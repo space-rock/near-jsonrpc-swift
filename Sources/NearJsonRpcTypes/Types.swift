@@ -119,6 +119,66 @@ private func describeDecodingError(_ error: Error) -> String {
     return String(describing: error)
 }
 
+// MARK: - Discriminator Enums
+
+// MARK: - ChangesType
+
+public enum ChangesType: String, Codable, Sendable {
+    case accountChanges = "account_changes"
+    case allAccessKeyChanges = "all_access_key_changes"
+    case allGasKeyChanges = "all_gas_key_changes"
+    case contractCodeChanges = "contract_code_changes"
+    case dataChanges = "data_changes"
+    case singleAccessKeyChanges = "single_access_key_changes"
+    case singleGasKeyChanges = "single_gas_key_changes"
+}
+
+// MARK: - RequestType
+
+public enum RequestType: String, Codable, Sendable {
+    case callFunction = "call_function"
+    case viewAccessKey = "view_access_key"
+    case viewAccessKeyList = "view_access_key_list"
+    case viewAccount = "view_account"
+    case viewCode = "view_code"
+    case viewGlobalContractCode = "view_global_contract_code"
+    case viewGlobalContractCodeByAccountId = "view_global_contract_code_by_account_id"
+    case viewState = "view_state"
+}
+
+// MARK: - Type
+
+public enum Type: String, Codable, Sendable {
+    case accessKeyDeletion = "access_key_deletion"
+    case accessKeyTouched = "access_key_touched"
+    case accessKeyUpdate = "access_key_update"
+    case accountDeletion = "account_deletion"
+    case accountTouched = "account_touched"
+    case accountUpdate = "account_update"
+    case actionReceiptGasReward = "action_receipt_gas_reward"
+    case actionReceiptProcessingStarted = "action_receipt_processing_started"
+    case bandwidthSchedulerStateUpdate = "bandwidth_scheduler_state_update"
+    case contractCodeDeletion = "contract_code_deletion"
+    case contractCodeTouched = "contract_code_touched"
+    case contractCodeUpdate = "contract_code_update"
+    case dataDeletion = "data_deletion"
+    case dataTouched = "data_touched"
+    case dataUpdate = "data_update"
+    case gasKeyDeletion = "gas_key_deletion"
+    case gasKeyNonceUpdate = "gas_key_nonce_update"
+    case gasKeyUpdate = "gas_key_update"
+    case initialState = "initial_state"
+    case migration
+    case notWritableToDisk = "not_writable_to_disk"
+    case postponedReceipt = "postponed_receipt"
+    case receipt
+    case receiptProcessing = "receipt_processing"
+    case transaction
+    case transactionProcessing = "transaction_processing"
+    case updatedDelayedReceipts = "updated_delayed_receipts"
+    case validatorAccountsUpdate = "validator_accounts_update"
+}
+
 // MARK: - AccountId
 
 public typealias AccountId = String
@@ -7182,12 +7242,12 @@ public enum RpcError: Codable, Sendable {
 public struct RpcLightClientExecutionProofRequestOneOfSenderIdTransactionHashType: Codable, Sendable {
     public let senderId: AccountId
     public let transactionHash: CryptoHash
-    public let type: String
+    public let type: Type
 
     public init(
         senderId: AccountId,
         transactionHash: CryptoHash,
-        type: String,
+        type: Type,
     ) {
         self.senderId = senderId
         self.transactionHash = transactionHash
@@ -7198,12 +7258,12 @@ public struct RpcLightClientExecutionProofRequestOneOfSenderIdTransactionHashTyp
 public struct RpcLightClientExecutionProofRequestOneOfReceiptIdReceiverIdType: Codable, Sendable {
     public let receiptId: CryptoHash
     public let receiverId: AccountId
-    public let type: String
+    public let type: Type
 
     public init(
         receiptId: CryptoHash,
         receiverId: AccountId,
-        type: String,
+        type: Type,
     ) {
         self.receiptId = receiptId
         self.receiverId = receiverId
@@ -7365,12 +7425,12 @@ public enum RpcProtocolConfigRequest: Codable, Sendable {
 public struct ViewAccountByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountId: AccountId
-    public let requestType: String
+    public let requestType: RequestType
 
     public init(
         blockId: BlockId,
         accountId: AccountId,
-        requestType: String,
+        requestType: RequestType,
     ) {
         self.blockId = blockId
         self.accountId = accountId
@@ -7381,12 +7441,12 @@ public struct ViewAccountByBlockId: Codable, Sendable {
 public struct ViewCodeByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountId: AccountId
-    public let requestType: String
+    public let requestType: RequestType
 
     public init(
         blockId: BlockId,
         accountId: AccountId,
-        requestType: String,
+        requestType: RequestType,
     ) {
         self.blockId = blockId
         self.accountId = accountId
@@ -7399,14 +7459,14 @@ public struct ViewStateByBlockId: Codable, Sendable {
     public let accountId: AccountId
     public let includeProof: Bool?
     public let prefixBase64: StoreKey
-    public let requestType: String
+    public let requestType: RequestType
 
     public init(
         blockId: BlockId,
         accountId: AccountId,
         includeProof: Bool?,
         prefixBase64: StoreKey,
-        requestType: String,
+        requestType: RequestType,
     ) {
         self.blockId = blockId
         self.accountId = accountId
@@ -7420,13 +7480,13 @@ public struct ViewAccessKeyByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountId: AccountId
     public let publicKey: PublicKey
-    public let requestType: String
+    public let requestType: RequestType
 
     public init(
         blockId: BlockId,
         accountId: AccountId,
         publicKey: PublicKey,
-        requestType: String,
+        requestType: RequestType,
     ) {
         self.blockId = blockId
         self.accountId = accountId
@@ -7438,12 +7498,12 @@ public struct ViewAccessKeyByBlockId: Codable, Sendable {
 public struct ViewAccessKeyListByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountId: AccountId
-    public let requestType: String
+    public let requestType: RequestType
 
     public init(
         blockId: BlockId,
         accountId: AccountId,
-        requestType: String,
+        requestType: RequestType,
     ) {
         self.blockId = blockId
         self.accountId = accountId
@@ -7456,14 +7516,14 @@ public struct CallFunctionByBlockId: Codable, Sendable {
     public let accountId: AccountId
     public let argsBase64: FunctionArgs
     public let methodName: String
-    public let requestType: String
+    public let requestType: RequestType
 
     public init(
         blockId: BlockId,
         accountId: AccountId,
         argsBase64: FunctionArgs,
         methodName: String,
-        requestType: String,
+        requestType: RequestType,
     ) {
         self.blockId = blockId
         self.accountId = accountId
@@ -7476,12 +7536,12 @@ public struct CallFunctionByBlockId: Codable, Sendable {
 public struct ViewGlobalContractCodeByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let codeHash: CryptoHash
-    public let requestType: String
+    public let requestType: RequestType
 
     public init(
         blockId: BlockId,
         codeHash: CryptoHash,
-        requestType: String,
+        requestType: RequestType,
     ) {
         self.blockId = blockId
         self.codeHash = codeHash
@@ -7492,12 +7552,12 @@ public struct ViewGlobalContractCodeByBlockId: Codable, Sendable {
 public struct ViewGlobalContractCodeByAccountIdByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountId: AccountId
-    public let requestType: String
+    public let requestType: RequestType
 
     public init(
         blockId: BlockId,
         accountId: AccountId,
-        requestType: String,
+        requestType: RequestType,
     ) {
         self.blockId = blockId
         self.accountId = accountId
@@ -7508,12 +7568,12 @@ public struct ViewGlobalContractCodeByAccountIdByBlockId: Codable, Sendable {
 public struct ViewAccountByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountId: AccountId
-    public let requestType: String
+    public let requestType: RequestType
 
     public init(
         finality: Finality,
         accountId: AccountId,
-        requestType: String,
+        requestType: RequestType,
     ) {
         self.finality = finality
         self.accountId = accountId
@@ -7524,12 +7584,12 @@ public struct ViewAccountByFinality: Codable, Sendable {
 public struct ViewCodeByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountId: AccountId
-    public let requestType: String
+    public let requestType: RequestType
 
     public init(
         finality: Finality,
         accountId: AccountId,
-        requestType: String,
+        requestType: RequestType,
     ) {
         self.finality = finality
         self.accountId = accountId
@@ -7542,14 +7602,14 @@ public struct ViewStateByFinality: Codable, Sendable {
     public let accountId: AccountId
     public let includeProof: Bool?
     public let prefixBase64: StoreKey
-    public let requestType: String
+    public let requestType: RequestType
 
     public init(
         finality: Finality,
         accountId: AccountId,
         includeProof: Bool?,
         prefixBase64: StoreKey,
-        requestType: String,
+        requestType: RequestType,
     ) {
         self.finality = finality
         self.accountId = accountId
@@ -7563,13 +7623,13 @@ public struct ViewAccessKeyByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountId: AccountId
     public let publicKey: PublicKey
-    public let requestType: String
+    public let requestType: RequestType
 
     public init(
         finality: Finality,
         accountId: AccountId,
         publicKey: PublicKey,
-        requestType: String,
+        requestType: RequestType,
     ) {
         self.finality = finality
         self.accountId = accountId
@@ -7581,12 +7641,12 @@ public struct ViewAccessKeyByFinality: Codable, Sendable {
 public struct ViewAccessKeyListByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountId: AccountId
-    public let requestType: String
+    public let requestType: RequestType
 
     public init(
         finality: Finality,
         accountId: AccountId,
-        requestType: String,
+        requestType: RequestType,
     ) {
         self.finality = finality
         self.accountId = accountId
@@ -7599,14 +7659,14 @@ public struct CallFunctionByFinality: Codable, Sendable {
     public let accountId: AccountId
     public let argsBase64: FunctionArgs
     public let methodName: String
-    public let requestType: String
+    public let requestType: RequestType
 
     public init(
         finality: Finality,
         accountId: AccountId,
         argsBase64: FunctionArgs,
         methodName: String,
-        requestType: String,
+        requestType: RequestType,
     ) {
         self.finality = finality
         self.accountId = accountId
@@ -7619,12 +7679,12 @@ public struct CallFunctionByFinality: Codable, Sendable {
 public struct ViewGlobalContractCodeByFinality: Codable, Sendable {
     public let finality: Finality
     public let codeHash: CryptoHash
-    public let requestType: String
+    public let requestType: RequestType
 
     public init(
         finality: Finality,
         codeHash: CryptoHash,
-        requestType: String,
+        requestType: RequestType,
     ) {
         self.finality = finality
         self.codeHash = codeHash
@@ -7635,12 +7695,12 @@ public struct ViewGlobalContractCodeByFinality: Codable, Sendable {
 public struct ViewGlobalContractCodeByAccountIdByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountId: AccountId
-    public let requestType: String
+    public let requestType: RequestType
 
     public init(
         finality: Finality,
         accountId: AccountId,
-        requestType: String,
+        requestType: RequestType,
     ) {
         self.finality = finality
         self.accountId = accountId
@@ -7651,12 +7711,12 @@ public struct ViewGlobalContractCodeByAccountIdByFinality: Codable, Sendable {
 public struct ViewAccountBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountId: AccountId
-    public let requestType: String
+    public let requestType: RequestType
 
     public init(
         syncCheckpoint: SyncCheckpoint,
         accountId: AccountId,
-        requestType: String,
+        requestType: RequestType,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountId = accountId
@@ -7667,12 +7727,12 @@ public struct ViewAccountBySyncCheckpoint: Codable, Sendable {
 public struct ViewCodeBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountId: AccountId
-    public let requestType: String
+    public let requestType: RequestType
 
     public init(
         syncCheckpoint: SyncCheckpoint,
         accountId: AccountId,
-        requestType: String,
+        requestType: RequestType,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountId = accountId
@@ -7685,14 +7745,14 @@ public struct ViewStateBySyncCheckpoint: Codable, Sendable {
     public let accountId: AccountId
     public let includeProof: Bool?
     public let prefixBase64: StoreKey
-    public let requestType: String
+    public let requestType: RequestType
 
     public init(
         syncCheckpoint: SyncCheckpoint,
         accountId: AccountId,
         includeProof: Bool?,
         prefixBase64: StoreKey,
-        requestType: String,
+        requestType: RequestType,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountId = accountId
@@ -7706,13 +7766,13 @@ public struct ViewAccessKeyBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountId: AccountId
     public let publicKey: PublicKey
-    public let requestType: String
+    public let requestType: RequestType
 
     public init(
         syncCheckpoint: SyncCheckpoint,
         accountId: AccountId,
         publicKey: PublicKey,
-        requestType: String,
+        requestType: RequestType,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountId = accountId
@@ -7724,12 +7784,12 @@ public struct ViewAccessKeyBySyncCheckpoint: Codable, Sendable {
 public struct ViewAccessKeyListBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountId: AccountId
-    public let requestType: String
+    public let requestType: RequestType
 
     public init(
         syncCheckpoint: SyncCheckpoint,
         accountId: AccountId,
-        requestType: String,
+        requestType: RequestType,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountId = accountId
@@ -7742,14 +7802,14 @@ public struct CallFunctionBySyncCheckpoint: Codable, Sendable {
     public let accountId: AccountId
     public let argsBase64: FunctionArgs
     public let methodName: String
-    public let requestType: String
+    public let requestType: RequestType
 
     public init(
         syncCheckpoint: SyncCheckpoint,
         accountId: AccountId,
         argsBase64: FunctionArgs,
         methodName: String,
-        requestType: String,
+        requestType: RequestType,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountId = accountId
@@ -7762,12 +7822,12 @@ public struct CallFunctionBySyncCheckpoint: Codable, Sendable {
 public struct ViewGlobalContractCodeBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let codeHash: CryptoHash
-    public let requestType: String
+    public let requestType: RequestType
 
     public init(
         syncCheckpoint: SyncCheckpoint,
         codeHash: CryptoHash,
-        requestType: String,
+        requestType: RequestType,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.codeHash = codeHash
@@ -7778,12 +7838,12 @@ public struct ViewGlobalContractCodeBySyncCheckpoint: Codable, Sendable {
 public struct ViewGlobalContractCodeByAccountIdBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountId: AccountId
-    public let requestType: String
+    public let requestType: RequestType
 
     public init(
         syncCheckpoint: SyncCheckpoint,
         accountId: AccountId,
-        requestType: String,
+        requestType: RequestType,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountId = accountId
@@ -8264,12 +8324,12 @@ public enum RpcRequestValidationErrorKind: Codable, Sendable {
 public struct AccountChangesByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountIds: [AccountId]
-    public let changesType: String
+    public let changesType: ChangesType
 
     public init(
         blockId: BlockId,
         accountIds: [AccountId],
-        changesType: String,
+        changesType: ChangesType,
     ) {
         self.blockId = blockId
         self.accountIds = accountIds
@@ -8279,12 +8339,12 @@ public struct AccountChangesByBlockId: Codable, Sendable {
 
 public struct SingleAccessKeyChangesByBlockId: Codable, Sendable {
     public let blockId: BlockId
-    public let changesType: String
+    public let changesType: ChangesType
     public let keys: [AccountWithPublicKey]
 
     public init(
         blockId: BlockId,
-        changesType: String,
+        changesType: ChangesType,
         keys: [AccountWithPublicKey],
     ) {
         self.blockId = blockId
@@ -8295,12 +8355,12 @@ public struct SingleAccessKeyChangesByBlockId: Codable, Sendable {
 
 public struct SingleGasKeyChangesByBlockId: Codable, Sendable {
     public let blockId: BlockId
-    public let changesType: String
+    public let changesType: ChangesType
     public let keys: [AccountWithPublicKey]
 
     public init(
         blockId: BlockId,
-        changesType: String,
+        changesType: ChangesType,
         keys: [AccountWithPublicKey],
     ) {
         self.blockId = blockId
@@ -8312,12 +8372,12 @@ public struct SingleGasKeyChangesByBlockId: Codable, Sendable {
 public struct AllAccessKeyChangesByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountIds: [AccountId]
-    public let changesType: String
+    public let changesType: ChangesType
 
     public init(
         blockId: BlockId,
         accountIds: [AccountId],
-        changesType: String,
+        changesType: ChangesType,
     ) {
         self.blockId = blockId
         self.accountIds = accountIds
@@ -8328,12 +8388,12 @@ public struct AllAccessKeyChangesByBlockId: Codable, Sendable {
 public struct AllGasKeyChangesByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountIds: [AccountId]
-    public let changesType: String
+    public let changesType: ChangesType
 
     public init(
         blockId: BlockId,
         accountIds: [AccountId],
-        changesType: String,
+        changesType: ChangesType,
     ) {
         self.blockId = blockId
         self.accountIds = accountIds
@@ -8344,12 +8404,12 @@ public struct AllGasKeyChangesByBlockId: Codable, Sendable {
 public struct ContractCodeChangesByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountIds: [AccountId]
-    public let changesType: String
+    public let changesType: ChangesType
 
     public init(
         blockId: BlockId,
         accountIds: [AccountId],
-        changesType: String,
+        changesType: ChangesType,
     ) {
         self.blockId = blockId
         self.accountIds = accountIds
@@ -8360,13 +8420,13 @@ public struct ContractCodeChangesByBlockId: Codable, Sendable {
 public struct DataChangesByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountIds: [AccountId]
-    public let changesType: String
+    public let changesType: ChangesType
     public let keyPrefixBase64: StoreKey
 
     public init(
         blockId: BlockId,
         accountIds: [AccountId],
-        changesType: String,
+        changesType: ChangesType,
         keyPrefixBase64: StoreKey,
     ) {
         self.blockId = blockId
@@ -8379,12 +8439,12 @@ public struct DataChangesByBlockId: Codable, Sendable {
 public struct AccountChangesByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountIds: [AccountId]
-    public let changesType: String
+    public let changesType: ChangesType
 
     public init(
         finality: Finality,
         accountIds: [AccountId],
-        changesType: String,
+        changesType: ChangesType,
     ) {
         self.finality = finality
         self.accountIds = accountIds
@@ -8394,12 +8454,12 @@ public struct AccountChangesByFinality: Codable, Sendable {
 
 public struct SingleAccessKeyChangesByFinality: Codable, Sendable {
     public let finality: Finality
-    public let changesType: String
+    public let changesType: ChangesType
     public let keys: [AccountWithPublicKey]
 
     public init(
         finality: Finality,
-        changesType: String,
+        changesType: ChangesType,
         keys: [AccountWithPublicKey],
     ) {
         self.finality = finality
@@ -8410,12 +8470,12 @@ public struct SingleAccessKeyChangesByFinality: Codable, Sendable {
 
 public struct SingleGasKeyChangesByFinality: Codable, Sendable {
     public let finality: Finality
-    public let changesType: String
+    public let changesType: ChangesType
     public let keys: [AccountWithPublicKey]
 
     public init(
         finality: Finality,
-        changesType: String,
+        changesType: ChangesType,
         keys: [AccountWithPublicKey],
     ) {
         self.finality = finality
@@ -8427,12 +8487,12 @@ public struct SingleGasKeyChangesByFinality: Codable, Sendable {
 public struct AllAccessKeyChangesByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountIds: [AccountId]
-    public let changesType: String
+    public let changesType: ChangesType
 
     public init(
         finality: Finality,
         accountIds: [AccountId],
-        changesType: String,
+        changesType: ChangesType,
     ) {
         self.finality = finality
         self.accountIds = accountIds
@@ -8443,12 +8503,12 @@ public struct AllAccessKeyChangesByFinality: Codable, Sendable {
 public struct AllGasKeyChangesByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountIds: [AccountId]
-    public let changesType: String
+    public let changesType: ChangesType
 
     public init(
         finality: Finality,
         accountIds: [AccountId],
-        changesType: String,
+        changesType: ChangesType,
     ) {
         self.finality = finality
         self.accountIds = accountIds
@@ -8459,12 +8519,12 @@ public struct AllGasKeyChangesByFinality: Codable, Sendable {
 public struct ContractCodeChangesByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountIds: [AccountId]
-    public let changesType: String
+    public let changesType: ChangesType
 
     public init(
         finality: Finality,
         accountIds: [AccountId],
-        changesType: String,
+        changesType: ChangesType,
     ) {
         self.finality = finality
         self.accountIds = accountIds
@@ -8475,13 +8535,13 @@ public struct ContractCodeChangesByFinality: Codable, Sendable {
 public struct DataChangesByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountIds: [AccountId]
-    public let changesType: String
+    public let changesType: ChangesType
     public let keyPrefixBase64: StoreKey
 
     public init(
         finality: Finality,
         accountIds: [AccountId],
-        changesType: String,
+        changesType: ChangesType,
         keyPrefixBase64: StoreKey,
     ) {
         self.finality = finality
@@ -8494,12 +8554,12 @@ public struct DataChangesByFinality: Codable, Sendable {
 public struct AccountChangesBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountIds: [AccountId]
-    public let changesType: String
+    public let changesType: ChangesType
 
     public init(
         syncCheckpoint: SyncCheckpoint,
         accountIds: [AccountId],
-        changesType: String,
+        changesType: ChangesType,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountIds = accountIds
@@ -8509,12 +8569,12 @@ public struct AccountChangesBySyncCheckpoint: Codable, Sendable {
 
 public struct SingleAccessKeyChangesBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
-    public let changesType: String
+    public let changesType: ChangesType
     public let keys: [AccountWithPublicKey]
 
     public init(
         syncCheckpoint: SyncCheckpoint,
-        changesType: String,
+        changesType: ChangesType,
         keys: [AccountWithPublicKey],
     ) {
         self.syncCheckpoint = syncCheckpoint
@@ -8525,12 +8585,12 @@ public struct SingleAccessKeyChangesBySyncCheckpoint: Codable, Sendable {
 
 public struct SingleGasKeyChangesBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
-    public let changesType: String
+    public let changesType: ChangesType
     public let keys: [AccountWithPublicKey]
 
     public init(
         syncCheckpoint: SyncCheckpoint,
-        changesType: String,
+        changesType: ChangesType,
         keys: [AccountWithPublicKey],
     ) {
         self.syncCheckpoint = syncCheckpoint
@@ -8542,12 +8602,12 @@ public struct SingleGasKeyChangesBySyncCheckpoint: Codable, Sendable {
 public struct AllAccessKeyChangesBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountIds: [AccountId]
-    public let changesType: String
+    public let changesType: ChangesType
 
     public init(
         syncCheckpoint: SyncCheckpoint,
         accountIds: [AccountId],
-        changesType: String,
+        changesType: ChangesType,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountIds = accountIds
@@ -8558,12 +8618,12 @@ public struct AllAccessKeyChangesBySyncCheckpoint: Codable, Sendable {
 public struct AllGasKeyChangesBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountIds: [AccountId]
-    public let changesType: String
+    public let changesType: ChangesType
 
     public init(
         syncCheckpoint: SyncCheckpoint,
         accountIds: [AccountId],
-        changesType: String,
+        changesType: ChangesType,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountIds = accountIds
@@ -8574,12 +8634,12 @@ public struct AllGasKeyChangesBySyncCheckpoint: Codable, Sendable {
 public struct ContractCodeChangesBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountIds: [AccountId]
-    public let changesType: String
+    public let changesType: ChangesType
 
     public init(
         syncCheckpoint: SyncCheckpoint,
         accountIds: [AccountId],
-        changesType: String,
+        changesType: ChangesType,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountIds = accountIds
@@ -8590,13 +8650,13 @@ public struct ContractCodeChangesBySyncCheckpoint: Codable, Sendable {
 public struct DataChangesBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountIds: [AccountId]
-    public let changesType: String
+    public let changesType: ChangesType
     public let keyPrefixBase64: StoreKey
 
     public init(
         syncCheckpoint: SyncCheckpoint,
         accountIds: [AccountId],
-        changesType: String,
+        changesType: ChangesType,
         keyPrefixBase64: StoreKey,
     ) {
         self.syncCheckpoint = syncCheckpoint
@@ -9245,11 +9305,11 @@ public enum ShardLayout: Codable, Sendable {
 
 public struct StateChangeCauseViewOneOfTxHashType: Codable, Sendable {
     public let txHash: CryptoHash
-    public let type: String
+    public let type: Type
 
     public init(
         txHash: CryptoHash,
-        type: String,
+        type: Type,
     ) {
         self.txHash = txHash
         self.type = type
@@ -9258,11 +9318,11 @@ public struct StateChangeCauseViewOneOfTxHashType: Codable, Sendable {
 
 public struct StateChangeCauseViewOneOfReceiptHashType: Codable, Sendable {
     public let receiptHash: CryptoHash
-    public let type: String
+    public let type: Type
 
     public init(
         receiptHash: CryptoHash,
-        type: String,
+        type: Type,
     ) {
         self.receiptHash = receiptHash
         self.type = type
@@ -9271,11 +9331,11 @@ public struct StateChangeCauseViewOneOfReceiptHashType: Codable, Sendable {
 
 public struct StateChangeCauseViewOneOfReceiptHashType1: Codable, Sendable {
     public let receiptHash: CryptoHash
-    public let type: String
+    public let type: Type
 
     public init(
         receiptHash: CryptoHash,
-        type: String,
+        type: Type,
     ) {
         self.receiptHash = receiptHash
         self.type = type
@@ -9284,11 +9344,11 @@ public struct StateChangeCauseViewOneOfReceiptHashType1: Codable, Sendable {
 
 public struct StateChangeCauseViewOneOfReceiptHashType2: Codable, Sendable {
     public let receiptHash: CryptoHash
-    public let type: String
+    public let type: Type
 
     public init(
         receiptHash: CryptoHash,
-        type: String,
+        type: Type,
     ) {
         self.receiptHash = receiptHash
         self.type = type
@@ -9297,11 +9357,11 @@ public struct StateChangeCauseViewOneOfReceiptHashType2: Codable, Sendable {
 
 public struct StateChangeCauseViewOneOfReceiptHashType3: Codable, Sendable {
     public let receiptHash: CryptoHash
-    public let type: String
+    public let type: Type
 
     public init(
         receiptHash: CryptoHash,
-        type: String,
+        type: Type,
     ) {
         self.receiptHash = receiptHash
         self.type = type
@@ -9495,11 +9555,11 @@ public enum StateChangeCauseView: Codable, Sendable {
 
 public struct StateChangeKindViewOneOfAccountIdType: Codable, Sendable {
     public let accountId: AccountId
-    public let type: String
+    public let type: Type
 
     public init(
         accountId: AccountId,
-        type: String,
+        type: Type,
     ) {
         self.accountId = accountId
         self.type = type
@@ -9508,11 +9568,11 @@ public struct StateChangeKindViewOneOfAccountIdType: Codable, Sendable {
 
 public struct StateChangeKindViewOneOfAccountIdType1: Codable, Sendable {
     public let accountId: AccountId
-    public let type: String
+    public let type: Type
 
     public init(
         accountId: AccountId,
-        type: String,
+        type: Type,
     ) {
         self.accountId = accountId
         self.type = type
@@ -9521,11 +9581,11 @@ public struct StateChangeKindViewOneOfAccountIdType1: Codable, Sendable {
 
 public struct StateChangeKindViewOneOfAccountIdType2: Codable, Sendable {
     public let accountId: AccountId
-    public let type: String
+    public let type: Type
 
     public init(
         accountId: AccountId,
-        type: String,
+        type: Type,
     ) {
         self.accountId = accountId
         self.type = type
@@ -9534,11 +9594,11 @@ public struct StateChangeKindViewOneOfAccountIdType2: Codable, Sendable {
 
 public struct StateChangeKindViewOneOfAccountIdType3: Codable, Sendable {
     public let accountId: AccountId
-    public let type: String
+    public let type: Type
 
     public init(
         accountId: AccountId,
-        type: String,
+        type: Type,
     ) {
         self.accountId = accountId
         self.type = type
@@ -9621,11 +9681,11 @@ public enum StateChangeKindView: Codable, Sendable {
 
 public struct StateChangeWithCauseViewOneOfChangeType: Codable, Sendable {
     public let change: InlineObject
-    public let type: String
+    public let type: Type
 
     public init(
         change: InlineObject,
-        type: String,
+        type: Type,
     ) {
         self.change = change
         self.type = type
@@ -9634,11 +9694,11 @@ public struct StateChangeWithCauseViewOneOfChangeType: Codable, Sendable {
 
 public struct StateChangeWithCauseViewOneOfChangeType1: Codable, Sendable {
     public let change: InlineObject
-    public let type: String
+    public let type: Type
 
     public init(
         change: InlineObject,
-        type: String,
+        type: Type,
     ) {
         self.change = change
         self.type = type
@@ -9647,11 +9707,11 @@ public struct StateChangeWithCauseViewOneOfChangeType1: Codable, Sendable {
 
 public struct StateChangeWithCauseViewOneOfChangeType2: Codable, Sendable {
     public let change: InlineObject
-    public let type: String
+    public let type: Type
 
     public init(
         change: InlineObject,
-        type: String,
+        type: Type,
     ) {
         self.change = change
         self.type = type
@@ -9660,11 +9720,11 @@ public struct StateChangeWithCauseViewOneOfChangeType2: Codable, Sendable {
 
 public struct StateChangeWithCauseViewOneOfChangeType3: Codable, Sendable {
     public let change: InlineObject
-    public let type: String
+    public let type: Type
 
     public init(
         change: InlineObject,
-        type: String,
+        type: Type,
     ) {
         self.change = change
         self.type = type
@@ -9673,11 +9733,11 @@ public struct StateChangeWithCauseViewOneOfChangeType3: Codable, Sendable {
 
 public struct StateChangeWithCauseViewOneOfChangeType4: Codable, Sendable {
     public let change: InlineObject
-    public let type: String
+    public let type: Type
 
     public init(
         change: InlineObject,
-        type: String,
+        type: Type,
     ) {
         self.change = change
         self.type = type
@@ -9686,11 +9746,11 @@ public struct StateChangeWithCauseViewOneOfChangeType4: Codable, Sendable {
 
 public struct StateChangeWithCauseViewOneOfChangeType5: Codable, Sendable {
     public let change: InlineObject
-    public let type: String
+    public let type: Type
 
     public init(
         change: InlineObject,
-        type: String,
+        type: Type,
     ) {
         self.change = change
         self.type = type
@@ -9699,11 +9759,11 @@ public struct StateChangeWithCauseViewOneOfChangeType5: Codable, Sendable {
 
 public struct StateChangeWithCauseViewOneOfChangeType6: Codable, Sendable {
     public let change: InlineObject
-    public let type: String
+    public let type: Type
 
     public init(
         change: InlineObject,
-        type: String,
+        type: Type,
     ) {
         self.change = change
         self.type = type
@@ -9712,11 +9772,11 @@ public struct StateChangeWithCauseViewOneOfChangeType6: Codable, Sendable {
 
 public struct StateChangeWithCauseViewOneOfChangeType7: Codable, Sendable {
     public let change: InlineObject
-    public let type: String
+    public let type: Type
 
     public init(
         change: InlineObject,
-        type: String,
+        type: Type,
     ) {
         self.change = change
         self.type = type
@@ -9725,11 +9785,11 @@ public struct StateChangeWithCauseViewOneOfChangeType7: Codable, Sendable {
 
 public struct StateChangeWithCauseViewOneOfChangeType8: Codable, Sendable {
     public let change: InlineObject
-    public let type: String
+    public let type: Type
 
     public init(
         change: InlineObject,
-        type: String,
+        type: Type,
     ) {
         self.change = change
         self.type = type
@@ -9738,11 +9798,11 @@ public struct StateChangeWithCauseViewOneOfChangeType8: Codable, Sendable {
 
 public struct StateChangeWithCauseViewOneOfChangeType9: Codable, Sendable {
     public let change: InlineObject
-    public let type: String
+    public let type: Type
 
     public init(
         change: InlineObject,
-        type: String,
+        type: Type,
     ) {
         self.change = change
         self.type = type
@@ -9751,11 +9811,11 @@ public struct StateChangeWithCauseViewOneOfChangeType9: Codable, Sendable {
 
 public struct StateChangeWithCauseViewOneOfChangeType10: Codable, Sendable {
     public let change: InlineObject
-    public let type: String
+    public let type: Type
 
     public init(
         change: InlineObject,
-        type: String,
+        type: Type,
     ) {
         self.change = change
         self.type = type

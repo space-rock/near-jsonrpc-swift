@@ -146,6 +146,21 @@ def escape_swift_keyword(property_name: str) -> str:
         return f"`{property_name}`"
     return property_name
 
+def is_discriminator_field(prop_name: str, prop_schema: Dict[str, Any]) -> bool:
+    """Check if a property is a discriminator field (single-value enum)"""
+    # Check if this is a single-value enum used as a discriminator
+    if "enum" in prop_schema and prop_schema.get("type") == "string":
+        enum_values = prop_schema["enum"]
+        if len(enum_values) == 1 and enum_values[0] is not None:
+            # Common discriminator field names
+            discriminator_patterns = ["type", "request_type", "changes_type", "kind"]
+            return any(pattern in prop_name.lower() for pattern in discriminator_patterns)
+    return False
+
+def get_discriminator_enum_type(prop_name: str) -> str:
+    """Get the enum type name for a discriminator field"""
+    return to_swift_type_name(prop_name)
+
 def process_property_for_struct(
     prop_name: str, 
     prop_schema: Dict[str, Any], 
@@ -165,7 +180,10 @@ def process_property_for_struct(
     swift_prop_name = to_swift_property_name(prop_name)
     swift_prop_name = escape_swift_keyword(swift_prop_name)
     
-    if context and generated_types and inline_types:
+    # Check if this is a discriminator field - if so, use the generated enum type
+    if is_discriminator_field(prop_name, prop_schema):
+        prop_type = get_discriminator_enum_type(prop_name)
+    elif context and generated_types and inline_types:
         prop_type = get_swift_type(prop_schema, components, context=context, generated_types=generated_types, inline_types=inline_types)
     else:
         prop_type = get_swift_type(prop_schema, components)
@@ -1560,6 +1578,79 @@ extension NearJsonRpcClient {
     full_code = header + methods_code + footer
     return full_code, len(methods)
 
+def collect_discriminator_enums(schemas: Dict[str, Any]) -> Dict[str, Set[str]]:
+    """Collect all discriminator enum values across all schemas"""
+    discriminators: Dict[str, Set[str]] = {}
+    
+    def extract_from_schema(schema: Dict[str, Any]):
+        """Recursively extract discriminator values from a schema"""
+        if not isinstance(schema, dict):
+            return
+        
+        # Check properties
+        properties = schema.get("properties", {})
+        for prop_name, prop_schema in properties.items():
+            if is_discriminator_field(prop_name, prop_schema):
+                enum_values = prop_schema.get("enum", [])
+                if enum_values and enum_values[0] is not None:
+                    if prop_name not in discriminators:
+                        discriminators[prop_name] = set()
+                    discriminators[prop_name].update(enum_values)
+        
+        # Check oneOf/anyOf/allOf variants
+        for key in ["oneOf", "anyOf", "allOf"]:
+            if key in schema:
+                for variant in schema[key]:
+                    extract_from_schema(variant)
+    
+    # Process all schemas
+    for schema in schemas.values():
+        extract_from_schema(schema)
+    
+    return discriminators
+
+def generate_discriminator_enums(discriminators: Dict[str, Set[str]]) -> str:
+    """Generate Swift enum types for discriminator fields"""
+    code = ""
+    
+    for field_name, values in sorted(discriminators.items()):
+        if not values:
+            continue
+        
+        # Generate enum name from field name
+        enum_name = to_swift_type_name(field_name)
+        
+        code += f"// MARK: - {enum_name}\n\n"
+        code += f"public enum {enum_name}: String, Codable, Sendable {{\n"
+        
+        # Generate cases
+        seen_cases = set()
+        for value in sorted(values):
+            # Convert to valid Swift case name
+            case_name = str(value).replace("-", "_").replace(" ", "_").replace(".", "_").replace("/", "_")
+            case_name = to_swift_property_name(case_name)
+            
+            # Ensure case name starts with a letter
+            if case_name and case_name[0].isdigit():
+                case_name = "val" + case_name
+            
+            # Avoid duplicate case names
+            original_case = case_name
+            counter = 1
+            while case_name in seen_cases:
+                case_name = f"{original_case}{counter}"
+                counter += 1
+            seen_cases.add(case_name)
+            
+            if case_name != value:
+                code += f'    case {case_name} = "{value}"\n'
+            else:
+                code += f'    case {case_name}\n'
+        
+        code += "}\n\n"
+    
+    return code
+
 def main():
     """Main function to generate Swift types from OpenAPI spec"""
     print(f"Loading OpenAPI specification from {OPENAPI_PATH}...")
@@ -1572,6 +1663,11 @@ def main():
     
     print(f"Found {len(components_schemas)} schemas")
     
+    # Collect discriminator enum values
+    print("Collecting discriminator fields...")
+    discriminators = collect_discriminator_enums(components_schemas)
+    print(f"Found {len(discriminators)} discriminator fields with enum values")
+    
     # Generate Swift code
     swift_code = "//\n"
     swift_code += "// Types.swift\n"
@@ -1582,6 +1678,11 @@ def main():
     # Add AnyCodable helper for arbitrary JSON objects
     swift_code += ANYCODABLE_HELPER_CODE
     swift_code += DECODING_DIAGNOSTICS_CODE
+    
+    # Generate discriminator enums first (they're used by other types)
+    if discriminators:
+        swift_code += "// MARK: - Discriminator Enums\n\n"
+        swift_code += generate_discriminator_enums(discriminators)
     
     generated_types = set()
     inline_types = {}
