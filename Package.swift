@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.1
 
 import PackageDescription
 
@@ -11,36 +11,36 @@ let package = Package(
     products: [
         .library(
             name: "NearJsonRpcClient",
-            targets: ["NearJsonRpcClient"]
+            targets: ["NearJsonRpcClient"],
         ),
         .library(
             name: "NearJsonRpcTypes",
-            targets: ["NearJsonRpcTypes"]
+            targets: ["NearJsonRpcTypes"],
         ),
     ],
     dependencies: [],
     targets: [
         .target(
             name: "NearJsonRpcTypes",
-            dependencies: []
+            dependencies: [],
         ),
         .target(
             name: "NearJsonRpcClient",
-            dependencies: ["NearJsonRpcTypes"]
+            dependencies: ["NearJsonRpcTypes"],
         ),
         .testTarget(
             name: "NearJsonRpcTypesTests",
             dependencies: ["NearJsonRpcTypes"],
             resources: [
-                .copy("Mock")
-            ]
+                .copy("Mock"),
+            ],
         ),
         .testTarget(
             name: "NearJsonRpcClientTests",
             dependencies: ["NearJsonRpcClient", "NearJsonRpcTypes"],
             resources: [
-                .copy("Mock")
-            ]
+                .copy("Mock"),
+            ],
         ),
-    ]
+    ],
 )

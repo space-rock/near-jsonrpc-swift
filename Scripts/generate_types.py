@@ -1,4 +1,3 @@
-# generate_swift_types.py
 import json
 import os
 import hashlib
@@ -8,7 +7,6 @@ OPENAPI_PATH = "./openapi.json"
 OUTPUT_PATH = "../Sources/NearJsonRpcTypes/Types.swift"
 METHODS_OUTPUT_PATH = "../Sources/NearJsonRpcClient/Methods.swift"
 
-# Constants for reuse
 SWIFT_RESERVED_KEYWORDS = {
     "protocol", "class", "struct", "enum", "func", "var", "let", "if", "else", 
     "for", "while", "return", "break", "continue", "default", "case", "switch", 
@@ -18,7 +16,7 @@ SWIFT_RESERVED_KEYWORDS = {
 }
 
 ANYCODABLE_HELPER_CODE = """// MARK: - AnyCodable Helper
-public struct AnyCodable: Codable {
+public struct AnyCodable: Codable, @unchecked Sendable {
     public let value: Any
     
     public init(_ value: Any) {
@@ -134,14 +132,13 @@ fileprivate func describeDecodingError(_ error: Error) -> String {
 
 """
 
-# --- Load OpenAPI ---
+
 def load_openapi() -> Dict[str, Any]:
     if not os.path.exists(OPENAPI_PATH):
         raise FileNotFoundError(f"{OPENAPI_PATH} not found")
     with open(OPENAPI_PATH, "r", encoding="utf-8") as f:
         return json.load(f)
 
-# --- Helper Functions for Code Reuse ---
 
 def escape_swift_keyword(property_name: str) -> str:
     """Escape Swift reserved keywords by wrapping in backticks"""
@@ -227,7 +224,6 @@ def register_generated_type(swift_name: str, generated_types: Set[str]) -> bool:
     generated_types.add(swift_name)
     return True
 
-# --- Swift Type Generation Helpers ---
 
 def to_swift_type_name(name: str) -> str:
     """Convert schema name to Swift type name (PascalCase)"""
@@ -512,7 +508,7 @@ def generate_swift_enum(name: str, schema: Dict[str, Any]) -> str:
     # Handle the special case of nullable enum with only null value
     if len(enum_values) == 1 and enum_values[0] is None and is_nullable:
         # This represents a null-only type, generate a type that encodes to null
-        return f"""public struct {swift_name}: Codable {{
+        return f"""public struct {swift_name}: Codable, Sendable {{
     public init() {{}}
     
     public init(from decoder: Decoder) throws {{
@@ -534,7 +530,7 @@ def generate_swift_enum(name: str, schema: Dict[str, Any]) -> str:
     
     if not non_null_values:
         # All values are null - generate a type that encodes to null
-        return f"""public struct {swift_name}: Codable {{
+        return f"""public struct {swift_name}: Codable, Sendable {{
     public init() {{}}
     
     public init(from decoder: Decoder) throws {{
@@ -658,7 +654,7 @@ def generate_swift_struct(name: str, schema: Dict[str, Any], components: Dict[st
             value_type = "Any"
         return f"public typealias {swift_name} = [String: {value_type}]\n"
     
-    code = f"public struct {swift_name}: Codable {{\n"
+    code = f"public struct {swift_name}: Codable, Sendable {{\n"
     
     # Generate properties using helper function
     property_mappings = {}
@@ -873,7 +869,7 @@ def generate_inline_object_struct(type_name: str, schema: Dict[str, Any], compon
     properties = schema.get("properties", {})
     required = set(schema.get("required", []))
     
-    code = f"public struct {type_name}: Codable {{\n"
+    code = f"public struct {type_name}: Codable, Sendable {{\n"
     
     # Generate properties using helper function
     property_mappings = {}
@@ -963,7 +959,7 @@ def generate_swift_enum_with_associated_values(name: str, schema: Dict[str, Any]
             break
     
     # Generate the main enum
-    code = f"public enum {swift_name}: Codable {{\n"
+    code = f"public enum {swift_name}: Codable, Sendable {{\n"
     
     # Generate cases
     case_names_used = set()
@@ -1172,8 +1168,9 @@ def generate_swift_enum_with_associated_values(name: str, schema: Dict[str, Any]
     
     return code, inline_structs
 
-# Global registry to track inline struct schemas and prevent duplicates
+
 _global_inline_struct_schemas = {}
+
 
 def generate_oneof_inline_struct(case_name: str, type_name: str, variant: Dict[str, Any], components: Dict[str, Any], generated_types: Optional[Set[str]] = None, inline_types: Optional[Dict[str, str]] = None) -> str:
     """Generate an inline struct for oneOf variants that need it"""
@@ -1212,7 +1209,7 @@ def generate_oneof_inline_struct(case_name: str, type_name: str, variant: Dict[s
     _global_inline_struct_schemas[type_name] = type_name
     
     # Regular multi-property struct
-    code = f"public struct {type_name}: Codable {{\n"
+    code = f"public struct {type_name}: Codable, Sendable {{\n"
     
     # Generate properties using helper function
     property_mappings = {}
@@ -1528,14 +1525,7 @@ def extract_rpc_methods(openapi: Dict[str, Any], components: Dict[str, Any]) -> 
 def generate_methods_code(openapi: Dict[str, Any], components: Dict[str, Any]) -> Tuple[str, int]:
     """Generate the Swift methods implementation from the OpenAPI specification."""
     methods = extract_rpc_methods(openapi, components)
-    header = """//
-// Methods.swift
-// NEAR Protocol JSON-RPC Client Methods (Auto-generated)
-//
-// DO NOT EDIT: This file is auto-generated by codegen.py
-// Edit Client.swift for static infrastructure changes
-//
-
+    header = """
 import Foundation
 import NearJsonRpcTypes
 

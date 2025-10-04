@@ -1,21 +1,17 @@
-//
-// Types.swift
-// Generated from OpenAPI specification
-//
-
 import Foundation
 
 // MARK: - AnyCodable Helper
-public struct AnyCodable: Codable {
+
+public struct AnyCodable: Codable, @unchecked Sendable {
     public let value: Any
-    
+
     public init(_ value: Any) {
         self.value = value
     }
-    
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
-        
+
         if container.decodeNil() {
             value = NSNull()
         } else if let bool = try? container.decode(Bool.self) {
@@ -27,17 +23,17 @@ public struct AnyCodable: Codable {
         } else if let string = try? container.decode(String.self) {
             value = string
         } else if let array = try? container.decode([AnyCodable].self) {
-            value = array.map { $0.value }
+            value = array.map(\.value)
         } else if let dictionary = try? container.decode([String: AnyCodable].self) {
             value = dictionary.mapValues { $0.value }
         } else {
             throw DecodingError.dataCorruptedError(in: container, debugDescription: "Cannot decode AnyCodable")
         }
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
-        
+
         if value is NSNull {
             try container.encodeNil()
         } else if let bool = value as? Bool {
@@ -53,30 +49,35 @@ public struct AnyCodable: Codable {
         } else if let dictionary = value as? [String: Any] {
             try container.encode(dictionary.mapValues(AnyCodable.init))
         } else {
-            throw EncodingError.invalidValue(value, EncodingError.Context(codingPath: [], debugDescription: "Cannot encode AnyCodable"))
+            throw EncodingError.invalidValue(
+                value,
+                EncodingError.Context(codingPath: [], debugDescription: "Cannot encode AnyCodable"),
+            )
         }
     }
 }
 
 // MARK: - AnyCodingKey Helper
+
 /// A dynamic CodingKey that can represent any string key
 struct AnyCodingKey: CodingKey {
     var stringValue: String
     var intValue: Int?
-    
+
     init(stringValue: String) {
         self.stringValue = stringValue
-        self.intValue = nil
+        intValue = nil
     }
-    
+
     init?(intValue: Int) {
-        self.stringValue = String(intValue)
+        stringValue = String(intValue)
         self.intValue = intValue
     }
 }
 
 // MARK: - Decoding Diagnostics Helpers
-fileprivate func describeCodingKey(_ key: CodingKey) -> String {
+
+private func describeCodingKey(_ key: CodingKey) -> String {
     if let intValue = key.intValue {
         return "[\(intValue)]"
     }
@@ -84,7 +85,7 @@ fileprivate func describeCodingKey(_ key: CodingKey) -> String {
     return stringValue.isEmpty ? "\"\"" : stringValue
 }
 
-fileprivate func describeCodingPath(_ codingPath: [CodingKey]) -> String {
+private func describeCodingPath(_ codingPath: [CodingKey]) -> String {
     guard !codingPath.isEmpty else { return "<root>" }
     var description = ""
     for key in codingPath {
@@ -100,16 +101,16 @@ fileprivate func describeCodingPath(_ codingPath: [CodingKey]) -> String {
     return description
 }
 
-fileprivate func describeDecodingError(_ error: Error) -> String {
+private func describeDecodingError(_ error: Error) -> String {
     if let decodingError = error as? DecodingError {
         switch decodingError {
-        case .typeMismatch(_, let context):
+        case let .typeMismatch(_, context):
             return "typeMismatch at \(describeCodingPath(context.codingPath)): \(context.debugDescription)"
-        case .valueNotFound(_, let context):
+        case let .valueNotFound(_, context):
             return "valueNotFound at \(describeCodingPath(context.codingPath)): \(context.debugDescription)"
-        case .keyNotFound(let key, let context):
+        case let .keyNotFound(key, context):
             return "keyNotFound for key '\(describeCodingKey(key))' at \(describeCodingPath(context.codingPath)): \(context.debugDescription)"
-        case .dataCorrupted(let context):
+        case let .dataCorrupted(context):
             return "dataCorrupted at \(describeCodingPath(context.codingPath)): \(context.debugDescription)"
         @unknown default:
             return "Unknown DecodingError: \(decodingError)"
@@ -119,21 +120,26 @@ fileprivate func describeDecodingError(_ error: Error) -> String {
 }
 
 // MARK: - AccountId
+
 public typealias AccountId = String
 
 // MARK: - AccountIdValidityRulesVersion
+
 public typealias AccountIdValidityRulesVersion = Int
 
 // MARK: - CryptoHash
+
 public typealias CryptoHash = String
 
 // MARK: - Direction
+
 public enum Direction: String, Codable, Sendable {
     case left = "Left"
     case right = "Right"
 }
 
 // MARK: - Finality
+
 public enum Finality: String, Codable, Sendable {
     case optimistic
     case nearFinal = "near-final"
@@ -141,15 +147,18 @@ public enum Finality: String, Codable, Sendable {
 }
 
 // MARK: - FunctionArgs
+
 public typealias FunctionArgs = String
 
 // MARK: - LogSummaryStyle
+
 public enum LogSummaryStyle: String, Codable, Sendable {
     case plain
     case colored
 }
 
 // MARK: - MethodResolveError
+
 public enum MethodResolveError: String, Codable, Sendable {
     case methodEmptyName = "MethodEmptyName"
     case methodNotFound = "MethodNotFound"
@@ -157,61 +166,77 @@ public enum MethodResolveError: String, Codable, Sendable {
 }
 
 // MARK: - MutableConfigValue
+
 public typealias MutableConfigValue = String
 
 // MARK: - NearGas
+
 public typealias NearGas = UInt64
 
 // MARK: - NearToken
+
 public typealias NearToken = String
 
 // MARK: - ProtocolVersionCheckConfig
+
 public enum ProtocolVersionCheckConfig: String, Codable, Sendable {
     case next = "Next"
     case nextNext = "NextNext"
 }
 
 // MARK: - PublicKey
+
 public typealias PublicKey = String
 
 // MARK: - ShardId
+
 public typealias ShardId = UInt64
 
 // MARK: - Signature
+
 public typealias Signature = String
 
 // MARK: - SignedTransaction
+
 public typealias SignedTransaction = Data
 
 // MARK: - StorageGetMode
+
 public enum StorageGetMode: String, Codable, Sendable {
     case flatStorage = "FlatStorage"
     case trie = "Trie"
 }
 
 // MARK: - StoreKey
+
 public typealias StoreKey = String
 
 // MARK: - StoreValue
+
 public typealias StoreValue = String
 
 // MARK: - SyncCheckpoint
+
 public enum SyncCheckpoint: String, Codable, Sendable {
     case genesis
     case earliestAvailable = "earliest_available"
 }
 
 // MARK: - GenesisConfigRequest
-public struct GenesisConfigRequest: Codable {
+
+public struct GenesisConfigRequest: Codable, Sendable {
     public init() {}
-    
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         if !container.decodeNil() {
-            throw DecodingError.typeMismatch(GenesisConfigRequest.self, DecodingError.Context(codingPath: [], debugDescription: "Expected null"))
+            throw DecodingError.typeMismatch(
+                GenesisConfigRequest.self,
+                DecodingError.Context(codingPath: [], debugDescription: "Expected null"),
+            )
         }
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encodeNil()
@@ -219,16 +244,20 @@ public struct GenesisConfigRequest: Codable {
 }
 
 // MARK: - RpcClientConfigRequest
-public struct RpcClientConfigRequest: Codable {
+
+public struct RpcClientConfigRequest: Codable, Sendable {
     public init() {}
-    
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         if !container.decodeNil() {
-            throw DecodingError.typeMismatch(RpcClientConfigRequest.self, DecodingError.Context(codingPath: [], debugDescription: "Expected null"))
+            throw DecodingError.typeMismatch(
+                RpcClientConfigRequest.self,
+                DecodingError.Context(codingPath: [], debugDescription: "Expected null"),
+            )
         }
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encodeNil()
@@ -236,16 +265,20 @@ public struct RpcClientConfigRequest: Codable {
 }
 
 // MARK: - RpcHealthRequest
-public struct RpcHealthRequest: Codable {
+
+public struct RpcHealthRequest: Codable, Sendable {
     public init() {}
-    
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         if !container.decodeNil() {
-            throw DecodingError.typeMismatch(RpcHealthRequest.self, DecodingError.Context(codingPath: [], debugDescription: "Expected null"))
+            throw DecodingError.typeMismatch(
+                RpcHealthRequest.self,
+                DecodingError.Context(codingPath: [], debugDescription: "Expected null"),
+            )
         }
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encodeNil()
@@ -253,16 +286,20 @@ public struct RpcHealthRequest: Codable {
 }
 
 // MARK: - RpcHealthResponse
-public struct RpcHealthResponse: Codable {
+
+public struct RpcHealthResponse: Codable, Sendable {
     public init() {}
-    
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         if !container.decodeNil() {
-            throw DecodingError.typeMismatch(RpcHealthResponse.self, DecodingError.Context(codingPath: [], debugDescription: "Expected null"))
+            throw DecodingError.typeMismatch(
+                RpcHealthResponse.self,
+                DecodingError.Context(codingPath: [], debugDescription: "Expected null"),
+            )
         }
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encodeNil()
@@ -270,16 +307,20 @@ public struct RpcHealthResponse: Codable {
 }
 
 // MARK: - RpcNetworkInfoRequest
-public struct RpcNetworkInfoRequest: Codable {
+
+public struct RpcNetworkInfoRequest: Codable, Sendable {
     public init() {}
-    
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         if !container.decodeNil() {
-            throw DecodingError.typeMismatch(RpcNetworkInfoRequest.self, DecodingError.Context(codingPath: [], debugDescription: "Expected null"))
+            throw DecodingError.typeMismatch(
+                RpcNetworkInfoRequest.self,
+                DecodingError.Context(codingPath: [], debugDescription: "Expected null"),
+            )
         }
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encodeNil()
@@ -287,16 +328,20 @@ public struct RpcNetworkInfoRequest: Codable {
 }
 
 // MARK: - RpcStatusRequest
-public struct RpcStatusRequest: Codable {
+
+public struct RpcStatusRequest: Codable, Sendable {
     public init() {}
-    
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         if !container.decodeNil() {
-            throw DecodingError.typeMismatch(RpcStatusRequest.self, DecodingError.Context(codingPath: [], debugDescription: "Expected null"))
+            throw DecodingError.typeMismatch(
+                RpcStatusRequest.self,
+                DecodingError.Context(codingPath: [], debugDescription: "Expected null"),
+            )
         }
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encodeNil()
@@ -304,7 +349,8 @@ public struct RpcStatusRequest: Codable {
 }
 
 // MARK: - AccessKeyPermission
-public enum AccessKeyPermission: Codable {
+
+public enum AccessKeyPermission: Codable, Sendable {
     case functionCall(FunctionCallPermission)
     case fullAccess
 
@@ -313,13 +359,14 @@ public enum AccessKeyPermission: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("FunctionCall") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("FunctionCall") == .orderedSame }) {
                     let value = try container.decode(FunctionCallPermission.self, forKey: matchingKey)
                     self = .functionCall(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".functionCall: \(describeDecodingError(error))")
         }
         if let value = try? decoder.singleValueContainer().decode(String.self), value == "FullAccess" {
@@ -337,7 +384,8 @@ public enum AccessKeyPermission: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for AccessKeyPermission\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for AccessKeyPermission:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for AccessKeyPermission:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -348,7 +396,7 @@ public enum AccessKeyPermission: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .functionCall(let value):
+        case let .functionCall(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .functionCall)
         case .fullAccess:
@@ -359,7 +407,8 @@ public enum AccessKeyPermission: Codable {
 }
 
 // MARK: - AccessKeyPermissionView
-public struct AccessKeyPermissionViewOneOfFunctionCallInline: Codable {
+
+public struct AccessKeyPermissionViewOneOfFunctionCallInline: Codable, Sendable {
     public let allowance: NearToken?
     public let methodNames: [String]
     public let receiverId: String
@@ -367,7 +416,7 @@ public struct AccessKeyPermissionViewOneOfFunctionCallInline: Codable {
     public init(
         allowance: NearToken?,
         methodNames: [String],
-        receiverId: String
+        receiverId: String,
     ) {
         self.allowance = allowance
         self.methodNames = methodNames
@@ -375,7 +424,7 @@ public struct AccessKeyPermissionViewOneOfFunctionCallInline: Codable {
     }
 }
 
-public enum AccessKeyPermissionView: Codable {
+public enum AccessKeyPermissionView: Codable, Sendable {
     case fullAccess
     case functionCall(AccessKeyPermissionViewOneOfFunctionCallInline)
 
@@ -388,13 +437,17 @@ public enum AccessKeyPermissionView: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("FunctionCall") == .orderedSame }) {
-                    let value = try container.decode(AccessKeyPermissionViewOneOfFunctionCallInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("FunctionCall") == .orderedSame }) {
+                    let value = try container.decode(
+                        AccessKeyPermissionViewOneOfFunctionCallInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .functionCall(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".functionCall: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -408,7 +461,8 @@ public enum AccessKeyPermissionView: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for AccessKeyPermissionView\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for AccessKeyPermissionView:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for AccessKeyPermissionView:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -419,7 +473,7 @@ public enum AccessKeyPermissionView: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .functionCall(let value):
+        case let .functionCall(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .functionCall)
         case .fullAccess:
@@ -430,27 +484,28 @@ public enum AccessKeyPermissionView: Codable {
 }
 
 // MARK: - ActionErrorKind
-public struct ActionErrorKindOneOfAccountAlreadyExistsInline: Codable {
+
+public struct ActionErrorKindOneOfAccountAlreadyExistsInline: Codable, Sendable {
     public let accountId: AccountId
 
     public init(
-        accountId: AccountId
+        accountId: AccountId,
     ) {
         self.accountId = accountId
     }
 }
 
-public struct ActionErrorKindOneOfAccountDoesNotExistInline: Codable {
+public struct ActionErrorKindOneOfAccountDoesNotExistInline: Codable, Sendable {
     public let accountId: AccountId
 
     public init(
-        accountId: AccountId
+        accountId: AccountId,
     ) {
         self.accountId = accountId
     }
 }
 
-public struct ActionErrorKindOneOfCreateAccountOnlyByRegistrarInline: Codable {
+public struct ActionErrorKindOneOfCreateAccountOnlyByRegistrarInline: Codable, Sendable {
     public let accountId: AccountId
     public let predecessorId: AccountId
     public let registrarAccountId: AccountId
@@ -458,7 +513,7 @@ public struct ActionErrorKindOneOfCreateAccountOnlyByRegistrarInline: Codable {
     public init(
         accountId: AccountId,
         predecessorId: AccountId,
-        registrarAccountId: AccountId
+        registrarAccountId: AccountId,
     ) {
         self.accountId = accountId
         self.predecessorId = predecessorId
@@ -466,92 +521,92 @@ public struct ActionErrorKindOneOfCreateAccountOnlyByRegistrarInline: Codable {
     }
 }
 
-public struct ActionErrorKindOneOfCreateAccountNotAllowedInline: Codable {
+public struct ActionErrorKindOneOfCreateAccountNotAllowedInline: Codable, Sendable {
     public let accountId: AccountId
     public let predecessorId: AccountId
 
     public init(
         accountId: AccountId,
-        predecessorId: AccountId
+        predecessorId: AccountId,
     ) {
         self.accountId = accountId
         self.predecessorId = predecessorId
     }
 }
 
-public struct ActionErrorKindOneOfActorNoPermissionInline: Codable {
+public struct ActionErrorKindOneOfActorNoPermissionInline: Codable, Sendable {
     public let accountId: AccountId
     public let actorId: AccountId
 
     public init(
         accountId: AccountId,
-        actorId: AccountId
+        actorId: AccountId,
     ) {
         self.accountId = accountId
         self.actorId = actorId
     }
 }
 
-public struct ActionErrorKindOneOfDeleteKeyDoesNotExistInline: Codable {
+public struct ActionErrorKindOneOfDeleteKeyDoesNotExistInline: Codable, Sendable {
     public let accountId: AccountId
     public let publicKey: PublicKey
 
     public init(
         accountId: AccountId,
-        publicKey: PublicKey
+        publicKey: PublicKey,
     ) {
         self.accountId = accountId
         self.publicKey = publicKey
     }
 }
 
-public struct ActionErrorKindOneOfAddKeyAlreadyExistsInline: Codable {
+public struct ActionErrorKindOneOfAddKeyAlreadyExistsInline: Codable, Sendable {
     public let accountId: AccountId
     public let publicKey: PublicKey
 
     public init(
         accountId: AccountId,
-        publicKey: PublicKey
+        publicKey: PublicKey,
     ) {
         self.accountId = accountId
         self.publicKey = publicKey
     }
 }
 
-public struct ActionErrorKindOneOfDeleteAccountStakingInline: Codable {
+public struct ActionErrorKindOneOfDeleteAccountStakingInline: Codable, Sendable {
     public let accountId: AccountId
 
     public init(
-        accountId: AccountId
+        accountId: AccountId,
     ) {
         self.accountId = accountId
     }
 }
 
-public struct ActionErrorKindOneOfLackBalanceForStateInline: Codable {
+public struct ActionErrorKindOneOfLackBalanceForStateInline: Codable, Sendable {
     public let accountId: AccountId
     public let amount: NearToken
 
     public init(
         accountId: AccountId,
-        amount: NearToken
+        amount: NearToken,
     ) {
         self.accountId = accountId
         self.amount = amount
     }
 }
 
-public struct ActionErrorKindOneOfTriesToUnstakeInline: Codable {
+public struct ActionErrorKindOneOfTriesToUnstakeInline: Codable, Sendable {
     public let accountId: AccountId
 
     public init(
-        accountId: AccountId
+        accountId: AccountId,
     ) {
         self.accountId = accountId
     }
 }
 
-public struct ActionErrorKindOneOfTriesToStakeInline: Codable {
+public struct ActionErrorKindOneOfTriesToStakeInline: Codable, Sendable {
     public let accountId: AccountId
     public let balance: NearToken
     public let locked: NearToken
@@ -561,7 +616,7 @@ public struct ActionErrorKindOneOfTriesToStakeInline: Codable {
         accountId: AccountId,
         balance: NearToken,
         locked: NearToken,
-        stake: NearToken
+        stake: NearToken,
     ) {
         self.accountId = accountId
         self.balance = balance
@@ -570,7 +625,7 @@ public struct ActionErrorKindOneOfTriesToStakeInline: Codable {
     }
 }
 
-public struct ActionErrorKindOneOfInsufficientStakeInline: Codable {
+public struct ActionErrorKindOneOfInsufficientStakeInline: Codable, Sendable {
     public let accountId: AccountId
     public let minimumStake: NearToken
     public let stake: NearToken
@@ -578,7 +633,7 @@ public struct ActionErrorKindOneOfInsufficientStakeInline: Codable {
     public init(
         accountId: AccountId,
         minimumStake: NearToken,
-        stake: NearToken
+        stake: NearToken,
     ) {
         self.accountId = accountId
         self.minimumStake = minimumStake
@@ -586,76 +641,76 @@ public struct ActionErrorKindOneOfInsufficientStakeInline: Codable {
     }
 }
 
-public struct ActionErrorKindOneOfOnlyImplicitAccountCreationAllowedInline: Codable {
+public struct ActionErrorKindOneOfOnlyImplicitAccountCreationAllowedInline: Codable, Sendable {
     public let accountId: AccountId
 
     public init(
-        accountId: AccountId
+        accountId: AccountId,
     ) {
         self.accountId = accountId
     }
 }
 
-public struct ActionErrorKindOneOfDeleteAccountWithLargeStateInline: Codable {
+public struct ActionErrorKindOneOfDeleteAccountWithLargeStateInline: Codable, Sendable {
     public let accountId: AccountId
 
     public init(
-        accountId: AccountId
+        accountId: AccountId,
     ) {
         self.accountId = accountId
     }
 }
 
-public struct ActionErrorKindOneOfDelegateActionSenderDoesNotMatchTxReceiverInline: Codable {
+public struct ActionErrorKindOneOfDelegateActionSenderDoesNotMatchTxReceiverInline: Codable, Sendable {
     public let receiverId: AccountId
     public let senderId: AccountId
 
     public init(
         receiverId: AccountId,
-        senderId: AccountId
+        senderId: AccountId,
     ) {
         self.receiverId = receiverId
         self.senderId = senderId
     }
 }
 
-public struct ActionErrorKindOneOfDelegateActionInvalidNonceInline: Codable {
+public struct ActionErrorKindOneOfDelegateActionInvalidNonceInline: Codable, Sendable {
     public let akNonce: UInt64
     public let delegateNonce: UInt64
 
     public init(
         akNonce: UInt64,
-        delegateNonce: UInt64
+        delegateNonce: UInt64,
     ) {
         self.akNonce = akNonce
         self.delegateNonce = delegateNonce
     }
 }
 
-public struct ActionErrorKindOneOfDelegateActionNonceTooLargeInline: Codable {
+public struct ActionErrorKindOneOfDelegateActionNonceTooLargeInline: Codable, Sendable {
     public let delegateNonce: UInt64
     public let upperBound: UInt64
 
     public init(
         delegateNonce: UInt64,
-        upperBound: UInt64
+        upperBound: UInt64,
     ) {
         self.delegateNonce = delegateNonce
         self.upperBound = upperBound
     }
 }
 
-public struct ActionErrorKindOneOfGlobalContractDoesNotExistInline: Codable {
+public struct ActionErrorKindOneOfGlobalContractDoesNotExistInline: Codable, Sendable {
     public let identifier: GlobalContractIdentifier
 
     public init(
-        identifier: GlobalContractIdentifier
+        identifier: GlobalContractIdentifier,
     ) {
         self.identifier = identifier
     }
 }
 
-public enum ActionErrorKind: Codable {
+public enum ActionErrorKind: Codable, Sendable {
     case accountAlreadyExists(ActionErrorKindOneOfAccountAlreadyExistsInline)
     case accountDoesNotExist(ActionErrorKindOneOfAccountDoesNotExistInline)
     case createAccountOnlyByRegistrar(ActionErrorKindOneOfCreateAccountOnlyByRegistrarInline)
@@ -673,7 +728,9 @@ public enum ActionErrorKind: Codable {
     case onlyImplicitAccountCreationAllowed(ActionErrorKindOneOfOnlyImplicitAccountCreationAllowedInline)
     case deleteAccountWithLargeState(ActionErrorKindOneOfDeleteAccountWithLargeStateInline)
     case delegateActionInvalidSignature
-    case delegateActionSenderDoesNotMatchTxReceiver(ActionErrorKindOneOfDelegateActionSenderDoesNotMatchTxReceiverInline)
+    case delegateActionSenderDoesNotMatchTxReceiver(
+        ActionErrorKindOneOfDelegateActionSenderDoesNotMatchTxReceiverInline,
+    )
     case delegateActionExpired
     case delegateActionAccessKeyError(InvalidAccessKeyError)
     case delegateActionInvalidNonce(ActionErrorKindOneOfDelegateActionInvalidNonceInline)
@@ -685,193 +742,281 @@ public enum ActionErrorKind: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("AccountAlreadyExists") == .orderedSame }) {
-                    let value = try container.decode(ActionErrorKindOneOfAccountAlreadyExistsInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("AccountAlreadyExists") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfAccountAlreadyExistsInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .accountAlreadyExists(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".accountAlreadyExists: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("AccountDoesNotExist") == .orderedSame }) {
-                    let value = try container.decode(ActionErrorKindOneOfAccountDoesNotExistInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("AccountDoesNotExist") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfAccountDoesNotExistInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .accountDoesNotExist(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".accountDoesNotExist: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("CreateAccountOnlyByRegistrar") == .orderedSame }) {
-                    let value = try container.decode(ActionErrorKindOneOfCreateAccountOnlyByRegistrarInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("CreateAccountOnlyByRegistrar") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfCreateAccountOnlyByRegistrarInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .createAccountOnlyByRegistrar(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".createAccountOnlyByRegistrar: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("CreateAccountNotAllowed") == .orderedSame }) {
-                    let value = try container.decode(ActionErrorKindOneOfCreateAccountNotAllowedInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("CreateAccountNotAllowed") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfCreateAccountNotAllowedInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .createAccountNotAllowed(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".createAccountNotAllowed: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ActorNoPermission") == .orderedSame }) {
-                    let value = try container.decode(ActionErrorKindOneOfActorNoPermissionInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("ActorNoPermission") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfActorNoPermissionInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .actorNoPermission(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".actorNoPermission: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DeleteKeyDoesNotExist") == .orderedSame }) {
-                    let value = try container.decode(ActionErrorKindOneOfDeleteKeyDoesNotExistInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("DeleteKeyDoesNotExist") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfDeleteKeyDoesNotExistInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .deleteKeyDoesNotExist(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".deleteKeyDoesNotExist: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("AddKeyAlreadyExists") == .orderedSame }) {
-                    let value = try container.decode(ActionErrorKindOneOfAddKeyAlreadyExistsInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("AddKeyAlreadyExists") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfAddKeyAlreadyExistsInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .addKeyAlreadyExists(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".addKeyAlreadyExists: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DeleteAccountStaking") == .orderedSame }) {
-                    let value = try container.decode(ActionErrorKindOneOfDeleteAccountStakingInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("DeleteAccountStaking") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfDeleteAccountStakingInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .deleteAccountStaking(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".deleteAccountStaking: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("LackBalanceForState") == .orderedSame }) {
-                    let value = try container.decode(ActionErrorKindOneOfLackBalanceForStateInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("LackBalanceForState") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfLackBalanceForStateInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .lackBalanceForState(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".lackBalanceForState: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("TriesToUnstake") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("TriesToUnstake") == .orderedSame }) {
                     let value = try container.decode(ActionErrorKindOneOfTriesToUnstakeInline.self, forKey: matchingKey)
                     self = .triesToUnstake(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".triesToUnstake: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("TriesToStake") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("TriesToStake") == .orderedSame }) {
                     let value = try container.decode(ActionErrorKindOneOfTriesToStakeInline.self, forKey: matchingKey)
                     self = .triesToStake(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".triesToStake: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("InsufficientStake") == .orderedSame }) {
-                    let value = try container.decode(ActionErrorKindOneOfInsufficientStakeInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("InsufficientStake") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfInsufficientStakeInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .insufficientStake(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".insufficientStake: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("FunctionCallError") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("FunctionCallError") == .orderedSame
+                    }) {
                     let value = try container.decode(FunctionCallError.self, forKey: matchingKey)
                     self = .functionCallError(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".functionCallError: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("NewReceiptValidationError") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("NewReceiptValidationError") == .orderedSame
+                    }) {
                     let value = try container.decode(ReceiptValidationError.self, forKey: matchingKey)
                     self = .newReceiptValidationError(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".newReceiptValidationError: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("OnlyImplicitAccountCreationAllowed") == .orderedSame }) {
-                    let value = try container.decode(ActionErrorKindOneOfOnlyImplicitAccountCreationAllowedInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("OnlyImplicitAccountCreationAllowed") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfOnlyImplicitAccountCreationAllowedInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .onlyImplicitAccountCreationAllowed(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".onlyImplicitAccountCreationAllowed: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DeleteAccountWithLargeState") == .orderedSame }) {
-                    let value = try container.decode(ActionErrorKindOneOfDeleteAccountWithLargeStateInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("DeleteAccountWithLargeState") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfDeleteAccountWithLargeStateInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .deleteAccountWithLargeState(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".deleteAccountWithLargeState: \(describeDecodingError(error))")
         }
-        if let value = try? decoder.singleValueContainer().decode(String.self), value == "DelegateActionInvalidSignature" {
+        if let value = try? decoder.singleValueContainer().decode(String.self),
+           value == "DelegateActionInvalidSignature" {
             self = .delegateActionInvalidSignature
             return
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DelegateActionSenderDoesNotMatchTxReceiver") == .orderedSame }) {
-                    let value = try container.decode(ActionErrorKindOneOfDelegateActionSenderDoesNotMatchTxReceiverInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue
+                            .caseInsensitiveCompare("DelegateActionSenderDoesNotMatchTxReceiver") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfDelegateActionSenderDoesNotMatchTxReceiverInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .delegateActionSenderDoesNotMatchTxReceiver(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".delegateActionSenderDoesNotMatchTxReceiver: \(describeDecodingError(error))")
         }
         if let value = try? decoder.singleValueContainer().decode(String.self), value == "DelegateActionExpired" {
@@ -880,46 +1025,67 @@ public enum ActionErrorKind: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DelegateActionAccessKeyError") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("DelegateActionAccessKeyError") == .orderedSame
+                    }) {
                     let value = try container.decode(InvalidAccessKeyError.self, forKey: matchingKey)
                     self = .delegateActionAccessKeyError(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".delegateActionAccessKeyError: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DelegateActionInvalidNonce") == .orderedSame }) {
-                    let value = try container.decode(ActionErrorKindOneOfDelegateActionInvalidNonceInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("DelegateActionInvalidNonce") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfDelegateActionInvalidNonceInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .delegateActionInvalidNonce(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".delegateActionInvalidNonce: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DelegateActionNonceTooLarge") == .orderedSame }) {
-                    let value = try container.decode(ActionErrorKindOneOfDelegateActionNonceTooLargeInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("DelegateActionNonceTooLarge") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfDelegateActionNonceTooLargeInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .delegateActionNonceTooLarge(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".delegateActionNonceTooLarge: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("GlobalContractDoesNotExist") == .orderedSame }) {
-                    let value = try container.decode(ActionErrorKindOneOfGlobalContractDoesNotExistInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("GlobalContractDoesNotExist") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfGlobalContractDoesNotExistInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .globalContractDoesNotExist(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".globalContractDoesNotExist: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -933,7 +1099,8 @@ public enum ActionErrorKind: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for ActionErrorKind\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for ActionErrorKind:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ActionErrorKind:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -964,67 +1131,67 @@ public enum ActionErrorKind: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .accountAlreadyExists(let value):
+        case let .accountAlreadyExists(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .accountAlreadyExists)
-        case .accountDoesNotExist(let value):
+        case let .accountDoesNotExist(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .accountDoesNotExist)
-        case .createAccountOnlyByRegistrar(let value):
+        case let .createAccountOnlyByRegistrar(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .createAccountOnlyByRegistrar)
-        case .createAccountNotAllowed(let value):
+        case let .createAccountNotAllowed(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .createAccountNotAllowed)
-        case .actorNoPermission(let value):
+        case let .actorNoPermission(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .actorNoPermission)
-        case .deleteKeyDoesNotExist(let value):
+        case let .deleteKeyDoesNotExist(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deleteKeyDoesNotExist)
-        case .addKeyAlreadyExists(let value):
+        case let .addKeyAlreadyExists(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .addKeyAlreadyExists)
-        case .deleteAccountStaking(let value):
+        case let .deleteAccountStaking(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deleteAccountStaking)
-        case .lackBalanceForState(let value):
+        case let .lackBalanceForState(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .lackBalanceForState)
-        case .triesToUnstake(let value):
+        case let .triesToUnstake(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .triesToUnstake)
-        case .triesToStake(let value):
+        case let .triesToStake(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .triesToStake)
-        case .insufficientStake(let value):
+        case let .insufficientStake(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .insufficientStake)
-        case .functionCallError(let value):
+        case let .functionCallError(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .functionCallError)
-        case .newReceiptValidationError(let value):
+        case let .newReceiptValidationError(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .newReceiptValidationError)
-        case .onlyImplicitAccountCreationAllowed(let value):
+        case let .onlyImplicitAccountCreationAllowed(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .onlyImplicitAccountCreationAllowed)
-        case .deleteAccountWithLargeState(let value):
+        case let .deleteAccountWithLargeState(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deleteAccountWithLargeState)
-        case .delegateActionSenderDoesNotMatchTxReceiver(let value):
+        case let .delegateActionSenderDoesNotMatchTxReceiver(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .delegateActionSenderDoesNotMatchTxReceiver)
-        case .delegateActionAccessKeyError(let value):
+        case let .delegateActionAccessKeyError(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .delegateActionAccessKeyError)
-        case .delegateActionInvalidNonce(let value):
+        case let .delegateActionInvalidNonce(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .delegateActionInvalidNonce)
-        case .delegateActionNonceTooLarge(let value):
+        case let .delegateActionNonceTooLarge(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .delegateActionNonceTooLarge)
-        case .globalContractDoesNotExist(let value):
+        case let .globalContractDoesNotExist(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .globalContractDoesNotExist)
         case .delegateActionInvalidSignature:
@@ -1038,17 +1205,18 @@ public enum ActionErrorKind: Codable {
 }
 
 // MARK: - ActionView
-public struct ActionViewOneOfDeployContractInline: Codable {
+
+public struct ActionViewOneOfDeployContractInline: Codable, Sendable {
     public let code: String
 
     public init(
-        code: String
+        code: String,
     ) {
         self.code = code
     }
 }
 
-public struct ActionViewOneOfFunctionCallInline: Codable {
+public struct ActionViewOneOfFunctionCallInline: Codable, Sendable {
     public let args: FunctionArgs
     public let deposit: NearToken
     public let gas: NearGas
@@ -1058,7 +1226,7 @@ public struct ActionViewOneOfFunctionCallInline: Codable {
         args: FunctionArgs,
         deposit: NearToken,
         gas: NearGas,
-        methodName: String
+        methodName: String,
     ) {
         self.args = args
         self.deposit = deposit
@@ -1067,116 +1235,116 @@ public struct ActionViewOneOfFunctionCallInline: Codable {
     }
 }
 
-public struct ActionViewOneOfTransferInline: Codable {
+public struct ActionViewOneOfTransferInline: Codable, Sendable {
     public let deposit: NearToken
 
     public init(
-        deposit: NearToken
+        deposit: NearToken,
     ) {
         self.deposit = deposit
     }
 }
 
-public struct ActionViewOneOfStakeInline: Codable {
+public struct ActionViewOneOfStakeInline: Codable, Sendable {
     public let publicKey: PublicKey
     public let stake: NearToken
 
     public init(
         publicKey: PublicKey,
-        stake: NearToken
+        stake: NearToken,
     ) {
         self.publicKey = publicKey
         self.stake = stake
     }
 }
 
-public struct ActionViewOneOfAddKeyInline: Codable {
+public struct ActionViewOneOfAddKeyInline: Codable, Sendable {
     public let accessKey: AccessKeyView
     public let publicKey: PublicKey
 
     public init(
         accessKey: AccessKeyView,
-        publicKey: PublicKey
+        publicKey: PublicKey,
     ) {
         self.accessKey = accessKey
         self.publicKey = publicKey
     }
 }
 
-public struct ActionViewOneOfDeleteKeyInline: Codable {
+public struct ActionViewOneOfDeleteKeyInline: Codable, Sendable {
     public let publicKey: PublicKey
 
     public init(
-        publicKey: PublicKey
+        publicKey: PublicKey,
     ) {
         self.publicKey = publicKey
     }
 }
 
-public struct ActionViewOneOfDeleteAccountInline: Codable {
+public struct ActionViewOneOfDeleteAccountInline: Codable, Sendable {
     public let beneficiaryId: AccountId
 
     public init(
-        beneficiaryId: AccountId
+        beneficiaryId: AccountId,
     ) {
         self.beneficiaryId = beneficiaryId
     }
 }
 
-public struct ActionViewOneOfDelegateInline: Codable {
+public struct ActionViewOneOfDelegateInline: Codable, Sendable {
     public let delegateAction: DelegateAction
     public let signature: Signature
 
     public init(
         delegateAction: DelegateAction,
-        signature: Signature
+        signature: Signature,
     ) {
         self.delegateAction = delegateAction
         self.signature = signature
     }
 }
 
-public struct ActionViewOneOfDeployGlobalContractInline: Codable {
+public struct ActionViewOneOfDeployGlobalContractInline: Codable, Sendable {
     public let code: String
 
     public init(
-        code: String
+        code: String,
     ) {
         self.code = code
     }
 }
 
-public struct ActionViewOneOfDeployGlobalContractByAccountIdInline: Codable {
+public struct ActionViewOneOfDeployGlobalContractByAccountIdInline: Codable, Sendable {
     public let code: String
 
     public init(
-        code: String
+        code: String,
     ) {
         self.code = code
     }
 }
 
-public struct ActionViewOneOfUseGlobalContractInline: Codable {
+public struct ActionViewOneOfUseGlobalContractInline: Codable, Sendable {
     public let codeHash: CryptoHash
 
     public init(
-        codeHash: CryptoHash
+        codeHash: CryptoHash,
     ) {
         self.codeHash = codeHash
     }
 }
 
-public struct ActionViewOneOfUseGlobalContractByAccountIdInline: Codable {
+public struct ActionViewOneOfUseGlobalContractByAccountIdInline: Codable, Sendable {
     public let accountId: AccountId
 
     public init(
-        accountId: AccountId
+        accountId: AccountId,
     ) {
         self.accountId = accountId
     }
 }
 
-public struct ActionViewOneOfDeterministicStateInitInline: Codable {
+public struct ActionViewOneOfDeterministicStateInitInline: Codable, Sendable {
     public let code: GlobalContractIdentifierView
     public let data: [String: String]
     public let deposit: NearToken
@@ -1184,7 +1352,7 @@ public struct ActionViewOneOfDeterministicStateInitInline: Codable {
     public init(
         code: GlobalContractIdentifierView,
         data: [String: String],
-        deposit: NearToken
+        deposit: NearToken,
     ) {
         self.code = code
         self.data = data
@@ -1192,7 +1360,7 @@ public struct ActionViewOneOfDeterministicStateInitInline: Codable {
     }
 }
 
-public enum ActionView: Codable {
+public enum ActionView: Codable, Sendable {
     case createAccount
     case deployContract(ActionViewOneOfDeployContractInline)
     case functionCall(ActionViewOneOfFunctionCallInline)
@@ -1217,145 +1385,180 @@ public enum ActionView: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DeployContract") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("DeployContract") == .orderedSame }) {
                     let value = try container.decode(ActionViewOneOfDeployContractInline.self, forKey: matchingKey)
                     self = .deployContract(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".deployContract: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("FunctionCall") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("FunctionCall") == .orderedSame }) {
                     let value = try container.decode(ActionViewOneOfFunctionCallInline.self, forKey: matchingKey)
                     self = .functionCall(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".functionCall: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("Transfer") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("Transfer") == .orderedSame }) {
                     let value = try container.decode(ActionViewOneOfTransferInline.self, forKey: matchingKey)
                     self = .transfer(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".transfer: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("Stake") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("Stake") == .orderedSame }) {
                     let value = try container.decode(ActionViewOneOfStakeInline.self, forKey: matchingKey)
                     self = .stake(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".stake: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("AddKey") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("AddKey") == .orderedSame }) {
                     let value = try container.decode(ActionViewOneOfAddKeyInline.self, forKey: matchingKey)
                     self = .addKey(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".addKey: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DeleteKey") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("DeleteKey") == .orderedSame }) {
                     let value = try container.decode(ActionViewOneOfDeleteKeyInline.self, forKey: matchingKey)
                     self = .deleteKey(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".deleteKey: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DeleteAccount") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("DeleteAccount") == .orderedSame }) {
                     let value = try container.decode(ActionViewOneOfDeleteAccountInline.self, forKey: matchingKey)
                     self = .deleteAccount(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".deleteAccount: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("Delegate") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("Delegate") == .orderedSame }) {
                     let value = try container.decode(ActionViewOneOfDelegateInline.self, forKey: matchingKey)
                     self = .delegate(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".delegate: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DeployGlobalContract") == .orderedSame }) {
-                    let value = try container.decode(ActionViewOneOfDeployGlobalContractInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("DeployGlobalContract") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionViewOneOfDeployGlobalContractInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .deployGlobalContract(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".deployGlobalContract: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DeployGlobalContractByAccountId") == .orderedSame }) {
-                    let value = try container.decode(ActionViewOneOfDeployGlobalContractByAccountIdInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("DeployGlobalContractByAccountId") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionViewOneOfDeployGlobalContractByAccountIdInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .deployGlobalContractByAccountId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".deployGlobalContractByAccountId: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("UseGlobalContract") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("UseGlobalContract") == .orderedSame
+                    }) {
                     let value = try container.decode(ActionViewOneOfUseGlobalContractInline.self, forKey: matchingKey)
                     self = .useGlobalContract(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".useGlobalContract: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("UseGlobalContractByAccountId") == .orderedSame }) {
-                    let value = try container.decode(ActionViewOneOfUseGlobalContractByAccountIdInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("UseGlobalContractByAccountId") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionViewOneOfUseGlobalContractByAccountIdInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .useGlobalContractByAccountId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".useGlobalContractByAccountId: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DeterministicStateInit") == .orderedSame }) {
-                    let value = try container.decode(ActionViewOneOfDeterministicStateInitInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("DeterministicStateInit") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionViewOneOfDeterministicStateInitInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .deterministicStateInit(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".deterministicStateInit: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -1369,7 +1572,8 @@ public enum ActionView: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for ActionView\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for ActionView:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ActionView:\n" + decodingErrors
+                .joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -1392,43 +1596,43 @@ public enum ActionView: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .deployContract(let value):
+        case let .deployContract(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deployContract)
-        case .functionCall(let value):
+        case let .functionCall(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .functionCall)
-        case .transfer(let value):
+        case let .transfer(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .transfer)
-        case .stake(let value):
+        case let .stake(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .stake)
-        case .addKey(let value):
+        case let .addKey(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .addKey)
-        case .deleteKey(let value):
+        case let .deleteKey(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deleteKey)
-        case .deleteAccount(let value):
+        case let .deleteAccount(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deleteAccount)
-        case .delegate(let value):
+        case let .delegate(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .delegate)
-        case .deployGlobalContract(let value):
+        case let .deployGlobalContract(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deployGlobalContract)
-        case .deployGlobalContractByAccountId(let value):
+        case let .deployGlobalContractByAccountId(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deployGlobalContractByAccountId)
-        case .useGlobalContract(let value):
+        case let .useGlobalContract(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .useGlobalContract)
-        case .useGlobalContractByAccountId(let value):
+        case let .useGlobalContractByAccountId(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .useGlobalContractByAccountId)
-        case .deterministicStateInit(let value):
+        case let .deterministicStateInit(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deterministicStateInit)
         case .createAccount:
@@ -1439,170 +1643,171 @@ public enum ActionView: Codable {
 }
 
 // MARK: - ActionsValidationError
-public struct ActionsValidationErrorOneOfTotalPrepaidGasExceededInline: Codable {
+
+public struct ActionsValidationErrorOneOfTotalPrepaidGasExceededInline: Codable, Sendable {
     public let limit: NearGas
     public let totalPrepaidGas: NearGas
 
     public init(
         limit: NearGas,
-        totalPrepaidGas: NearGas
+        totalPrepaidGas: NearGas,
     ) {
         self.limit = limit
         self.totalPrepaidGas = totalPrepaidGas
     }
 }
 
-public struct ActionsValidationErrorOneOfTotalNumberOfActionsExceededInline: Codable {
+public struct ActionsValidationErrorOneOfTotalNumberOfActionsExceededInline: Codable, Sendable {
     public let limit: UInt64
     public let totalNumberOfActions: UInt64
 
     public init(
         limit: UInt64,
-        totalNumberOfActions: UInt64
+        totalNumberOfActions: UInt64,
     ) {
         self.limit = limit
         self.totalNumberOfActions = totalNumberOfActions
     }
 }
 
-public struct ActionsValidationErrorOneOfAddKeyMethodNamesNumberOfBytesExceededInline: Codable {
+public struct ActionsValidationErrorOneOfAddKeyMethodNamesNumberOfBytesExceededInline: Codable, Sendable {
     public let limit: UInt64
     public let totalNumberOfBytes: UInt64
 
     public init(
         limit: UInt64,
-        totalNumberOfBytes: UInt64
+        totalNumberOfBytes: UInt64,
     ) {
         self.limit = limit
         self.totalNumberOfBytes = totalNumberOfBytes
     }
 }
 
-public struct ActionsValidationErrorOneOfAddKeyMethodNameLengthExceededInline: Codable {
+public struct ActionsValidationErrorOneOfAddKeyMethodNameLengthExceededInline: Codable, Sendable {
     public let length: UInt64
     public let limit: UInt64
 
     public init(
         length: UInt64,
-        limit: UInt64
+        limit: UInt64,
     ) {
         self.length = length
         self.limit = limit
     }
 }
 
-public struct ActionsValidationErrorOneOfInvalidAccountIdInline: Codable {
+public struct ActionsValidationErrorOneOfInvalidAccountIdInline: Codable, Sendable {
     public let accountId: String
 
     public init(
-        accountId: String
+        accountId: String,
     ) {
         self.accountId = accountId
     }
 }
 
-public struct ActionsValidationErrorOneOfContractSizeExceededInline: Codable {
+public struct ActionsValidationErrorOneOfContractSizeExceededInline: Codable, Sendable {
     public let limit: UInt64
     public let size: UInt64
 
     public init(
         limit: UInt64,
-        size: UInt64
+        size: UInt64,
     ) {
         self.limit = limit
         self.size = size
     }
 }
 
-public struct ActionsValidationErrorOneOfFunctionCallMethodNameLengthExceededInline: Codable {
+public struct ActionsValidationErrorOneOfFunctionCallMethodNameLengthExceededInline: Codable, Sendable {
     public let length: UInt64
     public let limit: UInt64
 
     public init(
         length: UInt64,
-        limit: UInt64
+        limit: UInt64,
     ) {
         self.length = length
         self.limit = limit
     }
 }
 
-public struct ActionsValidationErrorOneOfFunctionCallArgumentsLengthExceededInline: Codable {
+public struct ActionsValidationErrorOneOfFunctionCallArgumentsLengthExceededInline: Codable, Sendable {
     public let length: UInt64
     public let limit: UInt64
 
     public init(
         length: UInt64,
-        limit: UInt64
+        limit: UInt64,
     ) {
         self.length = length
         self.limit = limit
     }
 }
 
-public struct ActionsValidationErrorOneOfUnsuitableStakingKeyInline: Codable {
+public struct ActionsValidationErrorOneOfUnsuitableStakingKeyInline: Codable, Sendable {
     public let publicKey: PublicKey
 
     public init(
-        publicKey: PublicKey
+        publicKey: PublicKey,
     ) {
         self.publicKey = publicKey
     }
 }
 
-public struct ActionsValidationErrorOneOfUnsupportedProtocolFeatureInline: Codable {
+public struct ActionsValidationErrorOneOfUnsupportedProtocolFeatureInline: Codable, Sendable {
     public let protocolFeature: String
     public let version: Int
 
     public init(
         protocolFeature: String,
-        version: Int
+        version: Int,
     ) {
         self.protocolFeature = protocolFeature
         self.version = version
     }
 }
 
-public struct ActionsValidationErrorOneOfInvalidDeterministicStateInitReceiverInline: Codable {
+public struct ActionsValidationErrorOneOfInvalidDeterministicStateInitReceiverInline: Codable, Sendable {
     public let derivedId: AccountId
     public let receiverId: AccountId
 
     public init(
         derivedId: AccountId,
-        receiverId: AccountId
+        receiverId: AccountId,
     ) {
         self.derivedId = derivedId
         self.receiverId = receiverId
     }
 }
 
-public struct ActionsValidationErrorOneOfDeterministicStateInitKeyLengthExceededInline: Codable {
+public struct ActionsValidationErrorOneOfDeterministicStateInitKeyLengthExceededInline: Codable, Sendable {
     public let length: UInt64
     public let limit: UInt64
 
     public init(
         length: UInt64,
-        limit: UInt64
+        limit: UInt64,
     ) {
         self.length = length
         self.limit = limit
     }
 }
 
-public struct ActionsValidationErrorOneOfDeterministicStateInitValueLengthExceededInline: Codable {
+public struct ActionsValidationErrorOneOfDeterministicStateInitValueLengthExceededInline: Codable, Sendable {
     public let length: UInt64
     public let limit: UInt64
 
     public init(
         length: UInt64,
-        limit: UInt64
+        limit: UInt64,
     ) {
         self.length = length
         self.limit = limit
     }
 }
 
-public enum ActionsValidationError: Codable {
+public enum ActionsValidationError: Codable, Sendable {
     case deleteActionMustBeFinal
     case totalPrepaidGasExceeded(ActionsValidationErrorOneOfTotalPrepaidGasExceededInline)
     case totalNumberOfActionsExceeded(ActionsValidationErrorOneOfTotalNumberOfActionsExceededInline)
@@ -1618,8 +1823,12 @@ public enum ActionsValidationError: Codable {
     case delegateActionMustBeOnlyOne
     case unsupportedProtocolFeature(ActionsValidationErrorOneOfUnsupportedProtocolFeatureInline)
     case invalidDeterministicStateInitReceiver(ActionsValidationErrorOneOfInvalidDeterministicStateInitReceiverInline)
-    case deterministicStateInitKeyLengthExceeded(ActionsValidationErrorOneOfDeterministicStateInitKeyLengthExceededInline)
-    case deterministicStateInitValueLengthExceeded(ActionsValidationErrorOneOfDeterministicStateInitValueLengthExceededInline)
+    case deterministicStateInitKeyLengthExceeded(
+        ActionsValidationErrorOneOfDeterministicStateInitKeyLengthExceededInline,
+    )
+    case deterministicStateInitValueLengthExceeded(
+        ActionsValidationErrorOneOfDeterministicStateInitValueLengthExceededInline,
+    )
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -1630,46 +1839,70 @@ public enum ActionsValidationError: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("TotalPrepaidGasExceeded") == .orderedSame }) {
-                    let value = try container.decode(ActionsValidationErrorOneOfTotalPrepaidGasExceededInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("TotalPrepaidGasExceeded") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionsValidationErrorOneOfTotalPrepaidGasExceededInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .totalPrepaidGasExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".totalPrepaidGasExceeded: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("TotalNumberOfActionsExceeded") == .orderedSame }) {
-                    let value = try container.decode(ActionsValidationErrorOneOfTotalNumberOfActionsExceededInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("TotalNumberOfActionsExceeded") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionsValidationErrorOneOfTotalNumberOfActionsExceededInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .totalNumberOfActionsExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".totalNumberOfActionsExceeded: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("AddKeyMethodNamesNumberOfBytesExceeded") == .orderedSame }) {
-                    let value = try container.decode(ActionsValidationErrorOneOfAddKeyMethodNamesNumberOfBytesExceededInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("AddKeyMethodNamesNumberOfBytesExceeded") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionsValidationErrorOneOfAddKeyMethodNamesNumberOfBytesExceededInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .addKeyMethodNamesNumberOfBytesExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".addKeyMethodNamesNumberOfBytesExceeded: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("AddKeyMethodNameLengthExceeded") == .orderedSame }) {
-                    let value = try container.decode(ActionsValidationErrorOneOfAddKeyMethodNameLengthExceededInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("AddKeyMethodNameLengthExceeded") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionsValidationErrorOneOfAddKeyMethodNameLengthExceededInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .addKeyMethodNameLengthExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".addKeyMethodNameLengthExceeded: \(describeDecodingError(error))")
         }
         if let value = try? decoder.singleValueContainer().decode(String.self), value == "IntegerOverflow" {
@@ -1678,57 +1911,87 @@ public enum ActionsValidationError: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidAccountId") == .orderedSame }) {
-                    let value = try container.decode(ActionsValidationErrorOneOfInvalidAccountIdInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("InvalidAccountId") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionsValidationErrorOneOfInvalidAccountIdInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .invalidAccountId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".invalidAccountId: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ContractSizeExceeded") == .orderedSame }) {
-                    let value = try container.decode(ActionsValidationErrorOneOfContractSizeExceededInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("ContractSizeExceeded") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionsValidationErrorOneOfContractSizeExceededInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .contractSizeExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".contractSizeExceeded: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("FunctionCallMethodNameLengthExceeded") == .orderedSame }) {
-                    let value = try container.decode(ActionsValidationErrorOneOfFunctionCallMethodNameLengthExceededInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("FunctionCallMethodNameLengthExceeded") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionsValidationErrorOneOfFunctionCallMethodNameLengthExceededInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .functionCallMethodNameLengthExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".functionCallMethodNameLengthExceeded: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("FunctionCallArgumentsLengthExceeded") == .orderedSame }) {
-                    let value = try container.decode(ActionsValidationErrorOneOfFunctionCallArgumentsLengthExceededInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("FunctionCallArgumentsLengthExceeded") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionsValidationErrorOneOfFunctionCallArgumentsLengthExceededInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .functionCallArgumentsLengthExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".functionCallArgumentsLengthExceeded: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("UnsuitableStakingKey") == .orderedSame }) {
-                    let value = try container.decode(ActionsValidationErrorOneOfUnsuitableStakingKeyInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("UnsuitableStakingKey") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionsValidationErrorOneOfUnsuitableStakingKeyInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .unsuitableStakingKey(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".unsuitableStakingKey: \(describeDecodingError(error))")
         }
         if let value = try? decoder.singleValueContainer().decode(String.self), value == "FunctionCallZeroAttachedGas" {
@@ -1741,46 +2004,72 @@ public enum ActionsValidationError: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("UnsupportedProtocolFeature") == .orderedSame }) {
-                    let value = try container.decode(ActionsValidationErrorOneOfUnsupportedProtocolFeatureInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("UnsupportedProtocolFeature") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionsValidationErrorOneOfUnsupportedProtocolFeatureInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .unsupportedProtocolFeature(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".unsupportedProtocolFeature: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidDeterministicStateInitReceiver") == .orderedSame }) {
-                    let value = try container.decode(ActionsValidationErrorOneOfInvalidDeterministicStateInitReceiverInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("InvalidDeterministicStateInitReceiver") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionsValidationErrorOneOfInvalidDeterministicStateInitReceiverInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .invalidDeterministicStateInitReceiver(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".invalidDeterministicStateInitReceiver: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DeterministicStateInitKeyLengthExceeded") == .orderedSame }) {
-                    let value = try container.decode(ActionsValidationErrorOneOfDeterministicStateInitKeyLengthExceededInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue
+                            .caseInsensitiveCompare("DeterministicStateInitKeyLengthExceeded") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionsValidationErrorOneOfDeterministicStateInitKeyLengthExceededInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .deterministicStateInitKeyLengthExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".deterministicStateInitKeyLengthExceeded: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DeterministicStateInitValueLengthExceeded") == .orderedSame }) {
-                    let value = try container.decode(ActionsValidationErrorOneOfDeterministicStateInitValueLengthExceededInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue
+                            .caseInsensitiveCompare("DeterministicStateInitValueLengthExceeded") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionsValidationErrorOneOfDeterministicStateInitValueLengthExceededInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .deterministicStateInitValueLengthExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".deterministicStateInitValueLengthExceeded: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -1794,7 +2083,8 @@ public enum ActionsValidationError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for ActionsValidationError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for ActionsValidationError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ActionsValidationError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -1817,43 +2107,43 @@ public enum ActionsValidationError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .totalPrepaidGasExceeded(let value):
+        case let .totalPrepaidGasExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .totalPrepaidGasExceeded)
-        case .totalNumberOfActionsExceeded(let value):
+        case let .totalNumberOfActionsExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .totalNumberOfActionsExceeded)
-        case .addKeyMethodNamesNumberOfBytesExceeded(let value):
+        case let .addKeyMethodNamesNumberOfBytesExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .addKeyMethodNamesNumberOfBytesExceeded)
-        case .addKeyMethodNameLengthExceeded(let value):
+        case let .addKeyMethodNameLengthExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .addKeyMethodNameLengthExceeded)
-        case .invalidAccountId(let value):
+        case let .invalidAccountId(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .invalidAccountId)
-        case .contractSizeExceeded(let value):
+        case let .contractSizeExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .contractSizeExceeded)
-        case .functionCallMethodNameLengthExceeded(let value):
+        case let .functionCallMethodNameLengthExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .functionCallMethodNameLengthExceeded)
-        case .functionCallArgumentsLengthExceeded(let value):
+        case let .functionCallArgumentsLengthExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .functionCallArgumentsLengthExceeded)
-        case .unsuitableStakingKey(let value):
+        case let .unsuitableStakingKey(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .unsuitableStakingKey)
-        case .unsupportedProtocolFeature(let value):
+        case let .unsupportedProtocolFeature(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .unsupportedProtocolFeature)
-        case .invalidDeterministicStateInitReceiver(let value):
+        case let .invalidDeterministicStateInitReceiver(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .invalidDeterministicStateInitReceiver)
-        case .deterministicStateInitKeyLengthExceeded(let value):
+        case let .deterministicStateInitKeyLengthExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deterministicStateInitKeyLengthExceeded)
-        case .deterministicStateInitValueLengthExceeded(let value):
+        case let .deterministicStateInitValueLengthExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deterministicStateInitValueLengthExceeded)
         case .deleteActionMustBeFinal:
@@ -1873,7 +2163,8 @@ public enum ActionsValidationError: Codable {
 }
 
 // MARK: - BandwidthRequests
-public enum BandwidthRequests: Codable {
+
+public enum BandwidthRequests: Codable, Sendable {
     case v1(BandwidthRequestsV1)
 
     public init(from decoder: Decoder) throws {
@@ -1881,13 +2172,14 @@ public enum BandwidthRequests: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("V1") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("V1") == .orderedSame }) {
                     let value = try container.decode(BandwidthRequestsV1.self, forKey: matchingKey)
                     self = .v1(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".v1: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -1901,7 +2193,8 @@ public enum BandwidthRequests: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for BandwidthRequests\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for BandwidthRequests:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for BandwidthRequests:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -1912,7 +2205,7 @@ public enum BandwidthRequests: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .v1(let value):
+        case let .v1(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .v1)
         }
@@ -1920,7 +2213,8 @@ public enum BandwidthRequests: Codable {
 }
 
 // MARK: - BlockId
-public enum BlockId: Codable {
+
+public enum BlockId: Codable, Sendable {
     case integer(UInt64)
     case cryptoHash(CryptoHash)
 
@@ -1931,14 +2225,14 @@ public enum BlockId: Codable {
             let value = try decoder.singleValueContainer().decode(UInt64.self)
             self = .integer(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".integer: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(CryptoHash.self)
             self = .cryptoHash(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".cryptoHash: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -1952,17 +2246,18 @@ public enum BlockId: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for BlockId\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for BlockId:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for BlockId:\n" + decodingErrors
+                .joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .integer(let value):
+        case let .integer(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .cryptoHash(let value):
+        case let .cryptoHash(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
         }
@@ -1970,27 +2265,28 @@ public enum BlockId: Codable {
 }
 
 // MARK: - CompilationError
-public struct CompilationErrorOneOfCodeDoesNotExistInline: Codable {
+
+public struct CompilationErrorOneOfCodeDoesNotExistInline: Codable, Sendable {
     public let accountId: AccountId
 
     public init(
-        accountId: AccountId
+        accountId: AccountId,
     ) {
         self.accountId = accountId
     }
 }
 
-public struct CompilationErrorOneOfWasmerCompileErrorInline: Codable {
+public struct CompilationErrorOneOfWasmerCompileErrorInline: Codable, Sendable {
     public let msg: String
 
     public init(
-        msg: String
+        msg: String,
     ) {
         self.msg = msg
     }
 }
 
-public enum CompilationError: Codable {
+public enum CompilationError: Codable, Sendable {
     case codeDoesNotExist(CompilationErrorOneOfCodeDoesNotExistInline)
     case prepareError(PrepareError)
     case wasmerCompileError(CompilationErrorOneOfWasmerCompileErrorInline)
@@ -2000,35 +2296,48 @@ public enum CompilationError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("CodeDoesNotExist") == .orderedSame }) {
-                    let value = try container.decode(CompilationErrorOneOfCodeDoesNotExistInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("CodeDoesNotExist") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        CompilationErrorOneOfCodeDoesNotExistInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .codeDoesNotExist(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".codeDoesNotExist: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("PrepareError") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("PrepareError") == .orderedSame }) {
                     let value = try container.decode(PrepareError.self, forKey: matchingKey)
                     self = .prepareError(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".prepareError: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("WasmerCompileError") == .orderedSame }) {
-                    let value = try container.decode(CompilationErrorOneOfWasmerCompileErrorInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("WasmerCompileError") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        CompilationErrorOneOfWasmerCompileErrorInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .wasmerCompileError(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".wasmerCompileError: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -2042,7 +2351,8 @@ public enum CompilationError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for CompilationError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for CompilationError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for CompilationError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -2055,13 +2365,13 @@ public enum CompilationError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .codeDoesNotExist(let value):
+        case let .codeDoesNotExist(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .codeDoesNotExist)
-        case .prepareError(let value):
+        case let .prepareError(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .prepareError)
-        case .wasmerCompileError(let value):
+        case let .wasmerCompileError(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .wasmerCompileError)
         }
@@ -2069,7 +2379,8 @@ public enum CompilationError: Codable {
 }
 
 // MARK: - DeterministicAccountStateInit
-public enum DeterministicAccountStateInit: Codable {
+
+public enum DeterministicAccountStateInit: Codable, Sendable {
     case v1(DeterministicAccountStateInitV1)
 
     public init(from decoder: Decoder) throws {
@@ -2077,13 +2388,14 @@ public enum DeterministicAccountStateInit: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("V1") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("V1") == .orderedSame }) {
                     let value = try container.decode(DeterministicAccountStateInitV1.self, forKey: matchingKey)
                     self = .v1(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".v1: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -2097,7 +2409,9 @@ public enum DeterministicAccountStateInit: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for DeterministicAccountStateInit\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for DeterministicAccountStateInit:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for DeterministicAccountStateInit:\n" + decodingErrors
+                    .joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -2108,7 +2422,7 @@ public enum DeterministicAccountStateInit: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .v1(let value):
+        case let .v1(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .v1)
         }
@@ -2116,7 +2430,8 @@ public enum DeterministicAccountStateInit: Codable {
 }
 
 // MARK: - ExecutionStatusView
-public enum ExecutionStatusView: Codable {
+
+public enum ExecutionStatusView: Codable, Sendable {
     case unknown
     case failure(TxExecutionError)
     case successValue(String)
@@ -2131,35 +2446,40 @@ public enum ExecutionStatusView: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("Failure") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("Failure") == .orderedSame }) {
                     let value = try container.decode(TxExecutionError.self, forKey: matchingKey)
                     self = .failure(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".failure: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("SuccessValue") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("SuccessValue") == .orderedSame }) {
                     let value = try container.decode(String.self, forKey: matchingKey)
                     self = .successValue(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".successValue: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("SuccessReceiptId") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("SuccessReceiptId") == .orderedSame
+                    }) {
                     let value = try container.decode(CryptoHash.self, forKey: matchingKey)
                     self = .successReceiptId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".successReceiptId: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -2173,7 +2493,8 @@ public enum ExecutionStatusView: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for ExecutionStatusView\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for ExecutionStatusView:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ExecutionStatusView:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -2186,13 +2507,13 @@ public enum ExecutionStatusView: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .failure(let value):
+        case let .failure(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .failure)
-        case .successValue(let value):
+        case let .successValue(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .successValue)
-        case .successReceiptId(let value):
+        case let .successReceiptId(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .successReceiptId)
         case .unknown:
@@ -2203,40 +2524,41 @@ public enum ExecutionStatusView: Codable {
 }
 
 // MARK: - ExternalStorageLocation
-public struct ExternalStorageLocationOneOfS3Inline: Codable {
+
+public struct ExternalStorageLocationOneOfS3Inline: Codable, Sendable {
     public let bucket: String
     public let region: String
 
     public init(
         bucket: String,
-        region: String
+        region: String,
     ) {
         self.bucket = bucket
         self.region = region
     }
 }
 
-public struct ExternalStorageLocationOneOfFilesystemInline: Codable {
+public struct ExternalStorageLocationOneOfFilesystemInline: Codable, Sendable {
     public let rootDir: String
 
     public init(
-        rootDir: String
+        rootDir: String,
     ) {
         self.rootDir = rootDir
     }
 }
 
-public struct ExternalStorageLocationOneOfGCSInline: Codable {
+public struct ExternalStorageLocationOneOfGCSInline: Codable, Sendable {
     public let bucket: String
 
     public init(
-        bucket: String
+        bucket: String,
     ) {
         self.bucket = bucket
     }
 }
 
-public enum ExternalStorageLocation: Codable {
+public enum ExternalStorageLocation: Codable, Sendable {
     case s3(ExternalStorageLocationOneOfS3Inline)
     case filesystem(ExternalStorageLocationOneOfFilesystemInline)
     case gcs(ExternalStorageLocationOneOfGCSInline)
@@ -2246,35 +2568,41 @@ public enum ExternalStorageLocation: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("S3") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("S3") == .orderedSame }) {
                     let value = try container.decode(ExternalStorageLocationOneOfS3Inline.self, forKey: matchingKey)
                     self = .s3(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".s3: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("Filesystem") == .orderedSame }) {
-                    let value = try container.decode(ExternalStorageLocationOneOfFilesystemInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("Filesystem") == .orderedSame }) {
+                    let value = try container.decode(
+                        ExternalStorageLocationOneOfFilesystemInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .filesystem(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".filesystem: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("GCS") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("GCS") == .orderedSame }) {
                     let value = try container.decode(ExternalStorageLocationOneOfGCSInline.self, forKey: matchingKey)
                     self = .gcs(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".gcs: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -2288,7 +2616,8 @@ public enum ExternalStorageLocation: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for ExternalStorageLocation\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for ExternalStorageLocation:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ExternalStorageLocation:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -2301,13 +2630,13 @@ public enum ExternalStorageLocation: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .s3(let value):
+        case let .s3(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .s3)
-        case .filesystem(let value):
+        case let .filesystem(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .filesystem)
-        case .gcs(let value):
+        case let .gcs(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .gcs)
         }
@@ -2315,7 +2644,8 @@ public enum ExternalStorageLocation: Codable {
 }
 
 // MARK: - FinalExecutionStatus
-public enum FinalExecutionStatus: Codable {
+
+public enum FinalExecutionStatus: Codable, Sendable {
     case notStarted
     case started
     case failure(TxExecutionError)
@@ -2334,24 +2664,26 @@ public enum FinalExecutionStatus: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("Failure") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("Failure") == .orderedSame }) {
                     let value = try container.decode(TxExecutionError.self, forKey: matchingKey)
                     self = .failure(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".failure: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("SuccessValue") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("SuccessValue") == .orderedSame }) {
                     let value = try container.decode(String.self, forKey: matchingKey)
                     self = .successValue(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".successValue: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -2365,7 +2697,8 @@ public enum FinalExecutionStatus: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for FinalExecutionStatus\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for FinalExecutionStatus:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for FinalExecutionStatus:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -2377,10 +2710,10 @@ public enum FinalExecutionStatus: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .failure(let value):
+        case let .failure(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .failure)
-        case .successValue(let value):
+        case let .successValue(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .successValue)
         case .notStarted:
@@ -2394,17 +2727,18 @@ public enum FinalExecutionStatus: Codable {
 }
 
 // MARK: - FunctionCallError
-public struct FunctionCallErrorOneOfLinkErrorInline: Codable {
+
+public struct FunctionCallErrorOneOfLinkErrorInline: Codable, Sendable {
     public let msg: String
 
     public init(
-        msg: String
+        msg: String,
     ) {
         self.msg = msg
     }
 }
 
-public enum FunctionCallError: Codable {
+public enum FunctionCallError: Codable, Sendable {
     case string(String)
     case compilationError(CompilationError)
     case linkError(FunctionCallErrorOneOfLinkErrorInline)
@@ -2420,73 +2754,83 @@ public enum FunctionCallError: Codable {
             let value = try decoder.singleValueContainer().decode(String.self)
             self = .string(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".string: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("CompilationError") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("CompilationError") == .orderedSame
+                    }) {
                     let value = try container.decode(CompilationError.self, forKey: matchingKey)
                     self = .compilationError(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".compilationError: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("LinkError") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("LinkError") == .orderedSame }) {
                     let value = try container.decode(FunctionCallErrorOneOfLinkErrorInline.self, forKey: matchingKey)
                     self = .linkError(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".linkError: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("MethodResolveError") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("MethodResolveError") == .orderedSame
+                    }) {
                     let value = try container.decode(MethodResolveError.self, forKey: matchingKey)
                     self = .methodResolveError(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".methodResolveError: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("WasmTrap") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("WasmTrap") == .orderedSame }) {
                     let value = try container.decode(WasmTrap.self, forKey: matchingKey)
                     self = .wasmTrap(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".wasmTrap: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("HostError") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("HostError") == .orderedSame }) {
                     let value = try container.decode(HostError.self, forKey: matchingKey)
                     self = .hostError(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".hostError: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ExecutionError") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("ExecutionError") == .orderedSame }) {
                     let value = try container.decode(String.self, forKey: matchingKey)
                     self = .executionError(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".executionError: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -2500,7 +2844,8 @@ public enum FunctionCallError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for FunctionCallError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for FunctionCallError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for FunctionCallError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -2516,25 +2861,25 @@ public enum FunctionCallError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .compilationError(let value):
+        case let .compilationError(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .compilationError)
-        case .linkError(let value):
+        case let .linkError(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .linkError)
-        case .methodResolveError(let value):
+        case let .methodResolveError(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .methodResolveError)
-        case .wasmTrap(let value):
+        case let .wasmTrap(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .wasmTrap)
-        case .hostError(let value):
+        case let .hostError(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .hostError)
-        case .executionError(let value):
+        case let .executionError(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .executionError)
-        case .string(let value):
+        case let .string(value):
             var singleContainer = encoder.singleValueContainer()
             try singleContainer.encode(value)
         }
@@ -2542,7 +2887,8 @@ public enum FunctionCallError: Codable {
 }
 
 // MARK: - GlobalContractDeployMode
-public enum GlobalContractDeployMode: Codable {
+
+public enum GlobalContractDeployMode: Codable, Sendable {
     case codeHash
     case accountId
 
@@ -2568,7 +2914,8 @@ public enum GlobalContractDeployMode: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for GlobalContractDeployMode\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for GlobalContractDeployMode:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for GlobalContractDeployMode:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -2586,7 +2933,8 @@ public enum GlobalContractDeployMode: Codable {
 }
 
 // MARK: - GlobalContractIdentifier
-public enum GlobalContractIdentifier: Codable {
+
+public enum GlobalContractIdentifier: Codable, Sendable {
     case codeHash(CryptoHash)
     case accountId(AccountId)
 
@@ -2595,24 +2943,26 @@ public enum GlobalContractIdentifier: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("CodeHash") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("CodeHash") == .orderedSame }) {
                     let value = try container.decode(CryptoHash.self, forKey: matchingKey)
                     self = .codeHash(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".codeHash: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("AccountId") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("AccountId") == .orderedSame }) {
                     let value = try container.decode(AccountId.self, forKey: matchingKey)
                     self = .accountId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".accountId: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -2626,7 +2976,8 @@ public enum GlobalContractIdentifier: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for GlobalContractIdentifier\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for GlobalContractIdentifier:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for GlobalContractIdentifier:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -2638,10 +2989,10 @@ public enum GlobalContractIdentifier: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .codeHash(let value):
+        case let .codeHash(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .codeHash)
-        case .accountId(let value):
+        case let .accountId(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .accountId)
         }
@@ -2649,7 +3000,8 @@ public enum GlobalContractIdentifier: Codable {
 }
 
 // MARK: - GlobalContractIdentifierView
-public enum GlobalContractIdentifierView: Codable {
+
+public enum GlobalContractIdentifierView: Codable, Sendable {
     case cryptoHash(CryptoHash)
     case accountId(AccountId)
 
@@ -2660,14 +3012,14 @@ public enum GlobalContractIdentifierView: Codable {
             let value = try decoder.singleValueContainer().decode(CryptoHash.self)
             self = .cryptoHash(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".cryptoHash: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(AccountId.self)
             self = .accountId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".accountId: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -2681,17 +3033,19 @@ public enum GlobalContractIdentifierView: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for GlobalContractIdentifierView\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for GlobalContractIdentifierView:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for GlobalContractIdentifierView:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .cryptoHash(let value):
+        case let .cryptoHash(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .accountId(let value):
+        case let .accountId(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
         }
@@ -2699,228 +3053,229 @@ public enum GlobalContractIdentifierView: Codable {
 }
 
 // MARK: - HostError
-public struct HostErrorOneOfGuestPanicInline: Codable {
+
+public struct HostErrorOneOfGuestPanicInline: Codable, Sendable {
     public let panicMsg: String
 
     public init(
-        panicMsg: String
+        panicMsg: String,
     ) {
         self.panicMsg = panicMsg
     }
 }
 
-public struct HostErrorOneOfInvalidPromiseIndexInline: Codable {
+public struct HostErrorOneOfInvalidPromiseIndexInline: Codable, Sendable {
     public let promiseIdx: UInt64
 
     public init(
-        promiseIdx: UInt64
+        promiseIdx: UInt64,
     ) {
         self.promiseIdx = promiseIdx
     }
 }
 
-public struct HostErrorOneOfInvalidPromiseResultIndexInline: Codable {
+public struct HostErrorOneOfInvalidPromiseResultIndexInline: Codable, Sendable {
     public let resultIdx: UInt64
 
     public init(
-        resultIdx: UInt64
+        resultIdx: UInt64,
     ) {
         self.resultIdx = resultIdx
     }
 }
 
-public struct HostErrorOneOfInvalidRegisterIdInline: Codable {
+public struct HostErrorOneOfInvalidRegisterIdInline: Codable, Sendable {
     public let registerId: UInt64
 
     public init(
-        registerId: UInt64
+        registerId: UInt64,
     ) {
         self.registerId = registerId
     }
 }
 
-public struct HostErrorOneOfIteratorWasInvalidatedInline: Codable {
+public struct HostErrorOneOfIteratorWasInvalidatedInline: Codable, Sendable {
     public let iteratorIndex: UInt64
 
     public init(
-        iteratorIndex: UInt64
+        iteratorIndex: UInt64,
     ) {
         self.iteratorIndex = iteratorIndex
     }
 }
 
-public struct HostErrorOneOfInvalidReceiptIndexInline: Codable {
+public struct HostErrorOneOfInvalidReceiptIndexInline: Codable, Sendable {
     public let receiptIndex: UInt64
 
     public init(
-        receiptIndex: UInt64
+        receiptIndex: UInt64,
     ) {
         self.receiptIndex = receiptIndex
     }
 }
 
-public struct HostErrorOneOfInvalidIteratorIndexInline: Codable {
+public struct HostErrorOneOfInvalidIteratorIndexInline: Codable, Sendable {
     public let iteratorIndex: UInt64
 
     public init(
-        iteratorIndex: UInt64
+        iteratorIndex: UInt64,
     ) {
         self.iteratorIndex = iteratorIndex
     }
 }
 
-public struct HostErrorOneOfProhibitedInViewInline: Codable {
+public struct HostErrorOneOfProhibitedInViewInline: Codable, Sendable {
     public let methodName: String
 
     public init(
-        methodName: String
+        methodName: String,
     ) {
         self.methodName = methodName
     }
 }
 
-public struct HostErrorOneOfNumberOfLogsExceededInline: Codable {
+public struct HostErrorOneOfNumberOfLogsExceededInline: Codable, Sendable {
     public let limit: UInt64
 
     public init(
-        limit: UInt64
+        limit: UInt64,
     ) {
         self.limit = limit
     }
 }
 
-public struct HostErrorOneOfKeyLengthExceededInline: Codable {
+public struct HostErrorOneOfKeyLengthExceededInline: Codable, Sendable {
     public let length: UInt64
     public let limit: UInt64
 
     public init(
         length: UInt64,
-        limit: UInt64
+        limit: UInt64,
     ) {
         self.length = length
         self.limit = limit
     }
 }
 
-public struct HostErrorOneOfValueLengthExceededInline: Codable {
+public struct HostErrorOneOfValueLengthExceededInline: Codable, Sendable {
     public let length: UInt64
     public let limit: UInt64
 
     public init(
         length: UInt64,
-        limit: UInt64
+        limit: UInt64,
     ) {
         self.length = length
         self.limit = limit
     }
 }
 
-public struct HostErrorOneOfTotalLogLengthExceededInline: Codable {
+public struct HostErrorOneOfTotalLogLengthExceededInline: Codable, Sendable {
     public let length: UInt64
     public let limit: UInt64
 
     public init(
         length: UInt64,
-        limit: UInt64
+        limit: UInt64,
     ) {
         self.length = length
         self.limit = limit
     }
 }
 
-public struct HostErrorOneOfNumberPromisesExceededInline: Codable {
+public struct HostErrorOneOfNumberPromisesExceededInline: Codable, Sendable {
     public let limit: UInt64
     public let numberOfPromises: UInt64
 
     public init(
         limit: UInt64,
-        numberOfPromises: UInt64
+        numberOfPromises: UInt64,
     ) {
         self.limit = limit
         self.numberOfPromises = numberOfPromises
     }
 }
 
-public struct HostErrorOneOfNumberInputDataDependenciesExceededInline: Codable {
+public struct HostErrorOneOfNumberInputDataDependenciesExceededInline: Codable, Sendable {
     public let limit: UInt64
     public let numberOfInputDataDependencies: UInt64
 
     public init(
         limit: UInt64,
-        numberOfInputDataDependencies: UInt64
+        numberOfInputDataDependencies: UInt64,
     ) {
         self.limit = limit
         self.numberOfInputDataDependencies = numberOfInputDataDependencies
     }
 }
 
-public struct HostErrorOneOfReturnedValueLengthExceededInline: Codable {
+public struct HostErrorOneOfReturnedValueLengthExceededInline: Codable, Sendable {
     public let length: UInt64
     public let limit: UInt64
 
     public init(
         length: UInt64,
-        limit: UInt64
+        limit: UInt64,
     ) {
         self.length = length
         self.limit = limit
     }
 }
 
-public struct HostErrorOneOfContractSizeExceededInline: Codable {
+public struct HostErrorOneOfContractSizeExceededInline: Codable, Sendable {
     public let limit: UInt64
     public let size: UInt64
 
     public init(
         limit: UInt64,
-        size: UInt64
+        size: UInt64,
     ) {
         self.limit = limit
         self.size = size
     }
 }
 
-public struct HostErrorOneOfDeprecatedInline: Codable {
+public struct HostErrorOneOfDeprecatedInline: Codable, Sendable {
     public let methodName: String
 
     public init(
-        methodName: String
+        methodName: String,
     ) {
         self.methodName = methodName
     }
 }
 
-public struct HostErrorOneOfECRecoverErrorInline: Codable {
+public struct HostErrorOneOfECRecoverErrorInline: Codable, Sendable {
     public let msg: String
 
     public init(
-        msg: String
+        msg: String,
     ) {
         self.msg = msg
     }
 }
 
-public struct HostErrorOneOfAltBn128InvalidInputInline: Codable {
+public struct HostErrorOneOfAltBn128InvalidInputInline: Codable, Sendable {
     public let msg: String
 
     public init(
-        msg: String
+        msg: String,
     ) {
         self.msg = msg
     }
 }
 
-public struct HostErrorOneOfEd25519VerifyInvalidInputInline: Codable {
+public struct HostErrorOneOfEd25519VerifyInvalidInputInline: Codable, Sendable {
     public let msg: String
 
     public init(
-        msg: String
+        msg: String,
     ) {
         self.msg = msg
     }
 }
 
-public enum HostError: Codable {
+public enum HostError: Codable, Sendable {
     case badUTF16
     case badUTF8
     case gasExceeded
@@ -2984,13 +3339,14 @@ public enum HostError: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("GuestPanic") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("GuestPanic") == .orderedSame }) {
                     let value = try container.decode(HostErrorOneOfGuestPanicInline.self, forKey: matchingKey)
                     self = .guestPanic(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".guestPanic: \(describeDecodingError(error))")
         }
         if let value = try? decoder.singleValueContainer().decode(String.self), value == "IntegerOverflow" {
@@ -2999,16 +3355,20 @@ public enum HostError: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidPromiseIndex") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("InvalidPromiseIndex") == .orderedSame
+                    }) {
                     let value = try container.decode(HostErrorOneOfInvalidPromiseIndexInline.self, forKey: matchingKey)
                     self = .invalidPromiseIndex(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".invalidPromiseIndex: \(describeDecodingError(error))")
         }
-        if let value = try? decoder.singleValueContainer().decode(String.self), value == "CannotAppendActionToJointPromise" {
+        if let value = try? decoder.singleValueContainer().decode(String.self),
+           value == "CannotAppendActionToJointPromise" {
             self = .cannotAppendActionToJointPromise
             return
         }
@@ -3018,35 +3378,50 @@ public enum HostError: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidPromiseResultIndex") == .orderedSame }) {
-                    let value = try container.decode(HostErrorOneOfInvalidPromiseResultIndexInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("InvalidPromiseResultIndex") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        HostErrorOneOfInvalidPromiseResultIndexInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .invalidPromiseResultIndex(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".invalidPromiseResultIndex: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidRegisterId") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("InvalidRegisterId") == .orderedSame
+                    }) {
                     let value = try container.decode(HostErrorOneOfInvalidRegisterIdInline.self, forKey: matchingKey)
                     self = .invalidRegisterId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".invalidRegisterId: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("IteratorWasInvalidated") == .orderedSame }) {
-                    let value = try container.decode(HostErrorOneOfIteratorWasInvalidatedInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("IteratorWasInvalidated") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        HostErrorOneOfIteratorWasInvalidatedInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .iteratorWasInvalidated(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".iteratorWasInvalidated: \(describeDecodingError(error))")
         }
         if let value = try? decoder.singleValueContainer().decode(String.self), value == "MemoryAccessViolation" {
@@ -3055,24 +3430,30 @@ public enum HostError: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidReceiptIndex") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("InvalidReceiptIndex") == .orderedSame
+                    }) {
                     let value = try container.decode(HostErrorOneOfInvalidReceiptIndexInline.self, forKey: matchingKey)
                     self = .invalidReceiptIndex(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".invalidReceiptIndex: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidIteratorIndex") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("InvalidIteratorIndex") == .orderedSame
+                    }) {
                     let value = try container.decode(HostErrorOneOfInvalidIteratorIndexInline.self, forKey: matchingKey)
                     self = .invalidIteratorIndex(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".invalidIteratorIndex: \(describeDecodingError(error))")
         }
         if let value = try? decoder.singleValueContainer().decode(String.self), value == "InvalidAccountId" {
@@ -3089,145 +3470,195 @@ public enum HostError: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ProhibitedInView") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("ProhibitedInView") == .orderedSame
+                    }) {
                     let value = try container.decode(HostErrorOneOfProhibitedInViewInline.self, forKey: matchingKey)
                     self = .prohibitedInView(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".prohibitedInView: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("NumberOfLogsExceeded") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("NumberOfLogsExceeded") == .orderedSame
+                    }) {
                     let value = try container.decode(HostErrorOneOfNumberOfLogsExceededInline.self, forKey: matchingKey)
                     self = .numberOfLogsExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".numberOfLogsExceeded: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("KeyLengthExceeded") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("KeyLengthExceeded") == .orderedSame
+                    }) {
                     let value = try container.decode(HostErrorOneOfKeyLengthExceededInline.self, forKey: matchingKey)
                     self = .keyLengthExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".keyLengthExceeded: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ValueLengthExceeded") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("ValueLengthExceeded") == .orderedSame
+                    }) {
                     let value = try container.decode(HostErrorOneOfValueLengthExceededInline.self, forKey: matchingKey)
                     self = .valueLengthExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".valueLengthExceeded: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("TotalLogLengthExceeded") == .orderedSame }) {
-                    let value = try container.decode(HostErrorOneOfTotalLogLengthExceededInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("TotalLogLengthExceeded") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        HostErrorOneOfTotalLogLengthExceededInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .totalLogLengthExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".totalLogLengthExceeded: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("NumberPromisesExceeded") == .orderedSame }) {
-                    let value = try container.decode(HostErrorOneOfNumberPromisesExceededInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("NumberPromisesExceeded") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        HostErrorOneOfNumberPromisesExceededInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .numberPromisesExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".numberPromisesExceeded: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("NumberInputDataDependenciesExceeded") == .orderedSame }) {
-                    let value = try container.decode(HostErrorOneOfNumberInputDataDependenciesExceededInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("NumberInputDataDependenciesExceeded") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        HostErrorOneOfNumberInputDataDependenciesExceededInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .numberInputDataDependenciesExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".numberInputDataDependenciesExceeded: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ReturnedValueLengthExceeded") == .orderedSame }) {
-                    let value = try container.decode(HostErrorOneOfReturnedValueLengthExceededInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("ReturnedValueLengthExceeded") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        HostErrorOneOfReturnedValueLengthExceededInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .returnedValueLengthExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".returnedValueLengthExceeded: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ContractSizeExceeded") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("ContractSizeExceeded") == .orderedSame
+                    }) {
                     let value = try container.decode(HostErrorOneOfContractSizeExceededInline.self, forKey: matchingKey)
                     self = .contractSizeExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".contractSizeExceeded: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("Deprecated") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("Deprecated") == .orderedSame }) {
                     let value = try container.decode(HostErrorOneOfDeprecatedInline.self, forKey: matchingKey)
                     self = .deprecated(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".deprecated: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ECRecoverError") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("ECRecoverError") == .orderedSame }) {
                     let value = try container.decode(HostErrorOneOfECRecoverErrorInline.self, forKey: matchingKey)
                     self = .eCRecoverError(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".eCRecoverError: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("AltBn128InvalidInput") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("AltBn128InvalidInput") == .orderedSame
+                    }) {
                     let value = try container.decode(HostErrorOneOfAltBn128InvalidInputInline.self, forKey: matchingKey)
                     self = .altBn128InvalidInput(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".altBn128InvalidInput: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("Ed25519VerifyInvalidInput") == .orderedSame }) {
-                    let value = try container.decode(HostErrorOneOfEd25519VerifyInvalidInputInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("Ed25519VerifyInvalidInput") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        HostErrorOneOfEd25519VerifyInvalidInputInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .ed25519VerifyInvalidInput(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".ed25519VerifyInvalidInput: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -3241,7 +3672,8 @@ public enum HostError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for HostError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for HostError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for HostError:\n" + decodingErrors
+                .joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -3271,64 +3703,64 @@ public enum HostError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .guestPanic(let value):
+        case let .guestPanic(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .guestPanic)
-        case .invalidPromiseIndex(let value):
+        case let .invalidPromiseIndex(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .invalidPromiseIndex)
-        case .invalidPromiseResultIndex(let value):
+        case let .invalidPromiseResultIndex(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .invalidPromiseResultIndex)
-        case .invalidRegisterId(let value):
+        case let .invalidRegisterId(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .invalidRegisterId)
-        case .iteratorWasInvalidated(let value):
+        case let .iteratorWasInvalidated(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .iteratorWasInvalidated)
-        case .invalidReceiptIndex(let value):
+        case let .invalidReceiptIndex(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .invalidReceiptIndex)
-        case .invalidIteratorIndex(let value):
+        case let .invalidIteratorIndex(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .invalidIteratorIndex)
-        case .prohibitedInView(let value):
+        case let .prohibitedInView(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .prohibitedInView)
-        case .numberOfLogsExceeded(let value):
+        case let .numberOfLogsExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .numberOfLogsExceeded)
-        case .keyLengthExceeded(let value):
+        case let .keyLengthExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .keyLengthExceeded)
-        case .valueLengthExceeded(let value):
+        case let .valueLengthExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .valueLengthExceeded)
-        case .totalLogLengthExceeded(let value):
+        case let .totalLogLengthExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .totalLogLengthExceeded)
-        case .numberPromisesExceeded(let value):
+        case let .numberPromisesExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .numberPromisesExceeded)
-        case .numberInputDataDependenciesExceeded(let value):
+        case let .numberInputDataDependenciesExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .numberInputDataDependenciesExceeded)
-        case .returnedValueLengthExceeded(let value):
+        case let .returnedValueLengthExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .returnedValueLengthExceeded)
-        case .contractSizeExceeded(let value):
+        case let .contractSizeExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .contractSizeExceeded)
-        case .deprecated(let value):
+        case let .deprecated(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deprecated)
-        case .eCRecoverError(let value):
+        case let .eCRecoverError(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .eCRecoverError)
-        case .altBn128InvalidInput(let value):
+        case let .altBn128InvalidInput(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .altBn128InvalidInput)
-        case .ed25519VerifyInvalidInput(let value):
+        case let .ed25519VerifyInvalidInput(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .ed25519VerifyInvalidInput)
         case .badUTF16:
@@ -3375,43 +3807,44 @@ public enum HostError: Codable {
 }
 
 // MARK: - InvalidAccessKeyError
-public struct InvalidAccessKeyErrorOneOfAccessKeyNotFoundInline: Codable {
+
+public struct InvalidAccessKeyErrorOneOfAccessKeyNotFoundInline: Codable, Sendable {
     public let accountId: AccountId
     public let publicKey: PublicKey
 
     public init(
         accountId: AccountId,
-        publicKey: PublicKey
+        publicKey: PublicKey,
     ) {
         self.accountId = accountId
         self.publicKey = publicKey
     }
 }
 
-public struct InvalidAccessKeyErrorOneOfReceiverMismatchInline: Codable {
+public struct InvalidAccessKeyErrorOneOfReceiverMismatchInline: Codable, Sendable {
     public let akReceiver: String
     public let txReceiver: AccountId
 
     public init(
         akReceiver: String,
-        txReceiver: AccountId
+        txReceiver: AccountId,
     ) {
         self.akReceiver = akReceiver
         self.txReceiver = txReceiver
     }
 }
 
-public struct InvalidAccessKeyErrorOneOfMethodNameMismatchInline: Codable {
+public struct InvalidAccessKeyErrorOneOfMethodNameMismatchInline: Codable, Sendable {
     public let methodName: String
 
     public init(
-        methodName: String
+        methodName: String,
     ) {
         self.methodName = methodName
     }
 }
 
-public struct InvalidAccessKeyErrorOneOfNotEnoughAllowanceInline: Codable {
+public struct InvalidAccessKeyErrorOneOfNotEnoughAllowanceInline: Codable, Sendable {
     public let accountId: AccountId
     public let allowance: NearToken
     public let cost: NearToken
@@ -3421,7 +3854,7 @@ public struct InvalidAccessKeyErrorOneOfNotEnoughAllowanceInline: Codable {
         accountId: AccountId,
         allowance: NearToken,
         cost: NearToken,
-        publicKey: PublicKey
+        publicKey: PublicKey,
     ) {
         self.accountId = accountId
         self.allowance = allowance
@@ -3430,7 +3863,7 @@ public struct InvalidAccessKeyErrorOneOfNotEnoughAllowanceInline: Codable {
     }
 }
 
-public enum InvalidAccessKeyError: Codable {
+public enum InvalidAccessKeyError: Codable, Sendable {
     case accessKeyNotFound(InvalidAccessKeyErrorOneOfAccessKeyNotFoundInline)
     case receiverMismatch(InvalidAccessKeyErrorOneOfReceiverMismatchInline)
     case methodNameMismatch(InvalidAccessKeyErrorOneOfMethodNameMismatchInline)
@@ -3443,35 +3876,53 @@ public enum InvalidAccessKeyError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("AccessKeyNotFound") == .orderedSame }) {
-                    let value = try container.decode(InvalidAccessKeyErrorOneOfAccessKeyNotFoundInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("AccessKeyNotFound") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        InvalidAccessKeyErrorOneOfAccessKeyNotFoundInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .accessKeyNotFound(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".accessKeyNotFound: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ReceiverMismatch") == .orderedSame }) {
-                    let value = try container.decode(InvalidAccessKeyErrorOneOfReceiverMismatchInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("ReceiverMismatch") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        InvalidAccessKeyErrorOneOfReceiverMismatchInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .receiverMismatch(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".receiverMismatch: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("MethodNameMismatch") == .orderedSame }) {
-                    let value = try container.decode(InvalidAccessKeyErrorOneOfMethodNameMismatchInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("MethodNameMismatch") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        InvalidAccessKeyErrorOneOfMethodNameMismatchInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .methodNameMismatch(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".methodNameMismatch: \(describeDecodingError(error))")
         }
         if let value = try? decoder.singleValueContainer().decode(String.self), value == "RequiresFullAccess" {
@@ -3480,13 +3931,19 @@ public enum InvalidAccessKeyError: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("NotEnoughAllowance") == .orderedSame }) {
-                    let value = try container.decode(InvalidAccessKeyErrorOneOfNotEnoughAllowanceInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("NotEnoughAllowance") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        InvalidAccessKeyErrorOneOfNotEnoughAllowanceInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .notEnoughAllowance(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".notEnoughAllowance: \(describeDecodingError(error))")
         }
         if let value = try? decoder.singleValueContainer().decode(String.self), value == "DepositWithFunctionCall" {
@@ -3504,7 +3961,8 @@ public enum InvalidAccessKeyError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for InvalidAccessKeyError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for InvalidAccessKeyError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for InvalidAccessKeyError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -3518,16 +3976,16 @@ public enum InvalidAccessKeyError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .accessKeyNotFound(let value):
+        case let .accessKeyNotFound(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .accessKeyNotFound)
-        case .receiverMismatch(let value):
+        case let .receiverMismatch(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .receiverMismatch)
-        case .methodNameMismatch(let value):
+        case let .methodNameMismatch(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .methodNameMismatch)
-        case .notEnoughAllowance(let value):
+        case let .notEnoughAllowance(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .notEnoughAllowance)
         case .requiresFullAccess:
@@ -3541,63 +3999,64 @@ public enum InvalidAccessKeyError: Codable {
 }
 
 // MARK: - InvalidTxError
-public struct InvalidTxErrorOneOfInvalidSignerIdInline: Codable {
+
+public struct InvalidTxErrorOneOfInvalidSignerIdInline: Codable, Sendable {
     public let signerId: String
 
     public init(
-        signerId: String
+        signerId: String,
     ) {
         self.signerId = signerId
     }
 }
 
-public struct InvalidTxErrorOneOfSignerDoesNotExistInline: Codable {
+public struct InvalidTxErrorOneOfSignerDoesNotExistInline: Codable, Sendable {
     public let signerId: AccountId
 
     public init(
-        signerId: AccountId
+        signerId: AccountId,
     ) {
         self.signerId = signerId
     }
 }
 
-public struct InvalidTxErrorOneOfInvalidNonceInline: Codable {
+public struct InvalidTxErrorOneOfInvalidNonceInline: Codable, Sendable {
     public let akNonce: UInt64
     public let txNonce: UInt64
 
     public init(
         akNonce: UInt64,
-        txNonce: UInt64
+        txNonce: UInt64,
     ) {
         self.akNonce = akNonce
         self.txNonce = txNonce
     }
 }
 
-public struct InvalidTxErrorOneOfNonceTooLargeInline: Codable {
+public struct InvalidTxErrorOneOfNonceTooLargeInline: Codable, Sendable {
     public let txNonce: UInt64
     public let upperBound: UInt64
 
     public init(
         txNonce: UInt64,
-        upperBound: UInt64
+        upperBound: UInt64,
     ) {
         self.txNonce = txNonce
         self.upperBound = upperBound
     }
 }
 
-public struct InvalidTxErrorOneOfInvalidReceiverIdInline: Codable {
+public struct InvalidTxErrorOneOfInvalidReceiverIdInline: Codable, Sendable {
     public let receiverId: String
 
     public init(
-        receiverId: String
+        receiverId: String,
     ) {
         self.receiverId = receiverId
     }
 }
 
-public struct InvalidTxErrorOneOfNotEnoughBalanceInline: Codable {
+public struct InvalidTxErrorOneOfNotEnoughBalanceInline: Codable, Sendable {
     public let balance: NearToken
     public let cost: NearToken
     public let signerId: AccountId
@@ -3605,7 +4064,7 @@ public struct InvalidTxErrorOneOfNotEnoughBalanceInline: Codable {
     public init(
         balance: NearToken,
         cost: NearToken,
-        signerId: AccountId
+        signerId: AccountId,
     ) {
         self.balance = balance
         self.cost = cost
@@ -3613,59 +4072,59 @@ public struct InvalidTxErrorOneOfNotEnoughBalanceInline: Codable {
     }
 }
 
-public struct InvalidTxErrorOneOfLackBalanceForStateInline: Codable {
+public struct InvalidTxErrorOneOfLackBalanceForStateInline: Codable, Sendable {
     public let amount: NearToken
     public let signerId: AccountId
 
     public init(
         amount: NearToken,
-        signerId: AccountId
+        signerId: AccountId,
     ) {
         self.amount = amount
         self.signerId = signerId
     }
 }
 
-public struct InvalidTxErrorOneOfTransactionSizeExceededInline: Codable {
+public struct InvalidTxErrorOneOfTransactionSizeExceededInline: Codable, Sendable {
     public let limit: UInt64
     public let size: UInt64
 
     public init(
         limit: UInt64,
-        size: UInt64
+        size: UInt64,
     ) {
         self.limit = limit
         self.size = size
     }
 }
 
-public struct InvalidTxErrorOneOfShardCongestedInline: Codable {
+public struct InvalidTxErrorOneOfShardCongestedInline: Codable, Sendable {
     public let congestionLevel: Double
     public let shardId: Int
 
     public init(
         congestionLevel: Double,
-        shardId: Int
+        shardId: Int,
     ) {
         self.congestionLevel = congestionLevel
         self.shardId = shardId
     }
 }
 
-public struct InvalidTxErrorOneOfShardStuckInline: Codable {
+public struct InvalidTxErrorOneOfShardStuckInline: Codable, Sendable {
     public let missedChunks: UInt64
     public let shardId: Int
 
     public init(
         missedChunks: UInt64,
-        shardId: Int
+        shardId: Int,
     ) {
         self.missedChunks = missedChunks
         self.shardId = shardId
     }
 }
 
-public enum InvalidTxError: Codable {
+public enum InvalidTxError: Codable, Sendable {
     case invalidAccessKeyError(InvalidAccessKeyError)
     case invalidSignerId(InvalidTxErrorOneOfInvalidSignerIdInline)
     case signerDoesNotExist(InvalidTxErrorOneOfSignerDoesNotExistInline)
@@ -3690,68 +4149,88 @@ public enum InvalidTxError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidAccessKeyError") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("InvalidAccessKeyError") == .orderedSame
+                    }) {
                     let value = try container.decode(InvalidAccessKeyError.self, forKey: matchingKey)
                     self = .invalidAccessKeyError(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".invalidAccessKeyError: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidSignerId") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("InvalidSignerId") == .orderedSame
+                    }) {
                     let value = try container.decode(InvalidTxErrorOneOfInvalidSignerIdInline.self, forKey: matchingKey)
                     self = .invalidSignerId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".invalidSignerId: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("SignerDoesNotExist") == .orderedSame }) {
-                    let value = try container.decode(InvalidTxErrorOneOfSignerDoesNotExistInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("SignerDoesNotExist") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        InvalidTxErrorOneOfSignerDoesNotExistInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .signerDoesNotExist(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".signerDoesNotExist: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidNonce") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidNonce") == .orderedSame }) {
                     let value = try container.decode(InvalidTxErrorOneOfInvalidNonceInline.self, forKey: matchingKey)
                     self = .invalidNonce(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".invalidNonce: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("NonceTooLarge") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("NonceTooLarge") == .orderedSame }) {
                     let value = try container.decode(InvalidTxErrorOneOfNonceTooLargeInline.self, forKey: matchingKey)
                     self = .nonceTooLarge(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".nonceTooLarge: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidReceiverId") == .orderedSame }) {
-                    let value = try container.decode(InvalidTxErrorOneOfInvalidReceiverIdInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("InvalidReceiverId") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        InvalidTxErrorOneOfInvalidReceiverIdInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .invalidReceiverId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".invalidReceiverId: \(describeDecodingError(error))")
         }
         if let value = try? decoder.singleValueContainer().decode(String.self), value == "InvalidSignature" {
@@ -3760,24 +4239,36 @@ public enum InvalidTxError: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("NotEnoughBalance") == .orderedSame }) {
-                    let value = try container.decode(InvalidTxErrorOneOfNotEnoughBalanceInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("NotEnoughBalance") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        InvalidTxErrorOneOfNotEnoughBalanceInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .notEnoughBalance(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".notEnoughBalance: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("LackBalanceForState") == .orderedSame }) {
-                    let value = try container.decode(InvalidTxErrorOneOfLackBalanceForStateInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("LackBalanceForState") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        InvalidTxErrorOneOfLackBalanceForStateInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .lackBalanceForState(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".lackBalanceForState: \(describeDecodingError(error))")
         }
         if let value = try? decoder.singleValueContainer().decode(String.self), value == "CostOverflow" {
@@ -3794,24 +4285,33 @@ public enum InvalidTxError: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ActionsValidation") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("ActionsValidation") == .orderedSame
+                    }) {
                     let value = try container.decode(ActionsValidationError.self, forKey: matchingKey)
                     self = .actionsValidation(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".actionsValidation: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("TransactionSizeExceeded") == .orderedSame }) {
-                    let value = try container.decode(InvalidTxErrorOneOfTransactionSizeExceededInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("TransactionSizeExceeded") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        InvalidTxErrorOneOfTransactionSizeExceededInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .transactionSizeExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".transactionSizeExceeded: \(describeDecodingError(error))")
         }
         if let value = try? decoder.singleValueContainer().decode(String.self), value == "InvalidTransactionVersion" {
@@ -3820,35 +4320,38 @@ public enum InvalidTxError: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("StorageError") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("StorageError") == .orderedSame }) {
                     let value = try container.decode(StorageError.self, forKey: matchingKey)
                     self = .storageError(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".storageError: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ShardCongested") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("ShardCongested") == .orderedSame }) {
                     let value = try container.decode(InvalidTxErrorOneOfShardCongestedInline.self, forKey: matchingKey)
                     self = .shardCongested(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".shardCongested: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ShardStuck") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("ShardStuck") == .orderedSame }) {
                     let value = try container.decode(InvalidTxErrorOneOfShardStuckInline.self, forKey: matchingKey)
                     self = .shardStuck(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".shardStuck: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -3862,7 +4365,8 @@ public enum InvalidTxError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for InvalidTxError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for InvalidTxError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for InvalidTxError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -3885,43 +4389,43 @@ public enum InvalidTxError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .invalidAccessKeyError(let value):
+        case let .invalidAccessKeyError(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .invalidAccessKeyError)
-        case .invalidSignerId(let value):
+        case let .invalidSignerId(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .invalidSignerId)
-        case .signerDoesNotExist(let value):
+        case let .signerDoesNotExist(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .signerDoesNotExist)
-        case .invalidNonce(let value):
+        case let .invalidNonce(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .invalidNonce)
-        case .nonceTooLarge(let value):
+        case let .nonceTooLarge(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .nonceTooLarge)
-        case .invalidReceiverId(let value):
+        case let .invalidReceiverId(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .invalidReceiverId)
-        case .notEnoughBalance(let value):
+        case let .notEnoughBalance(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .notEnoughBalance)
-        case .lackBalanceForState(let value):
+        case let .lackBalanceForState(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .lackBalanceForState)
-        case .actionsValidation(let value):
+        case let .actionsValidation(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .actionsValidation)
-        case .transactionSizeExceeded(let value):
+        case let .transactionSizeExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .transactionSizeExceeded)
-        case .storageError(let value):
+        case let .storageError(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .storageError)
-        case .shardCongested(let value):
+        case let .shardCongested(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .shardCongested)
-        case .shardStuck(let value):
+        case let .shardStuck(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .shardStuck)
         case .invalidSignature:
@@ -3944,7 +4448,8 @@ public enum InvalidTxError: Codable {
 }
 
 // MARK: - JsonRpcResponseForArrayOfRangeOfUint64AndRpcError
-public enum JsonRpcResponseForArrayOfRangeOfUint64AndRpcError: Codable {
+
+public enum JsonRpcResponseForArrayOfRangeOfUint64AndRpcError: Codable, Sendable {
     case result([RangeOfUint64])
     case error(RpcError)
 
@@ -3953,24 +4458,26 @@ public enum JsonRpcResponseForArrayOfRangeOfUint64AndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode([RangeOfUint64].self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -3984,7 +4491,9 @@ public enum JsonRpcResponseForArrayOfRangeOfUint64AndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForArrayOfRangeOfUint64AndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForArrayOfRangeOfUint64AndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForArrayOfRangeOfUint64AndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -3996,10 +4505,10 @@ public enum JsonRpcResponseForArrayOfRangeOfUint64AndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -4007,7 +4516,8 @@ public enum JsonRpcResponseForArrayOfRangeOfUint64AndRpcError: Codable {
 }
 
 // MARK: - JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError
-public enum JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError: Codable {
+
+public enum JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError: Codable, Sendable {
     case result([ValidatorStakeView])
     case error(RpcError)
 
@@ -4016,24 +4526,26 @@ public enum JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode([ValidatorStakeView].self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -4047,7 +4559,9 @@ public enum JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -4059,10 +4573,10 @@ public enum JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -4070,7 +4584,8 @@ public enum JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError: Codable {
 }
 
 // MARK: - JsonRpcResponseForCryptoHashAndRpcError
-public enum JsonRpcResponseForCryptoHashAndRpcError: Codable {
+
+public enum JsonRpcResponseForCryptoHashAndRpcError: Codable, Sendable {
     case result(CryptoHash)
     case error(RpcError)
 
@@ -4079,24 +4594,26 @@ public enum JsonRpcResponseForCryptoHashAndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(CryptoHash.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -4110,7 +4627,9 @@ public enum JsonRpcResponseForCryptoHashAndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForCryptoHashAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForCryptoHashAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForCryptoHashAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -4122,10 +4641,10 @@ public enum JsonRpcResponseForCryptoHashAndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -4133,7 +4652,8 @@ public enum JsonRpcResponseForCryptoHashAndRpcError: Codable {
 }
 
 // MARK: - JsonRpcResponseForGenesisConfigAndRpcError
-public enum JsonRpcResponseForGenesisConfigAndRpcError: Codable {
+
+public enum JsonRpcResponseForGenesisConfigAndRpcError: Codable, Sendable {
     case result(GenesisConfig)
     case error(RpcError)
 
@@ -4142,24 +4662,26 @@ public enum JsonRpcResponseForGenesisConfigAndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(GenesisConfig.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -4173,7 +4695,9 @@ public enum JsonRpcResponseForGenesisConfigAndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForGenesisConfigAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForGenesisConfigAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForGenesisConfigAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -4185,10 +4709,10 @@ public enum JsonRpcResponseForGenesisConfigAndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -4196,7 +4720,8 @@ public enum JsonRpcResponseForGenesisConfigAndRpcError: Codable {
 }
 
 // MARK: - JsonRpcResponseForNullableRpcHealthResponseAndRpcError
-public enum JsonRpcResponseForNullableRpcHealthResponseAndRpcError: Codable {
+
+public enum JsonRpcResponseForNullableRpcHealthResponseAndRpcError: Codable, Sendable {
     case result(RpcHealthResponse)
     case error(RpcError)
 
@@ -4205,24 +4730,26 @@ public enum JsonRpcResponseForNullableRpcHealthResponseAndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcHealthResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -4236,7 +4763,9 @@ public enum JsonRpcResponseForNullableRpcHealthResponseAndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForNullableRpcHealthResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForNullableRpcHealthResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForNullableRpcHealthResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -4248,10 +4777,10 @@ public enum JsonRpcResponseForNullableRpcHealthResponseAndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -4259,7 +4788,8 @@ public enum JsonRpcResponseForNullableRpcHealthResponseAndRpcError: Codable {
 }
 
 // MARK: - JsonRpcResponseForRpcBlockResponseAndRpcError
-public enum JsonRpcResponseForRpcBlockResponseAndRpcError: Codable {
+
+public enum JsonRpcResponseForRpcBlockResponseAndRpcError: Codable, Sendable {
     case result(RpcBlockResponse)
     case error(RpcError)
 
@@ -4268,24 +4798,26 @@ public enum JsonRpcResponseForRpcBlockResponseAndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcBlockResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -4299,7 +4831,9 @@ public enum JsonRpcResponseForRpcBlockResponseAndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcBlockResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcBlockResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcBlockResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -4311,10 +4845,10 @@ public enum JsonRpcResponseForRpcBlockResponseAndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -4322,7 +4856,8 @@ public enum JsonRpcResponseForRpcBlockResponseAndRpcError: Codable {
 }
 
 // MARK: - JsonRpcResponseForRpcChunkResponseAndRpcError
-public enum JsonRpcResponseForRpcChunkResponseAndRpcError: Codable {
+
+public enum JsonRpcResponseForRpcChunkResponseAndRpcError: Codable, Sendable {
     case result(RpcChunkResponse)
     case error(RpcError)
 
@@ -4331,24 +4866,26 @@ public enum JsonRpcResponseForRpcChunkResponseAndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcChunkResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -4362,7 +4899,9 @@ public enum JsonRpcResponseForRpcChunkResponseAndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcChunkResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcChunkResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcChunkResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -4374,10 +4913,10 @@ public enum JsonRpcResponseForRpcChunkResponseAndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -4385,7 +4924,8 @@ public enum JsonRpcResponseForRpcChunkResponseAndRpcError: Codable {
 }
 
 // MARK: - JsonRpcResponseForRpcClientConfigResponseAndRpcError
-public enum JsonRpcResponseForRpcClientConfigResponseAndRpcError: Codable {
+
+public enum JsonRpcResponseForRpcClientConfigResponseAndRpcError: Codable, Sendable {
     case result(RpcClientConfigResponse)
     case error(RpcError)
 
@@ -4394,24 +4934,26 @@ public enum JsonRpcResponseForRpcClientConfigResponseAndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcClientConfigResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -4425,7 +4967,9 @@ public enum JsonRpcResponseForRpcClientConfigResponseAndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcClientConfigResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcClientConfigResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcClientConfigResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -4437,10 +4981,10 @@ public enum JsonRpcResponseForRpcClientConfigResponseAndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -4448,7 +4992,8 @@ public enum JsonRpcResponseForRpcClientConfigResponseAndRpcError: Codable {
 }
 
 // MARK: - JsonRpcResponseForRpcCongestionLevelResponseAndRpcError
-public enum JsonRpcResponseForRpcCongestionLevelResponseAndRpcError: Codable {
+
+public enum JsonRpcResponseForRpcCongestionLevelResponseAndRpcError: Codable, Sendable {
     case result(RpcCongestionLevelResponse)
     case error(RpcError)
 
@@ -4457,24 +5002,26 @@ public enum JsonRpcResponseForRpcCongestionLevelResponseAndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcCongestionLevelResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -4488,7 +5035,9 @@ public enum JsonRpcResponseForRpcCongestionLevelResponseAndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcCongestionLevelResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcCongestionLevelResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcCongestionLevelResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -4500,10 +5049,10 @@ public enum JsonRpcResponseForRpcCongestionLevelResponseAndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -4511,7 +5060,8 @@ public enum JsonRpcResponseForRpcCongestionLevelResponseAndRpcError: Codable {
 }
 
 // MARK: - JsonRpcResponseForRpcGasPriceResponseAndRpcError
-public enum JsonRpcResponseForRpcGasPriceResponseAndRpcError: Codable {
+
+public enum JsonRpcResponseForRpcGasPriceResponseAndRpcError: Codable, Sendable {
     case result(RpcGasPriceResponse)
     case error(RpcError)
 
@@ -4520,24 +5070,26 @@ public enum JsonRpcResponseForRpcGasPriceResponseAndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcGasPriceResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -4551,7 +5103,9 @@ public enum JsonRpcResponseForRpcGasPriceResponseAndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcGasPriceResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcGasPriceResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcGasPriceResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -4563,10 +5117,10 @@ public enum JsonRpcResponseForRpcGasPriceResponseAndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -4574,7 +5128,8 @@ public enum JsonRpcResponseForRpcGasPriceResponseAndRpcError: Codable {
 }
 
 // MARK: - JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError
-public enum JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError: Codable {
+
+public enum JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError: Codable, Sendable {
     case result(RpcLightClientBlockProofResponse)
     case error(RpcError)
 
@@ -4583,24 +5138,26 @@ public enum JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError: Codab
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcLightClientBlockProofResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -4614,7 +5171,9 @@ public enum JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError: Codab
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -4626,10 +5185,10 @@ public enum JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError: Codab
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -4637,7 +5196,8 @@ public enum JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError: Codab
 }
 
 // MARK: - JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError
-public enum JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError: Codable {
+
+public enum JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError: Codable, Sendable {
     case result(RpcLightClientExecutionProofResponse)
     case error(RpcError)
 
@@ -4646,24 +5206,26 @@ public enum JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError: C
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcLightClientExecutionProofResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -4677,7 +5239,9 @@ public enum JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError: C
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -4689,10 +5253,10 @@ public enum JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError: C
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -4700,7 +5264,8 @@ public enum JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError: C
 }
 
 // MARK: - JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError
-public enum JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError: Codable {
+
+public enum JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError: Codable, Sendable {
     case result(RpcLightClientNextBlockResponse)
     case error(RpcError)
 
@@ -4709,24 +5274,26 @@ public enum JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError: Codabl
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcLightClientNextBlockResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -4740,7 +5307,9 @@ public enum JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError: Codabl
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -4752,10 +5321,10 @@ public enum JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError: Codabl
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -4763,7 +5332,8 @@ public enum JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError: Codabl
 }
 
 // MARK: - JsonRpcResponseForRpcNetworkInfoResponseAndRpcError
-public enum JsonRpcResponseForRpcNetworkInfoResponseAndRpcError: Codable {
+
+public enum JsonRpcResponseForRpcNetworkInfoResponseAndRpcError: Codable, Sendable {
     case result(RpcNetworkInfoResponse)
     case error(RpcError)
 
@@ -4772,24 +5342,26 @@ public enum JsonRpcResponseForRpcNetworkInfoResponseAndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcNetworkInfoResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -4803,7 +5375,9 @@ public enum JsonRpcResponseForRpcNetworkInfoResponseAndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcNetworkInfoResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcNetworkInfoResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcNetworkInfoResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -4815,10 +5389,10 @@ public enum JsonRpcResponseForRpcNetworkInfoResponseAndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -4826,7 +5400,8 @@ public enum JsonRpcResponseForRpcNetworkInfoResponseAndRpcError: Codable {
 }
 
 // MARK: - JsonRpcResponseForRpcProtocolConfigResponseAndRpcError
-public enum JsonRpcResponseForRpcProtocolConfigResponseAndRpcError: Codable {
+
+public enum JsonRpcResponseForRpcProtocolConfigResponseAndRpcError: Codable, Sendable {
     case result(RpcProtocolConfigResponse)
     case error(RpcError)
 
@@ -4835,24 +5410,26 @@ public enum JsonRpcResponseForRpcProtocolConfigResponseAndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcProtocolConfigResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -4866,7 +5443,9 @@ public enum JsonRpcResponseForRpcProtocolConfigResponseAndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcProtocolConfigResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcProtocolConfigResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcProtocolConfigResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -4878,10 +5457,10 @@ public enum JsonRpcResponseForRpcProtocolConfigResponseAndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -4889,7 +5468,8 @@ public enum JsonRpcResponseForRpcProtocolConfigResponseAndRpcError: Codable {
 }
 
 // MARK: - JsonRpcResponseForRpcQueryResponseAndRpcError
-public enum JsonRpcResponseForRpcQueryResponseAndRpcError: Codable {
+
+public enum JsonRpcResponseForRpcQueryResponseAndRpcError: Codable, Sendable {
     case result(RpcQueryResponse)
     case error(RpcError)
 
@@ -4898,24 +5478,26 @@ public enum JsonRpcResponseForRpcQueryResponseAndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcQueryResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -4929,7 +5511,9 @@ public enum JsonRpcResponseForRpcQueryResponseAndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcQueryResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcQueryResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcQueryResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -4941,10 +5525,10 @@ public enum JsonRpcResponseForRpcQueryResponseAndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -4952,7 +5536,8 @@ public enum JsonRpcResponseForRpcQueryResponseAndRpcError: Codable {
 }
 
 // MARK: - JsonRpcResponseForRpcReceiptResponseAndRpcError
-public enum JsonRpcResponseForRpcReceiptResponseAndRpcError: Codable {
+
+public enum JsonRpcResponseForRpcReceiptResponseAndRpcError: Codable, Sendable {
     case result(RpcReceiptResponse)
     case error(RpcError)
 
@@ -4961,24 +5546,26 @@ public enum JsonRpcResponseForRpcReceiptResponseAndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcReceiptResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -4992,7 +5579,9 @@ public enum JsonRpcResponseForRpcReceiptResponseAndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcReceiptResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcReceiptResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcReceiptResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -5004,10 +5593,10 @@ public enum JsonRpcResponseForRpcReceiptResponseAndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -5015,7 +5604,8 @@ public enum JsonRpcResponseForRpcReceiptResponseAndRpcError: Codable {
 }
 
 // MARK: - JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError
-public enum JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError: Codable {
+
+public enum JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError: Codable, Sendable {
     case result(RpcSplitStorageInfoResponse)
     case error(RpcError)
 
@@ -5024,24 +5614,26 @@ public enum JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcSplitStorageInfoResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -5055,7 +5647,9 @@ public enum JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -5067,10 +5661,10 @@ public enum JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -5078,7 +5672,8 @@ public enum JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError: Codable {
 }
 
 // MARK: - JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError
-public enum JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError: Codable {
+
+public enum JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError: Codable, Sendable {
     case result(RpcStateChangesInBlockByTypeResponse)
     case error(RpcError)
 
@@ -5087,24 +5682,26 @@ public enum JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError: C
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcStateChangesInBlockByTypeResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -5118,7 +5715,9 @@ public enum JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError: C
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -5130,10 +5729,10 @@ public enum JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError: C
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -5141,7 +5740,8 @@ public enum JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError: C
 }
 
 // MARK: - JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError
-public enum JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError: Codable {
+
+public enum JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError: Codable, Sendable {
     case result(RpcStateChangesInBlockResponse)
     case error(RpcError)
 
@@ -5150,24 +5750,26 @@ public enum JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError: Codable
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcStateChangesInBlockResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -5181,7 +5783,9 @@ public enum JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError: Codable
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -5193,10 +5797,10 @@ public enum JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError: Codable
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -5204,7 +5808,8 @@ public enum JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError: Codable
 }
 
 // MARK: - JsonRpcResponseForRpcStatusResponseAndRpcError
-public enum JsonRpcResponseForRpcStatusResponseAndRpcError: Codable {
+
+public enum JsonRpcResponseForRpcStatusResponseAndRpcError: Codable, Sendable {
     case result(RpcStatusResponse)
     case error(RpcError)
 
@@ -5213,24 +5818,26 @@ public enum JsonRpcResponseForRpcStatusResponseAndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcStatusResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -5244,7 +5851,9 @@ public enum JsonRpcResponseForRpcStatusResponseAndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcStatusResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcStatusResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcStatusResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -5256,10 +5865,10 @@ public enum JsonRpcResponseForRpcStatusResponseAndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -5267,7 +5876,8 @@ public enum JsonRpcResponseForRpcStatusResponseAndRpcError: Codable {
 }
 
 // MARK: - JsonRpcResponseForRpcTransactionResponseAndRpcError
-public enum JsonRpcResponseForRpcTransactionResponseAndRpcError: Codable {
+
+public enum JsonRpcResponseForRpcTransactionResponseAndRpcError: Codable, Sendable {
     case result(RpcTransactionResponse)
     case error(RpcError)
 
@@ -5276,24 +5886,26 @@ public enum JsonRpcResponseForRpcTransactionResponseAndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcTransactionResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -5307,7 +5919,9 @@ public enum JsonRpcResponseForRpcTransactionResponseAndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcTransactionResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcTransactionResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcTransactionResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -5319,10 +5933,10 @@ public enum JsonRpcResponseForRpcTransactionResponseAndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -5330,7 +5944,8 @@ public enum JsonRpcResponseForRpcTransactionResponseAndRpcError: Codable {
 }
 
 // MARK: - JsonRpcResponseForRpcValidatorResponseAndRpcError
-public enum JsonRpcResponseForRpcValidatorResponseAndRpcError: Codable {
+
+public enum JsonRpcResponseForRpcValidatorResponseAndRpcError: Codable, Sendable {
     case result(RpcValidatorResponse)
     case error(RpcError)
 
@@ -5339,24 +5954,26 @@ public enum JsonRpcResponseForRpcValidatorResponseAndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcValidatorResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -5370,7 +5987,9 @@ public enum JsonRpcResponseForRpcValidatorResponseAndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcValidatorResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcValidatorResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcValidatorResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -5382,10 +6001,10 @@ public enum JsonRpcResponseForRpcValidatorResponseAndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -5393,7 +6012,8 @@ public enum JsonRpcResponseForRpcValidatorResponseAndRpcError: Codable {
 }
 
 // MARK: - MissingTrieValueContext
-public enum MissingTrieValueContext: Codable {
+
+public enum MissingTrieValueContext: Codable, Sendable {
     case trieIterator
     case triePrefetchingStorage
     case trieMemoryPartialStorage
@@ -5429,7 +6049,8 @@ public enum MissingTrieValueContext: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for MissingTrieValueContext\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for MissingTrieValueContext:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for MissingTrieValueContext:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -5453,7 +6074,8 @@ public enum MissingTrieValueContext: Codable {
 }
 
 // MARK: - NonDelegateAction
-public enum NonDelegateAction: Codable {
+
+public enum NonDelegateAction: Codable, Sendable {
     case createAccount(CreateAccountAction)
     case deployContract(DeployContractAction)
     case functionCall(FunctionCallAction)
@@ -5471,123 +6093,140 @@ public enum NonDelegateAction: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("CreateAccount") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("CreateAccount") == .orderedSame }) {
                     let value = try container.decode(CreateAccountAction.self, forKey: matchingKey)
                     self = .createAccount(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".createAccount: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DeployContract") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("DeployContract") == .orderedSame }) {
                     let value = try container.decode(DeployContractAction.self, forKey: matchingKey)
                     self = .deployContract(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".deployContract: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("FunctionCall") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("FunctionCall") == .orderedSame }) {
                     let value = try container.decode(FunctionCallAction.self, forKey: matchingKey)
                     self = .functionCall(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".functionCall: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("Transfer") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("Transfer") == .orderedSame }) {
                     let value = try container.decode(TransferAction.self, forKey: matchingKey)
                     self = .transfer(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".transfer: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("Stake") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("Stake") == .orderedSame }) {
                     let value = try container.decode(StakeAction.self, forKey: matchingKey)
                     self = .stake(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".stake: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("AddKey") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("AddKey") == .orderedSame }) {
                     let value = try container.decode(AddKeyAction.self, forKey: matchingKey)
                     self = .addKey(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".addKey: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DeleteKey") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("DeleteKey") == .orderedSame }) {
                     let value = try container.decode(DeleteKeyAction.self, forKey: matchingKey)
                     self = .deleteKey(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".deleteKey: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DeleteAccount") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("DeleteAccount") == .orderedSame }) {
                     let value = try container.decode(DeleteAccountAction.self, forKey: matchingKey)
                     self = .deleteAccount(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".deleteAccount: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DeployGlobalContract") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("DeployGlobalContract") == .orderedSame
+                    }) {
                     let value = try container.decode(DeployGlobalContractAction.self, forKey: matchingKey)
                     self = .deployGlobalContract(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".deployGlobalContract: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("UseGlobalContract") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("UseGlobalContract") == .orderedSame
+                    }) {
                     let value = try container.decode(UseGlobalContractAction.self, forKey: matchingKey)
                     self = .useGlobalContract(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".useGlobalContract: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DeterministicStateInit") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("DeterministicStateInit") == .orderedSame
+                    }) {
                     let value = try container.decode(DeterministicStateInitAction.self, forKey: matchingKey)
                     self = .deterministicStateInit(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".deterministicStateInit: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -5601,7 +6240,8 @@ public enum NonDelegateAction: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for NonDelegateAction\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for NonDelegateAction:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for NonDelegateAction:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -5622,37 +6262,37 @@ public enum NonDelegateAction: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .createAccount(let value):
+        case let .createAccount(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .createAccount)
-        case .deployContract(let value):
+        case let .deployContract(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deployContract)
-        case .functionCall(let value):
+        case let .functionCall(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .functionCall)
-        case .transfer(let value):
+        case let .transfer(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .transfer)
-        case .stake(let value):
+        case let .stake(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .stake)
-        case .addKey(let value):
+        case let .addKey(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .addKey)
-        case .deleteKey(let value):
+        case let .deleteKey(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deleteKey)
-        case .deleteAccount(let value):
+        case let .deleteAccount(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deleteAccount)
-        case .deployGlobalContract(let value):
+        case let .deployGlobalContract(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deployGlobalContract)
-        case .useGlobalContract(let value):
+        case let .useGlobalContract(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .useGlobalContract)
-        case .deterministicStateInit(let value):
+        case let .deterministicStateInit(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deterministicStateInit)
         }
@@ -5660,7 +6300,8 @@ public enum NonDelegateAction: Codable {
 }
 
 // MARK: - PrepareError
-public enum PrepareError: Codable {
+
+public enum PrepareError: Codable, Sendable {
     case serialization
     case deserialization
     case internalMemoryDeclared
@@ -5731,7 +6372,8 @@ public enum PrepareError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for PrepareError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for PrepareError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for PrepareError:\n" + decodingErrors
+                .joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -5776,7 +6418,8 @@ public enum PrepareError: Codable {
 }
 
 // MARK: - ReceiptEnumView
-public struct ReceiptEnumViewOneOfActionInline: Codable {
+
+public struct ReceiptEnumViewOneOfActionInline: Codable, Sendable {
     public let actions: [ActionView]
     public let gasPrice: NearToken
     public let inputDataIds: [CryptoHash]
@@ -5792,7 +6435,7 @@ public struct ReceiptEnumViewOneOfActionInline: Codable {
         isPromiseYield: Bool?,
         outputDataReceivers: [DataReceiverView],
         signerId: AccountId,
-        signerPublicKey: PublicKey
+        signerPublicKey: PublicKey,
     ) {
         self.actions = actions
         self.gasPrice = gasPrice
@@ -5804,7 +6447,7 @@ public struct ReceiptEnumViewOneOfActionInline: Codable {
     }
 }
 
-public struct ReceiptEnumViewOneOfDataInline: Codable {
+public struct ReceiptEnumViewOneOfDataInline: Codable, Sendable {
     public let data: String?
     public let dataId: CryptoHash
     public let isPromiseResume: Bool?
@@ -5812,7 +6455,7 @@ public struct ReceiptEnumViewOneOfDataInline: Codable {
     public init(
         data: String?,
         dataId: CryptoHash,
-        isPromiseResume: Bool?
+        isPromiseResume: Bool?,
     ) {
         self.data = data
         self.dataId = dataId
@@ -5820,7 +6463,7 @@ public struct ReceiptEnumViewOneOfDataInline: Codable {
     }
 }
 
-public struct ReceiptEnumViewOneOfGlobalContractDistributionInline: Codable {
+public struct ReceiptEnumViewOneOfGlobalContractDistributionInline: Codable, Sendable {
     public let alreadyDeliveredShards: [ShardId]
     public let code: String
     public let id: GlobalContractIdentifier
@@ -5830,7 +6473,7 @@ public struct ReceiptEnumViewOneOfGlobalContractDistributionInline: Codable {
         alreadyDeliveredShards: [ShardId],
         code: String,
         id: GlobalContractIdentifier,
-        targetShard: ShardId
+        targetShard: ShardId,
     ) {
         self.alreadyDeliveredShards = alreadyDeliveredShards
         self.code = code
@@ -5839,7 +6482,7 @@ public struct ReceiptEnumViewOneOfGlobalContractDistributionInline: Codable {
     }
 }
 
-public enum ReceiptEnumView: Codable {
+public enum ReceiptEnumView: Codable, Sendable {
     case action(ReceiptEnumViewOneOfActionInline)
     case data(ReceiptEnumViewOneOfDataInline)
     case globalContractDistribution(ReceiptEnumViewOneOfGlobalContractDistributionInline)
@@ -5849,35 +6492,43 @@ public enum ReceiptEnumView: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("Action") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("Action") == .orderedSame }) {
                     let value = try container.decode(ReceiptEnumViewOneOfActionInline.self, forKey: matchingKey)
                     self = .action(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".action: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("Data") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("Data") == .orderedSame }) {
                     let value = try container.decode(ReceiptEnumViewOneOfDataInline.self, forKey: matchingKey)
                     self = .data(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".data: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("GlobalContractDistribution") == .orderedSame }) {
-                    let value = try container.decode(ReceiptEnumViewOneOfGlobalContractDistributionInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("GlobalContractDistribution") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ReceiptEnumViewOneOfGlobalContractDistributionInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .globalContractDistribution(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".globalContractDistribution: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -5891,7 +6542,8 @@ public enum ReceiptEnumView: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for ReceiptEnumView\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for ReceiptEnumView:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ReceiptEnumView:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -5904,13 +6556,13 @@ public enum ReceiptEnumView: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .action(let value):
+        case let .action(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .action)
-        case .data(let value):
+        case let .data(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .data)
-        case .globalContractDistribution(let value):
+        case let .globalContractDistribution(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .globalContractDistribution)
         }
@@ -5918,86 +6570,87 @@ public enum ReceiptEnumView: Codable {
 }
 
 // MARK: - ReceiptValidationError
-public struct ReceiptValidationErrorOneOfInvalidPredecessorIdInline: Codable {
+
+public struct ReceiptValidationErrorOneOfInvalidPredecessorIdInline: Codable, Sendable {
     public let accountId: String
 
     public init(
-        accountId: String
+        accountId: String,
     ) {
         self.accountId = accountId
     }
 }
 
-public struct ReceiptValidationErrorOneOfInvalidReceiverIdInline: Codable {
+public struct ReceiptValidationErrorOneOfInvalidReceiverIdInline: Codable, Sendable {
     public let accountId: String
 
     public init(
-        accountId: String
+        accountId: String,
     ) {
         self.accountId = accountId
     }
 }
 
-public struct ReceiptValidationErrorOneOfInvalidSignerIdInline: Codable {
+public struct ReceiptValidationErrorOneOfInvalidSignerIdInline: Codable, Sendable {
     public let accountId: String
 
     public init(
-        accountId: String
+        accountId: String,
     ) {
         self.accountId = accountId
     }
 }
 
-public struct ReceiptValidationErrorOneOfInvalidDataReceiverIdInline: Codable {
+public struct ReceiptValidationErrorOneOfInvalidDataReceiverIdInline: Codable, Sendable {
     public let accountId: String
 
     public init(
-        accountId: String
+        accountId: String,
     ) {
         self.accountId = accountId
     }
 }
 
-public struct ReceiptValidationErrorOneOfReturnedValueLengthExceededInline: Codable {
+public struct ReceiptValidationErrorOneOfReturnedValueLengthExceededInline: Codable, Sendable {
     public let length: UInt64
     public let limit: UInt64
 
     public init(
         length: UInt64,
-        limit: UInt64
+        limit: UInt64,
     ) {
         self.length = length
         self.limit = limit
     }
 }
 
-public struct ReceiptValidationErrorOneOfNumberInputDataDependenciesExceededInline: Codable {
+public struct ReceiptValidationErrorOneOfNumberInputDataDependenciesExceededInline: Codable, Sendable {
     public let limit: UInt64
     public let numberOfInputDataDependencies: UInt64
 
     public init(
         limit: UInt64,
-        numberOfInputDataDependencies: UInt64
+        numberOfInputDataDependencies: UInt64,
     ) {
         self.limit = limit
         self.numberOfInputDataDependencies = numberOfInputDataDependencies
     }
 }
 
-public struct ReceiptValidationErrorOneOfReceiptSizeExceededInline: Codable {
+public struct ReceiptValidationErrorOneOfReceiptSizeExceededInline: Codable, Sendable {
     public let limit: UInt64
     public let size: UInt64
 
     public init(
         limit: UInt64,
-        size: UInt64
+        size: UInt64,
     ) {
         self.limit = limit
         self.size = size
     }
 }
 
-public enum ReceiptValidationError: Codable {
+public enum ReceiptValidationError: Codable, Sendable {
     case invalidPredecessorId(ReceiptValidationErrorOneOfInvalidPredecessorIdInline)
     case invalidReceiverId(ReceiptValidationErrorOneOfInvalidReceiverIdInline)
     case invalidSignerId(ReceiptValidationErrorOneOfInvalidSignerIdInline)
@@ -6012,90 +6665,135 @@ public enum ReceiptValidationError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidPredecessorId") == .orderedSame }) {
-                    let value = try container.decode(ReceiptValidationErrorOneOfInvalidPredecessorIdInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("InvalidPredecessorId") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ReceiptValidationErrorOneOfInvalidPredecessorIdInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .invalidPredecessorId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".invalidPredecessorId: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidReceiverId") == .orderedSame }) {
-                    let value = try container.decode(ReceiptValidationErrorOneOfInvalidReceiverIdInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("InvalidReceiverId") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ReceiptValidationErrorOneOfInvalidReceiverIdInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .invalidReceiverId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".invalidReceiverId: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidSignerId") == .orderedSame }) {
-                    let value = try container.decode(ReceiptValidationErrorOneOfInvalidSignerIdInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("InvalidSignerId") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ReceiptValidationErrorOneOfInvalidSignerIdInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .invalidSignerId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".invalidSignerId: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidDataReceiverId") == .orderedSame }) {
-                    let value = try container.decode(ReceiptValidationErrorOneOfInvalidDataReceiverIdInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("InvalidDataReceiverId") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ReceiptValidationErrorOneOfInvalidDataReceiverIdInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .invalidDataReceiverId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".invalidDataReceiverId: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ReturnedValueLengthExceeded") == .orderedSame }) {
-                    let value = try container.decode(ReceiptValidationErrorOneOfReturnedValueLengthExceededInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("ReturnedValueLengthExceeded") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ReceiptValidationErrorOneOfReturnedValueLengthExceededInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .returnedValueLengthExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".returnedValueLengthExceeded: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("NumberInputDataDependenciesExceeded") == .orderedSame }) {
-                    let value = try container.decode(ReceiptValidationErrorOneOfNumberInputDataDependenciesExceededInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("NumberInputDataDependenciesExceeded") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ReceiptValidationErrorOneOfNumberInputDataDependenciesExceededInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .numberInputDataDependenciesExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".numberInputDataDependenciesExceeded: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ActionsValidation") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("ActionsValidation") == .orderedSame
+                    }) {
                     let value = try container.decode(ActionsValidationError.self, forKey: matchingKey)
                     self = .actionsValidation(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".actionsValidation: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ReceiptSizeExceeded") == .orderedSame }) {
-                    let value = try container.decode(ReceiptValidationErrorOneOfReceiptSizeExceededInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("ReceiptSizeExceeded") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ReceiptValidationErrorOneOfReceiptSizeExceededInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .receiptSizeExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".receiptSizeExceeded: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -6109,7 +6807,8 @@ public enum ReceiptValidationError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for ReceiptValidationError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for ReceiptValidationError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ReceiptValidationError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -6127,28 +6826,28 @@ public enum ReceiptValidationError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .invalidPredecessorId(let value):
+        case let .invalidPredecessorId(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .invalidPredecessorId)
-        case .invalidReceiverId(let value):
+        case let .invalidReceiverId(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .invalidReceiverId)
-        case .invalidSignerId(let value):
+        case let .invalidSignerId(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .invalidSignerId)
-        case .invalidDataReceiverId(let value):
+        case let .invalidDataReceiverId(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .invalidDataReceiverId)
-        case .returnedValueLengthExceeded(let value):
+        case let .returnedValueLengthExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .returnedValueLengthExceeded)
-        case .numberInputDataDependenciesExceeded(let value):
+        case let .numberInputDataDependenciesExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .numberInputDataDependenciesExceeded)
-        case .actionsValidation(let value):
+        case let .actionsValidation(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .actionsValidation)
-        case .receiptSizeExceeded(let value):
+        case let .receiptSizeExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .receiptSizeExceeded)
         }
@@ -6156,7 +6855,8 @@ public enum ReceiptValidationError: Codable {
 }
 
 // MARK: - RpcBlockRequest
-public enum RpcBlockRequest: Codable {
+
+public enum RpcBlockRequest: Codable, Sendable {
     case blockId(BlockId)
     case finality(Finality)
     case syncCheckpoint(SyncCheckpoint)
@@ -6166,35 +6866,44 @@ public enum RpcBlockRequest: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("block_id") == .orderedSame || key.stringValue.caseInsensitiveCompare("blockId") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("block_id") == .orderedSame || key.stringValue
+                            .caseInsensitiveCompare("blockId") == .orderedSame
+                    }) {
                     let value = try container.decode(BlockId.self, forKey: matchingKey)
                     self = .blockId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".blockId: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("finality") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("finality") == .orderedSame }) {
                     let value = try container.decode(Finality.self, forKey: matchingKey)
                     self = .finality(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".finality: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("sync_checkpoint") == .orderedSame || key.stringValue.caseInsensitiveCompare("syncCheckpoint") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("sync_checkpoint") == .orderedSame || key.stringValue
+                            .caseInsensitiveCompare("syncCheckpoint") == .orderedSame
+                    }) {
                     let value = try container.decode(SyncCheckpoint.self, forKey: matchingKey)
                     self = .syncCheckpoint(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".syncCheckpoint: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -6208,7 +6917,8 @@ public enum RpcBlockRequest: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcBlockRequest\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcBlockRequest:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcBlockRequest:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -6219,13 +6929,13 @@ public enum RpcBlockRequest: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .blockId(let value):
+        case let .blockId(value):
             var container = encoder.container(keyedBy: AnyCodingKey.self)
             try container.encode(value, forKey: AnyCodingKey(stringValue: "block_id"))
-        case .finality(let value):
+        case let .finality(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .finality)
-        case .syncCheckpoint(let value):
+        case let .syncCheckpoint(value):
             var container = encoder.container(keyedBy: AnyCodingKey.self)
             try container.encode(value, forKey: AnyCodingKey(stringValue: "sync_checkpoint"))
         }
@@ -6233,20 +6943,21 @@ public enum RpcBlockRequest: Codable {
 }
 
 // MARK: - RpcChunkRequest
-public struct BlockShardId: Codable {
+
+public struct BlockShardId: Codable, Sendable {
     public let blockId: BlockId
     public let shardId: ShardId
 
     public init(
         blockId: BlockId,
-        shardId: ShardId
+        shardId: ShardId,
     ) {
         self.blockId = blockId
         self.shardId = shardId
     }
 }
 
-public enum RpcChunkRequest: Codable {
+public enum RpcChunkRequest: Codable, Sendable {
     case blockShardId(BlockShardId)
     case chunkId(CryptoHash)
 
@@ -6257,18 +6968,22 @@ public enum RpcChunkRequest: Codable {
             let value = try decoder.singleValueContainer().decode(BlockShardId.self)
             self = .blockShardId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".blockShardId: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("chunk_id") == .orderedSame || key.stringValue.caseInsensitiveCompare("chunkId") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("chunk_id") == .orderedSame || key.stringValue
+                            .caseInsensitiveCompare("chunkId") == .orderedSame
+                    }) {
                     let value = try container.decode(CryptoHash.self, forKey: matchingKey)
                     self = .chunkId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".chunkId: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -6282,17 +6997,18 @@ public enum RpcChunkRequest: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcChunkRequest\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcChunkRequest:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcChunkRequest:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .chunkId(let value):
+        case let .chunkId(value):
             var container = encoder.container(keyedBy: AnyCodingKey.self)
             try container.encode(value, forKey: AnyCodingKey(stringValue: "chunk_id"))
-        case .blockShardId(let value):
+        case let .blockShardId(value):
             var singleContainer = encoder.singleValueContainer()
             try singleContainer.encode(value)
         }
@@ -6300,7 +7016,8 @@ public enum RpcChunkRequest: Codable {
 }
 
 // MARK: - RpcCongestionLevelRequest
-public enum RpcCongestionLevelRequest: Codable {
+
+public enum RpcCongestionLevelRequest: Codable, Sendable {
     case blockShardId(BlockShardId)
     case chunkId(CryptoHash)
 
@@ -6311,18 +7028,22 @@ public enum RpcCongestionLevelRequest: Codable {
             let value = try decoder.singleValueContainer().decode(BlockShardId.self)
             self = .blockShardId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".blockShardId: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("chunk_id") == .orderedSame || key.stringValue.caseInsensitiveCompare("chunkId") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("chunk_id") == .orderedSame || key.stringValue
+                            .caseInsensitiveCompare("chunkId") == .orderedSame
+                    }) {
                     let value = try container.decode(CryptoHash.self, forKey: matchingKey)
                     self = .chunkId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".chunkId: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -6336,17 +7057,18 @@ public enum RpcCongestionLevelRequest: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcCongestionLevelRequest\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcCongestionLevelRequest:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcCongestionLevelRequest:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .chunkId(let value):
+        case let .chunkId(value):
             var container = encoder.container(keyedBy: AnyCodingKey.self)
             try container.encode(value, forKey: AnyCodingKey(stringValue: "chunk_id"))
-        case .blockShardId(let value):
+        case let .blockShardId(value):
             var singleContainer = encoder.singleValueContainer()
             try singleContainer.encode(value)
         }
@@ -6354,46 +7076,47 @@ public enum RpcCongestionLevelRequest: Codable {
 }
 
 // MARK: - RpcError
-public struct RpcErrorOneOfCauseName: Codable {
+
+public struct RpcErrorOneOfCauseName: Codable, Sendable {
     public let cause: RpcRequestValidationErrorKind
     public let name: String
 
     public init(
         cause: RpcRequestValidationErrorKind,
-        name: String
+        name: String,
     ) {
         self.cause = cause
         self.name = name
     }
 }
 
-public struct RpcErrorOneOfCauseName1: Codable {
+public struct RpcErrorOneOfCauseName1: Codable, Sendable {
     public let cause: AnyCodable
     public let name: String
 
     public init(
         cause: AnyCodable,
-        name: String
+        name: String,
     ) {
         self.cause = cause
         self.name = name
     }
 }
 
-public struct RpcErrorOneOfCauseName2: Codable {
+public struct RpcErrorOneOfCauseName2: Codable, Sendable {
     public let cause: AnyCodable
     public let name: String
 
     public init(
         cause: AnyCodable,
-        name: String
+        name: String,
     ) {
         self.cause = cause
         self.name = name
     }
 }
 
-public enum RpcError: Codable {
+public enum RpcError: Codable, Sendable {
     case rpcErrorCauseName(RpcErrorOneOfCauseName)
     case rpcErrorCauseName1(RpcErrorOneOfCauseName1)
     case rpcErrorCauseName2(RpcErrorOneOfCauseName2)
@@ -6405,21 +7128,21 @@ public enum RpcError: Codable {
             let value = try decoder.singleValueContainer().decode(RpcErrorOneOfCauseName.self)
             self = .rpcErrorCauseName(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".rpcErrorCauseName: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(RpcErrorOneOfCauseName1.self)
             self = .rpcErrorCauseName1(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".rpcErrorCauseName1: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(RpcErrorOneOfCauseName2.self)
             self = .rpcErrorCauseName2(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".rpcErrorCauseName2: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -6433,20 +7156,21 @@ public enum RpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcError:\n" + decodingErrors
+                .joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .rpcErrorCauseName(let value):
+        case let .rpcErrorCauseName(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .rpcErrorCauseName1(let value):
+        case let .rpcErrorCauseName1(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .rpcErrorCauseName2(let value):
+        case let .rpcErrorCauseName2(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
         }
@@ -6454,7 +7178,8 @@ public enum RpcError: Codable {
 }
 
 // MARK: - RpcLightClientExecutionProofRequest
-public struct RpcLightClientExecutionProofRequestOneOfSenderIdTransactionHashType: Codable {
+
+public struct RpcLightClientExecutionProofRequestOneOfSenderIdTransactionHashType: Codable, Sendable {
     public let senderId: AccountId
     public let transactionHash: CryptoHash
     public let type: String
@@ -6462,7 +7187,7 @@ public struct RpcLightClientExecutionProofRequestOneOfSenderIdTransactionHashTyp
     public init(
         senderId: AccountId,
         transactionHash: CryptoHash,
-        type: String
+        type: String,
     ) {
         self.senderId = senderId
         self.transactionHash = transactionHash
@@ -6470,7 +7195,7 @@ public struct RpcLightClientExecutionProofRequestOneOfSenderIdTransactionHashTyp
     }
 }
 
-public struct RpcLightClientExecutionProofRequestOneOfReceiptIdReceiverIdType: Codable {
+public struct RpcLightClientExecutionProofRequestOneOfReceiptIdReceiverIdType: Codable, Sendable {
     public let receiptId: CryptoHash
     public let receiverId: AccountId
     public let type: String
@@ -6478,7 +7203,7 @@ public struct RpcLightClientExecutionProofRequestOneOfReceiptIdReceiverIdType: C
     public init(
         receiptId: CryptoHash,
         receiverId: AccountId,
-        type: String
+        type: String,
     ) {
         self.receiptId = receiptId
         self.receiverId = receiverId
@@ -6486,26 +7211,36 @@ public struct RpcLightClientExecutionProofRequestOneOfReceiptIdReceiverIdType: C
     }
 }
 
-public enum RpcLightClientExecutionProofRequest: Codable {
-    case rpcLightClientExecutionProofRequestSenderIdTransactionHashType(RpcLightClientExecutionProofRequestOneOfSenderIdTransactionHashType)
-    case rpcLightClientExecutionProofRequestReceiptIdReceiverIdType(RpcLightClientExecutionProofRequestOneOfReceiptIdReceiverIdType)
+public enum RpcLightClientExecutionProofRequest: Codable, Sendable {
+    case rpcLightClientExecutionProofRequestSenderIdTransactionHashType(
+        RpcLightClientExecutionProofRequestOneOfSenderIdTransactionHashType,
+    )
+    case rpcLightClientExecutionProofRequestReceiptIdReceiverIdType(
+        RpcLightClientExecutionProofRequestOneOfReceiptIdReceiverIdType,
+    )
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
-            let value = try decoder.singleValueContainer().decode(RpcLightClientExecutionProofRequestOneOfSenderIdTransactionHashType.self)
+            let value = try decoder.singleValueContainer()
+                .decode(RpcLightClientExecutionProofRequestOneOfSenderIdTransactionHashType.self)
             self = .rpcLightClientExecutionProofRequestSenderIdTransactionHashType(value)
             return
-        } catch let error {
-            decodingErrors.append(".rpcLightClientExecutionProofRequestSenderIdTransactionHashType: \(describeDecodingError(error))")
+        } catch {
+            decodingErrors
+                .append(
+                    ".rpcLightClientExecutionProofRequestSenderIdTransactionHashType: \(describeDecodingError(error))",
+                )
         }
         do {
-            let value = try decoder.singleValueContainer().decode(RpcLightClientExecutionProofRequestOneOfReceiptIdReceiverIdType.self)
+            let value = try decoder.singleValueContainer()
+                .decode(RpcLightClientExecutionProofRequestOneOfReceiptIdReceiverIdType.self)
             self = .rpcLightClientExecutionProofRequestReceiptIdReceiverIdType(value)
             return
-        } catch let error {
-            decodingErrors.append(".rpcLightClientExecutionProofRequestReceiptIdReceiverIdType: \(describeDecodingError(error))")
+        } catch {
+            decodingErrors
+                .append(".rpcLightClientExecutionProofRequestReceiptIdReceiverIdType: \(describeDecodingError(error))")
         }
         let contextDescription: String
         if decodingErrors.isEmpty {
@@ -6518,17 +7253,19 @@ public enum RpcLightClientExecutionProofRequest: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcLightClientExecutionProofRequest\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcLightClientExecutionProofRequest:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for RpcLightClientExecutionProofRequest:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .rpcLightClientExecutionProofRequestSenderIdTransactionHashType(let value):
+        case let .rpcLightClientExecutionProofRequestSenderIdTransactionHashType(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .rpcLightClientExecutionProofRequestReceiptIdReceiverIdType(let value):
+        case let .rpcLightClientExecutionProofRequestReceiptIdReceiverIdType(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
         }
@@ -6536,7 +7273,8 @@ public enum RpcLightClientExecutionProofRequest: Codable {
 }
 
 // MARK: - RpcProtocolConfigRequest
-public enum RpcProtocolConfigRequest: Codable {
+
+public enum RpcProtocolConfigRequest: Codable, Sendable {
     case blockId(BlockId)
     case finality(Finality)
     case syncCheckpoint(SyncCheckpoint)
@@ -6546,35 +7284,44 @@ public enum RpcProtocolConfigRequest: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("block_id") == .orderedSame || key.stringValue.caseInsensitiveCompare("blockId") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("block_id") == .orderedSame || key.stringValue
+                            .caseInsensitiveCompare("blockId") == .orderedSame
+                    }) {
                     let value = try container.decode(BlockId.self, forKey: matchingKey)
                     self = .blockId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".blockId: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("finality") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("finality") == .orderedSame }) {
                     let value = try container.decode(Finality.self, forKey: matchingKey)
                     self = .finality(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".finality: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("sync_checkpoint") == .orderedSame || key.stringValue.caseInsensitiveCompare("syncCheckpoint") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("sync_checkpoint") == .orderedSame || key.stringValue
+                            .caseInsensitiveCompare("syncCheckpoint") == .orderedSame
+                    }) {
                     let value = try container.decode(SyncCheckpoint.self, forKey: matchingKey)
                     self = .syncCheckpoint(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".syncCheckpoint: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -6588,7 +7335,8 @@ public enum RpcProtocolConfigRequest: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcProtocolConfigRequest\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcProtocolConfigRequest:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcProtocolConfigRequest:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -6599,13 +7347,13 @@ public enum RpcProtocolConfigRequest: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .blockId(let value):
+        case let .blockId(value):
             var container = encoder.container(keyedBy: AnyCodingKey.self)
             try container.encode(value, forKey: AnyCodingKey(stringValue: "block_id"))
-        case .finality(let value):
+        case let .finality(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .finality)
-        case .syncCheckpoint(let value):
+        case let .syncCheckpoint(value):
             var container = encoder.container(keyedBy: AnyCodingKey.self)
             try container.encode(value, forKey: AnyCodingKey(stringValue: "sync_checkpoint"))
         }
@@ -6613,7 +7361,8 @@ public enum RpcProtocolConfigRequest: Codable {
 }
 
 // MARK: - RpcQueryRequest
-public struct ViewAccountByBlockId: Codable {
+
+public struct ViewAccountByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountId: AccountId
     public let requestType: String
@@ -6621,7 +7370,7 @@ public struct ViewAccountByBlockId: Codable {
     public init(
         blockId: BlockId,
         accountId: AccountId,
-        requestType: String
+        requestType: String,
     ) {
         self.blockId = blockId
         self.accountId = accountId
@@ -6629,7 +7378,7 @@ public struct ViewAccountByBlockId: Codable {
     }
 }
 
-public struct ViewCodeByBlockId: Codable {
+public struct ViewCodeByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountId: AccountId
     public let requestType: String
@@ -6637,7 +7386,7 @@ public struct ViewCodeByBlockId: Codable {
     public init(
         blockId: BlockId,
         accountId: AccountId,
-        requestType: String
+        requestType: String,
     ) {
         self.blockId = blockId
         self.accountId = accountId
@@ -6645,7 +7394,7 @@ public struct ViewCodeByBlockId: Codable {
     }
 }
 
-public struct ViewStateByBlockId: Codable {
+public struct ViewStateByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountId: AccountId
     public let includeProof: Bool?
@@ -6657,7 +7406,7 @@ public struct ViewStateByBlockId: Codable {
         accountId: AccountId,
         includeProof: Bool?,
         prefixBase64: StoreKey,
-        requestType: String
+        requestType: String,
     ) {
         self.blockId = blockId
         self.accountId = accountId
@@ -6667,7 +7416,7 @@ public struct ViewStateByBlockId: Codable {
     }
 }
 
-public struct ViewAccessKeyByBlockId: Codable {
+public struct ViewAccessKeyByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountId: AccountId
     public let publicKey: PublicKey
@@ -6677,7 +7426,7 @@ public struct ViewAccessKeyByBlockId: Codable {
         blockId: BlockId,
         accountId: AccountId,
         publicKey: PublicKey,
-        requestType: String
+        requestType: String,
     ) {
         self.blockId = blockId
         self.accountId = accountId
@@ -6686,7 +7435,7 @@ public struct ViewAccessKeyByBlockId: Codable {
     }
 }
 
-public struct ViewAccessKeyListByBlockId: Codable {
+public struct ViewAccessKeyListByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountId: AccountId
     public let requestType: String
@@ -6694,7 +7443,7 @@ public struct ViewAccessKeyListByBlockId: Codable {
     public init(
         blockId: BlockId,
         accountId: AccountId,
-        requestType: String
+        requestType: String,
     ) {
         self.blockId = blockId
         self.accountId = accountId
@@ -6702,7 +7451,7 @@ public struct ViewAccessKeyListByBlockId: Codable {
     }
 }
 
-public struct CallFunctionByBlockId: Codable {
+public struct CallFunctionByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountId: AccountId
     public let argsBase64: FunctionArgs
@@ -6714,7 +7463,7 @@ public struct CallFunctionByBlockId: Codable {
         accountId: AccountId,
         argsBase64: FunctionArgs,
         methodName: String,
-        requestType: String
+        requestType: String,
     ) {
         self.blockId = blockId
         self.accountId = accountId
@@ -6724,7 +7473,7 @@ public struct CallFunctionByBlockId: Codable {
     }
 }
 
-public struct ViewGlobalContractCodeByBlockId: Codable {
+public struct ViewGlobalContractCodeByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let codeHash: CryptoHash
     public let requestType: String
@@ -6732,7 +7481,7 @@ public struct ViewGlobalContractCodeByBlockId: Codable {
     public init(
         blockId: BlockId,
         codeHash: CryptoHash,
-        requestType: String
+        requestType: String,
     ) {
         self.blockId = blockId
         self.codeHash = codeHash
@@ -6740,7 +7489,7 @@ public struct ViewGlobalContractCodeByBlockId: Codable {
     }
 }
 
-public struct ViewGlobalContractCodeByAccountIdByBlockId: Codable {
+public struct ViewGlobalContractCodeByAccountIdByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountId: AccountId
     public let requestType: String
@@ -6748,7 +7497,7 @@ public struct ViewGlobalContractCodeByAccountIdByBlockId: Codable {
     public init(
         blockId: BlockId,
         accountId: AccountId,
-        requestType: String
+        requestType: String,
     ) {
         self.blockId = blockId
         self.accountId = accountId
@@ -6756,7 +7505,7 @@ public struct ViewGlobalContractCodeByAccountIdByBlockId: Codable {
     }
 }
 
-public struct ViewAccountByFinality: Codable {
+public struct ViewAccountByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountId: AccountId
     public let requestType: String
@@ -6764,7 +7513,7 @@ public struct ViewAccountByFinality: Codable {
     public init(
         finality: Finality,
         accountId: AccountId,
-        requestType: String
+        requestType: String,
     ) {
         self.finality = finality
         self.accountId = accountId
@@ -6772,7 +7521,7 @@ public struct ViewAccountByFinality: Codable {
     }
 }
 
-public struct ViewCodeByFinality: Codable {
+public struct ViewCodeByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountId: AccountId
     public let requestType: String
@@ -6780,7 +7529,7 @@ public struct ViewCodeByFinality: Codable {
     public init(
         finality: Finality,
         accountId: AccountId,
-        requestType: String
+        requestType: String,
     ) {
         self.finality = finality
         self.accountId = accountId
@@ -6788,7 +7537,7 @@ public struct ViewCodeByFinality: Codable {
     }
 }
 
-public struct ViewStateByFinality: Codable {
+public struct ViewStateByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountId: AccountId
     public let includeProof: Bool?
@@ -6800,7 +7549,7 @@ public struct ViewStateByFinality: Codable {
         accountId: AccountId,
         includeProof: Bool?,
         prefixBase64: StoreKey,
-        requestType: String
+        requestType: String,
     ) {
         self.finality = finality
         self.accountId = accountId
@@ -6810,7 +7559,7 @@ public struct ViewStateByFinality: Codable {
     }
 }
 
-public struct ViewAccessKeyByFinality: Codable {
+public struct ViewAccessKeyByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountId: AccountId
     public let publicKey: PublicKey
@@ -6820,7 +7569,7 @@ public struct ViewAccessKeyByFinality: Codable {
         finality: Finality,
         accountId: AccountId,
         publicKey: PublicKey,
-        requestType: String
+        requestType: String,
     ) {
         self.finality = finality
         self.accountId = accountId
@@ -6829,7 +7578,7 @@ public struct ViewAccessKeyByFinality: Codable {
     }
 }
 
-public struct ViewAccessKeyListByFinality: Codable {
+public struct ViewAccessKeyListByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountId: AccountId
     public let requestType: String
@@ -6837,7 +7586,7 @@ public struct ViewAccessKeyListByFinality: Codable {
     public init(
         finality: Finality,
         accountId: AccountId,
-        requestType: String
+        requestType: String,
     ) {
         self.finality = finality
         self.accountId = accountId
@@ -6845,7 +7594,7 @@ public struct ViewAccessKeyListByFinality: Codable {
     }
 }
 
-public struct CallFunctionByFinality: Codable {
+public struct CallFunctionByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountId: AccountId
     public let argsBase64: FunctionArgs
@@ -6857,7 +7606,7 @@ public struct CallFunctionByFinality: Codable {
         accountId: AccountId,
         argsBase64: FunctionArgs,
         methodName: String,
-        requestType: String
+        requestType: String,
     ) {
         self.finality = finality
         self.accountId = accountId
@@ -6867,7 +7616,7 @@ public struct CallFunctionByFinality: Codable {
     }
 }
 
-public struct ViewGlobalContractCodeByFinality: Codable {
+public struct ViewGlobalContractCodeByFinality: Codable, Sendable {
     public let finality: Finality
     public let codeHash: CryptoHash
     public let requestType: String
@@ -6875,7 +7624,7 @@ public struct ViewGlobalContractCodeByFinality: Codable {
     public init(
         finality: Finality,
         codeHash: CryptoHash,
-        requestType: String
+        requestType: String,
     ) {
         self.finality = finality
         self.codeHash = codeHash
@@ -6883,7 +7632,7 @@ public struct ViewGlobalContractCodeByFinality: Codable {
     }
 }
 
-public struct ViewGlobalContractCodeByAccountIdByFinality: Codable {
+public struct ViewGlobalContractCodeByAccountIdByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountId: AccountId
     public let requestType: String
@@ -6891,7 +7640,7 @@ public struct ViewGlobalContractCodeByAccountIdByFinality: Codable {
     public init(
         finality: Finality,
         accountId: AccountId,
-        requestType: String
+        requestType: String,
     ) {
         self.finality = finality
         self.accountId = accountId
@@ -6899,7 +7648,7 @@ public struct ViewGlobalContractCodeByAccountIdByFinality: Codable {
     }
 }
 
-public struct ViewAccountBySyncCheckpoint: Codable {
+public struct ViewAccountBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountId: AccountId
     public let requestType: String
@@ -6907,7 +7656,7 @@ public struct ViewAccountBySyncCheckpoint: Codable {
     public init(
         syncCheckpoint: SyncCheckpoint,
         accountId: AccountId,
-        requestType: String
+        requestType: String,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountId = accountId
@@ -6915,7 +7664,7 @@ public struct ViewAccountBySyncCheckpoint: Codable {
     }
 }
 
-public struct ViewCodeBySyncCheckpoint: Codable {
+public struct ViewCodeBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountId: AccountId
     public let requestType: String
@@ -6923,7 +7672,7 @@ public struct ViewCodeBySyncCheckpoint: Codable {
     public init(
         syncCheckpoint: SyncCheckpoint,
         accountId: AccountId,
-        requestType: String
+        requestType: String,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountId = accountId
@@ -6931,7 +7680,7 @@ public struct ViewCodeBySyncCheckpoint: Codable {
     }
 }
 
-public struct ViewStateBySyncCheckpoint: Codable {
+public struct ViewStateBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountId: AccountId
     public let includeProof: Bool?
@@ -6943,7 +7692,7 @@ public struct ViewStateBySyncCheckpoint: Codable {
         accountId: AccountId,
         includeProof: Bool?,
         prefixBase64: StoreKey,
-        requestType: String
+        requestType: String,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountId = accountId
@@ -6953,7 +7702,7 @@ public struct ViewStateBySyncCheckpoint: Codable {
     }
 }
 
-public struct ViewAccessKeyBySyncCheckpoint: Codable {
+public struct ViewAccessKeyBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountId: AccountId
     public let publicKey: PublicKey
@@ -6963,7 +7712,7 @@ public struct ViewAccessKeyBySyncCheckpoint: Codable {
         syncCheckpoint: SyncCheckpoint,
         accountId: AccountId,
         publicKey: PublicKey,
-        requestType: String
+        requestType: String,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountId = accountId
@@ -6972,7 +7721,7 @@ public struct ViewAccessKeyBySyncCheckpoint: Codable {
     }
 }
 
-public struct ViewAccessKeyListBySyncCheckpoint: Codable {
+public struct ViewAccessKeyListBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountId: AccountId
     public let requestType: String
@@ -6980,7 +7729,7 @@ public struct ViewAccessKeyListBySyncCheckpoint: Codable {
     public init(
         syncCheckpoint: SyncCheckpoint,
         accountId: AccountId,
-        requestType: String
+        requestType: String,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountId = accountId
@@ -6988,7 +7737,7 @@ public struct ViewAccessKeyListBySyncCheckpoint: Codable {
     }
 }
 
-public struct CallFunctionBySyncCheckpoint: Codable {
+public struct CallFunctionBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountId: AccountId
     public let argsBase64: FunctionArgs
@@ -7000,7 +7749,7 @@ public struct CallFunctionBySyncCheckpoint: Codable {
         accountId: AccountId,
         argsBase64: FunctionArgs,
         methodName: String,
-        requestType: String
+        requestType: String,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountId = accountId
@@ -7010,7 +7759,7 @@ public struct CallFunctionBySyncCheckpoint: Codable {
     }
 }
 
-public struct ViewGlobalContractCodeBySyncCheckpoint: Codable {
+public struct ViewGlobalContractCodeBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let codeHash: CryptoHash
     public let requestType: String
@@ -7018,7 +7767,7 @@ public struct ViewGlobalContractCodeBySyncCheckpoint: Codable {
     public init(
         syncCheckpoint: SyncCheckpoint,
         codeHash: CryptoHash,
-        requestType: String
+        requestType: String,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.codeHash = codeHash
@@ -7026,7 +7775,7 @@ public struct ViewGlobalContractCodeBySyncCheckpoint: Codable {
     }
 }
 
-public struct ViewGlobalContractCodeByAccountIdBySyncCheckpoint: Codable {
+public struct ViewGlobalContractCodeByAccountIdBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountId: AccountId
     public let requestType: String
@@ -7034,7 +7783,7 @@ public struct ViewGlobalContractCodeByAccountIdBySyncCheckpoint: Codable {
     public init(
         syncCheckpoint: SyncCheckpoint,
         accountId: AccountId,
-        requestType: String
+        requestType: String,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountId = accountId
@@ -7042,7 +7791,7 @@ public struct ViewGlobalContractCodeByAccountIdBySyncCheckpoint: Codable {
     }
 }
 
-public enum RpcQueryRequest: Codable {
+public enum RpcQueryRequest: Codable, Sendable {
     case viewAccountByBlockId(ViewAccountByBlockId)
     case viewCodeByBlockId(ViewCodeByBlockId)
     case viewStateByBlockId(ViewStateByBlockId)
@@ -7075,168 +7824,169 @@ public enum RpcQueryRequest: Codable {
             let value = try decoder.singleValueContainer().decode(ViewAccountByBlockId.self)
             self = .viewAccountByBlockId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewAccountByBlockId: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewCodeByBlockId.self)
             self = .viewCodeByBlockId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewCodeByBlockId: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewStateByBlockId.self)
             self = .viewStateByBlockId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewStateByBlockId: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewAccessKeyByBlockId.self)
             self = .viewAccessKeyByBlockId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewAccessKeyByBlockId: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewAccessKeyListByBlockId.self)
             self = .viewAccessKeyListByBlockId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewAccessKeyListByBlockId: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(CallFunctionByBlockId.self)
             self = .callFunctionByBlockId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".callFunctionByBlockId: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewGlobalContractCodeByBlockId.self)
             self = .viewGlobalContractCodeByBlockId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewGlobalContractCodeByBlockId: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewGlobalContractCodeByAccountIdByBlockId.self)
             self = .viewGlobalContractCodeByAccountIdByBlockId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewGlobalContractCodeByAccountIdByBlockId: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewAccountByFinality.self)
             self = .viewAccountByFinality(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewAccountByFinality: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewCodeByFinality.self)
             self = .viewCodeByFinality(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewCodeByFinality: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewStateByFinality.self)
             self = .viewStateByFinality(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewStateByFinality: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewAccessKeyByFinality.self)
             self = .viewAccessKeyByFinality(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewAccessKeyByFinality: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewAccessKeyListByFinality.self)
             self = .viewAccessKeyListByFinality(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewAccessKeyListByFinality: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(CallFunctionByFinality.self)
             self = .callFunctionByFinality(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".callFunctionByFinality: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewGlobalContractCodeByFinality.self)
             self = .viewGlobalContractCodeByFinality(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewGlobalContractCodeByFinality: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewGlobalContractCodeByAccountIdByFinality.self)
             self = .viewGlobalContractCodeByAccountIdByFinality(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewGlobalContractCodeByAccountIdByFinality: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewAccountBySyncCheckpoint.self)
             self = .viewAccountBySyncCheckpoint(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewAccountBySyncCheckpoint: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewCodeBySyncCheckpoint.self)
             self = .viewCodeBySyncCheckpoint(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewCodeBySyncCheckpoint: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewStateBySyncCheckpoint.self)
             self = .viewStateBySyncCheckpoint(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewStateBySyncCheckpoint: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewAccessKeyBySyncCheckpoint.self)
             self = .viewAccessKeyBySyncCheckpoint(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewAccessKeyBySyncCheckpoint: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewAccessKeyListBySyncCheckpoint.self)
             self = .viewAccessKeyListBySyncCheckpoint(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewAccessKeyListBySyncCheckpoint: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(CallFunctionBySyncCheckpoint.self)
             self = .callFunctionBySyncCheckpoint(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".callFunctionBySyncCheckpoint: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewGlobalContractCodeBySyncCheckpoint.self)
             self = .viewGlobalContractCodeBySyncCheckpoint(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewGlobalContractCodeBySyncCheckpoint: \(describeDecodingError(error))")
         }
         do {
-            let value = try decoder.singleValueContainer().decode(ViewGlobalContractCodeByAccountIdBySyncCheckpoint.self)
+            let value = try decoder.singleValueContainer()
+                .decode(ViewGlobalContractCodeByAccountIdBySyncCheckpoint.self)
             self = .viewGlobalContractCodeByAccountIdBySyncCheckpoint(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewGlobalContractCodeByAccountIdBySyncCheckpoint: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -7250,83 +8000,84 @@ public enum RpcQueryRequest: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcQueryRequest\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcQueryRequest:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcQueryRequest:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .viewAccountByBlockId(let value):
+        case let .viewAccountByBlockId(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewCodeByBlockId(let value):
+        case let .viewCodeByBlockId(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewStateByBlockId(let value):
+        case let .viewStateByBlockId(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewAccessKeyByBlockId(let value):
+        case let .viewAccessKeyByBlockId(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewAccessKeyListByBlockId(let value):
+        case let .viewAccessKeyListByBlockId(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .callFunctionByBlockId(let value):
+        case let .callFunctionByBlockId(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewGlobalContractCodeByBlockId(let value):
+        case let .viewGlobalContractCodeByBlockId(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewGlobalContractCodeByAccountIdByBlockId(let value):
+        case let .viewGlobalContractCodeByAccountIdByBlockId(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewAccountByFinality(let value):
+        case let .viewAccountByFinality(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewCodeByFinality(let value):
+        case let .viewCodeByFinality(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewStateByFinality(let value):
+        case let .viewStateByFinality(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewAccessKeyByFinality(let value):
+        case let .viewAccessKeyByFinality(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewAccessKeyListByFinality(let value):
+        case let .viewAccessKeyListByFinality(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .callFunctionByFinality(let value):
+        case let .callFunctionByFinality(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewGlobalContractCodeByFinality(let value):
+        case let .viewGlobalContractCodeByFinality(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewGlobalContractCodeByAccountIdByFinality(let value):
+        case let .viewGlobalContractCodeByAccountIdByFinality(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewAccountBySyncCheckpoint(let value):
+        case let .viewAccountBySyncCheckpoint(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewCodeBySyncCheckpoint(let value):
+        case let .viewCodeBySyncCheckpoint(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewStateBySyncCheckpoint(let value):
+        case let .viewStateBySyncCheckpoint(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewAccessKeyBySyncCheckpoint(let value):
+        case let .viewAccessKeyBySyncCheckpoint(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewAccessKeyListBySyncCheckpoint(let value):
+        case let .viewAccessKeyListBySyncCheckpoint(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .callFunctionBySyncCheckpoint(let value):
+        case let .callFunctionBySyncCheckpoint(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewGlobalContractCodeBySyncCheckpoint(let value):
+        case let .viewGlobalContractCodeBySyncCheckpoint(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewGlobalContractCodeByAccountIdBySyncCheckpoint(let value):
+        case let .viewGlobalContractCodeByAccountIdBySyncCheckpoint(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
         }
@@ -7334,7 +8085,8 @@ public enum RpcQueryRequest: Codable {
 }
 
 // MARK: - RpcQueryResponse
-public enum RpcQueryResponse: Codable {
+
+public enum RpcQueryResponse: Codable, Sendable {
     case accountView(AccountView)
     case contractCodeView(ContractCodeView)
     case viewStateResult(ViewStateResult)
@@ -7349,42 +8101,42 @@ public enum RpcQueryResponse: Codable {
             let value = try decoder.singleValueContainer().decode(AccountView.self)
             self = .accountView(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".accountView: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ContractCodeView.self)
             self = .contractCodeView(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".contractCodeView: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewStateResult.self)
             self = .viewStateResult(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewStateResult: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(CallResult.self)
             self = .callResult(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".callResult: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(AccessKeyView.self)
             self = .accessKeyView(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".accessKeyView: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(AccessKeyList.self)
             self = .accessKeyList(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".accessKeyList: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -7398,29 +8150,30 @@ public enum RpcQueryResponse: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcQueryResponse\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcQueryResponse:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcQueryResponse:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .accountView(let value):
+        case let .accountView(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .contractCodeView(let value):
+        case let .contractCodeView(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewStateResult(let value):
+        case let .viewStateResult(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .callResult(let value):
+        case let .callResult(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .accessKeyView(let value):
+        case let .accessKeyView(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .accessKeyList(let value):
+        case let .accessKeyList(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
         }
@@ -7428,33 +8181,34 @@ public enum RpcQueryResponse: Codable {
 }
 
 // MARK: - RpcRequestValidationErrorKind
-public struct RpcRequestValidationErrorKindOneOfInfoName: Codable {
+
+public struct RpcRequestValidationErrorKindOneOfInfoName: Codable, Sendable {
     public let info: AnyCodable
     public let name: String
 
     public init(
         info: AnyCodable,
-        name: String
+        name: String,
     ) {
         self.info = info
         self.name = name
     }
 }
 
-public struct RpcRequestValidationErrorKindOneOfInfoName1: Codable {
+public struct RpcRequestValidationErrorKindOneOfInfoName1: Codable, Sendable {
     public let info: AnyCodable
     public let name: String
 
     public init(
         info: AnyCodable,
-        name: String
+        name: String,
     ) {
         self.info = info
         self.name = name
     }
 }
 
-public enum RpcRequestValidationErrorKind: Codable {
+public enum RpcRequestValidationErrorKind: Codable, Sendable {
     case rpcRequestValidationErrorKindInfoName(RpcRequestValidationErrorKindOneOfInfoName)
     case rpcRequestValidationErrorKindInfoName1(RpcRequestValidationErrorKindOneOfInfoName1)
 
@@ -7465,14 +8219,14 @@ public enum RpcRequestValidationErrorKind: Codable {
             let value = try decoder.singleValueContainer().decode(RpcRequestValidationErrorKindOneOfInfoName.self)
             self = .rpcRequestValidationErrorKindInfoName(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".rpcRequestValidationErrorKindInfoName: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(RpcRequestValidationErrorKindOneOfInfoName1.self)
             self = .rpcRequestValidationErrorKindInfoName1(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".rpcRequestValidationErrorKindInfoName1: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -7486,17 +8240,19 @@ public enum RpcRequestValidationErrorKind: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcRequestValidationErrorKind\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcRequestValidationErrorKind:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for RpcRequestValidationErrorKind:\n" + decodingErrors
+                    .joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .rpcRequestValidationErrorKindInfoName(let value):
+        case let .rpcRequestValidationErrorKindInfoName(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .rpcRequestValidationErrorKindInfoName1(let value):
+        case let .rpcRequestValidationErrorKindInfoName1(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
         }
@@ -7504,7 +8260,8 @@ public enum RpcRequestValidationErrorKind: Codable {
 }
 
 // MARK: - RpcStateChangesInBlockByTypeRequest
-public struct AccountChangesByBlockId: Codable {
+
+public struct AccountChangesByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountIds: [AccountId]
     public let changesType: String
@@ -7512,7 +8269,7 @@ public struct AccountChangesByBlockId: Codable {
     public init(
         blockId: BlockId,
         accountIds: [AccountId],
-        changesType: String
+        changesType: String,
     ) {
         self.blockId = blockId
         self.accountIds = accountIds
@@ -7520,7 +8277,7 @@ public struct AccountChangesByBlockId: Codable {
     }
 }
 
-public struct SingleAccessKeyChangesByBlockId: Codable {
+public struct SingleAccessKeyChangesByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let changesType: String
     public let keys: [AccountWithPublicKey]
@@ -7528,7 +8285,7 @@ public struct SingleAccessKeyChangesByBlockId: Codable {
     public init(
         blockId: BlockId,
         changesType: String,
-        keys: [AccountWithPublicKey]
+        keys: [AccountWithPublicKey],
     ) {
         self.blockId = blockId
         self.changesType = changesType
@@ -7536,7 +8293,7 @@ public struct SingleAccessKeyChangesByBlockId: Codable {
     }
 }
 
-public struct SingleGasKeyChangesByBlockId: Codable {
+public struct SingleGasKeyChangesByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let changesType: String
     public let keys: [AccountWithPublicKey]
@@ -7544,7 +8301,7 @@ public struct SingleGasKeyChangesByBlockId: Codable {
     public init(
         blockId: BlockId,
         changesType: String,
-        keys: [AccountWithPublicKey]
+        keys: [AccountWithPublicKey],
     ) {
         self.blockId = blockId
         self.changesType = changesType
@@ -7552,7 +8309,7 @@ public struct SingleGasKeyChangesByBlockId: Codable {
     }
 }
 
-public struct AllAccessKeyChangesByBlockId: Codable {
+public struct AllAccessKeyChangesByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountIds: [AccountId]
     public let changesType: String
@@ -7560,7 +8317,7 @@ public struct AllAccessKeyChangesByBlockId: Codable {
     public init(
         blockId: BlockId,
         accountIds: [AccountId],
-        changesType: String
+        changesType: String,
     ) {
         self.blockId = blockId
         self.accountIds = accountIds
@@ -7568,7 +8325,7 @@ public struct AllAccessKeyChangesByBlockId: Codable {
     }
 }
 
-public struct AllGasKeyChangesByBlockId: Codable {
+public struct AllGasKeyChangesByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountIds: [AccountId]
     public let changesType: String
@@ -7576,7 +8333,7 @@ public struct AllGasKeyChangesByBlockId: Codable {
     public init(
         blockId: BlockId,
         accountIds: [AccountId],
-        changesType: String
+        changesType: String,
     ) {
         self.blockId = blockId
         self.accountIds = accountIds
@@ -7584,7 +8341,7 @@ public struct AllGasKeyChangesByBlockId: Codable {
     }
 }
 
-public struct ContractCodeChangesByBlockId: Codable {
+public struct ContractCodeChangesByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountIds: [AccountId]
     public let changesType: String
@@ -7592,7 +8349,7 @@ public struct ContractCodeChangesByBlockId: Codable {
     public init(
         blockId: BlockId,
         accountIds: [AccountId],
-        changesType: String
+        changesType: String,
     ) {
         self.blockId = blockId
         self.accountIds = accountIds
@@ -7600,7 +8357,7 @@ public struct ContractCodeChangesByBlockId: Codable {
     }
 }
 
-public struct DataChangesByBlockId: Codable {
+public struct DataChangesByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountIds: [AccountId]
     public let changesType: String
@@ -7610,7 +8367,7 @@ public struct DataChangesByBlockId: Codable {
         blockId: BlockId,
         accountIds: [AccountId],
         changesType: String,
-        keyPrefixBase64: StoreKey
+        keyPrefixBase64: StoreKey,
     ) {
         self.blockId = blockId
         self.accountIds = accountIds
@@ -7619,7 +8376,7 @@ public struct DataChangesByBlockId: Codable {
     }
 }
 
-public struct AccountChangesByFinality: Codable {
+public struct AccountChangesByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountIds: [AccountId]
     public let changesType: String
@@ -7627,7 +8384,7 @@ public struct AccountChangesByFinality: Codable {
     public init(
         finality: Finality,
         accountIds: [AccountId],
-        changesType: String
+        changesType: String,
     ) {
         self.finality = finality
         self.accountIds = accountIds
@@ -7635,7 +8392,7 @@ public struct AccountChangesByFinality: Codable {
     }
 }
 
-public struct SingleAccessKeyChangesByFinality: Codable {
+public struct SingleAccessKeyChangesByFinality: Codable, Sendable {
     public let finality: Finality
     public let changesType: String
     public let keys: [AccountWithPublicKey]
@@ -7643,7 +8400,7 @@ public struct SingleAccessKeyChangesByFinality: Codable {
     public init(
         finality: Finality,
         changesType: String,
-        keys: [AccountWithPublicKey]
+        keys: [AccountWithPublicKey],
     ) {
         self.finality = finality
         self.changesType = changesType
@@ -7651,7 +8408,7 @@ public struct SingleAccessKeyChangesByFinality: Codable {
     }
 }
 
-public struct SingleGasKeyChangesByFinality: Codable {
+public struct SingleGasKeyChangesByFinality: Codable, Sendable {
     public let finality: Finality
     public let changesType: String
     public let keys: [AccountWithPublicKey]
@@ -7659,7 +8416,7 @@ public struct SingleGasKeyChangesByFinality: Codable {
     public init(
         finality: Finality,
         changesType: String,
-        keys: [AccountWithPublicKey]
+        keys: [AccountWithPublicKey],
     ) {
         self.finality = finality
         self.changesType = changesType
@@ -7667,7 +8424,7 @@ public struct SingleGasKeyChangesByFinality: Codable {
     }
 }
 
-public struct AllAccessKeyChangesByFinality: Codable {
+public struct AllAccessKeyChangesByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountIds: [AccountId]
     public let changesType: String
@@ -7675,7 +8432,7 @@ public struct AllAccessKeyChangesByFinality: Codable {
     public init(
         finality: Finality,
         accountIds: [AccountId],
-        changesType: String
+        changesType: String,
     ) {
         self.finality = finality
         self.accountIds = accountIds
@@ -7683,7 +8440,7 @@ public struct AllAccessKeyChangesByFinality: Codable {
     }
 }
 
-public struct AllGasKeyChangesByFinality: Codable {
+public struct AllGasKeyChangesByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountIds: [AccountId]
     public let changesType: String
@@ -7691,7 +8448,7 @@ public struct AllGasKeyChangesByFinality: Codable {
     public init(
         finality: Finality,
         accountIds: [AccountId],
-        changesType: String
+        changesType: String,
     ) {
         self.finality = finality
         self.accountIds = accountIds
@@ -7699,7 +8456,7 @@ public struct AllGasKeyChangesByFinality: Codable {
     }
 }
 
-public struct ContractCodeChangesByFinality: Codable {
+public struct ContractCodeChangesByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountIds: [AccountId]
     public let changesType: String
@@ -7707,7 +8464,7 @@ public struct ContractCodeChangesByFinality: Codable {
     public init(
         finality: Finality,
         accountIds: [AccountId],
-        changesType: String
+        changesType: String,
     ) {
         self.finality = finality
         self.accountIds = accountIds
@@ -7715,7 +8472,7 @@ public struct ContractCodeChangesByFinality: Codable {
     }
 }
 
-public struct DataChangesByFinality: Codable {
+public struct DataChangesByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountIds: [AccountId]
     public let changesType: String
@@ -7725,7 +8482,7 @@ public struct DataChangesByFinality: Codable {
         finality: Finality,
         accountIds: [AccountId],
         changesType: String,
-        keyPrefixBase64: StoreKey
+        keyPrefixBase64: StoreKey,
     ) {
         self.finality = finality
         self.accountIds = accountIds
@@ -7734,7 +8491,7 @@ public struct DataChangesByFinality: Codable {
     }
 }
 
-public struct AccountChangesBySyncCheckpoint: Codable {
+public struct AccountChangesBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountIds: [AccountId]
     public let changesType: String
@@ -7742,7 +8499,7 @@ public struct AccountChangesBySyncCheckpoint: Codable {
     public init(
         syncCheckpoint: SyncCheckpoint,
         accountIds: [AccountId],
-        changesType: String
+        changesType: String,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountIds = accountIds
@@ -7750,7 +8507,7 @@ public struct AccountChangesBySyncCheckpoint: Codable {
     }
 }
 
-public struct SingleAccessKeyChangesBySyncCheckpoint: Codable {
+public struct SingleAccessKeyChangesBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let changesType: String
     public let keys: [AccountWithPublicKey]
@@ -7758,7 +8515,7 @@ public struct SingleAccessKeyChangesBySyncCheckpoint: Codable {
     public init(
         syncCheckpoint: SyncCheckpoint,
         changesType: String,
-        keys: [AccountWithPublicKey]
+        keys: [AccountWithPublicKey],
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.changesType = changesType
@@ -7766,7 +8523,7 @@ public struct SingleAccessKeyChangesBySyncCheckpoint: Codable {
     }
 }
 
-public struct SingleGasKeyChangesBySyncCheckpoint: Codable {
+public struct SingleGasKeyChangesBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let changesType: String
     public let keys: [AccountWithPublicKey]
@@ -7774,7 +8531,7 @@ public struct SingleGasKeyChangesBySyncCheckpoint: Codable {
     public init(
         syncCheckpoint: SyncCheckpoint,
         changesType: String,
-        keys: [AccountWithPublicKey]
+        keys: [AccountWithPublicKey],
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.changesType = changesType
@@ -7782,7 +8539,7 @@ public struct SingleGasKeyChangesBySyncCheckpoint: Codable {
     }
 }
 
-public struct AllAccessKeyChangesBySyncCheckpoint: Codable {
+public struct AllAccessKeyChangesBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountIds: [AccountId]
     public let changesType: String
@@ -7790,7 +8547,7 @@ public struct AllAccessKeyChangesBySyncCheckpoint: Codable {
     public init(
         syncCheckpoint: SyncCheckpoint,
         accountIds: [AccountId],
-        changesType: String
+        changesType: String,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountIds = accountIds
@@ -7798,7 +8555,7 @@ public struct AllAccessKeyChangesBySyncCheckpoint: Codable {
     }
 }
 
-public struct AllGasKeyChangesBySyncCheckpoint: Codable {
+public struct AllGasKeyChangesBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountIds: [AccountId]
     public let changesType: String
@@ -7806,7 +8563,7 @@ public struct AllGasKeyChangesBySyncCheckpoint: Codable {
     public init(
         syncCheckpoint: SyncCheckpoint,
         accountIds: [AccountId],
-        changesType: String
+        changesType: String,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountIds = accountIds
@@ -7814,7 +8571,7 @@ public struct AllGasKeyChangesBySyncCheckpoint: Codable {
     }
 }
 
-public struct ContractCodeChangesBySyncCheckpoint: Codable {
+public struct ContractCodeChangesBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountIds: [AccountId]
     public let changesType: String
@@ -7822,7 +8579,7 @@ public struct ContractCodeChangesBySyncCheckpoint: Codable {
     public init(
         syncCheckpoint: SyncCheckpoint,
         accountIds: [AccountId],
-        changesType: String
+        changesType: String,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountIds = accountIds
@@ -7830,7 +8587,7 @@ public struct ContractCodeChangesBySyncCheckpoint: Codable {
     }
 }
 
-public struct DataChangesBySyncCheckpoint: Codable {
+public struct DataChangesBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountIds: [AccountId]
     public let changesType: String
@@ -7840,7 +8597,7 @@ public struct DataChangesBySyncCheckpoint: Codable {
         syncCheckpoint: SyncCheckpoint,
         accountIds: [AccountId],
         changesType: String,
-        keyPrefixBase64: StoreKey
+        keyPrefixBase64: StoreKey,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountIds = accountIds
@@ -7849,7 +8606,7 @@ public struct DataChangesBySyncCheckpoint: Codable {
     }
 }
 
-public enum RpcStateChangesInBlockByTypeRequest: Codable {
+public enum RpcStateChangesInBlockByTypeRequest: Codable, Sendable {
     case accountChangesByBlockId(AccountChangesByBlockId)
     case singleAccessKeyChangesByBlockId(SingleAccessKeyChangesByBlockId)
     case singleGasKeyChangesByBlockId(SingleGasKeyChangesByBlockId)
@@ -7879,147 +8636,147 @@ public enum RpcStateChangesInBlockByTypeRequest: Codable {
             let value = try decoder.singleValueContainer().decode(AccountChangesByBlockId.self)
             self = .accountChangesByBlockId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".accountChangesByBlockId: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(SingleAccessKeyChangesByBlockId.self)
             self = .singleAccessKeyChangesByBlockId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".singleAccessKeyChangesByBlockId: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(SingleGasKeyChangesByBlockId.self)
             self = .singleGasKeyChangesByBlockId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".singleGasKeyChangesByBlockId: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(AllAccessKeyChangesByBlockId.self)
             self = .allAccessKeyChangesByBlockId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".allAccessKeyChangesByBlockId: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(AllGasKeyChangesByBlockId.self)
             self = .allGasKeyChangesByBlockId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".allGasKeyChangesByBlockId: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ContractCodeChangesByBlockId.self)
             self = .contractCodeChangesByBlockId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".contractCodeChangesByBlockId: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(DataChangesByBlockId.self)
             self = .dataChangesByBlockId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".dataChangesByBlockId: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(AccountChangesByFinality.self)
             self = .accountChangesByFinality(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".accountChangesByFinality: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(SingleAccessKeyChangesByFinality.self)
             self = .singleAccessKeyChangesByFinality(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".singleAccessKeyChangesByFinality: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(SingleGasKeyChangesByFinality.self)
             self = .singleGasKeyChangesByFinality(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".singleGasKeyChangesByFinality: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(AllAccessKeyChangesByFinality.self)
             self = .allAccessKeyChangesByFinality(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".allAccessKeyChangesByFinality: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(AllGasKeyChangesByFinality.self)
             self = .allGasKeyChangesByFinality(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".allGasKeyChangesByFinality: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ContractCodeChangesByFinality.self)
             self = .contractCodeChangesByFinality(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".contractCodeChangesByFinality: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(DataChangesByFinality.self)
             self = .dataChangesByFinality(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".dataChangesByFinality: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(AccountChangesBySyncCheckpoint.self)
             self = .accountChangesBySyncCheckpoint(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".accountChangesBySyncCheckpoint: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(SingleAccessKeyChangesBySyncCheckpoint.self)
             self = .singleAccessKeyChangesBySyncCheckpoint(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".singleAccessKeyChangesBySyncCheckpoint: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(SingleGasKeyChangesBySyncCheckpoint.self)
             self = .singleGasKeyChangesBySyncCheckpoint(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".singleGasKeyChangesBySyncCheckpoint: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(AllAccessKeyChangesBySyncCheckpoint.self)
             self = .allAccessKeyChangesBySyncCheckpoint(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".allAccessKeyChangesBySyncCheckpoint: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(AllGasKeyChangesBySyncCheckpoint.self)
             self = .allGasKeyChangesBySyncCheckpoint(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".allGasKeyChangesBySyncCheckpoint: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ContractCodeChangesBySyncCheckpoint.self)
             self = .contractCodeChangesBySyncCheckpoint(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".contractCodeChangesBySyncCheckpoint: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(DataChangesBySyncCheckpoint.self)
             self = .dataChangesBySyncCheckpoint(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".dataChangesBySyncCheckpoint: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -8033,74 +8790,76 @@ public enum RpcStateChangesInBlockByTypeRequest: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcStateChangesInBlockByTypeRequest\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcStateChangesInBlockByTypeRequest:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for RpcStateChangesInBlockByTypeRequest:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .accountChangesByBlockId(let value):
+        case let .accountChangesByBlockId(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .singleAccessKeyChangesByBlockId(let value):
+        case let .singleAccessKeyChangesByBlockId(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .singleGasKeyChangesByBlockId(let value):
+        case let .singleGasKeyChangesByBlockId(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .allAccessKeyChangesByBlockId(let value):
+        case let .allAccessKeyChangesByBlockId(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .allGasKeyChangesByBlockId(let value):
+        case let .allGasKeyChangesByBlockId(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .contractCodeChangesByBlockId(let value):
+        case let .contractCodeChangesByBlockId(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .dataChangesByBlockId(let value):
+        case let .dataChangesByBlockId(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .accountChangesByFinality(let value):
+        case let .accountChangesByFinality(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .singleAccessKeyChangesByFinality(let value):
+        case let .singleAccessKeyChangesByFinality(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .singleGasKeyChangesByFinality(let value):
+        case let .singleGasKeyChangesByFinality(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .allAccessKeyChangesByFinality(let value):
+        case let .allAccessKeyChangesByFinality(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .allGasKeyChangesByFinality(let value):
+        case let .allGasKeyChangesByFinality(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .contractCodeChangesByFinality(let value):
+        case let .contractCodeChangesByFinality(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .dataChangesByFinality(let value):
+        case let .dataChangesByFinality(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .accountChangesBySyncCheckpoint(let value):
+        case let .accountChangesBySyncCheckpoint(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .singleAccessKeyChangesBySyncCheckpoint(let value):
+        case let .singleAccessKeyChangesBySyncCheckpoint(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .singleGasKeyChangesBySyncCheckpoint(let value):
+        case let .singleGasKeyChangesBySyncCheckpoint(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .allAccessKeyChangesBySyncCheckpoint(let value):
+        case let .allAccessKeyChangesBySyncCheckpoint(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .allGasKeyChangesBySyncCheckpoint(let value):
+        case let .allGasKeyChangesBySyncCheckpoint(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .contractCodeChangesBySyncCheckpoint(let value):
+        case let .contractCodeChangesBySyncCheckpoint(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .dataChangesBySyncCheckpoint(let value):
+        case let .dataChangesBySyncCheckpoint(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
         }
@@ -8108,7 +8867,8 @@ public enum RpcStateChangesInBlockByTypeRequest: Codable {
 }
 
 // MARK: - RpcStateChangesInBlockRequest
-public enum RpcStateChangesInBlockRequest: Codable {
+
+public enum RpcStateChangesInBlockRequest: Codable, Sendable {
     case blockId(BlockId)
     case finality(Finality)
     case syncCheckpoint(SyncCheckpoint)
@@ -8118,35 +8878,44 @@ public enum RpcStateChangesInBlockRequest: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("block_id") == .orderedSame || key.stringValue.caseInsensitiveCompare("blockId") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("block_id") == .orderedSame || key.stringValue
+                            .caseInsensitiveCompare("blockId") == .orderedSame
+                    }) {
                     let value = try container.decode(BlockId.self, forKey: matchingKey)
                     self = .blockId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".blockId: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("finality") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("finality") == .orderedSame }) {
                     let value = try container.decode(Finality.self, forKey: matchingKey)
                     self = .finality(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".finality: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("sync_checkpoint") == .orderedSame || key.stringValue.caseInsensitiveCompare("syncCheckpoint") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("sync_checkpoint") == .orderedSame || key.stringValue
+                            .caseInsensitiveCompare("syncCheckpoint") == .orderedSame
+                    }) {
                     let value = try container.decode(SyncCheckpoint.self, forKey: matchingKey)
                     self = .syncCheckpoint(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".syncCheckpoint: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -8160,7 +8929,9 @@ public enum RpcStateChangesInBlockRequest: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcStateChangesInBlockRequest\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcStateChangesInBlockRequest:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for RpcStateChangesInBlockRequest:\n" + decodingErrors
+                    .joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -8171,13 +8942,13 @@ public enum RpcStateChangesInBlockRequest: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .blockId(let value):
+        case let .blockId(value):
             var container = encoder.container(keyedBy: AnyCodingKey.self)
             try container.encode(value, forKey: AnyCodingKey(stringValue: "block_id"))
-        case .finality(let value):
+        case let .finality(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .finality)
-        case .syncCheckpoint(let value):
+        case let .syncCheckpoint(value):
             var container = encoder.container(keyedBy: AnyCodingKey.self)
             try container.encode(value, forKey: AnyCodingKey(stringValue: "sync_checkpoint"))
         }
@@ -8185,7 +8956,8 @@ public enum RpcStateChangesInBlockRequest: Codable {
 }
 
 // MARK: - RpcTransactionResponse
-public enum RpcTransactionResponse: Codable {
+
+public enum RpcTransactionResponse: Codable, Sendable {
     case finalExecutionOutcomeWithReceiptView(FinalExecutionOutcomeWithReceiptView)
     case finalExecutionOutcomeView(FinalExecutionOutcomeView)
 
@@ -8196,14 +8968,14 @@ public enum RpcTransactionResponse: Codable {
             let value = try decoder.singleValueContainer().decode(FinalExecutionOutcomeWithReceiptView.self)
             self = .finalExecutionOutcomeWithReceiptView(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".finalExecutionOutcomeWithReceiptView: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(FinalExecutionOutcomeView.self)
             self = .finalExecutionOutcomeView(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".finalExecutionOutcomeView: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -8217,17 +8989,18 @@ public enum RpcTransactionResponse: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcTransactionResponse\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcTransactionResponse:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcTransactionResponse:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .finalExecutionOutcomeWithReceiptView(let value):
+        case let .finalExecutionOutcomeWithReceiptView(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .finalExecutionOutcomeView(let value):
+        case let .finalExecutionOutcomeView(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
         }
@@ -8235,20 +9008,21 @@ public enum RpcTransactionResponse: Codable {
 }
 
 // MARK: - RpcTransactionStatusRequest
-public struct RpcTransactionStatusRequestOneOfSenderAccountIdTxHash: Codable {
+
+public struct RpcTransactionStatusRequestOneOfSenderAccountIdTxHash: Codable, Sendable {
     public let senderAccountId: AccountId
     public let txHash: CryptoHash
 
     public init(
         senderAccountId: AccountId,
-        txHash: CryptoHash
+        txHash: CryptoHash,
     ) {
         self.senderAccountId = senderAccountId
         self.txHash = txHash
     }
 }
 
-public enum RpcTransactionStatusRequest: Codable {
+public enum RpcTransactionStatusRequest: Codable, Sendable {
     case signedTxBase64(SignedTransaction)
     case rpcTransactionStatusRequestSenderAccountIdTxHash(RpcTransactionStatusRequestOneOfSenderAccountIdTxHash)
 
@@ -8257,20 +9031,25 @@ public enum RpcTransactionStatusRequest: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("signed_tx_base64") == .orderedSame || key.stringValue.caseInsensitiveCompare("signedTxBase64") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("signed_tx_base64") == .orderedSame || key.stringValue
+                            .caseInsensitiveCompare("signedTxBase64") == .orderedSame
+                    }) {
                     let value = try container.decode(SignedTransaction.self, forKey: matchingKey)
                     self = .signedTxBase64(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".signedTxBase64: \(describeDecodingError(error))")
         }
         do {
-            let value = try decoder.singleValueContainer().decode(RpcTransactionStatusRequestOneOfSenderAccountIdTxHash.self)
+            let value = try decoder.singleValueContainer()
+                .decode(RpcTransactionStatusRequestOneOfSenderAccountIdTxHash.self)
             self = .rpcTransactionStatusRequestSenderAccountIdTxHash(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".rpcTransactionStatusRequestSenderAccountIdTxHash: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -8284,17 +9063,18 @@ public enum RpcTransactionStatusRequest: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcTransactionStatusRequest\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcTransactionStatusRequest:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcTransactionStatusRequest:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .signedTxBase64(let value):
+        case let .signedTxBase64(value):
             var container = encoder.container(keyedBy: AnyCodingKey.self)
             try container.encode(value, forKey: AnyCodingKey(stringValue: "signed_tx_base64"))
-        case .rpcTransactionStatusRequestSenderAccountIdTxHash(let value):
+        case let .rpcTransactionStatusRequestSenderAccountIdTxHash(value):
             var singleContainer = encoder.singleValueContainer()
             try singleContainer.encode(value)
         }
@@ -8302,7 +9082,8 @@ public enum RpcTransactionStatusRequest: Codable {
 }
 
 // MARK: - RpcValidatorRequest
-public enum RpcValidatorRequest: Codable {
+
+public enum RpcValidatorRequest: Codable, Sendable {
     case latest
     case epochId(EpochId)
     case blockId(BlockId)
@@ -8316,24 +9097,32 @@ public enum RpcValidatorRequest: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("epoch_id") == .orderedSame || key.stringValue.caseInsensitiveCompare("epochId") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("epoch_id") == .orderedSame || key.stringValue
+                            .caseInsensitiveCompare("epochId") == .orderedSame
+                    }) {
                     let value = try container.decode(EpochId.self, forKey: matchingKey)
                     self = .epochId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".epochId: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("block_id") == .orderedSame || key.stringValue.caseInsensitiveCompare("blockId") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("block_id") == .orderedSame || key.stringValue
+                            .caseInsensitiveCompare("blockId") == .orderedSame
+                    }) {
                     let value = try container.decode(BlockId.self, forKey: matchingKey)
                     self = .blockId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".blockId: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -8347,17 +9136,18 @@ public enum RpcValidatorRequest: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcValidatorRequest\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcValidatorRequest:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcValidatorRequest:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .epochId(let value):
+        case let .epochId(value):
             var container = encoder.container(keyedBy: AnyCodingKey.self)
             try container.encode(value, forKey: AnyCodingKey(stringValue: "epoch_id"))
-        case .blockId(let value):
+        case let .blockId(value):
             var container = encoder.container(keyedBy: AnyCodingKey.self)
             try container.encode(value, forKey: AnyCodingKey(stringValue: "block_id"))
         case .latest:
@@ -8368,7 +9158,8 @@ public enum RpcValidatorRequest: Codable {
 }
 
 // MARK: - ShardLayout
-public enum ShardLayout: Codable {
+
+public enum ShardLayout: Codable, Sendable {
     case v0(ShardLayoutV0)
     case v1(ShardLayoutV1)
     case v2(ShardLayoutV2)
@@ -8378,35 +9169,38 @@ public enum ShardLayout: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("V0") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("V0") == .orderedSame }) {
                     let value = try container.decode(ShardLayoutV0.self, forKey: matchingKey)
                     self = .v0(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".v0: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("V1") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("V1") == .orderedSame }) {
                     let value = try container.decode(ShardLayoutV1.self, forKey: matchingKey)
                     self = .v1(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".v1: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("V2") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("V2") == .orderedSame }) {
                     let value = try container.decode(ShardLayoutV2.self, forKey: matchingKey)
                     self = .v2(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".v2: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -8420,7 +9214,8 @@ public enum ShardLayout: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for ShardLayout\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for ShardLayout:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ShardLayout:\n" + decodingErrors
+                .joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -8433,13 +9228,13 @@ public enum ShardLayout: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .v0(let value):
+        case let .v0(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .v0)
-        case .v1(let value):
+        case let .v1(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .v1)
-        case .v2(let value):
+        case let .v2(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .v2)
         }
@@ -8447,72 +9242,73 @@ public enum ShardLayout: Codable {
 }
 
 // MARK: - StateChangeCauseView
-public struct StateChangeCauseViewOneOfTxHashType: Codable {
+
+public struct StateChangeCauseViewOneOfTxHashType: Codable, Sendable {
     public let txHash: CryptoHash
     public let type: String
 
     public init(
         txHash: CryptoHash,
-        type: String
+        type: String,
     ) {
         self.txHash = txHash
         self.type = type
     }
 }
 
-public struct StateChangeCauseViewOneOfReceiptHashType: Codable {
+public struct StateChangeCauseViewOneOfReceiptHashType: Codable, Sendable {
     public let receiptHash: CryptoHash
     public let type: String
 
     public init(
         receiptHash: CryptoHash,
-        type: String
+        type: String,
     ) {
         self.receiptHash = receiptHash
         self.type = type
     }
 }
 
-public struct StateChangeCauseViewOneOfReceiptHashType1: Codable {
+public struct StateChangeCauseViewOneOfReceiptHashType1: Codable, Sendable {
     public let receiptHash: CryptoHash
     public let type: String
 
     public init(
         receiptHash: CryptoHash,
-        type: String
+        type: String,
     ) {
         self.receiptHash = receiptHash
         self.type = type
     }
 }
 
-public struct StateChangeCauseViewOneOfReceiptHashType2: Codable {
+public struct StateChangeCauseViewOneOfReceiptHashType2: Codable, Sendable {
     public let receiptHash: CryptoHash
     public let type: String
 
     public init(
         receiptHash: CryptoHash,
-        type: String
+        type: String,
     ) {
         self.receiptHash = receiptHash
         self.type = type
     }
 }
 
-public struct StateChangeCauseViewOneOfReceiptHashType3: Codable {
+public struct StateChangeCauseViewOneOfReceiptHashType3: Codable, Sendable {
     public let receiptHash: CryptoHash
     public let type: String
 
     public init(
         receiptHash: CryptoHash,
-        type: String
+        type: String,
     ) {
         self.receiptHash = receiptHash
         self.type = type
     }
 }
 
-public enum StateChangeCauseView: Codable {
+public enum StateChangeCauseView: Codable, Sendable {
     case type(String)
     case type1(String)
     case stateChangeCauseViewTxHashType(StateChangeCauseViewOneOfTxHashType)
@@ -8530,103 +9326,109 @@ public enum StateChangeCauseView: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("type") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("type") == .orderedSame }) {
                     let value = try container.decode(String.self, forKey: matchingKey)
                     self = .type(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".type: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("type") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("type") == .orderedSame }) {
                     let value = try container.decode(String.self, forKey: matchingKey)
                     self = .type1(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".type1: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeCauseViewOneOfTxHashType.self)
             self = .stateChangeCauseViewTxHashType(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeCauseViewTxHashType: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeCauseViewOneOfReceiptHashType.self)
             self = .stateChangeCauseViewReceiptHashType(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeCauseViewReceiptHashType: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeCauseViewOneOfReceiptHashType1.self)
             self = .stateChangeCauseViewReceiptHashType1(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeCauseViewReceiptHashType1: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeCauseViewOneOfReceiptHashType2.self)
             self = .stateChangeCauseViewReceiptHashType2(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeCauseViewReceiptHashType2: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeCauseViewOneOfReceiptHashType3.self)
             self = .stateChangeCauseViewReceiptHashType3(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeCauseViewReceiptHashType3: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("type") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("type") == .orderedSame }) {
                     let value = try container.decode(String.self, forKey: matchingKey)
                     self = .type2(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".type2: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("type") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("type") == .orderedSame }) {
                     let value = try container.decode(String.self, forKey: matchingKey)
                     self = .type3(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".type3: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("type") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("type") == .orderedSame }) {
                     let value = try container.decode(String.self, forKey: matchingKey)
                     self = .type4(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".type4: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("type") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("type") == .orderedSame }) {
                     let value = try container.decode(String.self, forKey: matchingKey)
                     self = .type5(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".type5: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -8640,7 +9442,8 @@ public enum StateChangeCauseView: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for StateChangeCauseView\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for StateChangeCauseView:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for StateChangeCauseView:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -8651,37 +9454,37 @@ public enum StateChangeCauseView: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .type(let value):
+        case let .type(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .type)
-        case .type1(let value):
+        case let .type1(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .type)
-        case .type2(let value):
+        case let .type2(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .type)
-        case .type3(let value):
+        case let .type3(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .type)
-        case .type4(let value):
+        case let .type4(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .type)
-        case .type5(let value):
+        case let .type5(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .type)
-        case .stateChangeCauseViewTxHashType(let value):
+        case let .stateChangeCauseViewTxHashType(value):
             var singleContainer = encoder.singleValueContainer()
             try singleContainer.encode(value)
-        case .stateChangeCauseViewReceiptHashType(let value):
+        case let .stateChangeCauseViewReceiptHashType(value):
             var singleContainer = encoder.singleValueContainer()
             try singleContainer.encode(value)
-        case .stateChangeCauseViewReceiptHashType1(let value):
+        case let .stateChangeCauseViewReceiptHashType1(value):
             var singleContainer = encoder.singleValueContainer()
             try singleContainer.encode(value)
-        case .stateChangeCauseViewReceiptHashType2(let value):
+        case let .stateChangeCauseViewReceiptHashType2(value):
             var singleContainer = encoder.singleValueContainer()
             try singleContainer.encode(value)
-        case .stateChangeCauseViewReceiptHashType3(let value):
+        case let .stateChangeCauseViewReceiptHashType3(value):
             var singleContainer = encoder.singleValueContainer()
             try singleContainer.encode(value)
         }
@@ -8689,59 +9492,60 @@ public enum StateChangeCauseView: Codable {
 }
 
 // MARK: - StateChangeKindView
-public struct StateChangeKindViewOneOfAccountIdType: Codable {
+
+public struct StateChangeKindViewOneOfAccountIdType: Codable, Sendable {
     public let accountId: AccountId
     public let type: String
 
     public init(
         accountId: AccountId,
-        type: String
+        type: String,
     ) {
         self.accountId = accountId
         self.type = type
     }
 }
 
-public struct StateChangeKindViewOneOfAccountIdType1: Codable {
+public struct StateChangeKindViewOneOfAccountIdType1: Codable, Sendable {
     public let accountId: AccountId
     public let type: String
 
     public init(
         accountId: AccountId,
-        type: String
+        type: String,
     ) {
         self.accountId = accountId
         self.type = type
     }
 }
 
-public struct StateChangeKindViewOneOfAccountIdType2: Codable {
+public struct StateChangeKindViewOneOfAccountIdType2: Codable, Sendable {
     public let accountId: AccountId
     public let type: String
 
     public init(
         accountId: AccountId,
-        type: String
+        type: String,
     ) {
         self.accountId = accountId
         self.type = type
     }
 }
 
-public struct StateChangeKindViewOneOfAccountIdType3: Codable {
+public struct StateChangeKindViewOneOfAccountIdType3: Codable, Sendable {
     public let accountId: AccountId
     public let type: String
 
     public init(
         accountId: AccountId,
-        type: String
+        type: String,
     ) {
         self.accountId = accountId
         self.type = type
     }
 }
 
-public enum StateChangeKindView: Codable {
+public enum StateChangeKindView: Codable, Sendable {
     case stateChangeKindViewAccountIdType(StateChangeKindViewOneOfAccountIdType)
     case stateChangeKindViewAccountIdType1(StateChangeKindViewOneOfAccountIdType1)
     case stateChangeKindViewAccountIdType2(StateChangeKindViewOneOfAccountIdType2)
@@ -8754,28 +9558,28 @@ public enum StateChangeKindView: Codable {
             let value = try decoder.singleValueContainer().decode(StateChangeKindViewOneOfAccountIdType.self)
             self = .stateChangeKindViewAccountIdType(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeKindViewAccountIdType: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeKindViewOneOfAccountIdType1.self)
             self = .stateChangeKindViewAccountIdType1(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeKindViewAccountIdType1: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeKindViewOneOfAccountIdType2.self)
             self = .stateChangeKindViewAccountIdType2(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeKindViewAccountIdType2: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeKindViewOneOfAccountIdType3.self)
             self = .stateChangeKindViewAccountIdType3(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeKindViewAccountIdType3: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -8789,23 +9593,24 @@ public enum StateChangeKindView: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for StateChangeKindView\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for StateChangeKindView:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for StateChangeKindView:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .stateChangeKindViewAccountIdType(let value):
+        case let .stateChangeKindViewAccountIdType(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .stateChangeKindViewAccountIdType1(let value):
+        case let .stateChangeKindViewAccountIdType1(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .stateChangeKindViewAccountIdType2(let value):
+        case let .stateChangeKindViewAccountIdType2(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .stateChangeKindViewAccountIdType3(let value):
+        case let .stateChangeKindViewAccountIdType3(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
         }
@@ -8813,150 +9618,151 @@ public enum StateChangeKindView: Codable {
 }
 
 // MARK: - StateChangeWithCauseView
-public struct StateChangeWithCauseViewOneOfChangeType: Codable {
+
+public struct StateChangeWithCauseViewOneOfChangeType: Codable, Sendable {
     public let change: InlineObject
     public let type: String
 
     public init(
         change: InlineObject,
-        type: String
+        type: String,
     ) {
         self.change = change
         self.type = type
     }
 }
 
-public struct StateChangeWithCauseViewOneOfChangeType1: Codable {
+public struct StateChangeWithCauseViewOneOfChangeType1: Codable, Sendable {
     public let change: InlineObject
     public let type: String
 
     public init(
         change: InlineObject,
-        type: String
+        type: String,
     ) {
         self.change = change
         self.type = type
     }
 }
 
-public struct StateChangeWithCauseViewOneOfChangeType2: Codable {
+public struct StateChangeWithCauseViewOneOfChangeType2: Codable, Sendable {
     public let change: InlineObject
     public let type: String
 
     public init(
         change: InlineObject,
-        type: String
+        type: String,
     ) {
         self.change = change
         self.type = type
     }
 }
 
-public struct StateChangeWithCauseViewOneOfChangeType3: Codable {
+public struct StateChangeWithCauseViewOneOfChangeType3: Codable, Sendable {
     public let change: InlineObject
     public let type: String
 
     public init(
         change: InlineObject,
-        type: String
+        type: String,
     ) {
         self.change = change
         self.type = type
     }
 }
 
-public struct StateChangeWithCauseViewOneOfChangeType4: Codable {
+public struct StateChangeWithCauseViewOneOfChangeType4: Codable, Sendable {
     public let change: InlineObject
     public let type: String
 
     public init(
         change: InlineObject,
-        type: String
+        type: String,
     ) {
         self.change = change
         self.type = type
     }
 }
 
-public struct StateChangeWithCauseViewOneOfChangeType5: Codable {
+public struct StateChangeWithCauseViewOneOfChangeType5: Codable, Sendable {
     public let change: InlineObject
     public let type: String
 
     public init(
         change: InlineObject,
-        type: String
+        type: String,
     ) {
         self.change = change
         self.type = type
     }
 }
 
-public struct StateChangeWithCauseViewOneOfChangeType6: Codable {
+public struct StateChangeWithCauseViewOneOfChangeType6: Codable, Sendable {
     public let change: InlineObject
     public let type: String
 
     public init(
         change: InlineObject,
-        type: String
+        type: String,
     ) {
         self.change = change
         self.type = type
     }
 }
 
-public struct StateChangeWithCauseViewOneOfChangeType7: Codable {
+public struct StateChangeWithCauseViewOneOfChangeType7: Codable, Sendable {
     public let change: InlineObject
     public let type: String
 
     public init(
         change: InlineObject,
-        type: String
+        type: String,
     ) {
         self.change = change
         self.type = type
     }
 }
 
-public struct StateChangeWithCauseViewOneOfChangeType8: Codable {
+public struct StateChangeWithCauseViewOneOfChangeType8: Codable, Sendable {
     public let change: InlineObject
     public let type: String
 
     public init(
         change: InlineObject,
-        type: String
+        type: String,
     ) {
         self.change = change
         self.type = type
     }
 }
 
-public struct StateChangeWithCauseViewOneOfChangeType9: Codable {
+public struct StateChangeWithCauseViewOneOfChangeType9: Codable, Sendable {
     public let change: InlineObject
     public let type: String
 
     public init(
         change: InlineObject,
-        type: String
+        type: String,
     ) {
         self.change = change
         self.type = type
     }
 }
 
-public struct StateChangeWithCauseViewOneOfChangeType10: Codable {
+public struct StateChangeWithCauseViewOneOfChangeType10: Codable, Sendable {
     public let change: InlineObject
     public let type: String
 
     public init(
         change: InlineObject,
-        type: String
+        type: String,
     ) {
         self.change = change
         self.type = type
     }
 }
 
-public enum StateChangeWithCauseView: Codable {
+public enum StateChangeWithCauseView: Codable, Sendable {
     case stateChangeWithCauseViewChangeType(StateChangeWithCauseViewOneOfChangeType)
     case stateChangeWithCauseViewChangeType1(StateChangeWithCauseViewOneOfChangeType1)
     case stateChangeWithCauseViewChangeType2(StateChangeWithCauseViewOneOfChangeType2)
@@ -8976,77 +9782,77 @@ public enum StateChangeWithCauseView: Codable {
             let value = try decoder.singleValueContainer().decode(StateChangeWithCauseViewOneOfChangeType.self)
             self = .stateChangeWithCauseViewChangeType(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeWithCauseViewChangeType: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeWithCauseViewOneOfChangeType1.self)
             self = .stateChangeWithCauseViewChangeType1(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeWithCauseViewChangeType1: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeWithCauseViewOneOfChangeType2.self)
             self = .stateChangeWithCauseViewChangeType2(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeWithCauseViewChangeType2: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeWithCauseViewOneOfChangeType3.self)
             self = .stateChangeWithCauseViewChangeType3(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeWithCauseViewChangeType3: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeWithCauseViewOneOfChangeType4.self)
             self = .stateChangeWithCauseViewChangeType4(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeWithCauseViewChangeType4: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeWithCauseViewOneOfChangeType5.self)
             self = .stateChangeWithCauseViewChangeType5(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeWithCauseViewChangeType5: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeWithCauseViewOneOfChangeType6.self)
             self = .stateChangeWithCauseViewChangeType6(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeWithCauseViewChangeType6: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeWithCauseViewOneOfChangeType7.self)
             self = .stateChangeWithCauseViewChangeType7(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeWithCauseViewChangeType7: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeWithCauseViewOneOfChangeType8.self)
             self = .stateChangeWithCauseViewChangeType8(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeWithCauseViewChangeType8: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeWithCauseViewOneOfChangeType9.self)
             self = .stateChangeWithCauseViewChangeType9(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeWithCauseViewChangeType9: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeWithCauseViewOneOfChangeType10.self)
             self = .stateChangeWithCauseViewChangeType10(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeWithCauseViewChangeType10: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -9060,44 +9866,45 @@ public enum StateChangeWithCauseView: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for StateChangeWithCauseView\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for StateChangeWithCauseView:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for StateChangeWithCauseView:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .stateChangeWithCauseViewChangeType(let value):
+        case let .stateChangeWithCauseViewChangeType(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .stateChangeWithCauseViewChangeType1(let value):
+        case let .stateChangeWithCauseViewChangeType1(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .stateChangeWithCauseViewChangeType2(let value):
+        case let .stateChangeWithCauseViewChangeType2(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .stateChangeWithCauseViewChangeType3(let value):
+        case let .stateChangeWithCauseViewChangeType3(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .stateChangeWithCauseViewChangeType4(let value):
+        case let .stateChangeWithCauseViewChangeType4(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .stateChangeWithCauseViewChangeType5(let value):
+        case let .stateChangeWithCauseViewChangeType5(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .stateChangeWithCauseViewChangeType6(let value):
+        case let .stateChangeWithCauseViewChangeType6(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .stateChangeWithCauseViewChangeType7(let value):
+        case let .stateChangeWithCauseViewChangeType7(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .stateChangeWithCauseViewChangeType8(let value):
+        case let .stateChangeWithCauseViewChangeType8(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .stateChangeWithCauseViewChangeType9(let value):
+        case let .stateChangeWithCauseViewChangeType9(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .stateChangeWithCauseViewChangeType10(let value):
+        case let .stateChangeWithCauseViewChangeType10(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
         }
@@ -9105,7 +9912,8 @@ public enum StateChangeWithCauseView: Codable {
 }
 
 // MARK: - StorageError
-public enum StorageError: Codable {
+
+public enum StorageError: Codable, Sendable {
     case storageInternalError
     case missingTrieValue(MissingTrieValue)
     case unexpectedTrieValue
@@ -9122,13 +9930,16 @@ public enum StorageError: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("MissingTrieValue") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("MissingTrieValue") == .orderedSame
+                    }) {
                     let value = try container.decode(MissingTrieValue.self, forKey: matchingKey)
                     self = .missingTrieValue(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".missingTrieValue: \(describeDecodingError(error))")
         }
         if let value = try? decoder.singleValueContainer().decode(String.self), value == "UnexpectedTrieValue" {
@@ -9137,35 +9948,44 @@ public enum StorageError: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("StorageInconsistentState") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("StorageInconsistentState") == .orderedSame
+                    }) {
                     let value = try container.decode(String.self, forKey: matchingKey)
                     self = .storageInconsistentState(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".storageInconsistentState: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("FlatStorageBlockNotSupported") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("FlatStorageBlockNotSupported") == .orderedSame
+                    }) {
                     let value = try container.decode(String.self, forKey: matchingKey)
                     self = .flatStorageBlockNotSupported(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".flatStorageBlockNotSupported: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("MemTrieLoadingError") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("MemTrieLoadingError") == .orderedSame
+                    }) {
                     let value = try container.decode(String.self, forKey: matchingKey)
                     self = .memTrieLoadingError(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".memTrieLoadingError: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -9179,7 +9999,8 @@ public enum StorageError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for StorageError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for StorageError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for StorageError:\n" + decodingErrors
+                .joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -9193,16 +10014,16 @@ public enum StorageError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .missingTrieValue(let value):
+        case let .missingTrieValue(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .missingTrieValue)
-        case .storageInconsistentState(let value):
+        case let .storageInconsistentState(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .storageInconsistentState)
-        case .flatStorageBlockNotSupported(let value):
+        case let .flatStorageBlockNotSupported(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .flatStorageBlockNotSupported)
-        case .memTrieLoadingError(let value):
+        case let .memTrieLoadingError(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .memTrieLoadingError)
         case .storageInternalError:
@@ -9216,7 +10037,8 @@ public enum StorageError: Codable {
 }
 
 // MARK: - SyncConfig
-public enum SyncConfig: Codable {
+
+public enum SyncConfig: Codable, Sendable {
     case peers
     case externalStorage(ExternalStorageConfig)
 
@@ -9229,13 +10051,16 @@ public enum SyncConfig: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ExternalStorage") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("ExternalStorage") == .orderedSame
+                    }) {
                     let value = try container.decode(ExternalStorageConfig.self, forKey: matchingKey)
                     self = .externalStorage(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".externalStorage: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -9249,7 +10074,8 @@ public enum SyncConfig: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for SyncConfig\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for SyncConfig:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for SyncConfig:\n" + decodingErrors
+                .joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -9260,7 +10086,7 @@ public enum SyncConfig: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .externalStorage(let value):
+        case let .externalStorage(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .externalStorage)
         case .peers:
@@ -9271,7 +10097,8 @@ public enum SyncConfig: Codable {
 }
 
 // MARK: - TrackedShardsConfig
-public enum TrackedShardsConfig: Codable {
+
+public enum TrackedShardsConfig: Codable, Sendable {
     case noShards
     case shards([ShardUId])
     case allShards
@@ -9288,13 +10115,14 @@ public enum TrackedShardsConfig: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("Shards") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("Shards") == .orderedSame }) {
                     let value = try container.decode([ShardUId].self, forKey: matchingKey)
                     self = .shards(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".shards: \(describeDecodingError(error))")
         }
         if let value = try? decoder.singleValueContainer().decode(String.self), value == "AllShards" {
@@ -9303,35 +10131,40 @@ public enum TrackedShardsConfig: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ShadowValidator") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("ShadowValidator") == .orderedSame
+                    }) {
                     let value = try container.decode(AccountId.self, forKey: matchingKey)
                     self = .shadowValidator(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".shadowValidator: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("Schedule") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("Schedule") == .orderedSame }) {
                     let value = try container.decode([[ShardId]].self, forKey: matchingKey)
                     self = .schedule(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".schedule: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("Accounts") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("Accounts") == .orderedSame }) {
                     let value = try container.decode([AccountId].self, forKey: matchingKey)
                     self = .accounts(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".accounts: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -9345,7 +10178,8 @@ public enum TrackedShardsConfig: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for TrackedShardsConfig\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for TrackedShardsConfig:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for TrackedShardsConfig:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -9359,16 +10193,16 @@ public enum TrackedShardsConfig: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .shards(let value):
+        case let .shards(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .shards)
-        case .shadowValidator(let value):
+        case let .shadowValidator(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .shadowValidator)
-        case .schedule(let value):
+        case let .schedule(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .schedule)
-        case .accounts(let value):
+        case let .accounts(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .accounts)
         case .noShards:
@@ -9382,7 +10216,8 @@ public enum TrackedShardsConfig: Codable {
 }
 
 // MARK: - TxExecutionError
-public enum TxExecutionError: Codable {
+
+public enum TxExecutionError: Codable, Sendable {
     case actionError(ActionError)
     case invalidTxError(InvalidTxError)
 
@@ -9391,24 +10226,26 @@ public enum TxExecutionError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ActionError") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("ActionError") == .orderedSame }) {
                     let value = try container.decode(ActionError.self, forKey: matchingKey)
                     self = .actionError(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".actionError: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidTxError") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidTxError") == .orderedSame }) {
                     let value = try container.decode(InvalidTxError.self, forKey: matchingKey)
                     self = .invalidTxError(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".invalidTxError: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -9422,7 +10259,8 @@ public enum TxExecutionError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for TxExecutionError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for TxExecutionError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for TxExecutionError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -9434,10 +10272,10 @@ public enum TxExecutionError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .actionError(let value):
+        case let .actionError(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .actionError)
-        case .invalidTxError(let value):
+        case let .invalidTxError(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .invalidTxError)
         }
@@ -9445,7 +10283,8 @@ public enum TxExecutionError: Codable {
 }
 
 // MARK: - TxExecutionStatus
-public enum TxExecutionStatus: Codable {
+
+public enum TxExecutionStatus: Codable, Sendable {
     case none
     case included
     case executedOPTIMISTIC
@@ -9491,7 +10330,8 @@ public enum TxExecutionStatus: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for TxExecutionStatus\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for TxExecutionStatus:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for TxExecutionStatus:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -9521,7 +10361,8 @@ public enum TxExecutionStatus: Codable {
 }
 
 // MARK: - VMKind
-public enum VMKind: Codable {
+
+public enum VMKind: Codable, Sendable {
     case wasmer0
     case wasmtime
     case wasmer2
@@ -9557,7 +10398,8 @@ public enum VMKind: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for VMKind\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for VMKind:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for VMKind:\n" + decodingErrors
+                .joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -9581,72 +10423,73 @@ public enum VMKind: Codable {
 }
 
 // MARK: - ValidatorKickoutReason
-public struct ValidatorKickoutReasonOneOfNotEnoughBlocksInline: Codable {
+
+public struct ValidatorKickoutReasonOneOfNotEnoughBlocksInline: Codable, Sendable {
     public let expected: UInt64
     public let produced: UInt64
 
     public init(
         expected: UInt64,
-        produced: UInt64
+        produced: UInt64,
     ) {
         self.expected = expected
         self.produced = produced
     }
 }
 
-public struct ValidatorKickoutReasonOneOfNotEnoughChunksInline: Codable {
+public struct ValidatorKickoutReasonOneOfNotEnoughChunksInline: Codable, Sendable {
     public let expected: UInt64
     public let produced: UInt64
 
     public init(
         expected: UInt64,
-        produced: UInt64
+        produced: UInt64,
     ) {
         self.expected = expected
         self.produced = produced
     }
 }
 
-public struct ValidatorKickoutReasonOneOfNotEnoughStakeInline: Codable {
+public struct ValidatorKickoutReasonOneOfNotEnoughStakeInline: Codable, Sendable {
     public let stakeU128: NearToken
     public let thresholdU128: NearToken
 
     public init(
         stakeU128: NearToken,
-        thresholdU128: NearToken
+        thresholdU128: NearToken,
     ) {
         self.stakeU128 = stakeU128
         self.thresholdU128 = thresholdU128
     }
 }
 
-public struct ValidatorKickoutReasonOneOfNotEnoughChunkEndorsementsInline: Codable {
+public struct ValidatorKickoutReasonOneOfNotEnoughChunkEndorsementsInline: Codable, Sendable {
     public let expected: UInt64
     public let produced: UInt64
 
     public init(
         expected: UInt64,
-        produced: UInt64
+        produced: UInt64,
     ) {
         self.expected = expected
         self.produced = produced
     }
 }
 
-public struct ValidatorKickoutReasonOneOfProtocolVersionTooOldInline: Codable {
+public struct ValidatorKickoutReasonOneOfProtocolVersionTooOldInline: Codable, Sendable {
     public let networkVersion: Int
     public let version: Int
 
     public init(
         networkVersion: Int,
-        version: Int
+        version: Int,
     ) {
         self.networkVersion = networkVersion
         self.version = version
     }
 }
 
-public enum ValidatorKickoutReason: Codable {
+public enum ValidatorKickoutReason: Codable, Sendable {
     case UnusedSlashed
     case notEnoughBlocks(ValidatorKickoutReasonOneOfNotEnoughBlocksInline)
     case notEnoughChunks(ValidatorKickoutReasonOneOfNotEnoughChunksInline)
@@ -9665,24 +10508,36 @@ public enum ValidatorKickoutReason: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("NotEnoughBlocks") == .orderedSame }) {
-                    let value = try container.decode(ValidatorKickoutReasonOneOfNotEnoughBlocksInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("NotEnoughBlocks") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ValidatorKickoutReasonOneOfNotEnoughBlocksInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .notEnoughBlocks(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".notEnoughBlocks: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("NotEnoughChunks") == .orderedSame }) {
-                    let value = try container.decode(ValidatorKickoutReasonOneOfNotEnoughChunksInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("NotEnoughChunks") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ValidatorKickoutReasonOneOfNotEnoughChunksInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .notEnoughChunks(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".notEnoughChunks: \(describeDecodingError(error))")
         }
         if let value = try? decoder.singleValueContainer().decode(String.self), value == "Unstaked" {
@@ -9691,13 +10546,17 @@ public enum ValidatorKickoutReason: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("NotEnoughStake") == .orderedSame }) {
-                    let value = try container.decode(ValidatorKickoutReasonOneOfNotEnoughStakeInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("NotEnoughStake") == .orderedSame }) {
+                    let value = try container.decode(
+                        ValidatorKickoutReasonOneOfNotEnoughStakeInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .notEnoughStake(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".notEnoughStake: \(describeDecodingError(error))")
         }
         if let value = try? decoder.singleValueContainer().decode(String.self), value == "DidNotGetASeat" {
@@ -9706,24 +10565,36 @@ public enum ValidatorKickoutReason: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("NotEnoughChunkEndorsements") == .orderedSame }) {
-                    let value = try container.decode(ValidatorKickoutReasonOneOfNotEnoughChunkEndorsementsInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("NotEnoughChunkEndorsements") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ValidatorKickoutReasonOneOfNotEnoughChunkEndorsementsInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .notEnoughChunkEndorsements(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".notEnoughChunkEndorsements: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ProtocolVersionTooOld") == .orderedSame }) {
-                    let value = try container.decode(ValidatorKickoutReasonOneOfProtocolVersionTooOldInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("ProtocolVersionTooOld") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ValidatorKickoutReasonOneOfProtocolVersionTooOldInline.self,
+                        forKey: matchingKey,
+                    )
                     self = .protocolVersionTooOld(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".protocolVersionTooOld: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -9737,7 +10608,8 @@ public enum ValidatorKickoutReason: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for ValidatorKickoutReason\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for ValidatorKickoutReason:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ValidatorKickoutReason:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -9752,19 +10624,19 @@ public enum ValidatorKickoutReason: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .notEnoughBlocks(let value):
+        case let .notEnoughBlocks(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .notEnoughBlocks)
-        case .notEnoughChunks(let value):
+        case let .notEnoughChunks(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .notEnoughChunks)
-        case .notEnoughStake(let value):
+        case let .notEnoughStake(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .notEnoughStake)
-        case .notEnoughChunkEndorsements(let value):
+        case let .notEnoughChunkEndorsements(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .notEnoughChunkEndorsements)
-        case .protocolVersionTooOld(let value):
+        case let .protocolVersionTooOld(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .protocolVersionTooOld)
         case .UnusedSlashed:
@@ -9781,7 +10653,8 @@ public enum ValidatorKickoutReason: Codable {
 }
 
 // MARK: - ValidatorStakeView
-public struct ValidatorStakeViewOneOfAccountIdPublicKeyStake: Codable {
+
+public struct ValidatorStakeViewOneOfAccountIdPublicKeyStake: Codable, Sendable {
     public let accountId: AccountId
     public let publicKey: PublicKey
     public let stake: NearToken
@@ -9789,7 +10662,7 @@ public struct ValidatorStakeViewOneOfAccountIdPublicKeyStake: Codable {
     public init(
         accountId: AccountId,
         publicKey: PublicKey,
-        stake: NearToken
+        stake: NearToken,
     ) {
         self.accountId = accountId
         self.publicKey = publicKey
@@ -9797,7 +10670,7 @@ public struct ValidatorStakeViewOneOfAccountIdPublicKeyStake: Codable {
     }
 }
 
-public enum ValidatorStakeView: Codable {
+public enum ValidatorStakeView: Codable, Sendable {
     case validatorStakeViewAccountIdPublicKeyStake(ValidatorStakeViewOneOfAccountIdPublicKeyStake)
 
     public init(from decoder: Decoder) throws {
@@ -9807,7 +10680,7 @@ public enum ValidatorStakeView: Codable {
             let value = try decoder.singleValueContainer().decode(ValidatorStakeViewOneOfAccountIdPublicKeyStake.self)
             self = .validatorStakeViewAccountIdPublicKeyStake(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".validatorStakeViewAccountIdPublicKeyStake: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -9821,14 +10694,15 @@ public enum ValidatorStakeView: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for ValidatorStakeView\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for ValidatorStakeView:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ValidatorStakeView:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .validatorStakeViewAccountIdPublicKeyStake(let value):
+        case let .validatorStakeViewAccountIdPublicKeyStake(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
         }
@@ -9836,7 +10710,8 @@ public enum ValidatorStakeView: Codable {
 }
 
 // MARK: - WasmTrap
-public enum WasmTrap: Codable {
+
+public enum WasmTrap: Codable, Sendable {
     case unreachable
     case incorrectCallIndirectSignature
     case memoryOutOfBounds
@@ -9854,7 +10729,8 @@ public enum WasmTrap: Codable {
             self = .unreachable
             return
         }
-        if let value = try? decoder.singleValueContainer().decode(String.self), value == "IncorrectCallIndirectSignature" {
+        if let value = try? decoder.singleValueContainer().decode(String.self),
+           value == "IncorrectCallIndirectSignature" {
             self = .incorrectCallIndirectSignature
             return
         }
@@ -9897,7 +10773,8 @@ public enum WasmTrap: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for WasmTrap\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for WasmTrap:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for WasmTrap:\n" + decodingErrors
+                .joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -9936,19 +10813,22 @@ public enum WasmTrap: Codable {
 }
 
 // MARK: - EpochId
+
 public typealias EpochId = CryptoHash
 
 // MARK: - PeerId
+
 public typealias PeerId = PublicKey
 
 // MARK: - AccessKey
-public struct AccessKey: Codable {
+
+public struct AccessKey: Codable, Sendable {
     public let nonce: UInt64
     public let permission: AccessKeyPermission
 
     public init(
         nonce: UInt64,
-        permission: AccessKeyPermission
+        permission: AccessKeyPermission,
     ) {
         self.nonce = nonce
         self.permission = permission
@@ -9956,7 +10836,8 @@ public struct AccessKey: Codable {
 }
 
 // MARK: - AccessKeyCreationConfigView
-public struct AccessKeyCreationConfigView: Codable {
+
+public struct AccessKeyCreationConfigView: Codable, Sendable {
     public let fullAccessCost: Fee
     public let functionCallCost: Fee
     public let functionCallCostPerByte: Fee
@@ -9964,7 +10845,7 @@ public struct AccessKeyCreationConfigView: Codable {
     public init(
         fullAccessCost: Fee,
         functionCallCost: Fee,
-        functionCallCostPerByte: Fee
+        functionCallCostPerByte: Fee,
     ) {
         self.fullAccessCost = fullAccessCost
         self.functionCallCost = functionCallCost
@@ -9973,13 +10854,14 @@ public struct AccessKeyCreationConfigView: Codable {
 }
 
 // MARK: - AccessKeyInfoView
-public struct AccessKeyInfoView: Codable {
+
+public struct AccessKeyInfoView: Codable, Sendable {
     public let accessKey: AccessKeyView
     public let publicKey: PublicKey
 
     public init(
         accessKey: AccessKeyView,
-        publicKey: PublicKey
+        publicKey: PublicKey,
     ) {
         self.accessKey = accessKey
         self.publicKey = publicKey
@@ -9987,24 +10869,26 @@ public struct AccessKeyInfoView: Codable {
 }
 
 // MARK: - AccessKeyList
-public struct AccessKeyList: Codable {
+
+public struct AccessKeyList: Codable, Sendable {
     public let keys: [AccessKeyInfoView]
 
     public init(
-        keys: [AccessKeyInfoView]
+        keys: [AccessKeyInfoView],
     ) {
         self.keys = keys
     }
 }
 
 // MARK: - AccessKeyView
-public struct AccessKeyView: Codable {
+
+public struct AccessKeyView: Codable, Sendable {
     public let nonce: UInt64
     public let permission: AccessKeyPermissionView
 
     public init(
         nonce: UInt64,
-        permission: AccessKeyPermissionView
+        permission: AccessKeyPermissionView,
     ) {
         self.nonce = nonce
         self.permission = permission
@@ -10012,13 +10896,14 @@ public struct AccessKeyView: Codable {
 }
 
 // MARK: - AccountCreationConfigView
-public struct AccountCreationConfigView: Codable {
+
+public struct AccountCreationConfigView: Codable, Sendable {
     public let minAllowedTopLevelAccountLength: Int
     public let registrarAccountId: AccountId
 
     public init(
         minAllowedTopLevelAccountLength: Int,
-        registrarAccountId: AccountId
+        registrarAccountId: AccountId,
     ) {
         self.minAllowedTopLevelAccountLength = minAllowedTopLevelAccountLength
         self.registrarAccountId = registrarAccountId
@@ -10026,7 +10911,8 @@ public struct AccountCreationConfigView: Codable {
 }
 
 // MARK: - AccountDataView
-public struct AccountDataView: Codable {
+
+public struct AccountDataView: Codable, Sendable {
     public let accountKey: PublicKey
     public let peerId: PublicKey
     public let proxies: [Tier1ProxyView]
@@ -10036,7 +10922,7 @@ public struct AccountDataView: Codable {
         accountKey: PublicKey,
         peerId: PublicKey,
         proxies: [Tier1ProxyView],
-        timestamp: String
+        timestamp: String,
     ) {
         self.accountKey = accountKey
         self.peerId = peerId
@@ -10046,7 +10932,8 @@ public struct AccountDataView: Codable {
 }
 
 // MARK: - AccountInfo
-public struct AccountInfo: Codable {
+
+public struct AccountInfo: Codable, Sendable {
     public let accountId: AccountId
     public let amount: NearToken
     public let publicKey: PublicKey
@@ -10054,7 +10941,7 @@ public struct AccountInfo: Codable {
     public init(
         accountId: AccountId,
         amount: NearToken,
-        publicKey: PublicKey
+        publicKey: PublicKey,
     ) {
         self.accountId = accountId
         self.amount = amount
@@ -10063,7 +10950,8 @@ public struct AccountInfo: Codable {
 }
 
 // MARK: - AccountView
-public struct AccountView: Codable {
+
+public struct AccountView: Codable, Sendable {
     public let amount: NearToken
     public let codeHash: CryptoHash
     public let globalContractAccountId: AccountId?
@@ -10079,7 +10967,7 @@ public struct AccountView: Codable {
         globalContractHash: CryptoHash?,
         locked: NearToken,
         storagePaidAt: UInt64?,
-        storageUsage: UInt64
+        storageUsage: UInt64,
     ) {
         self.amount = amount
         self.codeHash = codeHash
@@ -10092,13 +10980,14 @@ public struct AccountView: Codable {
 }
 
 // MARK: - AccountWithPublicKey
-public struct AccountWithPublicKey: Codable {
+
+public struct AccountWithPublicKey: Codable, Sendable {
     public let accountId: AccountId
     public let publicKey: PublicKey
 
     public init(
         accountId: AccountId,
-        publicKey: PublicKey
+        publicKey: PublicKey,
     ) {
         self.accountId = accountId
         self.publicKey = publicKey
@@ -10106,7 +10995,8 @@ public struct AccountWithPublicKey: Codable {
 }
 
 // MARK: - ActionCreationConfigView
-public struct ActionCreationConfigView: Codable {
+
+public struct ActionCreationConfigView: Codable, Sendable {
     public let addKeyCost: AccessKeyCreationConfigView
     public let createAccountCost: Fee
     public let delegateCost: Fee
@@ -10130,7 +11020,7 @@ public struct ActionCreationConfigView: Codable {
         functionCallCost: Fee,
         functionCallCostPerByte: Fee,
         stakeCost: Fee,
-        transferCost: Fee
+        transferCost: Fee,
     ) {
         self.addKeyCost = addKeyCost
         self.createAccountCost = createAccountCost
@@ -10147,13 +11037,14 @@ public struct ActionCreationConfigView: Codable {
 }
 
 // MARK: - ActionError
-public struct ActionError: Codable {
+
+public struct ActionError: Codable, Sendable {
     public let index: UInt64?
     public let kind: ActionErrorKind
 
     public init(
         index: UInt64?,
-        kind: ActionErrorKind
+        kind: ActionErrorKind,
     ) {
         self.index = index
         self.kind = kind
@@ -10161,13 +11052,14 @@ public struct ActionError: Codable {
 }
 
 // MARK: - AddKeyAction
-public struct AddKeyAction: Codable {
+
+public struct AddKeyAction: Codable, Sendable {
     public let accessKey: AccessKey
     public let publicKey: PublicKey
 
     public init(
         accessKey: AccessKey,
-        publicKey: PublicKey
+        publicKey: PublicKey,
     ) {
         self.accessKey = accessKey
         self.publicKey = publicKey
@@ -10175,13 +11067,14 @@ public struct AddKeyAction: Codable {
 }
 
 // MARK: - BandwidthRequest
-public struct BandwidthRequest: Codable {
+
+public struct BandwidthRequest: Codable, Sendable {
     public let requestedValuesBitmap: BandwidthRequestBitmap
     public let toShard: Int
 
     public init(
         requestedValuesBitmap: BandwidthRequestBitmap,
-        toShard: Int
+        toShard: Int,
     ) {
         self.requestedValuesBitmap = requestedValuesBitmap
         self.toShard = toShard
@@ -10189,29 +11082,32 @@ public struct BandwidthRequest: Codable {
 }
 
 // MARK: - BandwidthRequestBitmap
-public struct BandwidthRequestBitmap: Codable {
+
+public struct BandwidthRequestBitmap: Codable, Sendable {
     public let data: [Int]
 
     public init(
-        data: [Int]
+        data: [Int],
     ) {
         self.data = data
     }
 }
 
 // MARK: - BandwidthRequestsV1
-public struct BandwidthRequestsV1: Codable {
+
+public struct BandwidthRequestsV1: Codable, Sendable {
     public let requests: [BandwidthRequest]
 
     public init(
-        requests: [BandwidthRequest]
+        requests: [BandwidthRequest],
     ) {
         self.requests = requests
     }
 }
 
 // MARK: - BlockHeaderInnerLiteView
-public struct BlockHeaderInnerLiteView: Codable {
+
+public struct BlockHeaderInnerLiteView: Codable, Sendable {
     public let blockMerkleRoot: CryptoHash
     public let epochId: CryptoHash
     public let height: UInt64
@@ -10231,7 +11127,7 @@ public struct BlockHeaderInnerLiteView: Codable {
         outcomeRoot: CryptoHash,
         prevStateRoot: CryptoHash,
         timestamp: UInt64,
-        timestampNanosec: String
+        timestampNanosec: String,
     ) {
         self.blockMerkleRoot = blockMerkleRoot
         self.epochId = epochId
@@ -10246,7 +11142,8 @@ public struct BlockHeaderInnerLiteView: Codable {
 }
 
 // MARK: - BlockHeaderView
-public struct BlockHeaderView: Codable {
+
+public struct BlockHeaderView: Codable, Sendable {
     public let approvals: [Signature?]
     public let blockBodyHash: CryptoHash?
     public let blockMerkleRoot: CryptoHash
@@ -10316,7 +11213,7 @@ public struct BlockHeaderView: Codable {
         timestampNanosec: String,
         totalSupply: NearToken,
         validatorProposals: [ValidatorStakeView],
-        validatorReward: NearToken?
+        validatorReward: NearToken?,
     ) {
         self.approvals = approvals
         self.blockBodyHash = blockBodyHash
@@ -10356,13 +11253,14 @@ public struct BlockHeaderView: Codable {
 }
 
 // MARK: - BlockStatusView
-public struct BlockStatusView: Codable {
+
+public struct BlockStatusView: Codable, Sendable {
     public let hash: CryptoHash
     public let height: UInt64
 
     public init(
         hash: CryptoHash,
-        height: UInt64
+        height: UInt64,
     ) {
         self.hash = hash
         self.height = height
@@ -10370,13 +11268,14 @@ public struct BlockStatusView: Codable {
 }
 
 // MARK: - CallResult
-public struct CallResult: Codable {
+
+public struct CallResult: Codable, Sendable {
     public let logs: [String]
     public let result: [Int]
 
     public init(
         logs: [String],
-        result: [Int]
+        result: [Int],
     ) {
         self.logs = logs
         self.result = result
@@ -10384,7 +11283,8 @@ public struct CallResult: Codable {
 }
 
 // MARK: - CatchupStatusView
-public struct CatchupStatusView: Codable {
+
+public struct CatchupStatusView: Codable, Sendable {
     public let blocksToCatchup: [BlockStatusView]
     public let shardSyncStatus: AnyCodable
     public let syncBlockHash: CryptoHash
@@ -10394,7 +11294,7 @@ public struct CatchupStatusView: Codable {
         blocksToCatchup: [BlockStatusView],
         shardSyncStatus: AnyCodable,
         syncBlockHash: CryptoHash,
-        syncBlockHeight: UInt64
+        syncBlockHeight: UInt64,
     ) {
         self.blocksToCatchup = blocksToCatchup
         self.shardSyncStatus = shardSyncStatus
@@ -10404,13 +11304,14 @@ public struct CatchupStatusView: Codable {
 }
 
 // MARK: - ChunkDistributionNetworkConfig
-public struct ChunkDistributionNetworkConfig: Codable {
+
+public struct ChunkDistributionNetworkConfig: Codable, Sendable {
     public let enabled: Bool
     public let uris: ChunkDistributionUris
 
     public init(
         enabled: Bool,
-        uris: ChunkDistributionUris
+        uris: ChunkDistributionUris,
     ) {
         self.enabled = enabled
         self.uris = uris
@@ -10418,13 +11319,14 @@ public struct ChunkDistributionNetworkConfig: Codable {
 }
 
 // MARK: - ChunkDistributionUris
-public struct ChunkDistributionUris: Codable {
+
+public struct ChunkDistributionUris: Codable, Sendable {
     public let get: String
     public let set: String
 
     public init(
         get: String,
-        set: String
+        set: String,
     ) {
         self.get = get
         self.set = set
@@ -10432,7 +11334,8 @@ public struct ChunkDistributionUris: Codable {
 }
 
 // MARK: - ChunkHeaderView
-public struct ChunkHeaderView: Codable {
+
+public struct ChunkHeaderView: Codable, Sendable {
     public let balanceBurnt: NearToken
     public let bandwidthRequests: BandwidthRequests?
     public let chunkHash: CryptoHash
@@ -10474,7 +11377,7 @@ public struct ChunkHeaderView: Codable {
         signature: Signature,
         txRoot: CryptoHash,
         validatorProposals: [ValidatorStakeView],
-        validatorReward: NearToken?
+        validatorReward: NearToken?,
     ) {
         self.balanceBurnt = balanceBurnt
         self.bandwidthRequests = bandwidthRequests
@@ -10500,18 +11403,20 @@ public struct ChunkHeaderView: Codable {
 }
 
 // MARK: - CloudArchivalReaderConfig
-public struct CloudArchivalReaderConfig: Codable {
+
+public struct CloudArchivalReaderConfig: Codable, Sendable {
     public let cloudStorage: CloudStorageConfig
 
     public init(
-        cloudStorage: CloudStorageConfig
+        cloudStorage: CloudStorageConfig,
     ) {
         self.cloudStorage = cloudStorage
     }
 }
 
 // MARK: - CloudArchivalWriterConfig
-public struct CloudArchivalWriterConfig: Codable {
+
+public struct CloudArchivalWriterConfig: Codable, Sendable {
     public let archiveBlockData: Bool?
     public let cloudStorage: CloudStorageConfig
     public let pollingInterval: DurationAsStdSchemaProvider?
@@ -10519,7 +11424,7 @@ public struct CloudArchivalWriterConfig: Codable {
     public init(
         archiveBlockData: Bool?,
         cloudStorage: CloudStorageConfig,
-        pollingInterval: DurationAsStdSchemaProvider?
+        pollingInterval: DurationAsStdSchemaProvider?,
     ) {
         self.archiveBlockData = archiveBlockData
         self.cloudStorage = cloudStorage
@@ -10528,13 +11433,14 @@ public struct CloudArchivalWriterConfig: Codable {
 }
 
 // MARK: - CloudStorageConfig
-public struct CloudStorageConfig: Codable {
+
+public struct CloudStorageConfig: Codable, Sendable {
     public let credentialsFile: String?
     public let storage: ExternalStorageLocation
 
     public init(
         credentialsFile: String?,
-        storage: ExternalStorageLocation
+        storage: ExternalStorageLocation,
     ) {
         self.credentialsFile = credentialsFile
         self.storage = storage
@@ -10542,7 +11448,8 @@ public struct CloudStorageConfig: Codable {
 }
 
 // MARK: - CongestionControlConfigView
-public struct CongestionControlConfigView: Codable {
+
+public struct CongestionControlConfigView: Codable, Sendable {
     public let allowedShardOutgoingGas: NearGas
     public let maxCongestionIncomingGas: NearGas
     public let maxCongestionMemoryConsumption: UInt64
@@ -10568,7 +11475,7 @@ public struct CongestionControlConfigView: Codable {
         minTxGas: NearGas,
         outgoingReceiptsBigSizeLimit: UInt64,
         outgoingReceiptsUsualSizeLimit: UInt64,
-        rejectTxCongestionThreshold: Double
+        rejectTxCongestionThreshold: Double,
     ) {
         self.allowedShardOutgoingGas = allowedShardOutgoingGas
         self.maxCongestionIncomingGas = maxCongestionIncomingGas
@@ -10586,7 +11493,8 @@ public struct CongestionControlConfigView: Codable {
 }
 
 // MARK: - CongestionInfoView
-public struct CongestionInfoView: Codable {
+
+public struct CongestionInfoView: Codable, Sendable {
     public let allowedShard: Int
     public let bufferedReceiptsGas: String
     public let delayedReceiptsGas: String
@@ -10596,7 +11504,7 @@ public struct CongestionInfoView: Codable {
         allowedShard: Int,
         bufferedReceiptsGas: String,
         delayedReceiptsGas: String,
-        receiptBytes: UInt64
+        receiptBytes: UInt64,
     ) {
         self.allowedShard = allowedShard
         self.bufferedReceiptsGas = bufferedReceiptsGas
@@ -10606,13 +11514,14 @@ public struct CongestionInfoView: Codable {
 }
 
 // MARK: - ContractCodeView
-public struct ContractCodeView: Codable {
+
+public struct ContractCodeView: Codable, Sendable {
     public let codeBase64: String
     public let hash: CryptoHash
 
     public init(
         codeBase64: String,
-        hash: CryptoHash
+        hash: CryptoHash,
     ) {
         self.codeBase64 = codeBase64
         self.hash = hash
@@ -10620,7 +11529,8 @@ public struct ContractCodeView: Codable {
 }
 
 // MARK: - CostGasUsed
-public struct CostGasUsed: Codable {
+
+public struct CostGasUsed: Codable, Sendable {
     public let cost: String
     public let costCategory: String
     public let gasUsed: String
@@ -10628,7 +11538,7 @@ public struct CostGasUsed: Codable {
     public init(
         cost: String,
         costCategory: String,
-        gasUsed: String
+        gasUsed: String,
     ) {
         self.cost = cost
         self.costCategory = costCategory
@@ -10637,13 +11547,14 @@ public struct CostGasUsed: Codable {
 }
 
 // MARK: - CreateAccountAction
-public struct CreateAccountAction: Codable {
 
+public struct CreateAccountAction: Codable, Sendable {
     public init() {}
 }
 
 // MARK: - CurrentEpochValidatorInfo
-public struct CurrentEpochValidatorInfo: Codable {
+
+public struct CurrentEpochValidatorInfo: Codable, Sendable {
     public let accountId: AccountId
     public let isSlashed: Bool
     public let numExpectedBlocks: UInt64
@@ -10677,7 +11588,7 @@ public struct CurrentEpochValidatorInfo: Codable {
         publicKey: PublicKey,
         shards: [ShardId],
         shardsEndorsed: [ShardId]?,
-        stake: NearToken
+        stake: NearToken,
     ) {
         self.accountId = accountId
         self.isSlashed = isSlashed
@@ -10699,13 +11610,14 @@ public struct CurrentEpochValidatorInfo: Codable {
 }
 
 // MARK: - DataReceiptCreationConfigView
-public struct DataReceiptCreationConfigView: Codable {
+
+public struct DataReceiptCreationConfigView: Codable, Sendable {
     public let baseCost: Fee
     public let costPerByte: Fee
 
     public init(
         baseCost: Fee,
-        costPerByte: Fee
+        costPerByte: Fee,
     ) {
         self.baseCost = baseCost
         self.costPerByte = costPerByte
@@ -10713,13 +11625,14 @@ public struct DataReceiptCreationConfigView: Codable {
 }
 
 // MARK: - DataReceiverView
-public struct DataReceiverView: Codable {
+
+public struct DataReceiverView: Codable, Sendable {
     public let dataId: CryptoHash
     public let receiverId: AccountId
 
     public init(
         dataId: CryptoHash,
-        receiverId: AccountId
+        receiverId: AccountId,
     ) {
         self.dataId = dataId
         self.receiverId = receiverId
@@ -10727,7 +11640,8 @@ public struct DataReceiverView: Codable {
 }
 
 // MARK: - DelegateAction
-public struct DelegateAction: Codable {
+
+public struct DelegateAction: Codable, Sendable {
     public let actions: [NonDelegateAction]
     public let maxBlockHeight: UInt64
     public let nonce: UInt64
@@ -10741,7 +11655,7 @@ public struct DelegateAction: Codable {
         nonce: UInt64,
         publicKey: PublicKey,
         receiverId: AccountId,
-        senderId: AccountId
+        senderId: AccountId,
     ) {
         self.actions = actions
         self.maxBlockHeight = maxBlockHeight
@@ -10753,46 +11667,50 @@ public struct DelegateAction: Codable {
 }
 
 // MARK: - DeleteAccountAction
-public struct DeleteAccountAction: Codable {
+
+public struct DeleteAccountAction: Codable, Sendable {
     public let beneficiaryId: AccountId
 
     public init(
-        beneficiaryId: AccountId
+        beneficiaryId: AccountId,
     ) {
         self.beneficiaryId = beneficiaryId
     }
 }
 
 // MARK: - DeleteKeyAction
-public struct DeleteKeyAction: Codable {
+
+public struct DeleteKeyAction: Codable, Sendable {
     public let publicKey: PublicKey
 
     public init(
-        publicKey: PublicKey
+        publicKey: PublicKey,
     ) {
         self.publicKey = publicKey
     }
 }
 
 // MARK: - DeployContractAction
-public struct DeployContractAction: Codable {
+
+public struct DeployContractAction: Codable, Sendable {
     public let code: String
 
     public init(
-        code: String
+        code: String,
     ) {
         self.code = code
     }
 }
 
 // MARK: - DeployGlobalContractAction
-public struct DeployGlobalContractAction: Codable {
+
+public struct DeployGlobalContractAction: Codable, Sendable {
     public let code: String
     public let deployMode: GlobalContractDeployMode
 
     public init(
         code: String,
-        deployMode: GlobalContractDeployMode
+        deployMode: GlobalContractDeployMode,
     ) {
         self.code = code
         self.deployMode = deployMode
@@ -10800,7 +11718,8 @@ public struct DeployGlobalContractAction: Codable {
 }
 
 // MARK: - DetailedDebugStatus
-public struct DetailedDebugStatus: Codable {
+
+public struct DetailedDebugStatus: Codable, Sendable {
     public let blockProductionDelayMillis: UInt64
     public let catchupStatus: [CatchupStatusView]
     public let currentHeadStatus: BlockStatusView
@@ -10814,7 +11733,7 @@ public struct DetailedDebugStatus: Codable {
         currentHeadStatus: BlockStatusView,
         currentHeaderHeadStatus: BlockStatusView,
         networkInfo: NetworkInfoView,
-        syncStatus: String
+        syncStatus: String,
     ) {
         self.blockProductionDelayMillis = blockProductionDelayMillis
         self.catchupStatus = catchupStatus
@@ -10826,13 +11745,14 @@ public struct DetailedDebugStatus: Codable {
 }
 
 // MARK: - DeterministicAccountStateInitV1
-public struct DeterministicAccountStateInitV1: Codable {
+
+public struct DeterministicAccountStateInitV1: Codable, Sendable {
     public let code: GlobalContractIdentifier
     public let data: [String: String]
 
     public init(
         code: GlobalContractIdentifier,
-        data: [String: String]
+        data: [String: String],
     ) {
         self.code = code
         self.data = data
@@ -10840,13 +11760,14 @@ public struct DeterministicAccountStateInitV1: Codable {
 }
 
 // MARK: - DeterministicStateInitAction
-public struct DeterministicStateInitAction: Codable {
+
+public struct DeterministicStateInitAction: Codable, Sendable {
     public let deposit: NearToken
     public let stateInit: DeterministicAccountStateInit
 
     public init(
         deposit: NearToken,
-        stateInit: DeterministicAccountStateInit
+        stateInit: DeterministicAccountStateInit,
     ) {
         self.deposit = deposit
         self.stateInit = stateInit
@@ -10854,7 +11775,8 @@ public struct DeterministicStateInitAction: Codable {
 }
 
 // MARK: - DumpConfig
-public struct DumpConfig: Codable {
+
+public struct DumpConfig: Codable, Sendable {
     public let credentialsFile: String?
     public let iterationDelay: DurationAsStdSchemaProvider?
     public let location: ExternalStorageLocation
@@ -10864,7 +11786,7 @@ public struct DumpConfig: Codable {
         credentialsFile: String?,
         iterationDelay: DurationAsStdSchemaProvider?,
         location: ExternalStorageLocation,
-        restartDumpForShards: [ShardId]?
+        restartDumpForShards: [ShardId]?,
     ) {
         self.credentialsFile = credentialsFile
         self.iterationDelay = iterationDelay
@@ -10874,13 +11796,14 @@ public struct DumpConfig: Codable {
 }
 
 // MARK: - DurationAsStdSchemaProvider
-public struct DurationAsStdSchemaProvider: Codable {
+
+public struct DurationAsStdSchemaProvider: Codable, Sendable {
     public let nanos: Int32
     public let secs: Int64
 
     public init(
         nanos: Int32,
-        secs: Int64
+        secs: Int64,
     ) {
         self.nanos = nanos
         self.secs = secs
@@ -10888,7 +11811,8 @@ public struct DurationAsStdSchemaProvider: Codable {
 }
 
 // MARK: - EpochSyncConfig
-public struct EpochSyncConfig: Codable {
+
+public struct EpochSyncConfig: Codable, Sendable {
     public let disableEpochSyncForBootstrapping: Bool?
     public let epochSyncHorizon: UInt64
     public let ignoreEpochSyncNetworkRequests: Bool?
@@ -10898,7 +11822,7 @@ public struct EpochSyncConfig: Codable {
         disableEpochSyncForBootstrapping: Bool?,
         epochSyncHorizon: UInt64,
         ignoreEpochSyncNetworkRequests: Bool?,
-        timeoutForEpochSync: DurationAsStdSchemaProvider
+        timeoutForEpochSync: DurationAsStdSchemaProvider,
     ) {
         self.disableEpochSyncForBootstrapping = disableEpochSyncForBootstrapping
         self.epochSyncHorizon = epochSyncHorizon
@@ -10908,13 +11832,14 @@ public struct EpochSyncConfig: Codable {
 }
 
 // MARK: - ExecutionMetadataView
-public struct ExecutionMetadataView: Codable {
+
+public struct ExecutionMetadataView: Codable, Sendable {
     public let gasProfile: [CostGasUsed]?
     public let version: Int
 
     public init(
         gasProfile: [CostGasUsed]?,
-        version: Int
+        version: Int,
     ) {
         self.gasProfile = gasProfile
         self.version = version
@@ -10922,7 +11847,8 @@ public struct ExecutionMetadataView: Codable {
 }
 
 // MARK: - ExecutionOutcomeView
-public struct ExecutionOutcomeView: Codable {
+
+public struct ExecutionOutcomeView: Codable, Sendable {
     public let executorId: AccountId
     public let gasBurnt: NearGas
     public let logs: [String]
@@ -10938,7 +11864,7 @@ public struct ExecutionOutcomeView: Codable {
         metadata: ExecutionMetadataView?,
         receiptIds: [CryptoHash],
         status: ExecutionStatusView,
-        tokensBurnt: NearToken
+        tokensBurnt: NearToken,
     ) {
         self.executorId = executorId
         self.gasBurnt = gasBurnt
@@ -10951,7 +11877,8 @@ public struct ExecutionOutcomeView: Codable {
 }
 
 // MARK: - ExecutionOutcomeWithIdView
-public struct ExecutionOutcomeWithIdView: Codable {
+
+public struct ExecutionOutcomeWithIdView: Codable, Sendable {
     public let blockHash: CryptoHash
     public let id: CryptoHash
     public let outcome: ExecutionOutcomeView
@@ -10961,7 +11888,7 @@ public struct ExecutionOutcomeWithIdView: Codable {
         blockHash: CryptoHash,
         id: CryptoHash,
         outcome: ExecutionOutcomeView,
-        proof: [MerklePathItem]
+        proof: [MerklePathItem],
     ) {
         self.blockHash = blockHash
         self.id = id
@@ -10971,7 +11898,8 @@ public struct ExecutionOutcomeWithIdView: Codable {
 }
 
 // MARK: - ExtCostsConfigView
-public struct ExtCostsConfigView: Codable {
+
+public struct ExtCostsConfigView: Codable, Sendable {
     public let altBn128G1MultiexpBase: NearGas
     public let altBn128G1MultiexpElement: NearGas
     public let altBn128G1SumBase: NearGas
@@ -11147,7 +12075,7 @@ public struct ExtCostsConfigView: Codable {
         yieldCreateBase: NearGas,
         yieldCreateByte: NearGas,
         yieldResumeBase: NearGas,
-        yieldResumeByte: NearGas
+        yieldResumeByte: NearGas,
     ) {
         self.altBn128G1MultiexpBase = altBn128G1MultiexpBase
         self.altBn128G1MultiexpElement = altBn128G1MultiexpElement
@@ -11240,7 +12168,8 @@ public struct ExtCostsConfigView: Codable {
 }
 
 // MARK: - ExternalStorageConfig
-public struct ExternalStorageConfig: Codable {
+
+public struct ExternalStorageConfig: Codable, Sendable {
     public let externalStorageFallbackThreshold: UInt64?
     public let location: ExternalStorageLocation
     public let numConcurrentRequests: Int?
@@ -11250,7 +12179,7 @@ public struct ExternalStorageConfig: Codable {
         externalStorageFallbackThreshold: UInt64?,
         location: ExternalStorageLocation,
         numConcurrentRequests: Int?,
-        numConcurrentRequestsDuringCatchup: Int?
+        numConcurrentRequestsDuringCatchup: Int?,
     ) {
         self.externalStorageFallbackThreshold = externalStorageFallbackThreshold
         self.location = location
@@ -11260,7 +12189,8 @@ public struct ExternalStorageConfig: Codable {
 }
 
 // MARK: - Fee
-public struct Fee: Codable {
+
+public struct Fee: Codable, Sendable {
     public let execution: NearGas
     public let sendNotSir: NearGas
     public let sendSir: NearGas
@@ -11268,7 +12198,7 @@ public struct Fee: Codable {
     public init(
         execution: NearGas,
         sendNotSir: NearGas,
-        sendSir: NearGas
+        sendSir: NearGas,
     ) {
         self.execution = execution
         self.sendNotSir = sendNotSir
@@ -11277,7 +12207,8 @@ public struct Fee: Codable {
 }
 
 // MARK: - FinalExecutionOutcomeView
-public struct FinalExecutionOutcomeView: Codable {
+
+public struct FinalExecutionOutcomeView: Codable, Sendable {
     public let receiptsOutcome: [ExecutionOutcomeWithIdView]
     public let status: FinalExecutionStatus
     public let transaction: SignedTransactionView
@@ -11287,7 +12218,7 @@ public struct FinalExecutionOutcomeView: Codable {
         receiptsOutcome: [ExecutionOutcomeWithIdView],
         status: FinalExecutionStatus,
         transaction: SignedTransactionView,
-        transactionOutcome: ExecutionOutcomeWithIdView
+        transactionOutcome: ExecutionOutcomeWithIdView,
     ) {
         self.receiptsOutcome = receiptsOutcome
         self.status = status
@@ -11297,7 +12228,8 @@ public struct FinalExecutionOutcomeView: Codable {
 }
 
 // MARK: - FinalExecutionOutcomeWithReceiptView
-public struct FinalExecutionOutcomeWithReceiptView: Codable {
+
+public struct FinalExecutionOutcomeWithReceiptView: Codable, Sendable {
     public let receipts: [ReceiptView]
     public let receiptsOutcome: [ExecutionOutcomeWithIdView]
     public let status: FinalExecutionStatus
@@ -11309,7 +12241,7 @@ public struct FinalExecutionOutcomeWithReceiptView: Codable {
         receiptsOutcome: [ExecutionOutcomeWithIdView],
         status: FinalExecutionStatus,
         transaction: SignedTransactionView,
-        transactionOutcome: ExecutionOutcomeWithIdView
+        transactionOutcome: ExecutionOutcomeWithIdView,
     ) {
         self.receipts = receipts
         self.receiptsOutcome = receiptsOutcome
@@ -11320,7 +12252,8 @@ public struct FinalExecutionOutcomeWithReceiptView: Codable {
 }
 
 // MARK: - FunctionCallAction
-public struct FunctionCallAction: Codable {
+
+public struct FunctionCallAction: Codable, Sendable {
     public let args: String
     public let deposit: NearToken
     public let gas: NearGas
@@ -11330,7 +12263,7 @@ public struct FunctionCallAction: Codable {
         args: String,
         deposit: NearToken,
         gas: NearGas,
-        methodName: String
+        methodName: String,
     ) {
         self.args = args
         self.deposit = deposit
@@ -11340,7 +12273,8 @@ public struct FunctionCallAction: Codable {
 }
 
 // MARK: - FunctionCallPermission
-public struct FunctionCallPermission: Codable {
+
+public struct FunctionCallPermission: Codable, Sendable {
     public let allowance: NearToken?
     public let methodNames: [String]
     public let receiverId: String
@@ -11348,7 +12282,7 @@ public struct FunctionCallPermission: Codable {
     public init(
         allowance: NearToken?,
         methodNames: [String],
-        receiverId: String
+        receiverId: String,
     ) {
         self.allowance = allowance
         self.methodNames = methodNames
@@ -11357,7 +12291,8 @@ public struct FunctionCallPermission: Codable {
 }
 
 // MARK: - GCConfig
-public struct GCConfig: Codable {
+
+public struct GCConfig: Codable, Sendable {
     public let gcBlocksLimit: UInt64?
     public let gcForkCleanStep: UInt64?
     public let gcNumEpochsToKeep: UInt64?
@@ -11367,7 +12302,7 @@ public struct GCConfig: Codable {
         gcBlocksLimit: UInt64?,
         gcForkCleanStep: UInt64?,
         gcNumEpochsToKeep: UInt64?,
-        gcStepPeriod: DurationAsStdSchemaProvider?
+        gcStepPeriod: DurationAsStdSchemaProvider?,
     ) {
         self.gcBlocksLimit = gcBlocksLimit
         self.gcForkCleanStep = gcForkCleanStep
@@ -11377,7 +12312,8 @@ public struct GCConfig: Codable {
 }
 
 // MARK: - GasKeyView
-public struct GasKeyView: Codable {
+
+public struct GasKeyView: Codable, Sendable {
     public let balance: NearToken
     public let numNonces: Int
     public let permission: AccessKeyPermissionView
@@ -11385,7 +12321,7 @@ public struct GasKeyView: Codable {
     public init(
         balance: NearToken,
         numNonces: Int,
-        permission: AccessKeyPermissionView
+        permission: AccessKeyPermissionView,
     ) {
         self.balance = balance
         self.numNonces = numNonces
@@ -11394,7 +12330,8 @@ public struct GasKeyView: Codable {
 }
 
 // MARK: - GenesisConfig
-public struct GenesisConfig: Codable {
+
+public struct GenesisConfig: Codable, Sendable {
     public let avgHiddenValidatorSeatsPerShard: [UInt64]
     public let blockProducerKickoutThreshold: Int
     public let chainId: String
@@ -11474,7 +12411,7 @@ public struct GenesisConfig: Codable {
         totalSupply: NearToken,
         transactionValidityPeriod: UInt64,
         useProductionConfig: Bool?,
-        validators: [AccountInfo]
+        validators: [AccountInfo],
     ) {
         self.avgHiddenValidatorSeatsPerShard = avgHiddenValidatorSeatsPerShard
         self.blockProducerKickoutThreshold = blockProducerKickoutThreshold
@@ -11519,7 +12456,8 @@ public struct GenesisConfig: Codable {
 }
 
 // MARK: - JsonRpcRequestForEXPERIMENTALChanges
-public struct JsonRpcRequestForEXPERIMENTALChanges: Codable {
+
+public struct JsonRpcRequestForEXPERIMENTALChanges: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -11529,7 +12467,7 @@ public struct JsonRpcRequestForEXPERIMENTALChanges: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcStateChangesInBlockByTypeRequest
+        params: RpcStateChangesInBlockByTypeRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -11539,7 +12477,8 @@ public struct JsonRpcRequestForEXPERIMENTALChanges: Codable {
 }
 
 // MARK: - JsonRpcRequestForEXPERIMENTALChangesInBlock
-public struct JsonRpcRequestForEXPERIMENTALChangesInBlock: Codable {
+
+public struct JsonRpcRequestForEXPERIMENTALChangesInBlock: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -11549,7 +12488,7 @@ public struct JsonRpcRequestForEXPERIMENTALChangesInBlock: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcStateChangesInBlockRequest
+        params: RpcStateChangesInBlockRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -11559,7 +12498,8 @@ public struct JsonRpcRequestForEXPERIMENTALChangesInBlock: Codable {
 }
 
 // MARK: - JsonRpcRequestForEXPERIMENTALCongestionLevel
-public struct JsonRpcRequestForEXPERIMENTALCongestionLevel: Codable {
+
+public struct JsonRpcRequestForEXPERIMENTALCongestionLevel: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -11569,7 +12509,7 @@ public struct JsonRpcRequestForEXPERIMENTALCongestionLevel: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcCongestionLevelRequest
+        params: RpcCongestionLevelRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -11579,7 +12519,8 @@ public struct JsonRpcRequestForEXPERIMENTALCongestionLevel: Codable {
 }
 
 // MARK: - JsonRpcRequestForEXPERIMENTALGenesisConfig
-public struct JsonRpcRequestForEXPERIMENTALGenesisConfig: Codable {
+
+public struct JsonRpcRequestForEXPERIMENTALGenesisConfig: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -11589,7 +12530,7 @@ public struct JsonRpcRequestForEXPERIMENTALGenesisConfig: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: GenesisConfigRequest
+        params: GenesisConfigRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -11599,7 +12540,8 @@ public struct JsonRpcRequestForEXPERIMENTALGenesisConfig: Codable {
 }
 
 // MARK: - JsonRpcRequestForEXPERIMENTALLightClientBlockProof
-public struct JsonRpcRequestForEXPERIMENTALLightClientBlockProof: Codable {
+
+public struct JsonRpcRequestForEXPERIMENTALLightClientBlockProof: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -11609,7 +12551,7 @@ public struct JsonRpcRequestForEXPERIMENTALLightClientBlockProof: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcLightClientBlockProofRequest
+        params: RpcLightClientBlockProofRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -11619,7 +12561,8 @@ public struct JsonRpcRequestForEXPERIMENTALLightClientBlockProof: Codable {
 }
 
 // MARK: - JsonRpcRequestForEXPERIMENTALLightClientProof
-public struct JsonRpcRequestForEXPERIMENTALLightClientProof: Codable {
+
+public struct JsonRpcRequestForEXPERIMENTALLightClientProof: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -11629,7 +12572,7 @@ public struct JsonRpcRequestForEXPERIMENTALLightClientProof: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcLightClientExecutionProofRequest
+        params: RpcLightClientExecutionProofRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -11639,7 +12582,8 @@ public struct JsonRpcRequestForEXPERIMENTALLightClientProof: Codable {
 }
 
 // MARK: - JsonRpcRequestForEXPERIMENTALMaintenanceWindows
-public struct JsonRpcRequestForEXPERIMENTALMaintenanceWindows: Codable {
+
+public struct JsonRpcRequestForEXPERIMENTALMaintenanceWindows: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -11649,7 +12593,7 @@ public struct JsonRpcRequestForEXPERIMENTALMaintenanceWindows: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcMaintenanceWindowsRequest
+        params: RpcMaintenanceWindowsRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -11659,7 +12603,8 @@ public struct JsonRpcRequestForEXPERIMENTALMaintenanceWindows: Codable {
 }
 
 // MARK: - JsonRpcRequestForEXPERIMENTALProtocolConfig
-public struct JsonRpcRequestForEXPERIMENTALProtocolConfig: Codable {
+
+public struct JsonRpcRequestForEXPERIMENTALProtocolConfig: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -11669,7 +12614,7 @@ public struct JsonRpcRequestForEXPERIMENTALProtocolConfig: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcProtocolConfigRequest
+        params: RpcProtocolConfigRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -11679,7 +12624,8 @@ public struct JsonRpcRequestForEXPERIMENTALProtocolConfig: Codable {
 }
 
 // MARK: - JsonRpcRequestForEXPERIMENTALReceipt
-public struct JsonRpcRequestForEXPERIMENTALReceipt: Codable {
+
+public struct JsonRpcRequestForEXPERIMENTALReceipt: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -11689,7 +12635,7 @@ public struct JsonRpcRequestForEXPERIMENTALReceipt: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcReceiptRequest
+        params: RpcReceiptRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -11699,7 +12645,8 @@ public struct JsonRpcRequestForEXPERIMENTALReceipt: Codable {
 }
 
 // MARK: - JsonRpcRequestForEXPERIMENTALSplitStorageInfo
-public struct JsonRpcRequestForEXPERIMENTALSplitStorageInfo: Codable {
+
+public struct JsonRpcRequestForEXPERIMENTALSplitStorageInfo: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -11709,7 +12656,7 @@ public struct JsonRpcRequestForEXPERIMENTALSplitStorageInfo: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcSplitStorageInfoRequest
+        params: RpcSplitStorageInfoRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -11719,7 +12666,8 @@ public struct JsonRpcRequestForEXPERIMENTALSplitStorageInfo: Codable {
 }
 
 // MARK: - JsonRpcRequestForEXPERIMENTALTxStatus
-public struct JsonRpcRequestForEXPERIMENTALTxStatus: Codable {
+
+public struct JsonRpcRequestForEXPERIMENTALTxStatus: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -11729,7 +12677,7 @@ public struct JsonRpcRequestForEXPERIMENTALTxStatus: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcTransactionStatusRequest
+        params: RpcTransactionStatusRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -11739,7 +12687,8 @@ public struct JsonRpcRequestForEXPERIMENTALTxStatus: Codable {
 }
 
 // MARK: - JsonRpcRequestForEXPERIMENTALValidatorsOrdered
-public struct JsonRpcRequestForEXPERIMENTALValidatorsOrdered: Codable {
+
+public struct JsonRpcRequestForEXPERIMENTALValidatorsOrdered: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -11749,7 +12698,7 @@ public struct JsonRpcRequestForEXPERIMENTALValidatorsOrdered: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcValidatorsOrderedRequest
+        params: RpcValidatorsOrderedRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -11759,7 +12708,8 @@ public struct JsonRpcRequestForEXPERIMENTALValidatorsOrdered: Codable {
 }
 
 // MARK: - JsonRpcRequestForBlock
-public struct JsonRpcRequestForBlock: Codable {
+
+public struct JsonRpcRequestForBlock: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -11769,7 +12719,7 @@ public struct JsonRpcRequestForBlock: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcBlockRequest
+        params: RpcBlockRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -11779,7 +12729,8 @@ public struct JsonRpcRequestForBlock: Codable {
 }
 
 // MARK: - JsonRpcRequestForBlockEffects
-public struct JsonRpcRequestForBlockEffects: Codable {
+
+public struct JsonRpcRequestForBlockEffects: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -11789,7 +12740,7 @@ public struct JsonRpcRequestForBlockEffects: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcStateChangesInBlockRequest
+        params: RpcStateChangesInBlockRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -11799,7 +12750,8 @@ public struct JsonRpcRequestForBlockEffects: Codable {
 }
 
 // MARK: - JsonRpcRequestForBroadcastTxAsync
-public struct JsonRpcRequestForBroadcastTxAsync: Codable {
+
+public struct JsonRpcRequestForBroadcastTxAsync: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -11809,7 +12761,7 @@ public struct JsonRpcRequestForBroadcastTxAsync: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcSendTransactionRequest
+        params: RpcSendTransactionRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -11819,7 +12771,8 @@ public struct JsonRpcRequestForBroadcastTxAsync: Codable {
 }
 
 // MARK: - JsonRpcRequestForBroadcastTxCommit
-public struct JsonRpcRequestForBroadcastTxCommit: Codable {
+
+public struct JsonRpcRequestForBroadcastTxCommit: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -11829,7 +12782,7 @@ public struct JsonRpcRequestForBroadcastTxCommit: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcSendTransactionRequest
+        params: RpcSendTransactionRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -11839,7 +12792,8 @@ public struct JsonRpcRequestForBroadcastTxCommit: Codable {
 }
 
 // MARK: - JsonRpcRequestForChanges
-public struct JsonRpcRequestForChanges: Codable {
+
+public struct JsonRpcRequestForChanges: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -11849,7 +12803,7 @@ public struct JsonRpcRequestForChanges: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcStateChangesInBlockByTypeRequest
+        params: RpcStateChangesInBlockByTypeRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -11859,7 +12813,8 @@ public struct JsonRpcRequestForChanges: Codable {
 }
 
 // MARK: - JsonRpcRequestForChunk
-public struct JsonRpcRequestForChunk: Codable {
+
+public struct JsonRpcRequestForChunk: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -11869,7 +12824,7 @@ public struct JsonRpcRequestForChunk: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcChunkRequest
+        params: RpcChunkRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -11879,7 +12834,8 @@ public struct JsonRpcRequestForChunk: Codable {
 }
 
 // MARK: - JsonRpcRequestForClientConfig
-public struct JsonRpcRequestForClientConfig: Codable {
+
+public struct JsonRpcRequestForClientConfig: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -11889,7 +12845,7 @@ public struct JsonRpcRequestForClientConfig: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcClientConfigRequest
+        params: RpcClientConfigRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -11899,7 +12855,8 @@ public struct JsonRpcRequestForClientConfig: Codable {
 }
 
 // MARK: - JsonRpcRequestForGasPrice
-public struct JsonRpcRequestForGasPrice: Codable {
+
+public struct JsonRpcRequestForGasPrice: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -11909,7 +12866,7 @@ public struct JsonRpcRequestForGasPrice: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcGasPriceRequest
+        params: RpcGasPriceRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -11919,7 +12876,8 @@ public struct JsonRpcRequestForGasPrice: Codable {
 }
 
 // MARK: - JsonRpcRequestForGenesisConfig
-public struct JsonRpcRequestForGenesisConfig: Codable {
+
+public struct JsonRpcRequestForGenesisConfig: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -11929,7 +12887,7 @@ public struct JsonRpcRequestForGenesisConfig: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: GenesisConfigRequest
+        params: GenesisConfigRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -11939,7 +12897,8 @@ public struct JsonRpcRequestForGenesisConfig: Codable {
 }
 
 // MARK: - JsonRpcRequestForHealth
-public struct JsonRpcRequestForHealth: Codable {
+
+public struct JsonRpcRequestForHealth: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -11949,7 +12908,7 @@ public struct JsonRpcRequestForHealth: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcHealthRequest
+        params: RpcHealthRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -11959,7 +12918,8 @@ public struct JsonRpcRequestForHealth: Codable {
 }
 
 // MARK: - JsonRpcRequestForLightClientProof
-public struct JsonRpcRequestForLightClientProof: Codable {
+
+public struct JsonRpcRequestForLightClientProof: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -11969,7 +12929,7 @@ public struct JsonRpcRequestForLightClientProof: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcLightClientExecutionProofRequest
+        params: RpcLightClientExecutionProofRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -11979,7 +12939,8 @@ public struct JsonRpcRequestForLightClientProof: Codable {
 }
 
 // MARK: - JsonRpcRequestForMaintenanceWindows
-public struct JsonRpcRequestForMaintenanceWindows: Codable {
+
+public struct JsonRpcRequestForMaintenanceWindows: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -11989,7 +12950,7 @@ public struct JsonRpcRequestForMaintenanceWindows: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcMaintenanceWindowsRequest
+        params: RpcMaintenanceWindowsRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -11999,7 +12960,8 @@ public struct JsonRpcRequestForMaintenanceWindows: Codable {
 }
 
 // MARK: - JsonRpcRequestForNetworkInfo
-public struct JsonRpcRequestForNetworkInfo: Codable {
+
+public struct JsonRpcRequestForNetworkInfo: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -12009,7 +12971,7 @@ public struct JsonRpcRequestForNetworkInfo: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcNetworkInfoRequest
+        params: RpcNetworkInfoRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -12019,7 +12981,8 @@ public struct JsonRpcRequestForNetworkInfo: Codable {
 }
 
 // MARK: - JsonRpcRequestForNextLightClientBlock
-public struct JsonRpcRequestForNextLightClientBlock: Codable {
+
+public struct JsonRpcRequestForNextLightClientBlock: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -12029,7 +12992,7 @@ public struct JsonRpcRequestForNextLightClientBlock: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcLightClientNextBlockRequest
+        params: RpcLightClientNextBlockRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -12039,7 +13002,8 @@ public struct JsonRpcRequestForNextLightClientBlock: Codable {
 }
 
 // MARK: - JsonRpcRequestForQuery
-public struct JsonRpcRequestForQuery: Codable {
+
+public struct JsonRpcRequestForQuery: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -12049,7 +13013,7 @@ public struct JsonRpcRequestForQuery: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcQueryRequest
+        params: RpcQueryRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -12059,7 +13023,8 @@ public struct JsonRpcRequestForQuery: Codable {
 }
 
 // MARK: - JsonRpcRequestForSendTx
-public struct JsonRpcRequestForSendTx: Codable {
+
+public struct JsonRpcRequestForSendTx: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -12069,7 +13034,7 @@ public struct JsonRpcRequestForSendTx: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcSendTransactionRequest
+        params: RpcSendTransactionRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -12079,7 +13044,8 @@ public struct JsonRpcRequestForSendTx: Codable {
 }
 
 // MARK: - JsonRpcRequestForStatus
-public struct JsonRpcRequestForStatus: Codable {
+
+public struct JsonRpcRequestForStatus: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -12089,7 +13055,7 @@ public struct JsonRpcRequestForStatus: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcStatusRequest
+        params: RpcStatusRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -12099,7 +13065,8 @@ public struct JsonRpcRequestForStatus: Codable {
 }
 
 // MARK: - JsonRpcRequestForTx
-public struct JsonRpcRequestForTx: Codable {
+
+public struct JsonRpcRequestForTx: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -12109,7 +13076,7 @@ public struct JsonRpcRequestForTx: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcTransactionStatusRequest
+        params: RpcTransactionStatusRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -12119,7 +13086,8 @@ public struct JsonRpcRequestForTx: Codable {
 }
 
 // MARK: - JsonRpcRequestForValidators
-public struct JsonRpcRequestForValidators: Codable {
+
+public struct JsonRpcRequestForValidators: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -12129,7 +13097,7 @@ public struct JsonRpcRequestForValidators: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcValidatorRequest
+        params: RpcValidatorRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -12139,7 +13107,8 @@ public struct JsonRpcRequestForValidators: Codable {
 }
 
 // MARK: - KnownProducerView
-public struct KnownProducerView: Codable {
+
+public struct KnownProducerView: Codable, Sendable {
     public let accountId: AccountId
     public let nextHops: [PublicKey]?
     public let peerId: PublicKey
@@ -12147,7 +13116,7 @@ public struct KnownProducerView: Codable {
     public init(
         accountId: AccountId,
         nextHops: [PublicKey]?,
-        peerId: PublicKey
+        peerId: PublicKey,
     ) {
         self.accountId = accountId
         self.nextHops = nextHops
@@ -12156,7 +13125,8 @@ public struct KnownProducerView: Codable {
 }
 
 // MARK: - LightClientBlockLiteView
-public struct LightClientBlockLiteView: Codable {
+
+public struct LightClientBlockLiteView: Codable, Sendable {
     public let innerLite: BlockHeaderInnerLiteView
     public let innerRestHash: CryptoHash
     public let prevBlockHash: CryptoHash
@@ -12164,7 +13134,7 @@ public struct LightClientBlockLiteView: Codable {
     public init(
         innerLite: BlockHeaderInnerLiteView,
         innerRestHash: CryptoHash,
-        prevBlockHash: CryptoHash
+        prevBlockHash: CryptoHash,
     ) {
         self.innerLite = innerLite
         self.innerRestHash = innerRestHash
@@ -12173,7 +13143,8 @@ public struct LightClientBlockLiteView: Codable {
 }
 
 // MARK: - LimitConfig
-public struct LimitConfig: Codable {
+
+public struct LimitConfig: Codable, Sendable {
     public let accountIdValidityRulesVersion: AccountIdValidityRulesVersion?
     public let initialMemoryPages: Int
     public let maxActionsPerReceipt: UInt64
@@ -12235,7 +13206,7 @@ public struct LimitConfig: Codable {
         maxYieldPayloadSize: UInt64,
         perReceiptStorageProofSizeLimit: Int,
         registersMemoryLimit: UInt64,
-        yieldTimeoutLengthInBlocks: UInt64
+        yieldTimeoutLengthInBlocks: UInt64,
     ) {
         self.accountIdValidityRulesVersion = accountIdValidityRulesVersion
         self.initialMemoryPages = initialMemoryPages
@@ -12271,13 +13242,14 @@ public struct LimitConfig: Codable {
 }
 
 // MARK: - MerklePathItem
-public struct MerklePathItem: Codable {
+
+public struct MerklePathItem: Codable, Sendable {
     public let direction: Direction
     public let hash: CryptoHash
 
     public init(
         direction: Direction,
-        hash: CryptoHash
+        hash: CryptoHash,
     ) {
         self.direction = direction
         self.hash = hash
@@ -12285,13 +13257,14 @@ public struct MerklePathItem: Codable {
 }
 
 // MARK: - MissingTrieValue
-public struct MissingTrieValue: Codable {
+
+public struct MissingTrieValue: Codable, Sendable {
     public let context: MissingTrieValueContext
     public let hash: CryptoHash
 
     public init(
         context: MissingTrieValueContext,
-        hash: CryptoHash
+        hash: CryptoHash,
     ) {
         self.context = context
         self.hash = hash
@@ -12299,7 +13272,8 @@ public struct MissingTrieValue: Codable {
 }
 
 // MARK: - NetworkInfoView
-public struct NetworkInfoView: Codable {
+
+public struct NetworkInfoView: Codable, Sendable {
     public let connectedPeers: [PeerInfoView]
     public let knownProducers: [KnownProducerView]
     public let numConnectedPeers: Int
@@ -12315,7 +13289,7 @@ public struct NetworkInfoView: Codable {
         peerMaxCount: Int,
         tier1AccountsData: [AccountDataView],
         tier1AccountsKeys: [PublicKey],
-        tier1Connections: [PeerInfoView]
+        tier1Connections: [PeerInfoView],
     ) {
         self.connectedPeers = connectedPeers
         self.knownProducers = knownProducers
@@ -12328,7 +13302,8 @@ public struct NetworkInfoView: Codable {
 }
 
 // MARK: - NextEpochValidatorInfo
-public struct NextEpochValidatorInfo: Codable {
+
+public struct NextEpochValidatorInfo: Codable, Sendable {
     public let accountId: AccountId
     public let publicKey: PublicKey
     public let shards: [ShardId]
@@ -12338,7 +13313,7 @@ public struct NextEpochValidatorInfo: Codable {
         accountId: AccountId,
         publicKey: PublicKey,
         shards: [ShardId],
-        stake: NearToken
+        stake: NearToken,
     ) {
         self.accountId = accountId
         self.publicKey = publicKey
@@ -12348,7 +13323,8 @@ public struct NextEpochValidatorInfo: Codable {
 }
 
 // MARK: - PeerInfoView
-public struct PeerInfoView: Codable {
+
+public struct PeerInfoView: Codable, Sendable {
     public let accountId: AccountId?
     public let addr: String
     public let archival: Bool
@@ -12380,7 +13356,7 @@ public struct PeerInfoView: Codable {
         peerId: PublicKey,
         receivedBytesPerSec: UInt64,
         sentBytesPerSec: UInt64,
-        trackedShards: [ShardId]
+        trackedShards: [ShardId],
     ) {
         self.accountId = accountId
         self.addr = addr
@@ -12401,13 +13377,14 @@ public struct PeerInfoView: Codable {
 }
 
 // MARK: - RangeOfUint64
-public struct RangeOfUint64: Codable {
+
+public struct RangeOfUint64: Codable, Sendable {
     public let end: UInt64
     public let start: UInt64
 
     public init(
         end: UInt64,
-        start: UInt64
+        start: UInt64,
     ) {
         self.end = end
         self.start = start
@@ -12415,7 +13392,8 @@ public struct RangeOfUint64: Codable {
 }
 
 // MARK: - ReceiptView
-public struct ReceiptView: Codable {
+
+public struct ReceiptView: Codable, Sendable {
     public let predecessorId: AccountId
     public let priority: UInt64?
     public let receipt: ReceiptEnumView
@@ -12427,7 +13405,7 @@ public struct ReceiptView: Codable {
         priority: UInt64?,
         receipt: ReceiptEnumView,
         receiptId: CryptoHash,
-        receiverId: AccountId
+        receiverId: AccountId,
     ) {
         self.predecessorId = predecessorId
         self.priority = priority
@@ -12438,7 +13416,8 @@ public struct ReceiptView: Codable {
 }
 
 // MARK: - RpcBlockResponse
-public struct RpcBlockResponse: Codable {
+
+public struct RpcBlockResponse: Codable, Sendable {
     public let author: AccountId
     public let chunks: [ChunkHeaderView]
     public let header: BlockHeaderView
@@ -12446,7 +13425,7 @@ public struct RpcBlockResponse: Codable {
     public init(
         author: AccountId,
         chunks: [ChunkHeaderView],
-        header: BlockHeaderView
+        header: BlockHeaderView,
     ) {
         self.author = author
         self.chunks = chunks
@@ -12455,7 +13434,8 @@ public struct RpcBlockResponse: Codable {
 }
 
 // MARK: - RpcChunkResponse
-public struct RpcChunkResponse: Codable {
+
+public struct RpcChunkResponse: Codable, Sendable {
     public let author: AccountId
     public let header: ChunkHeaderView
     public let receipts: [ReceiptView]
@@ -12465,7 +13445,7 @@ public struct RpcChunkResponse: Codable {
         author: AccountId,
         header: ChunkHeaderView,
         receipts: [ReceiptView],
-        transactions: [SignedTransactionView]
+        transactions: [SignedTransactionView],
     ) {
         self.author = author
         self.header = header
@@ -12475,7 +13455,8 @@ public struct RpcChunkResponse: Codable {
 }
 
 // MARK: - RpcClientConfigResponse
-public struct RpcClientConfigResponse: Codable {
+
+public struct RpcClientConfigResponse: Codable, Sendable {
     public let archive: Bool
     public let blockFetchHorizon: UInt64
     public let blockHeaderFetchHorizon: UInt64
@@ -12609,7 +13590,7 @@ public struct RpcClientConfigResponse: Codable {
         ttlAccountIdRouter: [UInt64],
         txRoutingHeightHorizon: UInt64,
         version: Version,
-        viewClientThreads: Int
+        viewClientThreads: Int,
     ) {
         self.archive = archive
         self.blockFetchHorizon = blockFetchHorizon
@@ -12681,40 +13662,44 @@ public struct RpcClientConfigResponse: Codable {
 }
 
 // MARK: - RpcCongestionLevelResponse
-public struct RpcCongestionLevelResponse: Codable {
+
+public struct RpcCongestionLevelResponse: Codable, Sendable {
     public let congestionLevel: Double
 
     public init(
-        congestionLevel: Double
+        congestionLevel: Double,
     ) {
         self.congestionLevel = congestionLevel
     }
 }
 
 // MARK: - RpcGasPriceRequest
-public struct RpcGasPriceRequest: Codable {
+
+public struct RpcGasPriceRequest: Codable, Sendable {
     public let blockId: BlockId?
 
     public init(
-        blockId: BlockId?
+        blockId: BlockId?,
     ) {
         self.blockId = blockId
     }
 }
 
 // MARK: - RpcGasPriceResponse
-public struct RpcGasPriceResponse: Codable {
+
+public struct RpcGasPriceResponse: Codable, Sendable {
     public let gasPrice: NearToken
 
     public init(
-        gasPrice: NearToken
+        gasPrice: NearToken,
     ) {
         self.gasPrice = gasPrice
     }
 }
 
 // MARK: - RpcKnownProducer
-public struct RpcKnownProducer: Codable {
+
+public struct RpcKnownProducer: Codable, Sendable {
     public let accountId: AccountId
     public let addr: String?
     public let peerId: PeerId
@@ -12722,7 +13707,7 @@ public struct RpcKnownProducer: Codable {
     public init(
         accountId: AccountId,
         addr: String?,
-        peerId: PeerId
+        peerId: PeerId,
     ) {
         self.accountId = accountId
         self.addr = addr
@@ -12731,13 +13716,14 @@ public struct RpcKnownProducer: Codable {
 }
 
 // MARK: - RpcLightClientBlockProofRequest
-public struct RpcLightClientBlockProofRequest: Codable {
+
+public struct RpcLightClientBlockProofRequest: Codable, Sendable {
     public let blockHash: CryptoHash
     public let lightClientHead: CryptoHash
 
     public init(
         blockHash: CryptoHash,
-        lightClientHead: CryptoHash
+        lightClientHead: CryptoHash,
     ) {
         self.blockHash = blockHash
         self.lightClientHead = lightClientHead
@@ -12745,13 +13731,14 @@ public struct RpcLightClientBlockProofRequest: Codable {
 }
 
 // MARK: - RpcLightClientBlockProofResponse
-public struct RpcLightClientBlockProofResponse: Codable {
+
+public struct RpcLightClientBlockProofResponse: Codable, Sendable {
     public let blockHeaderLite: LightClientBlockLiteView
     public let blockProof: [MerklePathItem]
 
     public init(
         blockHeaderLite: LightClientBlockLiteView,
-        blockProof: [MerklePathItem]
+        blockProof: [MerklePathItem],
     ) {
         self.blockHeaderLite = blockHeaderLite
         self.blockProof = blockProof
@@ -12759,7 +13746,8 @@ public struct RpcLightClientBlockProofResponse: Codable {
 }
 
 // MARK: - RpcLightClientExecutionProofResponse
-public struct RpcLightClientExecutionProofResponse: Codable {
+
+public struct RpcLightClientExecutionProofResponse: Codable, Sendable {
     public let blockHeaderLite: LightClientBlockLiteView
     public let blockProof: [MerklePathItem]
     public let outcomeProof: ExecutionOutcomeWithIdView
@@ -12769,7 +13757,7 @@ public struct RpcLightClientExecutionProofResponse: Codable {
         blockHeaderLite: LightClientBlockLiteView,
         blockProof: [MerklePathItem],
         outcomeProof: ExecutionOutcomeWithIdView,
-        outcomeRootProof: [MerklePathItem]
+        outcomeRootProof: [MerklePathItem],
     ) {
         self.blockHeaderLite = blockHeaderLite
         self.blockProof = blockProof
@@ -12779,18 +13767,20 @@ public struct RpcLightClientExecutionProofResponse: Codable {
 }
 
 // MARK: - RpcLightClientNextBlockRequest
-public struct RpcLightClientNextBlockRequest: Codable {
+
+public struct RpcLightClientNextBlockRequest: Codable, Sendable {
     public let lastBlockHash: CryptoHash
 
     public init(
-        lastBlockHash: CryptoHash
+        lastBlockHash: CryptoHash,
     ) {
         self.lastBlockHash = lastBlockHash
     }
 }
 
 // MARK: - RpcLightClientNextBlockResponse
-public struct RpcLightClientNextBlockResponse: Codable {
+
+public struct RpcLightClientNextBlockResponse: Codable, Sendable {
     public let approvalsAfterNext: [Signature?]?
     public let innerLite: BlockHeaderInnerLiteView?
     public let innerRestHash: CryptoHash?
@@ -12804,7 +13794,7 @@ public struct RpcLightClientNextBlockResponse: Codable {
         innerRestHash: CryptoHash?,
         nextBlockInnerHash: CryptoHash?,
         nextBps: [ValidatorStakeView]?,
-        prevBlockHash: CryptoHash?
+        prevBlockHash: CryptoHash?,
     ) {
         self.approvalsAfterNext = approvalsAfterNext
         self.innerLite = innerLite
@@ -12816,18 +13806,20 @@ public struct RpcLightClientNextBlockResponse: Codable {
 }
 
 // MARK: - RpcMaintenanceWindowsRequest
-public struct RpcMaintenanceWindowsRequest: Codable {
+
+public struct RpcMaintenanceWindowsRequest: Codable, Sendable {
     public let accountId: AccountId
 
     public init(
-        accountId: AccountId
+        accountId: AccountId,
     ) {
         self.accountId = accountId
     }
 }
 
 // MARK: - RpcNetworkInfoResponse
-public struct RpcNetworkInfoResponse: Codable {
+
+public struct RpcNetworkInfoResponse: Codable, Sendable {
     public let activePeers: [RpcPeerInfo]
     public let knownProducers: [RpcKnownProducer]
     public let numActivePeers: Int
@@ -12841,7 +13833,7 @@ public struct RpcNetworkInfoResponse: Codable {
         numActivePeers: Int,
         peerMaxCount: Int,
         receivedBytesPerSec: UInt64,
-        sentBytesPerSec: UInt64
+        sentBytesPerSec: UInt64,
     ) {
         self.activePeers = activePeers
         self.knownProducers = knownProducers
@@ -12853,7 +13845,8 @@ public struct RpcNetworkInfoResponse: Codable {
 }
 
 // MARK: - RpcPeerInfo
-public struct RpcPeerInfo: Codable {
+
+public struct RpcPeerInfo: Codable, Sendable {
     public let accountId: AccountId?
     public let addr: String?
     public let id: PeerId
@@ -12861,7 +13854,7 @@ public struct RpcPeerInfo: Codable {
     public init(
         accountId: AccountId?,
         addr: String?,
-        id: PeerId
+        id: PeerId,
     ) {
         self.accountId = accountId
         self.addr = addr
@@ -12870,7 +13863,8 @@ public struct RpcPeerInfo: Codable {
 }
 
 // MARK: - RpcProtocolConfigResponse
-public struct RpcProtocolConfigResponse: Codable {
+
+public struct RpcProtocolConfigResponse: Codable, Sendable {
     public let avgHiddenValidatorSeatsPerShard: [UInt64]
     public let blockProducerKickoutThreshold: Int
     public let chainId: String
@@ -12938,7 +13932,7 @@ public struct RpcProtocolConfigResponse: Codable {
         shardLayout: ShardLayout,
         shuffleShardAssignmentForChunkProducers: Bool,
         targetValidatorMandatesPerShard: UInt64,
-        transactionValidityPeriod: UInt64
+        transactionValidityPeriod: UInt64,
     ) {
         self.avgHiddenValidatorSeatsPerShard = avgHiddenValidatorSeatsPerShard
         self.blockProducerKickoutThreshold = blockProducerKickoutThreshold
@@ -12977,18 +13971,20 @@ public struct RpcProtocolConfigResponse: Codable {
 }
 
 // MARK: - RpcReceiptRequest
-public struct RpcReceiptRequest: Codable {
+
+public struct RpcReceiptRequest: Codable, Sendable {
     public let receiptId: CryptoHash
 
     public init(
-        receiptId: CryptoHash
+        receiptId: CryptoHash,
     ) {
         self.receiptId = receiptId
     }
 }
 
 // MARK: - RpcReceiptResponse
-public struct RpcReceiptResponse: Codable {
+
+public struct RpcReceiptResponse: Codable, Sendable {
     public let predecessorId: AccountId
     public let priority: UInt64?
     public let receipt: ReceiptEnumView
@@ -13000,7 +13996,7 @@ public struct RpcReceiptResponse: Codable {
         priority: UInt64?,
         receipt: ReceiptEnumView,
         receiptId: CryptoHash,
-        receiverId: AccountId
+        receiverId: AccountId,
     ) {
         self.predecessorId = predecessorId
         self.priority = priority
@@ -13011,13 +14007,14 @@ public struct RpcReceiptResponse: Codable {
 }
 
 // MARK: - RpcSendTransactionRequest
-public struct RpcSendTransactionRequest: Codable {
+
+public struct RpcSendTransactionRequest: Codable, Sendable {
     public let signedTxBase64: SignedTransaction
     public let waitUntil: TxExecutionStatus?
 
     public init(
         signedTxBase64: SignedTransaction,
-        waitUntil: TxExecutionStatus?
+        waitUntil: TxExecutionStatus?,
     ) {
         self.signedTxBase64 = signedTxBase64
         self.waitUntil = waitUntil
@@ -13025,13 +14022,14 @@ public struct RpcSendTransactionRequest: Codable {
 }
 
 // MARK: - RpcSplitStorageInfoRequest
-public struct RpcSplitStorageInfoRequest: Codable {
 
+public struct RpcSplitStorageInfoRequest: Codable, Sendable {
     public init() {}
 }
 
 // MARK: - RpcSplitStorageInfoResponse
-public struct RpcSplitStorageInfoResponse: Codable {
+
+public struct RpcSplitStorageInfoResponse: Codable, Sendable {
     public let coldHeadHeight: UInt64?
     public let finalHeadHeight: UInt64?
     public let headHeight: UInt64?
@@ -13041,7 +14039,7 @@ public struct RpcSplitStorageInfoResponse: Codable {
         coldHeadHeight: UInt64?,
         finalHeadHeight: UInt64?,
         headHeight: UInt64?,
-        hotDbKind: String?
+        hotDbKind: String?,
     ) {
         self.coldHeadHeight = coldHeadHeight
         self.finalHeadHeight = finalHeadHeight
@@ -13051,13 +14049,14 @@ public struct RpcSplitStorageInfoResponse: Codable {
 }
 
 // MARK: - RpcStateChangesInBlockByTypeResponse
-public struct RpcStateChangesInBlockByTypeResponse: Codable {
+
+public struct RpcStateChangesInBlockByTypeResponse: Codable, Sendable {
     public let blockHash: CryptoHash
     public let changes: [StateChangeKindView]
 
     public init(
         blockHash: CryptoHash,
-        changes: [StateChangeKindView]
+        changes: [StateChangeKindView],
     ) {
         self.blockHash = blockHash
         self.changes = changes
@@ -13065,13 +14064,14 @@ public struct RpcStateChangesInBlockByTypeResponse: Codable {
 }
 
 // MARK: - RpcStateChangesInBlockResponse
-public struct RpcStateChangesInBlockResponse: Codable {
+
+public struct RpcStateChangesInBlockResponse: Codable, Sendable {
     public let blockHash: CryptoHash
     public let changes: [StateChangeWithCauseView]
 
     public init(
         blockHash: CryptoHash,
-        changes: [StateChangeWithCauseView]
+        changes: [StateChangeWithCauseView],
     ) {
         self.blockHash = blockHash
         self.changes = changes
@@ -13079,7 +14079,8 @@ public struct RpcStateChangesInBlockResponse: Codable {
 }
 
 // MARK: - RpcStatusResponse
-public struct RpcStatusResponse: Codable {
+
+public struct RpcStatusResponse: Codable, Sendable {
     public let chainId: String
     public let detailedDebugStatus: DetailedDebugStatus?
     public let genesisHash: CryptoHash
@@ -13109,7 +14110,7 @@ public struct RpcStatusResponse: Codable {
         validatorAccountId: AccountId?,
         validatorPublicKey: PublicKey?,
         validators: [ValidatorInfo],
-        version: Version
+        version: Version,
     ) {
         self.chainId = chainId
         self.detailedDebugStatus = detailedDebugStatus
@@ -13129,7 +14130,8 @@ public struct RpcStatusResponse: Codable {
 }
 
 // MARK: - RpcValidatorResponse
-public struct RpcValidatorResponse: Codable {
+
+public struct RpcValidatorResponse: Codable, Sendable {
     public let currentFishermen: [ValidatorStakeView]
     public let currentProposals: [ValidatorStakeView]
     public let currentValidators: [CurrentEpochValidatorInfo]
@@ -13147,7 +14149,7 @@ public struct RpcValidatorResponse: Codable {
         epochStartHeight: UInt64,
         nextFishermen: [ValidatorStakeView],
         nextValidators: [NextEpochValidatorInfo],
-        prevEpochKickout: [ValidatorKickoutView]
+        prevEpochKickout: [ValidatorKickoutView],
     ) {
         self.currentFishermen = currentFishermen
         self.currentProposals = currentProposals
@@ -13161,18 +14163,20 @@ public struct RpcValidatorResponse: Codable {
 }
 
 // MARK: - RpcValidatorsOrderedRequest
-public struct RpcValidatorsOrderedRequest: Codable {
+
+public struct RpcValidatorsOrderedRequest: Codable, Sendable {
     public let blockId: BlockId?
 
     public init(
-        blockId: BlockId?
+        blockId: BlockId?,
     ) {
         self.blockId = blockId
     }
 }
 
 // MARK: - RuntimeConfigView
-public struct RuntimeConfigView: Codable {
+
+public struct RuntimeConfigView: Codable, Sendable {
     public let accountCreationConfig: AccountCreationConfigView
     public let congestionControlConfig: CongestionControlConfigView
     public let storageAmountPerByte: NearToken
@@ -13186,7 +14190,7 @@ public struct RuntimeConfigView: Codable {
         storageAmountPerByte: NearToken,
         transactionCosts: RuntimeFeesConfigView,
         wasmConfig: VMConfigView,
-        witnessConfig: WitnessConfigView
+        witnessConfig: WitnessConfigView,
     ) {
         self.accountCreationConfig = accountCreationConfig
         self.congestionControlConfig = congestionControlConfig
@@ -13198,7 +14202,8 @@ public struct RuntimeConfigView: Codable {
 }
 
 // MARK: - RuntimeFeesConfigView
-public struct RuntimeFeesConfigView: Codable {
+
+public struct RuntimeFeesConfigView: Codable, Sendable {
     public let actionCreationConfig: ActionCreationConfigView
     public let actionReceiptCreationConfig: Fee
     public let burntGasReward: [Int32]
@@ -13212,7 +14217,7 @@ public struct RuntimeFeesConfigView: Codable {
         burntGasReward: [Int32],
         dataReceiptCreationConfig: DataReceiptCreationConfigView,
         pessimisticGasPriceInflationRatio: [Int32],
-        storageUsageConfig: StorageUsageConfigView
+        storageUsageConfig: StorageUsageConfigView,
     ) {
         self.actionCreationConfig = actionCreationConfig
         self.actionReceiptCreationConfig = actionReceiptCreationConfig
@@ -13224,13 +14229,14 @@ public struct RuntimeFeesConfigView: Codable {
 }
 
 // MARK: - ShardLayoutV0
-public struct ShardLayoutV0: Codable {
+
+public struct ShardLayoutV0: Codable, Sendable {
     public let numShards: UInt64
     public let version: Int
 
     public init(
         numShards: UInt64,
-        version: Int
+        version: Int,
     ) {
         self.numShards = numShards
         self.version = version
@@ -13238,7 +14244,8 @@ public struct ShardLayoutV0: Codable {
 }
 
 // MARK: - ShardLayoutV1
-public struct ShardLayoutV1: Codable {
+
+public struct ShardLayoutV1: Codable, Sendable {
     public let boundaryAccounts: [AccountId]
     public let shardsSplitMap: [[ShardId]]?
     public let toParentShardMap: [ShardId]?
@@ -13248,7 +14255,7 @@ public struct ShardLayoutV1: Codable {
         boundaryAccounts: [AccountId],
         shardsSplitMap: [[ShardId]]?,
         toParentShardMap: [ShardId]?,
-        version: Int
+        version: Int,
     ) {
         self.boundaryAccounts = boundaryAccounts
         self.shardsSplitMap = shardsSplitMap
@@ -13258,7 +14265,8 @@ public struct ShardLayoutV1: Codable {
 }
 
 // MARK: - ShardLayoutV2
-public struct ShardLayoutV2: Codable {
+
+public struct ShardLayoutV2: Codable, Sendable {
     public let boundaryAccounts: [AccountId]
     public let idToIndexMap: [String: Int]
     public let indexToIdMap: [String: ShardId]
@@ -13274,7 +14282,7 @@ public struct ShardLayoutV2: Codable {
         shardIds: [ShardId],
         shardsParentMap: [String: ShardId]?,
         shardsSplitMap: [String: [ShardId]]?,
-        version: Int
+        version: Int,
     ) {
         self.boundaryAccounts = boundaryAccounts
         self.idToIndexMap = idToIndexMap
@@ -13287,13 +14295,14 @@ public struct ShardLayoutV2: Codable {
 }
 
 // MARK: - ShardUId
-public struct ShardUId: Codable {
+
+public struct ShardUId: Codable, Sendable {
     public let shardId: Int
     public let version: Int
 
     public init(
         shardId: Int,
-        version: Int
+        version: Int,
     ) {
         self.shardId = shardId
         self.version = version
@@ -13301,13 +14310,14 @@ public struct ShardUId: Codable {
 }
 
 // MARK: - SignedDelegateAction
-public struct SignedDelegateAction: Codable {
+
+public struct SignedDelegateAction: Codable, Sendable {
     public let delegateAction: DelegateAction
     public let signature: Signature
 
     public init(
         delegateAction: DelegateAction,
-        signature: Signature
+        signature: Signature,
     ) {
         self.delegateAction = delegateAction
         self.signature = signature
@@ -13315,7 +14325,8 @@ public struct SignedDelegateAction: Codable {
 }
 
 // MARK: - SignedTransactionView
-public struct SignedTransactionView: Codable {
+
+public struct SignedTransactionView: Codable, Sendable {
     public let actions: [ActionView]
     public let hash: CryptoHash
     public let nonce: UInt64
@@ -13333,7 +14344,7 @@ public struct SignedTransactionView: Codable {
         publicKey: PublicKey,
         receiverId: AccountId,
         signature: Signature,
-        signerId: AccountId
+        signerId: AccountId,
     ) {
         self.actions = actions
         self.hash = hash
@@ -13347,13 +14358,14 @@ public struct SignedTransactionView: Codable {
 }
 
 // MARK: - SlashedValidator
-public struct SlashedValidator: Codable {
+
+public struct SlashedValidator: Codable, Sendable {
     public let accountId: AccountId
     public let isDoubleSign: Bool
 
     public init(
         accountId: AccountId,
-        isDoubleSign: Bool
+        isDoubleSign: Bool,
     ) {
         self.accountId = accountId
         self.isDoubleSign = isDoubleSign
@@ -13361,13 +14373,14 @@ public struct SlashedValidator: Codable {
 }
 
 // MARK: - StakeAction
-public struct StakeAction: Codable {
+
+public struct StakeAction: Codable, Sendable {
     public let publicKey: PublicKey
     public let stake: NearToken
 
     public init(
         publicKey: PublicKey,
-        stake: NearToken
+        stake: NearToken,
     ) {
         self.publicKey = publicKey
         self.stake = stake
@@ -13375,13 +14388,14 @@ public struct StakeAction: Codable {
 }
 
 // MARK: - StateItem
-public struct StateItem: Codable {
+
+public struct StateItem: Codable, Sendable {
     public let key: StoreKey
     public let value: StoreValue
 
     public init(
         key: StoreKey,
-        value: StoreValue
+        value: StoreValue,
     ) {
         self.key = key
         self.value = value
@@ -13389,7 +14403,8 @@ public struct StateItem: Codable {
 }
 
 // MARK: - StateSyncConfig
-public struct StateSyncConfig: Codable {
+
+public struct StateSyncConfig: Codable, Sendable {
     public let concurrency: SyncConcurrency?
     public let dump: DumpConfig?
     public let partsCompressionLvl: Int32?
@@ -13399,7 +14414,7 @@ public struct StateSyncConfig: Codable {
         concurrency: SyncConcurrency?,
         dump: DumpConfig?,
         partsCompressionLvl: Int32?,
-        sync: SyncConfig?
+        sync: SyncConfig?,
     ) {
         self.concurrency = concurrency
         self.dump = dump
@@ -13409,7 +14424,8 @@ public struct StateSyncConfig: Codable {
 }
 
 // MARK: - StatusSyncInfo
-public struct StatusSyncInfo: Codable {
+
+public struct StatusSyncInfo: Codable, Sendable {
     public let earliestBlockHash: CryptoHash?
     public let earliestBlockHeight: UInt64?
     public let earliestBlockTime: String?
@@ -13431,7 +14447,7 @@ public struct StatusSyncInfo: Codable {
         latestBlockHeight: UInt64,
         latestBlockTime: String,
         latestStateRoot: CryptoHash,
-        syncing: Bool
+        syncing: Bool,
     ) {
         self.earliestBlockHash = earliestBlockHash
         self.earliestBlockHeight = earliestBlockHeight
@@ -13447,13 +14463,14 @@ public struct StatusSyncInfo: Codable {
 }
 
 // MARK: - StorageUsageConfigView
-public struct StorageUsageConfigView: Codable {
+
+public struct StorageUsageConfigView: Codable, Sendable {
     public let numBytesAccount: UInt64
     public let numExtraBytesRecord: UInt64
 
     public init(
         numBytesAccount: UInt64,
-        numExtraBytesRecord: UInt64
+        numExtraBytesRecord: UInt64,
     ) {
         self.numBytesAccount = numBytesAccount
         self.numExtraBytesRecord = numExtraBytesRecord
@@ -13461,7 +14478,8 @@ public struct StorageUsageConfigView: Codable {
 }
 
 // MARK: - SyncConcurrency
-public struct SyncConcurrency: Codable {
+
+public struct SyncConcurrency: Codable, Sendable {
     public let apply: Int
     public let applyDuringCatchup: Int
     public let peerDownloads: Int
@@ -13471,7 +14489,7 @@ public struct SyncConcurrency: Codable {
         apply: Int,
         applyDuringCatchup: Int,
         peerDownloads: Int,
-        perShard: Int
+        perShard: Int,
     ) {
         self.apply = apply
         self.applyDuringCatchup = applyDuringCatchup
@@ -13481,13 +14499,14 @@ public struct SyncConcurrency: Codable {
 }
 
 // MARK: - Tier1ProxyView
-public struct Tier1ProxyView: Codable {
+
+public struct Tier1ProxyView: Codable, Sendable {
     public let addr: String
     public let peerId: PublicKey
 
     public init(
         addr: String,
-        peerId: PublicKey
+        peerId: PublicKey,
     ) {
         self.addr = addr
         self.peerId = peerId
@@ -13495,29 +14514,32 @@ public struct Tier1ProxyView: Codable {
 }
 
 // MARK: - TransferAction
-public struct TransferAction: Codable {
+
+public struct TransferAction: Codable, Sendable {
     public let deposit: NearToken
 
     public init(
-        deposit: NearToken
+        deposit: NearToken,
     ) {
         self.deposit = deposit
     }
 }
 
 // MARK: - UseGlobalContractAction
-public struct UseGlobalContractAction: Codable {
+
+public struct UseGlobalContractAction: Codable, Sendable {
     public let contractIdentifier: GlobalContractIdentifier
 
     public init(
-        contractIdentifier: GlobalContractIdentifier
+        contractIdentifier: GlobalContractIdentifier,
     ) {
         self.contractIdentifier = contractIdentifier
     }
 }
 
 // MARK: - VMConfigView
-public struct VMConfigView: Codable {
+
+public struct VMConfigView: Codable, Sendable {
     public let deterministicAccountIds: Bool
     public let discardCustomSections: Bool
     public let ethImplicitAccounts: Bool
@@ -13547,7 +14569,7 @@ public struct VMConfigView: Codable {
         regularOpCost: Int,
         saturatingFloatToInt: Bool,
         storageGetMode: StorageGetMode,
-        vmKind: VMKind
+        vmKind: VMKind,
     ) {
         self.deterministicAccountIds = deterministicAccountIds
         self.discardCustomSections = discardCustomSections
@@ -13567,24 +14589,26 @@ public struct VMConfigView: Codable {
 }
 
 // MARK: - ValidatorInfo
-public struct ValidatorInfo: Codable {
+
+public struct ValidatorInfo: Codable, Sendable {
     public let accountId: AccountId
 
     public init(
-        accountId: AccountId
+        accountId: AccountId,
     ) {
         self.accountId = accountId
     }
 }
 
 // MARK: - ValidatorKickoutView
-public struct ValidatorKickoutView: Codable {
+
+public struct ValidatorKickoutView: Codable, Sendable {
     public let accountId: AccountId
     public let reason: ValidatorKickoutReason
 
     public init(
         accountId: AccountId,
-        reason: ValidatorKickoutReason
+        reason: ValidatorKickoutReason,
     ) {
         self.accountId = accountId
         self.reason = reason
@@ -13592,7 +14616,8 @@ public struct ValidatorKickoutView: Codable {
 }
 
 // MARK: - ValidatorStakeViewV1
-public struct ValidatorStakeViewV1: Codable {
+
+public struct ValidatorStakeViewV1: Codable, Sendable {
     public let accountId: AccountId
     public let publicKey: PublicKey
     public let stake: NearToken
@@ -13600,7 +14625,7 @@ public struct ValidatorStakeViewV1: Codable {
     public init(
         accountId: AccountId,
         publicKey: PublicKey,
-        stake: NearToken
+        stake: NearToken,
     ) {
         self.accountId = accountId
         self.publicKey = publicKey
@@ -13609,7 +14634,8 @@ public struct ValidatorStakeViewV1: Codable {
 }
 
 // MARK: - Version
-public struct Version: Codable {
+
+public struct Version: Codable, Sendable {
     public let build: String
     public let commit: String
     public let rustcVersion: String?
@@ -13619,7 +14645,7 @@ public struct Version: Codable {
         build: String,
         commit: String,
         rustcVersion: String?,
-        version: String
+        version: String,
     ) {
         self.build = build
         self.commit = commit
@@ -13629,13 +14655,14 @@ public struct Version: Codable {
 }
 
 // MARK: - ViewStateResult
-public struct ViewStateResult: Codable {
+
+public struct ViewStateResult: Codable, Sendable {
     public let proof: [String]?
     public let values: [StateItem]
 
     public init(
         proof: [String]?,
-        values: [StateItem]
+        values: [StateItem],
     ) {
         self.proof = proof
         self.values = values
@@ -13643,7 +14670,8 @@ public struct ViewStateResult: Codable {
 }
 
 // MARK: - WitnessConfigView
-public struct WitnessConfigView: Codable {
+
+public struct WitnessConfigView: Codable, Sendable {
     public let combinedTransactionsSizeLimit: Int
     public let mainStorageProofSizeSoftLimit: UInt64
     public let newTransactionsValidationStateSizeSoftLimit: UInt64
@@ -13651,7 +14679,7 @@ public struct WitnessConfigView: Codable {
     public init(
         combinedTransactionsSizeLimit: Int,
         mainStorageProofSizeSoftLimit: UInt64,
-        newTransactionsValidationStateSizeSoftLimit: UInt64
+        newTransactionsValidationStateSizeSoftLimit: UInt64,
     ) {
         self.combinedTransactionsSizeLimit = combinedTransactionsSizeLimit
         self.mainStorageProofSizeSoftLimit = mainStorageProofSizeSoftLimit
@@ -13661,14 +14689,12 @@ public struct WitnessConfigView: Codable {
 
 // MARK: - Generated Inline Types
 
-public struct InlineObject: Codable {
+public struct InlineObject: Codable, Sendable {
     public let accountId: AccountId
 
     public init(
-        accountId: AccountId
+        accountId: AccountId,
     ) {
         self.accountId = accountId
     }
 }
-
-

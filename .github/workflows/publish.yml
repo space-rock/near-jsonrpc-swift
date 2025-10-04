@@ -1,0 +1,115 @@
+name: Release Please
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  release-please:
+    name: Release Please
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      paths_released: ${{ steps.release-please.outputs.paths_released }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      version: ${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}
+    
+    steps:
+      - name: Run Release Please
+        id: release
+        uses: googleapis/release-please-action@v4
+        with:
+          release-type: simple
+          package-name: near-jsonrpc-swift
+          bump-minor-pre-major: true
+          bump-patch-for-minor-pre-major: true
+
+  publish-release:
+    name: Publish Release Assets
+    runs-on: macos-latest
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Swift
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: '6.1'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: 'Scripts/requirements.txt'
+
+      - name: Install Python dependencies
+        run: |
+          cd Scripts
+          pip install -r requirements.txt
+
+      - name: Generate Swift code from OpenAPI spec
+        run: |
+          cd Scripts
+          bash codegen.sh
+
+      - name: Validate Swift Package
+        run: |
+          echo "🔍 Validating Swift Package..."
+          swift package resolve
+          swift build
+          swift test
+          echo "✅ Package validation successful"
+
+      - name: Build documentation
+        continue-on-error: true
+        run: |
+          if swift package plugin --list | grep -q "generate-documentation"; then
+            echo "📚 Generating documentation..."
+            swift package generate-documentation
+          else
+            echo "⚠️ swift-docc-plugin not available, skipping documentation generation"
+          fi
+
+      - name: Create Release Archive
+        id: archive
+        run: |
+          VERSION="${{ needs.release-please.outputs.version }}"
+          ARCHIVE_NAME="NearJsonRpc-${VERSION}.zip"
+          
+          zip -r "${ARCHIVE_NAME}" \
+            Sources/ \
+            Package.swift \
+            README.md \
+            LICENSE \
+            Examples/ \
+            -x "*.DS_Store" \
+            -x ".build/*" \
+            -x ".swiftpm/*"
+          
+          echo "archive_name=${ARCHIVE_NAME}" >> $GITHUB_OUTPUT
+          echo "✅ Created release archive: ${ARCHIVE_NAME}"
+
+      - name: Upload Release Assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload ${{ needs.release-please.outputs.tag_name }} \
+            ${{ steps.archive.outputs.archive_name }} \
+            --clobber
+
+      - name: Release Summary
+        run: |
+          echo "🎉 Release ${{ needs.release-please.outputs.tag_name }} published successfully!"
+          echo "📦 Package URL: https://github.com/${{ github.repository }}"
+          echo "🏷️ Tag: ${{ needs.release-please.outputs.tag_name }}"
+          echo "📝 Release URL: https://github.com/${{ github.repository }}/releases/tag/${{ needs.release-please.outputs.tag_name }}"

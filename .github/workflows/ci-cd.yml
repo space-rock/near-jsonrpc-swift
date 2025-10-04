@@ -1,0 +1,154 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  test-macos:
+    name: Test & Build (macOS)
+    runs-on: macos-14
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Swift
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: '6.1'
+
+      - name: Cache Swift dependencies
+        uses: actions/cache@v4
+        with:
+          path: .build
+          key: ${{ runner.os }}-spm-${{ hashFiles('Package.swift') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: 'Scripts/requirements.txt'
+
+      - name: Install Python dependencies
+        run: |
+          cd Scripts
+          pip install -r requirements.txt
+
+      - name: Generate Swift code from OpenAPI spec
+        run: |
+          cd Scripts
+          bash codegen.sh
+
+      - name: Swift Package Resolve
+        run: swift package resolve
+
+      - name: Build Swift Package
+        run: swift build
+
+      - name: Run Swift Tests
+        run: swift test --enable-code-coverage
+
+      - name: Generate coverage report
+        continue-on-error: true
+        run: |
+          # Find the Swift toolchain path
+          SWIFT_PATH=$(which swift)
+          TOOLCHAIN_PATH=$(dirname $(dirname "$SWIFT_PATH"))
+          LLVM_COV="$TOOLCHAIN_PATH/usr/bin/llvm-cov"
+          
+          # Fallback to xcrun if direct path doesn't exist
+          if [ ! -f "$LLVM_COV" ]; then
+            LLVM_COV="xcrun llvm-cov"
+          fi
+          
+          # Find the test binary
+          TEST_BINARY=".build/debug/NearJsonRpcPackageTests.xctest/Contents/MacOS/NearJsonRpcPackageTests"
+          
+          # Generate coverage
+          $LLVM_COV export \
+            -format="lcov" \
+            "$TEST_BINARY" \
+            -instr-profile=.build/debug/codecov/default.profdata \
+            -ignore-filename-regex=".build|Tests" \
+            > coverage.lcov
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.lcov
+          fail_ci_if_error: false
+
+  test-linux:
+    name: Test & Build (Linux)
+    runs-on: ubuntu-latest
+    container:
+      image: swift:6.1
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Cache Swift dependencies
+        uses: actions/cache@v4
+        with:
+          path: .build
+          key: ${{ runner.os }}-spm-${{ hashFiles('Package.swift') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-
+
+      - name: Install Python
+        run: |
+          apt-get update
+          apt-get install -y python3 python3-pip python3-venv
+
+      - name: Install Python dependencies
+        run: |
+          pip install --break-system-packages -r Scripts/requirements.txt
+
+      - name: Generate Swift code from OpenAPI spec
+        run: |
+          cd Scripts
+          bash codegen.sh
+
+      - name: Swift Package Resolve
+        run: swift package resolve
+
+      - name: Build Swift Package
+        run: swift build
+
+      - name: Run Swift Tests
+        run: swift test
+
+  validate-package:
+    name: Validate Swift Package
+    runs-on: macos-latest
+    if: github.event_name == 'pull_request'
+    needs: [test-macos, test-linux]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Swift
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: '6.1'
+
+      - name: Validate Swift Package Structure
+        run: |
+          echo "📦 Validating Swift Package..."
+          swift package dump-package
+          echo "✅ Package structure is valid"

@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.1
 import PackageDescription
 
 let package = Package(
@@ -8,7 +8,7 @@ let package = Package(
         .iOS(.v13),
     ],
     dependencies: [
-        .package(name: "NearJsonRpc", path: "..")
+        .package(name: "NearJsonRpc", path: ".."),
     ],
     targets: [
         .executableTarget(
@@ -17,7 +17,7 @@ let package = Package(
                 .product(name: "NearJsonRpcClient", package: "NearJsonRpc"),
                 .product(name: "NearJsonRpcTypes", package: "NearJsonRpc"),
             ],
-            path: "Sources"
-        )
-    ]
+            path: "Sources",
+        ),
+    ],
 )
