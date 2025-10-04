@@ -15,16 +15,14 @@ permissions:
 jobs:
   test-macos:
     name: Test & Build (macOS)
-    runs-on: macos-latest
+    runs-on: macos-14
     
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Swift
-        uses: swift-actions/setup-swift@v2
-        with:
-          swift-version: '5.9'
+      - name: Select Xcode version
+        run: sudo xcode-select -s /Applications/Xcode_16.0.app/Contents/Developer
 
       - name: Cache Swift dependencies
         uses: actions/cache@v4
@@ -84,7 +82,7 @@ jobs:
     name: Test & Build (Linux)
     runs-on: ubuntu-latest
     container:
-      image: swift:5.9
+      image: swift:6.1
 
     steps:
       - name: Checkout repository
@@ -119,7 +117,7 @@ jobs:
 
   validate-package:
     name: Validate Swift Package
-    runs-on: macos-latest
+    runs-on: macos-14
     if: github.event_name == 'pull_request'
     needs: [test-macos, test-linux]
 
@@ -127,10 +125,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Swift
-        uses: swift-actions/setup-swift@v2
-        with:
-          swift-version: '5.9'
+      - name: Select Xcode version
+        run: sudo xcode-select -s /Applications/Xcode_16.0.app/Contents/Developer
 
       - name: Validate Swift Package Structure
         run: |

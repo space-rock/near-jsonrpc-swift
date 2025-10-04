@@ -154,7 +154,7 @@ struct ClientUnitTests {
             id: "123",
             jsonrpc: "2.0",
             method: "test_method",
-            params: params
+            params: params,
         )
         #expect(request.id == "123")
         #expect(request.jsonrpc == "2.0")
@@ -172,7 +172,7 @@ struct ClientUnitTests {
             id: "123",
             jsonrpc: "2.0",
             method: "test_method",
-            params: params
+            params: params,
         )
 
         let encoder = JSONEncoder()
@@ -231,14 +231,14 @@ struct ClientUnitTests {
             stringValue: "test",
             intValue: 42,
             arrayValue: ["a", "b", "c"],
-            nestedObject: ComplexParams.NestedObject(key: "value")
+            nestedObject: ComplexParams.NestedObject(key: "value"),
         )
 
         let request = JsonRpcRequest(
             id: "456",
             jsonrpc: "2.0",
             method: "complex_method",
-            params: params
+            params: params,
         )
 
         let encoder = JSONEncoder()
@@ -261,7 +261,7 @@ struct ClientUnitTests {
             id: "789",
             jsonrpc: "2.0",
             method: "empty_method",
-            params: EmptyParams()
+            params: EmptyParams(),
         )
 
         let encoder = JSONEncoder()
@@ -285,7 +285,7 @@ struct ClientUnitTests {
             id: uuid,
             jsonrpc: "2.0",
             method: "test",
-            params: TestParams(value: "test")
+            params: TestParams(value: "test"),
         )
 
         #expect(request.id == uuid)
@@ -309,7 +309,7 @@ struct ClientUnitTests {
                 id: "1",
                 jsonrpc: "2.0",
                 method: method,
-                params: TestParams()
+                params: TestParams(),
             )
 
             let encoder = JSONEncoder()

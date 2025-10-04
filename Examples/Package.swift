@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.1
 import PackageDescription
 
 let package = Package(
@@ -17,7 +17,7 @@ let package = Package(
                 .product(name: "NearJsonRpcClient", package: "NearJsonRpc"),
                 .product(name: "NearJsonRpcTypes", package: "NearJsonRpc"),
             ],
-            path: "Sources"
+            path: "Sources",
         ),
-    ]
+    ],
 )

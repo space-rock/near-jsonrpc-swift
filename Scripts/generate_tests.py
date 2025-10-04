@@ -585,42 +585,51 @@ struct ClientTests {
 # =============================================================================
 
 def generate_mock_url_protocol_class() -> str:
-    """Generate a MockURLProtocol class for mocking network responses"""
-    return '''
-// MARK: - Mock URLProtocol for Testing
+    return """class MockURLProtocol: URLProtocol {
+    static var handler: MockHandler = MockHandler()
 
-class MockURLProtocol: URLProtocol {
-    static var requestHandler: ((URLRequest) throws -> (HTTPURLResponse, Data))?
-    static var lastRequest: URLRequest?
-    
+    actor MockHandler {
+        private var requestHandler: (@Sendable (URLRequest) throws -> (HTTPURLResponse, Data))?
+
+        func setRequestHandler(_ handler: @Sendable @escaping (URLRequest) throws -> (HTTPURLResponse, Data)) {
+            self.requestHandler = handler
+        }
+
+        func getRequestHandler() -> (@Sendable (URLRequest) throws -> (HTTPURLResponse, Data))? {
+            return self.requestHandler
+        }
+    }
+
     override class func canInit(with request: URLRequest) -> Bool {
         return true
     }
-    
+
     override class func canonicalRequest(for request: URLRequest) -> URLRequest {
         return request
     }
-    
+
     override func startLoading() {
-        guard let handler = MockURLProtocol.requestHandler else {
-            fatalError("Handler is unavailable.")
-        }
-        
-        MockURLProtocol.lastRequest = request
-        
-        do {
-            let (response, data) = try handler(request)
-            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-            client?.urlProtocol(self, didLoad: data)
-            client?.urlProtocolDidFinishLoading(self)
-        } catch {
-            client?.urlProtocol(self, didFailWithError: error)
+        Task {
+            guard let handlerFunc = await MockURLProtocol.handler.getRequestHandler() else {
+                fatalError("Handler is unavailable.")
+            }
+
+            do {
+                let (response, data) = try handlerFunc(request)
+                self.client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+                self.client?.urlProtocol(self, didLoad: data)
+                self.client?.urlProtocolDidFinishLoading(self)
+            } catch {
+                self.client?.urlProtocol(self, didFailWithError: error)
+            }
         }
     }
-    
-    override func stopLoading() {}
+
+    override func stopLoading() {
+        // No-op
+    }
 }
-'''
+"""
 
 
 def generate_test_utilities() -> str:
@@ -665,8 +674,8 @@ extension ClientMethodTests {
     }
     
     /// Setup mock response handler for success case
-    func setupMockSuccessResponse(with data: Data) {
-        MockURLProtocol.requestHandler = { _ in
+    func setupMockSuccessResponse(with data: Data) async {
+        await MockURLProtocol.handler.setRequestHandler { _ in
             let response = HTTPURLResponse(
                 url: URL(string: "https://rpc.testnet.near.org")!,
                 statusCode: 200,
@@ -678,8 +687,8 @@ extension ClientMethodTests {
     }
     
     /// Setup mock response handler for error case
-    func setupMockErrorResponse(with data: Data) {
-        MockURLProtocol.requestHandler = { _ in
+    func setupMockErrorResponse(with data: Data) async {
+        await MockURLProtocol.handler.setRequestHandler { _ in
             let response = HTTPURLResponse(
                 url: URL(string: "https://rpc.testnet.near.org")!,
                 statusCode: 200,
@@ -691,8 +700,8 @@ extension ClientMethodTests {
     }
     
     /// Setup mock response handler for HTTP error
-    func setupMockHTTPError(statusCode: Int) {
-        MockURLProtocol.requestHandler = { request in
+    func setupMockHTTPError(statusCode: Int) async {
+        await MockURLProtocol.handler.setRequestHandler { request in
             let response = HTTPURLResponse(
                 url: URL(string: "https://rpc.testnet.near.org")!,
                 statusCode: statusCode,
@@ -704,8 +713,8 @@ extension ClientMethodTests {
     }
     
     /// Verify that a request was made with the expected method
-    func verifyRequest(expectedMethod: String) {
-        guard let request = MockURLProtocol.lastRequest else {
+    func verifyRequest(expectedMethod: String) async {
+        guard let request = await MockURLProtocol.handler.getLastRequest() else {
             Issue.record("No request was captured")
             return
         }
@@ -758,13 +767,13 @@ def generate_method_test(method_name: str, swift_function_name: str,
         
         // Load mock success response data
         let responseData = try loadMockJSON("{response_swift}_Success.json")
-        setupMockSuccessResponse(with: responseData)
+        await setupMockSuccessResponse(with: responseData)
         
         // Execute
         let result = try await client.{swift_function_name}(request)
         
         // Verify
-        verifyRequest(expectedMethod: "{method_name}")
+        await verifyRequest(expectedMethod: "{method_name}")
         #expect(result != nil)
     }}
     
@@ -786,7 +795,7 @@ def generate_method_test(method_name: str, swift_function_name: str,
         
         // Load mock error response data
         let responseData = try loadMockJSON("{response_swift}_Error.json")
-        setupMockErrorResponse(with: responseData)
+        await setupMockErrorResponse(with: responseData)
         
         // Execute & Verify
         do {{
@@ -817,7 +826,7 @@ def generate_method_test(method_name: str, swift_function_name: str,
         let request = requestWrapper.params
         
         // Setup HTTP error response
-        setupMockHTTPError(statusCode: 500)
+        await setupMockHTTPError(statusCode: 500)
         
         // Execute & Verify
         do {{

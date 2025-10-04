@@ -23,12 +23,12 @@ struct EnhancedCoverageTests {
         guard let url = testBundle.url(
             forResource: filename.replacingOccurrences(of: ".json", with: ""),
             withExtension: "json",
-            subdirectory: "Mock"
+            subdirectory: "Mock",
         ) else {
             throw NSError(
                 domain: "TestError",
                 code: 1,
-                userInfo: [NSLocalizedDescriptionKey: "Mock file not found: \(filename)"]
+                userInfo: [NSLocalizedDescriptionKey: "Mock file not found: \(filename)"],
             )
         }
         return try Data(contentsOf: url)

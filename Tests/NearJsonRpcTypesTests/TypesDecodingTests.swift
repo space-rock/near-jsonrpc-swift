@@ -23,12 +23,12 @@ struct TypesDecodingTests {
         guard let url = testBundle.url(
             forResource: filename.replacingOccurrences(of: ".json", with: ""),
             withExtension: "json",
-            subdirectory: "Mock"
+            subdirectory: "Mock",
         ) else {
             throw NSError(
                 domain: "TestError",
                 code: 1,
-                userInfo: [NSLocalizedDescriptionKey: "Mock file not found: \(filename)"]
+                userInfo: [NSLocalizedDescriptionKey: "Mock file not found: \(filename)"],
             )
         }
         return try Data(contentsOf: url)
@@ -799,7 +799,8 @@ struct TypesDecodingTests {
         _ = try decoder.decode(JsonRpcResponseForRpcGasPriceResponseAndRpcError.self, from: encoded)
     }
 
-    @Test("JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError success response can be decoded and re-encoded"
+    @Test(
+        "JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError success response can be decoded and re-encoded",
     )
     func jsonRpcResponseForRpcLightClientBlockProofResponseAndRpcErrorSuccessDecodingAndEncoding() throws {
         let data = try loadMockJSON("JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError_Success.json")
@@ -831,7 +832,7 @@ struct TypesDecodingTests {
     }
 
     @Test(
-        "JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError success response can be decoded and re-encoded"
+        "JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError success response can be decoded and re-encoded",
     )
     func jsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcErrorSuccessDecodingAndEncoding() throws {
         let data = try loadMockJSON("JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError_Success.json")
@@ -839,7 +840,7 @@ struct TypesDecodingTests {
         // Test decoding
         let decoded = try decoder.decode(
             JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError.self,
-            from: data
+            from: data,
         )
 
         // Test encoding
@@ -851,7 +852,7 @@ struct TypesDecodingTests {
     }
 
     @Test(
-        "JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError error response can be decoded and re-encoded"
+        "JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError error response can be decoded and re-encoded",
     )
     func jsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcErrorErrorDecodingAndEncoding() throws {
         let data = try loadMockJSON("JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError_Error.json")
@@ -859,7 +860,7 @@ struct TypesDecodingTests {
         // Test decoding
         let decoded = try decoder.decode(
             JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError.self,
-            from: data
+            from: data,
         )
 
         // Test encoding
@@ -1051,7 +1052,7 @@ struct TypesDecodingTests {
     }
 
     @Test(
-        "JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError success response can be decoded and re-encoded"
+        "JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError success response can be decoded and re-encoded",
     )
     func jsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcErrorSuccessDecodingAndEncoding() throws {
         let data = try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError_Success.json")
@@ -1059,7 +1060,7 @@ struct TypesDecodingTests {
         // Test decoding
         let decoded = try decoder.decode(
             JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError.self,
-            from: data
+            from: data,
         )
 
         // Test encoding
@@ -1071,7 +1072,7 @@ struct TypesDecodingTests {
     }
 
     @Test(
-        "JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError error response can be decoded and re-encoded"
+        "JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError error response can be decoded and re-encoded",
     )
     func jsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcErrorErrorDecodingAndEncoding() throws {
         let data = try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError_Error.json")
@@ -1079,7 +1080,7 @@ struct TypesDecodingTests {
         // Test decoding
         let decoded = try decoder.decode(
             JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError.self,
-            from: data
+            from: data,
         )
 
         // Test encoding

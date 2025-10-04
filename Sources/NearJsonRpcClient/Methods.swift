@@ -12,7 +12,7 @@ public extension NearJsonRpcClient {
         let response: JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError = try await performRequest(
             method: "EXPERIMENTAL_changes",
             params: request,
-            responseType: JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError.self
+            responseType: JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError.self,
         )
 
         switch response {
@@ -31,7 +31,7 @@ public extension NearJsonRpcClient {
         let response: JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError = try await performRequest(
             method: "EXPERIMENTAL_changes_in_block",
             params: request,
-            responseType: JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError.self
+            responseType: JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError.self,
         )
 
         switch response {
@@ -47,7 +47,7 @@ public extension NearJsonRpcClient {
         let response: JsonRpcResponseForRpcCongestionLevelResponseAndRpcError = try await performRequest(
             method: "EXPERIMENTAL_congestion_level",
             params: request,
-            responseType: JsonRpcResponseForRpcCongestionLevelResponseAndRpcError.self
+            responseType: JsonRpcResponseForRpcCongestionLevelResponseAndRpcError.self,
         )
 
         switch response {
@@ -63,7 +63,7 @@ public extension NearJsonRpcClient {
         let response: JsonRpcResponseForGenesisConfigAndRpcError = try await performRequest(
             method: "EXPERIMENTAL_genesis_config",
             params: request,
-            responseType: JsonRpcResponseForGenesisConfigAndRpcError.self
+            responseType: JsonRpcResponseForGenesisConfigAndRpcError.self,
         )
 
         switch response {
@@ -80,7 +80,7 @@ public extension NearJsonRpcClient {
         let response: JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError = try await performRequest(
             method: "EXPERIMENTAL_light_client_block_proof",
             params: request,
-            responseType: JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError.self
+            responseType: JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError.self,
         )
 
         switch response {
@@ -97,7 +97,7 @@ public extension NearJsonRpcClient {
         let response: JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError = try await performRequest(
             method: "EXPERIMENTAL_light_client_proof",
             params: request,
-            responseType: JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError.self
+            responseType: JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError.self,
         )
 
         switch response {
@@ -115,7 +115,7 @@ public extension NearJsonRpcClient {
         let response: JsonRpcResponseForArrayOfRangeOfUint64AndRpcError = try await performRequest(
             method: "EXPERIMENTAL_maintenance_windows",
             params: request,
-            responseType: JsonRpcResponseForArrayOfRangeOfUint64AndRpcError.self
+            responseType: JsonRpcResponseForArrayOfRangeOfUint64AndRpcError.self,
         )
 
         switch response {
@@ -132,7 +132,7 @@ public extension NearJsonRpcClient {
         let response: JsonRpcResponseForRpcProtocolConfigResponseAndRpcError = try await performRequest(
             method: "EXPERIMENTAL_protocol_config",
             params: request,
-            responseType: JsonRpcResponseForRpcProtocolConfigResponseAndRpcError.self
+            responseType: JsonRpcResponseForRpcProtocolConfigResponseAndRpcError.self,
         )
 
         switch response {
@@ -148,7 +148,7 @@ public extension NearJsonRpcClient {
         let response: JsonRpcResponseForRpcReceiptResponseAndRpcError = try await performRequest(
             method: "EXPERIMENTAL_receipt",
             params: request,
-            responseType: JsonRpcResponseForRpcReceiptResponseAndRpcError.self
+            responseType: JsonRpcResponseForRpcReceiptResponseAndRpcError.self,
         )
 
         switch response {
@@ -166,7 +166,7 @@ public extension NearJsonRpcClient {
         let response: JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError = try await performRequest(
             method: "EXPERIMENTAL_split_storage_info",
             params: request,
-            responseType: JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError.self
+            responseType: JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError.self,
         )
 
         switch response {
@@ -182,7 +182,7 @@ public extension NearJsonRpcClient {
         let response: JsonRpcResponseForRpcTransactionResponseAndRpcError = try await performRequest(
             method: "EXPERIMENTAL_tx_status",
             params: request,
-            responseType: JsonRpcResponseForRpcTransactionResponseAndRpcError.self
+            responseType: JsonRpcResponseForRpcTransactionResponseAndRpcError.self,
         )
 
         switch response {
@@ -199,7 +199,7 @@ public extension NearJsonRpcClient {
         let response: JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError = try await performRequest(
             method: "EXPERIMENTAL_validators_ordered",
             params: request,
-            responseType: JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError.self
+            responseType: JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError.self,
         )
 
         switch response {
@@ -215,7 +215,7 @@ public extension NearJsonRpcClient {
         let response: JsonRpcResponseForRpcBlockResponseAndRpcError = try await performRequest(
             method: "block",
             params: request,
-            responseType: JsonRpcResponseForRpcBlockResponseAndRpcError.self
+            responseType: JsonRpcResponseForRpcBlockResponseAndRpcError.self,
         )
 
         switch response {
@@ -232,7 +232,7 @@ public extension NearJsonRpcClient {
         let response: JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError = try await performRequest(
             method: "block_effects",
             params: request,
-            responseType: JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError.self
+            responseType: JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError.self,
         )
 
         switch response {
@@ -248,7 +248,7 @@ public extension NearJsonRpcClient {
         let response: JsonRpcResponseForCryptoHashAndRpcError = try await performRequest(
             method: "broadcast_tx_async",
             params: request,
-            responseType: JsonRpcResponseForCryptoHashAndRpcError.self
+            responseType: JsonRpcResponseForCryptoHashAndRpcError.self,
         )
 
         switch response {
@@ -265,7 +265,7 @@ public extension NearJsonRpcClient {
         let response: JsonRpcResponseForRpcTransactionResponseAndRpcError = try await performRequest(
             method: "broadcast_tx_commit",
             params: request,
-            responseType: JsonRpcResponseForRpcTransactionResponseAndRpcError.self
+            responseType: JsonRpcResponseForRpcTransactionResponseAndRpcError.self,
         )
 
         switch response {
@@ -281,7 +281,7 @@ public extension NearJsonRpcClient {
         let response: JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError = try await performRequest(
             method: "changes",
             params: request,
-            responseType: JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError.self
+            responseType: JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError.self,
         )
 
         switch response {
@@ -297,7 +297,7 @@ public extension NearJsonRpcClient {
         let response: JsonRpcResponseForRpcChunkResponseAndRpcError = try await performRequest(
             method: "chunk",
             params: request,
-            responseType: JsonRpcResponseForRpcChunkResponseAndRpcError.self
+            responseType: JsonRpcResponseForRpcChunkResponseAndRpcError.self,
         )
 
         switch response {
@@ -313,7 +313,7 @@ public extension NearJsonRpcClient {
         let response: JsonRpcResponseForRpcClientConfigResponseAndRpcError = try await performRequest(
             method: "client_config",
             params: request,
-            responseType: JsonRpcResponseForRpcClientConfigResponseAndRpcError.self
+            responseType: JsonRpcResponseForRpcClientConfigResponseAndRpcError.self,
         )
 
         switch response {
@@ -330,7 +330,7 @@ public extension NearJsonRpcClient {
         let response: JsonRpcResponseForRpcGasPriceResponseAndRpcError = try await performRequest(
             method: "gas_price",
             params: request,
-            responseType: JsonRpcResponseForRpcGasPriceResponseAndRpcError.self
+            responseType: JsonRpcResponseForRpcGasPriceResponseAndRpcError.self,
         )
 
         switch response {
@@ -346,7 +346,7 @@ public extension NearJsonRpcClient {
         let response: JsonRpcResponseForGenesisConfigAndRpcError = try await performRequest(
             method: "genesis_config",
             params: request,
-            responseType: JsonRpcResponseForGenesisConfigAndRpcError.self
+            responseType: JsonRpcResponseForGenesisConfigAndRpcError.self,
         )
 
         switch response {
@@ -362,7 +362,7 @@ public extension NearJsonRpcClient {
         let response: JsonRpcResponseForNullableRpcHealthResponseAndRpcError = try await performRequest(
             method: "health",
             params: request,
-            responseType: JsonRpcResponseForNullableRpcHealthResponseAndRpcError.self
+            responseType: JsonRpcResponseForNullableRpcHealthResponseAndRpcError.self,
         )
 
         switch response {
@@ -379,7 +379,7 @@ public extension NearJsonRpcClient {
         let response: JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError = try await performRequest(
             method: "light_client_proof",
             params: request,
-            responseType: JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError.self
+            responseType: JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError.self,
         )
 
         switch response {
@@ -396,7 +396,7 @@ public extension NearJsonRpcClient {
         let response: JsonRpcResponseForArrayOfRangeOfUint64AndRpcError = try await performRequest(
             method: "maintenance_windows",
             params: request,
-            responseType: JsonRpcResponseForArrayOfRangeOfUint64AndRpcError.self
+            responseType: JsonRpcResponseForArrayOfRangeOfUint64AndRpcError.self,
         )
 
         switch response {
@@ -413,7 +413,7 @@ public extension NearJsonRpcClient {
         let response: JsonRpcResponseForRpcNetworkInfoResponseAndRpcError = try await performRequest(
             method: "network_info",
             params: request,
-            responseType: JsonRpcResponseForRpcNetworkInfoResponseAndRpcError.self
+            responseType: JsonRpcResponseForRpcNetworkInfoResponseAndRpcError.self,
         )
 
         switch response {
@@ -430,7 +430,7 @@ public extension NearJsonRpcClient {
         let response: JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError = try await performRequest(
             method: "next_light_client_block",
             params: request,
-            responseType: JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError.self
+            responseType: JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError.self,
         )
 
         switch response {
@@ -457,7 +457,7 @@ public extension NearJsonRpcClient {
         let response: JsonRpcResponseForRpcQueryResponseAndRpcError = try await performRequest(
             method: "query",
             params: request,
-            responseType: JsonRpcResponseForRpcQueryResponseAndRpcError.self
+            responseType: JsonRpcResponseForRpcQueryResponseAndRpcError.self,
         )
 
         switch response {
@@ -474,7 +474,7 @@ public extension NearJsonRpcClient {
         let response: JsonRpcResponseForRpcTransactionResponseAndRpcError = try await performRequest(
             method: "send_tx",
             params: request,
-            responseType: JsonRpcResponseForRpcTransactionResponseAndRpcError.self
+            responseType: JsonRpcResponseForRpcTransactionResponseAndRpcError.self,
         )
 
         switch response {
@@ -491,7 +491,7 @@ public extension NearJsonRpcClient {
         let response: JsonRpcResponseForRpcStatusResponseAndRpcError = try await performRequest(
             method: "status",
             params: request,
-            responseType: JsonRpcResponseForRpcStatusResponseAndRpcError.self
+            responseType: JsonRpcResponseForRpcStatusResponseAndRpcError.self,
         )
 
         switch response {
@@ -507,7 +507,7 @@ public extension NearJsonRpcClient {
         let response: JsonRpcResponseForRpcTransactionResponseAndRpcError = try await performRequest(
             method: "tx",
             params: request,
-            responseType: JsonRpcResponseForRpcTransactionResponseAndRpcError.self
+            responseType: JsonRpcResponseForRpcTransactionResponseAndRpcError.self,
         )
 
         switch response {
@@ -523,7 +523,7 @@ public extension NearJsonRpcClient {
         let response: JsonRpcResponseForRpcValidatorResponseAndRpcError = try await performRequest(
             method: "validators",
             params: request,
-            responseType: JsonRpcResponseForRpcValidatorResponseAndRpcError.self
+            responseType: JsonRpcResponseForRpcValidatorResponseAndRpcError.self,
         )
 
         switch response {

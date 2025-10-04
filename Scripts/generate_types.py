@@ -16,7 +16,7 @@ SWIFT_RESERVED_KEYWORDS = {
 }
 
 ANYCODABLE_HELPER_CODE = """// MARK: - AnyCodable Helper
-public struct AnyCodable: Codable {
+public struct AnyCodable: Codable, @unchecked Sendable {
     public let value: Any
     
     public init(_ value: Any) {
@@ -508,7 +508,7 @@ def generate_swift_enum(name: str, schema: Dict[str, Any]) -> str:
     # Handle the special case of nullable enum with only null value
     if len(enum_values) == 1 and enum_values[0] is None and is_nullable:
         # This represents a null-only type, generate a type that encodes to null
-        return f"""public struct {swift_name}: Codable {{
+        return f"""public struct {swift_name}: Codable, Sendable {{
     public init() {{}}
     
     public init(from decoder: Decoder) throws {{
@@ -530,7 +530,7 @@ def generate_swift_enum(name: str, schema: Dict[str, Any]) -> str:
     
     if not non_null_values:
         # All values are null - generate a type that encodes to null
-        return f"""public struct {swift_name}: Codable {{
+        return f"""public struct {swift_name}: Codable, Sendable {{
     public init() {{}}
     
     public init(from decoder: Decoder) throws {{
@@ -654,7 +654,7 @@ def generate_swift_struct(name: str, schema: Dict[str, Any], components: Dict[st
             value_type = "Any"
         return f"public typealias {swift_name} = [String: {value_type}]\n"
     
-    code = f"public struct {swift_name}: Codable {{\n"
+    code = f"public struct {swift_name}: Codable, Sendable {{\n"
     
     # Generate properties using helper function
     property_mappings = {}
@@ -869,7 +869,7 @@ def generate_inline_object_struct(type_name: str, schema: Dict[str, Any], compon
     properties = schema.get("properties", {})
     required = set(schema.get("required", []))
     
-    code = f"public struct {type_name}: Codable {{\n"
+    code = f"public struct {type_name}: Codable, Sendable {{\n"
     
     # Generate properties using helper function
     property_mappings = {}
@@ -959,7 +959,7 @@ def generate_swift_enum_with_associated_values(name: str, schema: Dict[str, Any]
             break
     
     # Generate the main enum
-    code = f"public enum {swift_name}: Codable {{\n"
+    code = f"public enum {swift_name}: Codable, Sendable {{\n"
     
     # Generate cases
     case_names_used = set()
@@ -1209,7 +1209,7 @@ def generate_oneof_inline_struct(case_name: str, type_name: str, variant: Dict[s
     _global_inline_struct_schemas[type_name] = type_name
     
     # Regular multi-property struct
-    code = f"public struct {type_name}: Codable {{\n"
+    code = f"public struct {type_name}: Codable, Sendable {{\n"
     
     # Generate properties using helper function
     property_mappings = {}

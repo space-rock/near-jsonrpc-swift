@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(FoundationNetworking)
+    import FoundationNetworking
+#endif
 import NearJsonRpcTypes
 
 public typealias NearRpcClient = NearJsonRpcClient
@@ -34,13 +37,13 @@ extension NearJsonRpcClient {
     func performRequest<ResponseType: Codable>(
         method: String,
         params: some Codable,
-        responseType _: ResponseType.Type
+        responseType _: ResponseType.Type,
     ) async throws -> ResponseType {
         let request = JsonRpcRequest(
             id: UUID().uuidString,
             jsonrpc: "2.0",
             method: method,
-            params: params
+            params: params,
         )
 
         let encoder = JSONEncoder()

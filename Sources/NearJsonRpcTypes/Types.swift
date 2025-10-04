@@ -2,7 +2,7 @@ import Foundation
 
 // MARK: - AnyCodable Helper
 
-public struct AnyCodable: Codable {
+public struct AnyCodable: Codable, @unchecked Sendable {
     public let value: Any
 
     public init(_ value: Any) {
@@ -51,7 +51,7 @@ public struct AnyCodable: Codable {
         } else {
             throw EncodingError.invalidValue(
                 value,
-                EncodingError.Context(codingPath: [], debugDescription: "Cannot encode AnyCodable")
+                EncodingError.Context(codingPath: [], debugDescription: "Cannot encode AnyCodable"),
             )
         }
     }
@@ -224,7 +224,7 @@ public enum SyncCheckpoint: String, Codable, Sendable {
 
 // MARK: - GenesisConfigRequest
 
-public struct GenesisConfigRequest: Codable {
+public struct GenesisConfigRequest: Codable, Sendable {
     public init() {}
 
     public init(from decoder: Decoder) throws {
@@ -232,7 +232,7 @@ public struct GenesisConfigRequest: Codable {
         if !container.decodeNil() {
             throw DecodingError.typeMismatch(
                 GenesisConfigRequest.self,
-                DecodingError.Context(codingPath: [], debugDescription: "Expected null")
+                DecodingError.Context(codingPath: [], debugDescription: "Expected null"),
             )
         }
     }
@@ -245,7 +245,7 @@ public struct GenesisConfigRequest: Codable {
 
 // MARK: - RpcClientConfigRequest
 
-public struct RpcClientConfigRequest: Codable {
+public struct RpcClientConfigRequest: Codable, Sendable {
     public init() {}
 
     public init(from decoder: Decoder) throws {
@@ -253,7 +253,7 @@ public struct RpcClientConfigRequest: Codable {
         if !container.decodeNil() {
             throw DecodingError.typeMismatch(
                 RpcClientConfigRequest.self,
-                DecodingError.Context(codingPath: [], debugDescription: "Expected null")
+                DecodingError.Context(codingPath: [], debugDescription: "Expected null"),
             )
         }
     }
@@ -266,7 +266,7 @@ public struct RpcClientConfigRequest: Codable {
 
 // MARK: - RpcHealthRequest
 
-public struct RpcHealthRequest: Codable {
+public struct RpcHealthRequest: Codable, Sendable {
     public init() {}
 
     public init(from decoder: Decoder) throws {
@@ -274,7 +274,7 @@ public struct RpcHealthRequest: Codable {
         if !container.decodeNil() {
             throw DecodingError.typeMismatch(
                 RpcHealthRequest.self,
-                DecodingError.Context(codingPath: [], debugDescription: "Expected null")
+                DecodingError.Context(codingPath: [], debugDescription: "Expected null"),
             )
         }
     }
@@ -287,7 +287,7 @@ public struct RpcHealthRequest: Codable {
 
 // MARK: - RpcHealthResponse
 
-public struct RpcHealthResponse: Codable {
+public struct RpcHealthResponse: Codable, Sendable {
     public init() {}
 
     public init(from decoder: Decoder) throws {
@@ -295,7 +295,7 @@ public struct RpcHealthResponse: Codable {
         if !container.decodeNil() {
             throw DecodingError.typeMismatch(
                 RpcHealthResponse.self,
-                DecodingError.Context(codingPath: [], debugDescription: "Expected null")
+                DecodingError.Context(codingPath: [], debugDescription: "Expected null"),
             )
         }
     }
@@ -308,7 +308,7 @@ public struct RpcHealthResponse: Codable {
 
 // MARK: - RpcNetworkInfoRequest
 
-public struct RpcNetworkInfoRequest: Codable {
+public struct RpcNetworkInfoRequest: Codable, Sendable {
     public init() {}
 
     public init(from decoder: Decoder) throws {
@@ -316,7 +316,7 @@ public struct RpcNetworkInfoRequest: Codable {
         if !container.decodeNil() {
             throw DecodingError.typeMismatch(
                 RpcNetworkInfoRequest.self,
-                DecodingError.Context(codingPath: [], debugDescription: "Expected null")
+                DecodingError.Context(codingPath: [], debugDescription: "Expected null"),
             )
         }
     }
@@ -329,7 +329,7 @@ public struct RpcNetworkInfoRequest: Codable {
 
 // MARK: - RpcStatusRequest
 
-public struct RpcStatusRequest: Codable {
+public struct RpcStatusRequest: Codable, Sendable {
     public init() {}
 
     public init(from decoder: Decoder) throws {
@@ -337,7 +337,7 @@ public struct RpcStatusRequest: Codable {
         if !container.decodeNil() {
             throw DecodingError.typeMismatch(
                 RpcStatusRequest.self,
-                DecodingError.Context(codingPath: [], debugDescription: "Expected null")
+                DecodingError.Context(codingPath: [], debugDescription: "Expected null"),
             )
         }
     }
@@ -350,7 +350,7 @@ public struct RpcStatusRequest: Codable {
 
 // MARK: - AccessKeyPermission
 
-public enum AccessKeyPermission: Codable {
+public enum AccessKeyPermission: Codable, Sendable {
     case functionCall(FunctionCallPermission)
     case fullAccess
 
@@ -408,7 +408,7 @@ public enum AccessKeyPermission: Codable {
 
 // MARK: - AccessKeyPermissionView
 
-public struct AccessKeyPermissionViewOneOfFunctionCallInline: Codable {
+public struct AccessKeyPermissionViewOneOfFunctionCallInline: Codable, Sendable {
     public let allowance: NearToken?
     public let methodNames: [String]
     public let receiverId: String
@@ -416,7 +416,7 @@ public struct AccessKeyPermissionViewOneOfFunctionCallInline: Codable {
     public init(
         allowance: NearToken?,
         methodNames: [String],
-        receiverId: String
+        receiverId: String,
     ) {
         self.allowance = allowance
         self.methodNames = methodNames
@@ -424,7 +424,7 @@ public struct AccessKeyPermissionViewOneOfFunctionCallInline: Codable {
     }
 }
 
-public enum AccessKeyPermissionView: Codable {
+public enum AccessKeyPermissionView: Codable, Sendable {
     case fullAccess
     case functionCall(AccessKeyPermissionViewOneOfFunctionCallInline)
 
@@ -441,7 +441,7 @@ public enum AccessKeyPermissionView: Codable {
                     .first(where: { key in key.stringValue.caseInsensitiveCompare("FunctionCall") == .orderedSame }) {
                     let value = try container.decode(
                         AccessKeyPermissionViewOneOfFunctionCallInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .functionCall(value)
                     return
@@ -485,27 +485,27 @@ public enum AccessKeyPermissionView: Codable {
 
 // MARK: - ActionErrorKind
 
-public struct ActionErrorKindOneOfAccountAlreadyExistsInline: Codable {
+public struct ActionErrorKindOneOfAccountAlreadyExistsInline: Codable, Sendable {
     public let accountId: AccountId
 
     public init(
-        accountId: AccountId
+        accountId: AccountId,
     ) {
         self.accountId = accountId
     }
 }
 
-public struct ActionErrorKindOneOfAccountDoesNotExistInline: Codable {
+public struct ActionErrorKindOneOfAccountDoesNotExistInline: Codable, Sendable {
     public let accountId: AccountId
 
     public init(
-        accountId: AccountId
+        accountId: AccountId,
     ) {
         self.accountId = accountId
     }
 }
 
-public struct ActionErrorKindOneOfCreateAccountOnlyByRegistrarInline: Codable {
+public struct ActionErrorKindOneOfCreateAccountOnlyByRegistrarInline: Codable, Sendable {
     public let accountId: AccountId
     public let predecessorId: AccountId
     public let registrarAccountId: AccountId
@@ -513,7 +513,7 @@ public struct ActionErrorKindOneOfCreateAccountOnlyByRegistrarInline: Codable {
     public init(
         accountId: AccountId,
         predecessorId: AccountId,
-        registrarAccountId: AccountId
+        registrarAccountId: AccountId,
     ) {
         self.accountId = accountId
         self.predecessorId = predecessorId
@@ -521,92 +521,92 @@ public struct ActionErrorKindOneOfCreateAccountOnlyByRegistrarInline: Codable {
     }
 }
 
-public struct ActionErrorKindOneOfCreateAccountNotAllowedInline: Codable {
+public struct ActionErrorKindOneOfCreateAccountNotAllowedInline: Codable, Sendable {
     public let accountId: AccountId
     public let predecessorId: AccountId
 
     public init(
         accountId: AccountId,
-        predecessorId: AccountId
+        predecessorId: AccountId,
     ) {
         self.accountId = accountId
         self.predecessorId = predecessorId
     }
 }
 
-public struct ActionErrorKindOneOfActorNoPermissionInline: Codable {
+public struct ActionErrorKindOneOfActorNoPermissionInline: Codable, Sendable {
     public let accountId: AccountId
     public let actorId: AccountId
 
     public init(
         accountId: AccountId,
-        actorId: AccountId
+        actorId: AccountId,
     ) {
         self.accountId = accountId
         self.actorId = actorId
     }
 }
 
-public struct ActionErrorKindOneOfDeleteKeyDoesNotExistInline: Codable {
+public struct ActionErrorKindOneOfDeleteKeyDoesNotExistInline: Codable, Sendable {
     public let accountId: AccountId
     public let publicKey: PublicKey
 
     public init(
         accountId: AccountId,
-        publicKey: PublicKey
+        publicKey: PublicKey,
     ) {
         self.accountId = accountId
         self.publicKey = publicKey
     }
 }
 
-public struct ActionErrorKindOneOfAddKeyAlreadyExistsInline: Codable {
+public struct ActionErrorKindOneOfAddKeyAlreadyExistsInline: Codable, Sendable {
     public let accountId: AccountId
     public let publicKey: PublicKey
 
     public init(
         accountId: AccountId,
-        publicKey: PublicKey
+        publicKey: PublicKey,
     ) {
         self.accountId = accountId
         self.publicKey = publicKey
     }
 }
 
-public struct ActionErrorKindOneOfDeleteAccountStakingInline: Codable {
+public struct ActionErrorKindOneOfDeleteAccountStakingInline: Codable, Sendable {
     public let accountId: AccountId
 
     public init(
-        accountId: AccountId
+        accountId: AccountId,
     ) {
         self.accountId = accountId
     }
 }
 
-public struct ActionErrorKindOneOfLackBalanceForStateInline: Codable {
+public struct ActionErrorKindOneOfLackBalanceForStateInline: Codable, Sendable {
     public let accountId: AccountId
     public let amount: NearToken
 
     public init(
         accountId: AccountId,
-        amount: NearToken
+        amount: NearToken,
     ) {
         self.accountId = accountId
         self.amount = amount
     }
 }
 
-public struct ActionErrorKindOneOfTriesToUnstakeInline: Codable {
+public struct ActionErrorKindOneOfTriesToUnstakeInline: Codable, Sendable {
     public let accountId: AccountId
 
     public init(
-        accountId: AccountId
+        accountId: AccountId,
     ) {
         self.accountId = accountId
     }
 }
 
-public struct ActionErrorKindOneOfTriesToStakeInline: Codable {
+public struct ActionErrorKindOneOfTriesToStakeInline: Codable, Sendable {
     public let accountId: AccountId
     public let balance: NearToken
     public let locked: NearToken
@@ -616,7 +616,7 @@ public struct ActionErrorKindOneOfTriesToStakeInline: Codable {
         accountId: AccountId,
         balance: NearToken,
         locked: NearToken,
-        stake: NearToken
+        stake: NearToken,
     ) {
         self.accountId = accountId
         self.balance = balance
@@ -625,7 +625,7 @@ public struct ActionErrorKindOneOfTriesToStakeInline: Codable {
     }
 }
 
-public struct ActionErrorKindOneOfInsufficientStakeInline: Codable {
+public struct ActionErrorKindOneOfInsufficientStakeInline: Codable, Sendable {
     public let accountId: AccountId
     public let minimumStake: NearToken
     public let stake: NearToken
@@ -633,7 +633,7 @@ public struct ActionErrorKindOneOfInsufficientStakeInline: Codable {
     public init(
         accountId: AccountId,
         minimumStake: NearToken,
-        stake: NearToken
+        stake: NearToken,
     ) {
         self.accountId = accountId
         self.minimumStake = minimumStake
@@ -641,76 +641,76 @@ public struct ActionErrorKindOneOfInsufficientStakeInline: Codable {
     }
 }
 
-public struct ActionErrorKindOneOfOnlyImplicitAccountCreationAllowedInline: Codable {
+public struct ActionErrorKindOneOfOnlyImplicitAccountCreationAllowedInline: Codable, Sendable {
     public let accountId: AccountId
 
     public init(
-        accountId: AccountId
+        accountId: AccountId,
     ) {
         self.accountId = accountId
     }
 }
 
-public struct ActionErrorKindOneOfDeleteAccountWithLargeStateInline: Codable {
+public struct ActionErrorKindOneOfDeleteAccountWithLargeStateInline: Codable, Sendable {
     public let accountId: AccountId
 
     public init(
-        accountId: AccountId
+        accountId: AccountId,
     ) {
         self.accountId = accountId
     }
 }
 
-public struct ActionErrorKindOneOfDelegateActionSenderDoesNotMatchTxReceiverInline: Codable {
+public struct ActionErrorKindOneOfDelegateActionSenderDoesNotMatchTxReceiverInline: Codable, Sendable {
     public let receiverId: AccountId
     public let senderId: AccountId
 
     public init(
         receiverId: AccountId,
-        senderId: AccountId
+        senderId: AccountId,
     ) {
         self.receiverId = receiverId
         self.senderId = senderId
     }
 }
 
-public struct ActionErrorKindOneOfDelegateActionInvalidNonceInline: Codable {
+public struct ActionErrorKindOneOfDelegateActionInvalidNonceInline: Codable, Sendable {
     public let akNonce: UInt64
     public let delegateNonce: UInt64
 
     public init(
         akNonce: UInt64,
-        delegateNonce: UInt64
+        delegateNonce: UInt64,
     ) {
         self.akNonce = akNonce
         self.delegateNonce = delegateNonce
     }
 }
 
-public struct ActionErrorKindOneOfDelegateActionNonceTooLargeInline: Codable {
+public struct ActionErrorKindOneOfDelegateActionNonceTooLargeInline: Codable, Sendable {
     public let delegateNonce: UInt64
     public let upperBound: UInt64
 
     public init(
         delegateNonce: UInt64,
-        upperBound: UInt64
+        upperBound: UInt64,
     ) {
         self.delegateNonce = delegateNonce
         self.upperBound = upperBound
     }
 }
 
-public struct ActionErrorKindOneOfGlobalContractDoesNotExistInline: Codable {
+public struct ActionErrorKindOneOfGlobalContractDoesNotExistInline: Codable, Sendable {
     public let identifier: GlobalContractIdentifier
 
     public init(
-        identifier: GlobalContractIdentifier
+        identifier: GlobalContractIdentifier,
     ) {
         self.identifier = identifier
     }
 }
 
-public enum ActionErrorKind: Codable {
+public enum ActionErrorKind: Codable, Sendable {
     case accountAlreadyExists(ActionErrorKindOneOfAccountAlreadyExistsInline)
     case accountDoesNotExist(ActionErrorKindOneOfAccountDoesNotExistInline)
     case createAccountOnlyByRegistrar(ActionErrorKindOneOfCreateAccountOnlyByRegistrarInline)
@@ -728,7 +728,8 @@ public enum ActionErrorKind: Codable {
     case onlyImplicitAccountCreationAllowed(ActionErrorKindOneOfOnlyImplicitAccountCreationAllowedInline)
     case deleteAccountWithLargeState(ActionErrorKindOneOfDeleteAccountWithLargeStateInline)
     case delegateActionInvalidSignature
-    case delegateActionSenderDoesNotMatchTxReceiver(ActionErrorKindOneOfDelegateActionSenderDoesNotMatchTxReceiverInline
+    case delegateActionSenderDoesNotMatchTxReceiver(
+        ActionErrorKindOneOfDelegateActionSenderDoesNotMatchTxReceiverInline,
     )
     case delegateActionExpired
     case delegateActionAccessKeyError(InvalidAccessKeyError)
@@ -747,7 +748,7 @@ public enum ActionErrorKind: Codable {
                     }) {
                     let value = try container.decode(
                         ActionErrorKindOneOfAccountAlreadyExistsInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .accountAlreadyExists(value)
                     return
@@ -764,7 +765,7 @@ public enum ActionErrorKind: Codable {
                     }) {
                     let value = try container.decode(
                         ActionErrorKindOneOfAccountDoesNotExistInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .accountDoesNotExist(value)
                     return
@@ -781,7 +782,7 @@ public enum ActionErrorKind: Codable {
                     }) {
                     let value = try container.decode(
                         ActionErrorKindOneOfCreateAccountOnlyByRegistrarInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .createAccountOnlyByRegistrar(value)
                     return
@@ -798,7 +799,7 @@ public enum ActionErrorKind: Codable {
                     }) {
                     let value = try container.decode(
                         ActionErrorKindOneOfCreateAccountNotAllowedInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .createAccountNotAllowed(value)
                     return
@@ -815,7 +816,7 @@ public enum ActionErrorKind: Codable {
                     }) {
                     let value = try container.decode(
                         ActionErrorKindOneOfActorNoPermissionInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .actorNoPermission(value)
                     return
@@ -832,7 +833,7 @@ public enum ActionErrorKind: Codable {
                     }) {
                     let value = try container.decode(
                         ActionErrorKindOneOfDeleteKeyDoesNotExistInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .deleteKeyDoesNotExist(value)
                     return
@@ -849,7 +850,7 @@ public enum ActionErrorKind: Codable {
                     }) {
                     let value = try container.decode(
                         ActionErrorKindOneOfAddKeyAlreadyExistsInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .addKeyAlreadyExists(value)
                     return
@@ -866,7 +867,7 @@ public enum ActionErrorKind: Codable {
                     }) {
                     let value = try container.decode(
                         ActionErrorKindOneOfDeleteAccountStakingInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .deleteAccountStaking(value)
                     return
@@ -883,7 +884,7 @@ public enum ActionErrorKind: Codable {
                     }) {
                     let value = try container.decode(
                         ActionErrorKindOneOfLackBalanceForStateInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .lackBalanceForState(value)
                     return
@@ -924,7 +925,7 @@ public enum ActionErrorKind: Codable {
                     }) {
                     let value = try container.decode(
                         ActionErrorKindOneOfInsufficientStakeInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .insufficientStake(value)
                     return
@@ -969,7 +970,7 @@ public enum ActionErrorKind: Codable {
                     }) {
                     let value = try container.decode(
                         ActionErrorKindOneOfOnlyImplicitAccountCreationAllowedInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .onlyImplicitAccountCreationAllowed(value)
                     return
@@ -986,7 +987,7 @@ public enum ActionErrorKind: Codable {
                     }) {
                     let value = try container.decode(
                         ActionErrorKindOneOfDeleteAccountWithLargeStateInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .deleteAccountWithLargeState(value)
                     return
@@ -1009,7 +1010,7 @@ public enum ActionErrorKind: Codable {
                     }) {
                     let value = try container.decode(
                         ActionErrorKindOneOfDelegateActionSenderDoesNotMatchTxReceiverInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .delegateActionSenderDoesNotMatchTxReceiver(value)
                     return
@@ -1044,7 +1045,7 @@ public enum ActionErrorKind: Codable {
                     }) {
                     let value = try container.decode(
                         ActionErrorKindOneOfDelegateActionInvalidNonceInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .delegateActionInvalidNonce(value)
                     return
@@ -1061,7 +1062,7 @@ public enum ActionErrorKind: Codable {
                     }) {
                     let value = try container.decode(
                         ActionErrorKindOneOfDelegateActionNonceTooLargeInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .delegateActionNonceTooLarge(value)
                     return
@@ -1078,7 +1079,7 @@ public enum ActionErrorKind: Codable {
                     }) {
                     let value = try container.decode(
                         ActionErrorKindOneOfGlobalContractDoesNotExistInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .globalContractDoesNotExist(value)
                     return
@@ -1205,17 +1206,17 @@ public enum ActionErrorKind: Codable {
 
 // MARK: - ActionView
 
-public struct ActionViewOneOfDeployContractInline: Codable {
+public struct ActionViewOneOfDeployContractInline: Codable, Sendable {
     public let code: String
 
     public init(
-        code: String
+        code: String,
     ) {
         self.code = code
     }
 }
 
-public struct ActionViewOneOfFunctionCallInline: Codable {
+public struct ActionViewOneOfFunctionCallInline: Codable, Sendable {
     public let args: FunctionArgs
     public let deposit: NearToken
     public let gas: NearGas
@@ -1225,7 +1226,7 @@ public struct ActionViewOneOfFunctionCallInline: Codable {
         args: FunctionArgs,
         deposit: NearToken,
         gas: NearGas,
-        methodName: String
+        methodName: String,
     ) {
         self.args = args
         self.deposit = deposit
@@ -1234,116 +1235,116 @@ public struct ActionViewOneOfFunctionCallInline: Codable {
     }
 }
 
-public struct ActionViewOneOfTransferInline: Codable {
+public struct ActionViewOneOfTransferInline: Codable, Sendable {
     public let deposit: NearToken
 
     public init(
-        deposit: NearToken
+        deposit: NearToken,
     ) {
         self.deposit = deposit
     }
 }
 
-public struct ActionViewOneOfStakeInline: Codable {
+public struct ActionViewOneOfStakeInline: Codable, Sendable {
     public let publicKey: PublicKey
     public let stake: NearToken
 
     public init(
         publicKey: PublicKey,
-        stake: NearToken
+        stake: NearToken,
     ) {
         self.publicKey = publicKey
         self.stake = stake
     }
 }
 
-public struct ActionViewOneOfAddKeyInline: Codable {
+public struct ActionViewOneOfAddKeyInline: Codable, Sendable {
     public let accessKey: AccessKeyView
     public let publicKey: PublicKey
 
     public init(
         accessKey: AccessKeyView,
-        publicKey: PublicKey
+        publicKey: PublicKey,
     ) {
         self.accessKey = accessKey
         self.publicKey = publicKey
     }
 }
 
-public struct ActionViewOneOfDeleteKeyInline: Codable {
+public struct ActionViewOneOfDeleteKeyInline: Codable, Sendable {
     public let publicKey: PublicKey
 
     public init(
-        publicKey: PublicKey
+        publicKey: PublicKey,
     ) {
         self.publicKey = publicKey
     }
 }
 
-public struct ActionViewOneOfDeleteAccountInline: Codable {
+public struct ActionViewOneOfDeleteAccountInline: Codable, Sendable {
     public let beneficiaryId: AccountId
 
     public init(
-        beneficiaryId: AccountId
+        beneficiaryId: AccountId,
     ) {
         self.beneficiaryId = beneficiaryId
     }
 }
 
-public struct ActionViewOneOfDelegateInline: Codable {
+public struct ActionViewOneOfDelegateInline: Codable, Sendable {
     public let delegateAction: DelegateAction
     public let signature: Signature
 
     public init(
         delegateAction: DelegateAction,
-        signature: Signature
+        signature: Signature,
     ) {
         self.delegateAction = delegateAction
         self.signature = signature
     }
 }
 
-public struct ActionViewOneOfDeployGlobalContractInline: Codable {
+public struct ActionViewOneOfDeployGlobalContractInline: Codable, Sendable {
     public let code: String
 
     public init(
-        code: String
+        code: String,
     ) {
         self.code = code
     }
 }
 
-public struct ActionViewOneOfDeployGlobalContractByAccountIdInline: Codable {
+public struct ActionViewOneOfDeployGlobalContractByAccountIdInline: Codable, Sendable {
     public let code: String
 
     public init(
-        code: String
+        code: String,
     ) {
         self.code = code
     }
 }
 
-public struct ActionViewOneOfUseGlobalContractInline: Codable {
+public struct ActionViewOneOfUseGlobalContractInline: Codable, Sendable {
     public let codeHash: CryptoHash
 
     public init(
-        codeHash: CryptoHash
+        codeHash: CryptoHash,
     ) {
         self.codeHash = codeHash
     }
 }
 
-public struct ActionViewOneOfUseGlobalContractByAccountIdInline: Codable {
+public struct ActionViewOneOfUseGlobalContractByAccountIdInline: Codable, Sendable {
     public let accountId: AccountId
 
     public init(
-        accountId: AccountId
+        accountId: AccountId,
     ) {
         self.accountId = accountId
     }
 }
 
-public struct ActionViewOneOfDeterministicStateInitInline: Codable {
+public struct ActionViewOneOfDeterministicStateInitInline: Codable, Sendable {
     public let code: GlobalContractIdentifierView
     public let data: [String: String]
     public let deposit: NearToken
@@ -1351,7 +1352,7 @@ public struct ActionViewOneOfDeterministicStateInitInline: Codable {
     public init(
         code: GlobalContractIdentifierView,
         data: [String: String],
-        deposit: NearToken
+        deposit: NearToken,
     ) {
         self.code = code
         self.data = data
@@ -1359,7 +1360,7 @@ public struct ActionViewOneOfDeterministicStateInitInline: Codable {
     }
 }
 
-public enum ActionView: Codable {
+public enum ActionView: Codable, Sendable {
     case createAccount
     case deployContract(ActionViewOneOfDeployContractInline)
     case functionCall(ActionViewOneOfFunctionCallInline)
@@ -1486,7 +1487,7 @@ public enum ActionView: Codable {
                     }) {
                     let value = try container.decode(
                         ActionViewOneOfDeployGlobalContractInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .deployGlobalContract(value)
                     return
@@ -1503,7 +1504,7 @@ public enum ActionView: Codable {
                     }) {
                     let value = try container.decode(
                         ActionViewOneOfDeployGlobalContractByAccountIdInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .deployGlobalContractByAccountId(value)
                     return
@@ -1534,7 +1535,7 @@ public enum ActionView: Codable {
                     }) {
                     let value = try container.decode(
                         ActionViewOneOfUseGlobalContractByAccountIdInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .useGlobalContractByAccountId(value)
                     return
@@ -1551,7 +1552,7 @@ public enum ActionView: Codable {
                     }) {
                     let value = try container.decode(
                         ActionViewOneOfDeterministicStateInitInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .deterministicStateInit(value)
                     return
@@ -1643,170 +1644,170 @@ public enum ActionView: Codable {
 
 // MARK: - ActionsValidationError
 
-public struct ActionsValidationErrorOneOfTotalPrepaidGasExceededInline: Codable {
+public struct ActionsValidationErrorOneOfTotalPrepaidGasExceededInline: Codable, Sendable {
     public let limit: NearGas
     public let totalPrepaidGas: NearGas
 
     public init(
         limit: NearGas,
-        totalPrepaidGas: NearGas
+        totalPrepaidGas: NearGas,
     ) {
         self.limit = limit
         self.totalPrepaidGas = totalPrepaidGas
     }
 }
 
-public struct ActionsValidationErrorOneOfTotalNumberOfActionsExceededInline: Codable {
+public struct ActionsValidationErrorOneOfTotalNumberOfActionsExceededInline: Codable, Sendable {
     public let limit: UInt64
     public let totalNumberOfActions: UInt64
 
     public init(
         limit: UInt64,
-        totalNumberOfActions: UInt64
+        totalNumberOfActions: UInt64,
     ) {
         self.limit = limit
         self.totalNumberOfActions = totalNumberOfActions
     }
 }
 
-public struct ActionsValidationErrorOneOfAddKeyMethodNamesNumberOfBytesExceededInline: Codable {
+public struct ActionsValidationErrorOneOfAddKeyMethodNamesNumberOfBytesExceededInline: Codable, Sendable {
     public let limit: UInt64
     public let totalNumberOfBytes: UInt64
 
     public init(
         limit: UInt64,
-        totalNumberOfBytes: UInt64
+        totalNumberOfBytes: UInt64,
     ) {
         self.limit = limit
         self.totalNumberOfBytes = totalNumberOfBytes
     }
 }
 
-public struct ActionsValidationErrorOneOfAddKeyMethodNameLengthExceededInline: Codable {
+public struct ActionsValidationErrorOneOfAddKeyMethodNameLengthExceededInline: Codable, Sendable {
     public let length: UInt64
     public let limit: UInt64
 
     public init(
         length: UInt64,
-        limit: UInt64
+        limit: UInt64,
     ) {
         self.length = length
         self.limit = limit
     }
 }
 
-public struct ActionsValidationErrorOneOfInvalidAccountIdInline: Codable {
+public struct ActionsValidationErrorOneOfInvalidAccountIdInline: Codable, Sendable {
     public let accountId: String
 
     public init(
-        accountId: String
+        accountId: String,
     ) {
         self.accountId = accountId
     }
 }
 
-public struct ActionsValidationErrorOneOfContractSizeExceededInline: Codable {
+public struct ActionsValidationErrorOneOfContractSizeExceededInline: Codable, Sendable {
     public let limit: UInt64
     public let size: UInt64
 
     public init(
         limit: UInt64,
-        size: UInt64
+        size: UInt64,
     ) {
         self.limit = limit
         self.size = size
     }
 }
 
-public struct ActionsValidationErrorOneOfFunctionCallMethodNameLengthExceededInline: Codable {
+public struct ActionsValidationErrorOneOfFunctionCallMethodNameLengthExceededInline: Codable, Sendable {
     public let length: UInt64
     public let limit: UInt64
 
     public init(
         length: UInt64,
-        limit: UInt64
+        limit: UInt64,
     ) {
         self.length = length
         self.limit = limit
     }
 }
 
-public struct ActionsValidationErrorOneOfFunctionCallArgumentsLengthExceededInline: Codable {
+public struct ActionsValidationErrorOneOfFunctionCallArgumentsLengthExceededInline: Codable, Sendable {
     public let length: UInt64
     public let limit: UInt64
 
     public init(
         length: UInt64,
-        limit: UInt64
+        limit: UInt64,
     ) {
         self.length = length
         self.limit = limit
     }
 }
 
-public struct ActionsValidationErrorOneOfUnsuitableStakingKeyInline: Codable {
+public struct ActionsValidationErrorOneOfUnsuitableStakingKeyInline: Codable, Sendable {
     public let publicKey: PublicKey
 
     public init(
-        publicKey: PublicKey
+        publicKey: PublicKey,
     ) {
         self.publicKey = publicKey
     }
 }
 
-public struct ActionsValidationErrorOneOfUnsupportedProtocolFeatureInline: Codable {
+public struct ActionsValidationErrorOneOfUnsupportedProtocolFeatureInline: Codable, Sendable {
     public let protocolFeature: String
     public let version: Int
 
     public init(
         protocolFeature: String,
-        version: Int
+        version: Int,
     ) {
         self.protocolFeature = protocolFeature
         self.version = version
     }
 }
 
-public struct ActionsValidationErrorOneOfInvalidDeterministicStateInitReceiverInline: Codable {
+public struct ActionsValidationErrorOneOfInvalidDeterministicStateInitReceiverInline: Codable, Sendable {
     public let derivedId: AccountId
     public let receiverId: AccountId
 
     public init(
         derivedId: AccountId,
-        receiverId: AccountId
+        receiverId: AccountId,
     ) {
         self.derivedId = derivedId
         self.receiverId = receiverId
     }
 }
 
-public struct ActionsValidationErrorOneOfDeterministicStateInitKeyLengthExceededInline: Codable {
+public struct ActionsValidationErrorOneOfDeterministicStateInitKeyLengthExceededInline: Codable, Sendable {
     public let length: UInt64
     public let limit: UInt64
 
     public init(
         length: UInt64,
-        limit: UInt64
+        limit: UInt64,
     ) {
         self.length = length
         self.limit = limit
     }
 }
 
-public struct ActionsValidationErrorOneOfDeterministicStateInitValueLengthExceededInline: Codable {
+public struct ActionsValidationErrorOneOfDeterministicStateInitValueLengthExceededInline: Codable, Sendable {
     public let length: UInt64
     public let limit: UInt64
 
     public init(
         length: UInt64,
-        limit: UInt64
+        limit: UInt64,
     ) {
         self.length = length
         self.limit = limit
     }
 }
 
-public enum ActionsValidationError: Codable {
+public enum ActionsValidationError: Codable, Sendable {
     case deleteActionMustBeFinal
     case totalPrepaidGasExceeded(ActionsValidationErrorOneOfTotalPrepaidGasExceededInline)
     case totalNumberOfActionsExceeded(ActionsValidationErrorOneOfTotalNumberOfActionsExceededInline)
@@ -1823,10 +1824,10 @@ public enum ActionsValidationError: Codable {
     case unsupportedProtocolFeature(ActionsValidationErrorOneOfUnsupportedProtocolFeatureInline)
     case invalidDeterministicStateInitReceiver(ActionsValidationErrorOneOfInvalidDeterministicStateInitReceiverInline)
     case deterministicStateInitKeyLengthExceeded(
-        ActionsValidationErrorOneOfDeterministicStateInitKeyLengthExceededInline
+        ActionsValidationErrorOneOfDeterministicStateInitKeyLengthExceededInline,
     )
     case deterministicStateInitValueLengthExceeded(
-        ActionsValidationErrorOneOfDeterministicStateInitValueLengthExceededInline
+        ActionsValidationErrorOneOfDeterministicStateInitValueLengthExceededInline,
     )
 
     public init(from decoder: Decoder) throws {
@@ -1844,7 +1845,7 @@ public enum ActionsValidationError: Codable {
                     }) {
                     let value = try container.decode(
                         ActionsValidationErrorOneOfTotalPrepaidGasExceededInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .totalPrepaidGasExceeded(value)
                     return
@@ -1861,7 +1862,7 @@ public enum ActionsValidationError: Codable {
                     }) {
                     let value = try container.decode(
                         ActionsValidationErrorOneOfTotalNumberOfActionsExceededInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .totalNumberOfActionsExceeded(value)
                     return
@@ -1878,7 +1879,7 @@ public enum ActionsValidationError: Codable {
                     }) {
                     let value = try container.decode(
                         ActionsValidationErrorOneOfAddKeyMethodNamesNumberOfBytesExceededInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .addKeyMethodNamesNumberOfBytesExceeded(value)
                     return
@@ -1895,7 +1896,7 @@ public enum ActionsValidationError: Codable {
                     }) {
                     let value = try container.decode(
                         ActionsValidationErrorOneOfAddKeyMethodNameLengthExceededInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .addKeyMethodNameLengthExceeded(value)
                     return
@@ -1916,7 +1917,7 @@ public enum ActionsValidationError: Codable {
                     }) {
                     let value = try container.decode(
                         ActionsValidationErrorOneOfInvalidAccountIdInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .invalidAccountId(value)
                     return
@@ -1933,7 +1934,7 @@ public enum ActionsValidationError: Codable {
                     }) {
                     let value = try container.decode(
                         ActionsValidationErrorOneOfContractSizeExceededInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .contractSizeExceeded(value)
                     return
@@ -1950,7 +1951,7 @@ public enum ActionsValidationError: Codable {
                     }) {
                     let value = try container.decode(
                         ActionsValidationErrorOneOfFunctionCallMethodNameLengthExceededInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .functionCallMethodNameLengthExceeded(value)
                     return
@@ -1967,7 +1968,7 @@ public enum ActionsValidationError: Codable {
                     }) {
                     let value = try container.decode(
                         ActionsValidationErrorOneOfFunctionCallArgumentsLengthExceededInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .functionCallArgumentsLengthExceeded(value)
                     return
@@ -1984,7 +1985,7 @@ public enum ActionsValidationError: Codable {
                     }) {
                     let value = try container.decode(
                         ActionsValidationErrorOneOfUnsuitableStakingKeyInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .unsuitableStakingKey(value)
                     return
@@ -2009,7 +2010,7 @@ public enum ActionsValidationError: Codable {
                     }) {
                     let value = try container.decode(
                         ActionsValidationErrorOneOfUnsupportedProtocolFeatureInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .unsupportedProtocolFeature(value)
                     return
@@ -2026,7 +2027,7 @@ public enum ActionsValidationError: Codable {
                     }) {
                     let value = try container.decode(
                         ActionsValidationErrorOneOfInvalidDeterministicStateInitReceiverInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .invalidDeterministicStateInitReceiver(value)
                     return
@@ -2044,7 +2045,7 @@ public enum ActionsValidationError: Codable {
                     }) {
                     let value = try container.decode(
                         ActionsValidationErrorOneOfDeterministicStateInitKeyLengthExceededInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .deterministicStateInitKeyLengthExceeded(value)
                     return
@@ -2062,7 +2063,7 @@ public enum ActionsValidationError: Codable {
                     }) {
                     let value = try container.decode(
                         ActionsValidationErrorOneOfDeterministicStateInitValueLengthExceededInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .deterministicStateInitValueLengthExceeded(value)
                     return
@@ -2163,7 +2164,7 @@ public enum ActionsValidationError: Codable {
 
 // MARK: - BandwidthRequests
 
-public enum BandwidthRequests: Codable {
+public enum BandwidthRequests: Codable, Sendable {
     case v1(BandwidthRequestsV1)
 
     public init(from decoder: Decoder) throws {
@@ -2213,7 +2214,7 @@ public enum BandwidthRequests: Codable {
 
 // MARK: - BlockId
 
-public enum BlockId: Codable {
+public enum BlockId: Codable, Sendable {
     case integer(UInt64)
     case cryptoHash(CryptoHash)
 
@@ -2265,27 +2266,27 @@ public enum BlockId: Codable {
 
 // MARK: - CompilationError
 
-public struct CompilationErrorOneOfCodeDoesNotExistInline: Codable {
+public struct CompilationErrorOneOfCodeDoesNotExistInline: Codable, Sendable {
     public let accountId: AccountId
 
     public init(
-        accountId: AccountId
+        accountId: AccountId,
     ) {
         self.accountId = accountId
     }
 }
 
-public struct CompilationErrorOneOfWasmerCompileErrorInline: Codable {
+public struct CompilationErrorOneOfWasmerCompileErrorInline: Codable, Sendable {
     public let msg: String
 
     public init(
-        msg: String
+        msg: String,
     ) {
         self.msg = msg
     }
 }
 
-public enum CompilationError: Codable {
+public enum CompilationError: Codable, Sendable {
     case codeDoesNotExist(CompilationErrorOneOfCodeDoesNotExistInline)
     case prepareError(PrepareError)
     case wasmerCompileError(CompilationErrorOneOfWasmerCompileErrorInline)
@@ -2301,7 +2302,7 @@ public enum CompilationError: Codable {
                     }) {
                     let value = try container.decode(
                         CompilationErrorOneOfCodeDoesNotExistInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .codeDoesNotExist(value)
                     return
@@ -2330,7 +2331,7 @@ public enum CompilationError: Codable {
                     }) {
                     let value = try container.decode(
                         CompilationErrorOneOfWasmerCompileErrorInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .wasmerCompileError(value)
                     return
@@ -2379,7 +2380,7 @@ public enum CompilationError: Codable {
 
 // MARK: - DeterministicAccountStateInit
 
-public enum DeterministicAccountStateInit: Codable {
+public enum DeterministicAccountStateInit: Codable, Sendable {
     case v1(DeterministicAccountStateInitV1)
 
     public init(from decoder: Decoder) throws {
@@ -2430,7 +2431,7 @@ public enum DeterministicAccountStateInit: Codable {
 
 // MARK: - ExecutionStatusView
 
-public enum ExecutionStatusView: Codable {
+public enum ExecutionStatusView: Codable, Sendable {
     case unknown
     case failure(TxExecutionError)
     case successValue(String)
@@ -2524,40 +2525,40 @@ public enum ExecutionStatusView: Codable {
 
 // MARK: - ExternalStorageLocation
 
-public struct ExternalStorageLocationOneOfS3Inline: Codable {
+public struct ExternalStorageLocationOneOfS3Inline: Codable, Sendable {
     public let bucket: String
     public let region: String
 
     public init(
         bucket: String,
-        region: String
+        region: String,
     ) {
         self.bucket = bucket
         self.region = region
     }
 }
 
-public struct ExternalStorageLocationOneOfFilesystemInline: Codable {
+public struct ExternalStorageLocationOneOfFilesystemInline: Codable, Sendable {
     public let rootDir: String
 
     public init(
-        rootDir: String
+        rootDir: String,
     ) {
         self.rootDir = rootDir
     }
 }
 
-public struct ExternalStorageLocationOneOfGCSInline: Codable {
+public struct ExternalStorageLocationOneOfGCSInline: Codable, Sendable {
     public let bucket: String
 
     public init(
-        bucket: String
+        bucket: String,
     ) {
         self.bucket = bucket
     }
 }
 
-public enum ExternalStorageLocation: Codable {
+public enum ExternalStorageLocation: Codable, Sendable {
     case s3(ExternalStorageLocationOneOfS3Inline)
     case filesystem(ExternalStorageLocationOneOfFilesystemInline)
     case gcs(ExternalStorageLocationOneOfGCSInline)
@@ -2583,7 +2584,7 @@ public enum ExternalStorageLocation: Codable {
                     .first(where: { key in key.stringValue.caseInsensitiveCompare("Filesystem") == .orderedSame }) {
                     let value = try container.decode(
                         ExternalStorageLocationOneOfFilesystemInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .filesystem(value)
                     return
@@ -2644,7 +2645,7 @@ public enum ExternalStorageLocation: Codable {
 
 // MARK: - FinalExecutionStatus
 
-public enum FinalExecutionStatus: Codable {
+public enum FinalExecutionStatus: Codable, Sendable {
     case notStarted
     case started
     case failure(TxExecutionError)
@@ -2727,17 +2728,17 @@ public enum FinalExecutionStatus: Codable {
 
 // MARK: - FunctionCallError
 
-public struct FunctionCallErrorOneOfLinkErrorInline: Codable {
+public struct FunctionCallErrorOneOfLinkErrorInline: Codable, Sendable {
     public let msg: String
 
     public init(
-        msg: String
+        msg: String,
     ) {
         self.msg = msg
     }
 }
 
-public enum FunctionCallError: Codable {
+public enum FunctionCallError: Codable, Sendable {
     case string(String)
     case compilationError(CompilationError)
     case linkError(FunctionCallErrorOneOfLinkErrorInline)
@@ -2887,7 +2888,7 @@ public enum FunctionCallError: Codable {
 
 // MARK: - GlobalContractDeployMode
 
-public enum GlobalContractDeployMode: Codable {
+public enum GlobalContractDeployMode: Codable, Sendable {
     case codeHash
     case accountId
 
@@ -2933,7 +2934,7 @@ public enum GlobalContractDeployMode: Codable {
 
 // MARK: - GlobalContractIdentifier
 
-public enum GlobalContractIdentifier: Codable {
+public enum GlobalContractIdentifier: Codable, Sendable {
     case codeHash(CryptoHash)
     case accountId(AccountId)
 
@@ -3000,7 +3001,7 @@ public enum GlobalContractIdentifier: Codable {
 
 // MARK: - GlobalContractIdentifierView
 
-public enum GlobalContractIdentifierView: Codable {
+public enum GlobalContractIdentifierView: Codable, Sendable {
     case cryptoHash(CryptoHash)
     case accountId(AccountId)
 
@@ -3053,228 +3054,228 @@ public enum GlobalContractIdentifierView: Codable {
 
 // MARK: - HostError
 
-public struct HostErrorOneOfGuestPanicInline: Codable {
+public struct HostErrorOneOfGuestPanicInline: Codable, Sendable {
     public let panicMsg: String
 
     public init(
-        panicMsg: String
+        panicMsg: String,
     ) {
         self.panicMsg = panicMsg
     }
 }
 
-public struct HostErrorOneOfInvalidPromiseIndexInline: Codable {
+public struct HostErrorOneOfInvalidPromiseIndexInline: Codable, Sendable {
     public let promiseIdx: UInt64
 
     public init(
-        promiseIdx: UInt64
+        promiseIdx: UInt64,
     ) {
         self.promiseIdx = promiseIdx
     }
 }
 
-public struct HostErrorOneOfInvalidPromiseResultIndexInline: Codable {
+public struct HostErrorOneOfInvalidPromiseResultIndexInline: Codable, Sendable {
     public let resultIdx: UInt64
 
     public init(
-        resultIdx: UInt64
+        resultIdx: UInt64,
     ) {
         self.resultIdx = resultIdx
     }
 }
 
-public struct HostErrorOneOfInvalidRegisterIdInline: Codable {
+public struct HostErrorOneOfInvalidRegisterIdInline: Codable, Sendable {
     public let registerId: UInt64
 
     public init(
-        registerId: UInt64
+        registerId: UInt64,
     ) {
         self.registerId = registerId
     }
 }
 
-public struct HostErrorOneOfIteratorWasInvalidatedInline: Codable {
+public struct HostErrorOneOfIteratorWasInvalidatedInline: Codable, Sendable {
     public let iteratorIndex: UInt64
 
     public init(
-        iteratorIndex: UInt64
+        iteratorIndex: UInt64,
     ) {
         self.iteratorIndex = iteratorIndex
     }
 }
 
-public struct HostErrorOneOfInvalidReceiptIndexInline: Codable {
+public struct HostErrorOneOfInvalidReceiptIndexInline: Codable, Sendable {
     public let receiptIndex: UInt64
 
     public init(
-        receiptIndex: UInt64
+        receiptIndex: UInt64,
     ) {
         self.receiptIndex = receiptIndex
     }
 }
 
-public struct HostErrorOneOfInvalidIteratorIndexInline: Codable {
+public struct HostErrorOneOfInvalidIteratorIndexInline: Codable, Sendable {
     public let iteratorIndex: UInt64
 
     public init(
-        iteratorIndex: UInt64
+        iteratorIndex: UInt64,
     ) {
         self.iteratorIndex = iteratorIndex
     }
 }
 
-public struct HostErrorOneOfProhibitedInViewInline: Codable {
+public struct HostErrorOneOfProhibitedInViewInline: Codable, Sendable {
     public let methodName: String
 
     public init(
-        methodName: String
+        methodName: String,
     ) {
         self.methodName = methodName
     }
 }
 
-public struct HostErrorOneOfNumberOfLogsExceededInline: Codable {
+public struct HostErrorOneOfNumberOfLogsExceededInline: Codable, Sendable {
     public let limit: UInt64
 
     public init(
-        limit: UInt64
+        limit: UInt64,
     ) {
         self.limit = limit
     }
 }
 
-public struct HostErrorOneOfKeyLengthExceededInline: Codable {
+public struct HostErrorOneOfKeyLengthExceededInline: Codable, Sendable {
     public let length: UInt64
     public let limit: UInt64
 
     public init(
         length: UInt64,
-        limit: UInt64
+        limit: UInt64,
     ) {
         self.length = length
         self.limit = limit
     }
 }
 
-public struct HostErrorOneOfValueLengthExceededInline: Codable {
+public struct HostErrorOneOfValueLengthExceededInline: Codable, Sendable {
     public let length: UInt64
     public let limit: UInt64
 
     public init(
         length: UInt64,
-        limit: UInt64
+        limit: UInt64,
     ) {
         self.length = length
         self.limit = limit
     }
 }
 
-public struct HostErrorOneOfTotalLogLengthExceededInline: Codable {
+public struct HostErrorOneOfTotalLogLengthExceededInline: Codable, Sendable {
     public let length: UInt64
     public let limit: UInt64
 
     public init(
         length: UInt64,
-        limit: UInt64
+        limit: UInt64,
     ) {
         self.length = length
         self.limit = limit
     }
 }
 
-public struct HostErrorOneOfNumberPromisesExceededInline: Codable {
+public struct HostErrorOneOfNumberPromisesExceededInline: Codable, Sendable {
     public let limit: UInt64
     public let numberOfPromises: UInt64
 
     public init(
         limit: UInt64,
-        numberOfPromises: UInt64
+        numberOfPromises: UInt64,
     ) {
         self.limit = limit
         self.numberOfPromises = numberOfPromises
     }
 }
 
-public struct HostErrorOneOfNumberInputDataDependenciesExceededInline: Codable {
+public struct HostErrorOneOfNumberInputDataDependenciesExceededInline: Codable, Sendable {
     public let limit: UInt64
     public let numberOfInputDataDependencies: UInt64
 
     public init(
         limit: UInt64,
-        numberOfInputDataDependencies: UInt64
+        numberOfInputDataDependencies: UInt64,
     ) {
         self.limit = limit
         self.numberOfInputDataDependencies = numberOfInputDataDependencies
     }
 }
 
-public struct HostErrorOneOfReturnedValueLengthExceededInline: Codable {
+public struct HostErrorOneOfReturnedValueLengthExceededInline: Codable, Sendable {
     public let length: UInt64
     public let limit: UInt64
 
     public init(
         length: UInt64,
-        limit: UInt64
+        limit: UInt64,
     ) {
         self.length = length
         self.limit = limit
     }
 }
 
-public struct HostErrorOneOfContractSizeExceededInline: Codable {
+public struct HostErrorOneOfContractSizeExceededInline: Codable, Sendable {
     public let limit: UInt64
     public let size: UInt64
 
     public init(
         limit: UInt64,
-        size: UInt64
+        size: UInt64,
     ) {
         self.limit = limit
         self.size = size
     }
 }
 
-public struct HostErrorOneOfDeprecatedInline: Codable {
+public struct HostErrorOneOfDeprecatedInline: Codable, Sendable {
     public let methodName: String
 
     public init(
-        methodName: String
+        methodName: String,
     ) {
         self.methodName = methodName
     }
 }
 
-public struct HostErrorOneOfECRecoverErrorInline: Codable {
+public struct HostErrorOneOfECRecoverErrorInline: Codable, Sendable {
     public let msg: String
 
     public init(
-        msg: String
+        msg: String,
     ) {
         self.msg = msg
     }
 }
 
-public struct HostErrorOneOfAltBn128InvalidInputInline: Codable {
+public struct HostErrorOneOfAltBn128InvalidInputInline: Codable, Sendable {
     public let msg: String
 
     public init(
-        msg: String
+        msg: String,
     ) {
         self.msg = msg
     }
 }
 
-public struct HostErrorOneOfEd25519VerifyInvalidInputInline: Codable {
+public struct HostErrorOneOfEd25519VerifyInvalidInputInline: Codable, Sendable {
     public let msg: String
 
     public init(
-        msg: String
+        msg: String,
     ) {
         self.msg = msg
     }
 }
 
-public enum HostError: Codable {
+public enum HostError: Codable, Sendable {
     case badUTF16
     case badUTF8
     case gasExceeded
@@ -3383,7 +3384,7 @@ public enum HostError: Codable {
                     }) {
                     let value = try container.decode(
                         HostErrorOneOfInvalidPromiseResultIndexInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .invalidPromiseResultIndex(value)
                     return
@@ -3414,7 +3415,7 @@ public enum HostError: Codable {
                     }) {
                     let value = try container.decode(
                         HostErrorOneOfIteratorWasInvalidatedInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .iteratorWasInvalidated(value)
                     return
@@ -3531,7 +3532,7 @@ public enum HostError: Codable {
                     }) {
                     let value = try container.decode(
                         HostErrorOneOfTotalLogLengthExceededInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .totalLogLengthExceeded(value)
                     return
@@ -3548,7 +3549,7 @@ public enum HostError: Codable {
                     }) {
                     let value = try container.decode(
                         HostErrorOneOfNumberPromisesExceededInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .numberPromisesExceeded(value)
                     return
@@ -3565,7 +3566,7 @@ public enum HostError: Codable {
                     }) {
                     let value = try container.decode(
                         HostErrorOneOfNumberInputDataDependenciesExceededInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .numberInputDataDependenciesExceeded(value)
                     return
@@ -3582,7 +3583,7 @@ public enum HostError: Codable {
                     }) {
                     let value = try container.decode(
                         HostErrorOneOfReturnedValueLengthExceededInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .returnedValueLengthExceeded(value)
                     return
@@ -3651,7 +3652,7 @@ public enum HostError: Codable {
                     }) {
                     let value = try container.decode(
                         HostErrorOneOfEd25519VerifyInvalidInputInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .ed25519VerifyInvalidInput(value)
                     return
@@ -3807,43 +3808,43 @@ public enum HostError: Codable {
 
 // MARK: - InvalidAccessKeyError
 
-public struct InvalidAccessKeyErrorOneOfAccessKeyNotFoundInline: Codable {
+public struct InvalidAccessKeyErrorOneOfAccessKeyNotFoundInline: Codable, Sendable {
     public let accountId: AccountId
     public let publicKey: PublicKey
 
     public init(
         accountId: AccountId,
-        publicKey: PublicKey
+        publicKey: PublicKey,
     ) {
         self.accountId = accountId
         self.publicKey = publicKey
     }
 }
 
-public struct InvalidAccessKeyErrorOneOfReceiverMismatchInline: Codable {
+public struct InvalidAccessKeyErrorOneOfReceiverMismatchInline: Codable, Sendable {
     public let akReceiver: String
     public let txReceiver: AccountId
 
     public init(
         akReceiver: String,
-        txReceiver: AccountId
+        txReceiver: AccountId,
     ) {
         self.akReceiver = akReceiver
         self.txReceiver = txReceiver
     }
 }
 
-public struct InvalidAccessKeyErrorOneOfMethodNameMismatchInline: Codable {
+public struct InvalidAccessKeyErrorOneOfMethodNameMismatchInline: Codable, Sendable {
     public let methodName: String
 
     public init(
-        methodName: String
+        methodName: String,
     ) {
         self.methodName = methodName
     }
 }
 
-public struct InvalidAccessKeyErrorOneOfNotEnoughAllowanceInline: Codable {
+public struct InvalidAccessKeyErrorOneOfNotEnoughAllowanceInline: Codable, Sendable {
     public let accountId: AccountId
     public let allowance: NearToken
     public let cost: NearToken
@@ -3853,7 +3854,7 @@ public struct InvalidAccessKeyErrorOneOfNotEnoughAllowanceInline: Codable {
         accountId: AccountId,
         allowance: NearToken,
         cost: NearToken,
-        publicKey: PublicKey
+        publicKey: PublicKey,
     ) {
         self.accountId = accountId
         self.allowance = allowance
@@ -3862,7 +3863,7 @@ public struct InvalidAccessKeyErrorOneOfNotEnoughAllowanceInline: Codable {
     }
 }
 
-public enum InvalidAccessKeyError: Codable {
+public enum InvalidAccessKeyError: Codable, Sendable {
     case accessKeyNotFound(InvalidAccessKeyErrorOneOfAccessKeyNotFoundInline)
     case receiverMismatch(InvalidAccessKeyErrorOneOfReceiverMismatchInline)
     case methodNameMismatch(InvalidAccessKeyErrorOneOfMethodNameMismatchInline)
@@ -3881,7 +3882,7 @@ public enum InvalidAccessKeyError: Codable {
                     }) {
                     let value = try container.decode(
                         InvalidAccessKeyErrorOneOfAccessKeyNotFoundInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .accessKeyNotFound(value)
                     return
@@ -3898,7 +3899,7 @@ public enum InvalidAccessKeyError: Codable {
                     }) {
                     let value = try container.decode(
                         InvalidAccessKeyErrorOneOfReceiverMismatchInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .receiverMismatch(value)
                     return
@@ -3915,7 +3916,7 @@ public enum InvalidAccessKeyError: Codable {
                     }) {
                     let value = try container.decode(
                         InvalidAccessKeyErrorOneOfMethodNameMismatchInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .methodNameMismatch(value)
                     return
@@ -3936,7 +3937,7 @@ public enum InvalidAccessKeyError: Codable {
                     }) {
                     let value = try container.decode(
                         InvalidAccessKeyErrorOneOfNotEnoughAllowanceInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .notEnoughAllowance(value)
                     return
@@ -3999,63 +4000,63 @@ public enum InvalidAccessKeyError: Codable {
 
 // MARK: - InvalidTxError
 
-public struct InvalidTxErrorOneOfInvalidSignerIdInline: Codable {
+public struct InvalidTxErrorOneOfInvalidSignerIdInline: Codable, Sendable {
     public let signerId: String
 
     public init(
-        signerId: String
+        signerId: String,
     ) {
         self.signerId = signerId
     }
 }
 
-public struct InvalidTxErrorOneOfSignerDoesNotExistInline: Codable {
+public struct InvalidTxErrorOneOfSignerDoesNotExistInline: Codable, Sendable {
     public let signerId: AccountId
 
     public init(
-        signerId: AccountId
+        signerId: AccountId,
     ) {
         self.signerId = signerId
     }
 }
 
-public struct InvalidTxErrorOneOfInvalidNonceInline: Codable {
+public struct InvalidTxErrorOneOfInvalidNonceInline: Codable, Sendable {
     public let akNonce: UInt64
     public let txNonce: UInt64
 
     public init(
         akNonce: UInt64,
-        txNonce: UInt64
+        txNonce: UInt64,
     ) {
         self.akNonce = akNonce
         self.txNonce = txNonce
     }
 }
 
-public struct InvalidTxErrorOneOfNonceTooLargeInline: Codable {
+public struct InvalidTxErrorOneOfNonceTooLargeInline: Codable, Sendable {
     public let txNonce: UInt64
     public let upperBound: UInt64
 
     public init(
         txNonce: UInt64,
-        upperBound: UInt64
+        upperBound: UInt64,
     ) {
         self.txNonce = txNonce
         self.upperBound = upperBound
     }
 }
 
-public struct InvalidTxErrorOneOfInvalidReceiverIdInline: Codable {
+public struct InvalidTxErrorOneOfInvalidReceiverIdInline: Codable, Sendable {
     public let receiverId: String
 
     public init(
-        receiverId: String
+        receiverId: String,
     ) {
         self.receiverId = receiverId
     }
 }
 
-public struct InvalidTxErrorOneOfNotEnoughBalanceInline: Codable {
+public struct InvalidTxErrorOneOfNotEnoughBalanceInline: Codable, Sendable {
     public let balance: NearToken
     public let cost: NearToken
     public let signerId: AccountId
@@ -4063,7 +4064,7 @@ public struct InvalidTxErrorOneOfNotEnoughBalanceInline: Codable {
     public init(
         balance: NearToken,
         cost: NearToken,
-        signerId: AccountId
+        signerId: AccountId,
     ) {
         self.balance = balance
         self.cost = cost
@@ -4071,59 +4072,59 @@ public struct InvalidTxErrorOneOfNotEnoughBalanceInline: Codable {
     }
 }
 
-public struct InvalidTxErrorOneOfLackBalanceForStateInline: Codable {
+public struct InvalidTxErrorOneOfLackBalanceForStateInline: Codable, Sendable {
     public let amount: NearToken
     public let signerId: AccountId
 
     public init(
         amount: NearToken,
-        signerId: AccountId
+        signerId: AccountId,
     ) {
         self.amount = amount
         self.signerId = signerId
     }
 }
 
-public struct InvalidTxErrorOneOfTransactionSizeExceededInline: Codable {
+public struct InvalidTxErrorOneOfTransactionSizeExceededInline: Codable, Sendable {
     public let limit: UInt64
     public let size: UInt64
 
     public init(
         limit: UInt64,
-        size: UInt64
+        size: UInt64,
     ) {
         self.limit = limit
         self.size = size
     }
 }
 
-public struct InvalidTxErrorOneOfShardCongestedInline: Codable {
+public struct InvalidTxErrorOneOfShardCongestedInline: Codable, Sendable {
     public let congestionLevel: Double
     public let shardId: Int
 
     public init(
         congestionLevel: Double,
-        shardId: Int
+        shardId: Int,
     ) {
         self.congestionLevel = congestionLevel
         self.shardId = shardId
     }
 }
 
-public struct InvalidTxErrorOneOfShardStuckInline: Codable {
+public struct InvalidTxErrorOneOfShardStuckInline: Codable, Sendable {
     public let missedChunks: UInt64
     public let shardId: Int
 
     public init(
         missedChunks: UInt64,
-        shardId: Int
+        shardId: Int,
     ) {
         self.missedChunks = missedChunks
         self.shardId = shardId
     }
 }
 
-public enum InvalidTxError: Codable {
+public enum InvalidTxError: Codable, Sendable {
     case invalidAccessKeyError(InvalidAccessKeyError)
     case invalidSignerId(InvalidTxErrorOneOfInvalidSignerIdInline)
     case signerDoesNotExist(InvalidTxErrorOneOfSignerDoesNotExistInline)
@@ -4182,7 +4183,7 @@ public enum InvalidTxError: Codable {
                     }) {
                     let value = try container.decode(
                         InvalidTxErrorOneOfSignerDoesNotExistInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .signerDoesNotExist(value)
                     return
@@ -4223,7 +4224,7 @@ public enum InvalidTxError: Codable {
                     }) {
                     let value = try container.decode(
                         InvalidTxErrorOneOfInvalidReceiverIdInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .invalidReceiverId(value)
                     return
@@ -4244,7 +4245,7 @@ public enum InvalidTxError: Codable {
                     }) {
                     let value = try container.decode(
                         InvalidTxErrorOneOfNotEnoughBalanceInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .notEnoughBalance(value)
                     return
@@ -4261,7 +4262,7 @@ public enum InvalidTxError: Codable {
                     }) {
                     let value = try container.decode(
                         InvalidTxErrorOneOfLackBalanceForStateInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .lackBalanceForState(value)
                     return
@@ -4304,7 +4305,7 @@ public enum InvalidTxError: Codable {
                     }) {
                     let value = try container.decode(
                         InvalidTxErrorOneOfTransactionSizeExceededInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .transactionSizeExceeded(value)
                     return
@@ -4448,7 +4449,7 @@ public enum InvalidTxError: Codable {
 
 // MARK: - JsonRpcResponseForArrayOfRangeOfUint64AndRpcError
 
-public enum JsonRpcResponseForArrayOfRangeOfUint64AndRpcError: Codable {
+public enum JsonRpcResponseForArrayOfRangeOfUint64AndRpcError: Codable, Sendable {
     case result([RangeOfUint64])
     case error(RpcError)
 
@@ -4516,7 +4517,7 @@ public enum JsonRpcResponseForArrayOfRangeOfUint64AndRpcError: Codable {
 
 // MARK: - JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError
 
-public enum JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError: Codable {
+public enum JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError: Codable, Sendable {
     case result([ValidatorStakeView])
     case error(RpcError)
 
@@ -4584,7 +4585,7 @@ public enum JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError: Codable {
 
 // MARK: - JsonRpcResponseForCryptoHashAndRpcError
 
-public enum JsonRpcResponseForCryptoHashAndRpcError: Codable {
+public enum JsonRpcResponseForCryptoHashAndRpcError: Codable, Sendable {
     case result(CryptoHash)
     case error(RpcError)
 
@@ -4652,7 +4653,7 @@ public enum JsonRpcResponseForCryptoHashAndRpcError: Codable {
 
 // MARK: - JsonRpcResponseForGenesisConfigAndRpcError
 
-public enum JsonRpcResponseForGenesisConfigAndRpcError: Codable {
+public enum JsonRpcResponseForGenesisConfigAndRpcError: Codable, Sendable {
     case result(GenesisConfig)
     case error(RpcError)
 
@@ -4720,7 +4721,7 @@ public enum JsonRpcResponseForGenesisConfigAndRpcError: Codable {
 
 // MARK: - JsonRpcResponseForNullableRpcHealthResponseAndRpcError
 
-public enum JsonRpcResponseForNullableRpcHealthResponseAndRpcError: Codable {
+public enum JsonRpcResponseForNullableRpcHealthResponseAndRpcError: Codable, Sendable {
     case result(RpcHealthResponse)
     case error(RpcError)
 
@@ -4788,7 +4789,7 @@ public enum JsonRpcResponseForNullableRpcHealthResponseAndRpcError: Codable {
 
 // MARK: - JsonRpcResponseForRpcBlockResponseAndRpcError
 
-public enum JsonRpcResponseForRpcBlockResponseAndRpcError: Codable {
+public enum JsonRpcResponseForRpcBlockResponseAndRpcError: Codable, Sendable {
     case result(RpcBlockResponse)
     case error(RpcError)
 
@@ -4856,7 +4857,7 @@ public enum JsonRpcResponseForRpcBlockResponseAndRpcError: Codable {
 
 // MARK: - JsonRpcResponseForRpcChunkResponseAndRpcError
 
-public enum JsonRpcResponseForRpcChunkResponseAndRpcError: Codable {
+public enum JsonRpcResponseForRpcChunkResponseAndRpcError: Codable, Sendable {
     case result(RpcChunkResponse)
     case error(RpcError)
 
@@ -4924,7 +4925,7 @@ public enum JsonRpcResponseForRpcChunkResponseAndRpcError: Codable {
 
 // MARK: - JsonRpcResponseForRpcClientConfigResponseAndRpcError
 
-public enum JsonRpcResponseForRpcClientConfigResponseAndRpcError: Codable {
+public enum JsonRpcResponseForRpcClientConfigResponseAndRpcError: Codable, Sendable {
     case result(RpcClientConfigResponse)
     case error(RpcError)
 
@@ -4992,7 +4993,7 @@ public enum JsonRpcResponseForRpcClientConfigResponseAndRpcError: Codable {
 
 // MARK: - JsonRpcResponseForRpcCongestionLevelResponseAndRpcError
 
-public enum JsonRpcResponseForRpcCongestionLevelResponseAndRpcError: Codable {
+public enum JsonRpcResponseForRpcCongestionLevelResponseAndRpcError: Codable, Sendable {
     case result(RpcCongestionLevelResponse)
     case error(RpcError)
 
@@ -5060,7 +5061,7 @@ public enum JsonRpcResponseForRpcCongestionLevelResponseAndRpcError: Codable {
 
 // MARK: - JsonRpcResponseForRpcGasPriceResponseAndRpcError
 
-public enum JsonRpcResponseForRpcGasPriceResponseAndRpcError: Codable {
+public enum JsonRpcResponseForRpcGasPriceResponseAndRpcError: Codable, Sendable {
     case result(RpcGasPriceResponse)
     case error(RpcError)
 
@@ -5128,7 +5129,7 @@ public enum JsonRpcResponseForRpcGasPriceResponseAndRpcError: Codable {
 
 // MARK: - JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError
 
-public enum JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError: Codable {
+public enum JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError: Codable, Sendable {
     case result(RpcLightClientBlockProofResponse)
     case error(RpcError)
 
@@ -5196,7 +5197,7 @@ public enum JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError: Codab
 
 // MARK: - JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError
 
-public enum JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError: Codable {
+public enum JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError: Codable, Sendable {
     case result(RpcLightClientExecutionProofResponse)
     case error(RpcError)
 
@@ -5264,7 +5265,7 @@ public enum JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError: C
 
 // MARK: - JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError
 
-public enum JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError: Codable {
+public enum JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError: Codable, Sendable {
     case result(RpcLightClientNextBlockResponse)
     case error(RpcError)
 
@@ -5332,7 +5333,7 @@ public enum JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError: Codabl
 
 // MARK: - JsonRpcResponseForRpcNetworkInfoResponseAndRpcError
 
-public enum JsonRpcResponseForRpcNetworkInfoResponseAndRpcError: Codable {
+public enum JsonRpcResponseForRpcNetworkInfoResponseAndRpcError: Codable, Sendable {
     case result(RpcNetworkInfoResponse)
     case error(RpcError)
 
@@ -5400,7 +5401,7 @@ public enum JsonRpcResponseForRpcNetworkInfoResponseAndRpcError: Codable {
 
 // MARK: - JsonRpcResponseForRpcProtocolConfigResponseAndRpcError
 
-public enum JsonRpcResponseForRpcProtocolConfigResponseAndRpcError: Codable {
+public enum JsonRpcResponseForRpcProtocolConfigResponseAndRpcError: Codable, Sendable {
     case result(RpcProtocolConfigResponse)
     case error(RpcError)
 
@@ -5468,7 +5469,7 @@ public enum JsonRpcResponseForRpcProtocolConfigResponseAndRpcError: Codable {
 
 // MARK: - JsonRpcResponseForRpcQueryResponseAndRpcError
 
-public enum JsonRpcResponseForRpcQueryResponseAndRpcError: Codable {
+public enum JsonRpcResponseForRpcQueryResponseAndRpcError: Codable, Sendable {
     case result(RpcQueryResponse)
     case error(RpcError)
 
@@ -5536,7 +5537,7 @@ public enum JsonRpcResponseForRpcQueryResponseAndRpcError: Codable {
 
 // MARK: - JsonRpcResponseForRpcReceiptResponseAndRpcError
 
-public enum JsonRpcResponseForRpcReceiptResponseAndRpcError: Codable {
+public enum JsonRpcResponseForRpcReceiptResponseAndRpcError: Codable, Sendable {
     case result(RpcReceiptResponse)
     case error(RpcError)
 
@@ -5604,7 +5605,7 @@ public enum JsonRpcResponseForRpcReceiptResponseAndRpcError: Codable {
 
 // MARK: - JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError
 
-public enum JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError: Codable {
+public enum JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError: Codable, Sendable {
     case result(RpcSplitStorageInfoResponse)
     case error(RpcError)
 
@@ -5672,7 +5673,7 @@ public enum JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError: Codable {
 
 // MARK: - JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError
 
-public enum JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError: Codable {
+public enum JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError: Codable, Sendable {
     case result(RpcStateChangesInBlockByTypeResponse)
     case error(RpcError)
 
@@ -5740,7 +5741,7 @@ public enum JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError: C
 
 // MARK: - JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError
 
-public enum JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError: Codable {
+public enum JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError: Codable, Sendable {
     case result(RpcStateChangesInBlockResponse)
     case error(RpcError)
 
@@ -5808,7 +5809,7 @@ public enum JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError: Codable
 
 // MARK: - JsonRpcResponseForRpcStatusResponseAndRpcError
 
-public enum JsonRpcResponseForRpcStatusResponseAndRpcError: Codable {
+public enum JsonRpcResponseForRpcStatusResponseAndRpcError: Codable, Sendable {
     case result(RpcStatusResponse)
     case error(RpcError)
 
@@ -5876,7 +5877,7 @@ public enum JsonRpcResponseForRpcStatusResponseAndRpcError: Codable {
 
 // MARK: - JsonRpcResponseForRpcTransactionResponseAndRpcError
 
-public enum JsonRpcResponseForRpcTransactionResponseAndRpcError: Codable {
+public enum JsonRpcResponseForRpcTransactionResponseAndRpcError: Codable, Sendable {
     case result(RpcTransactionResponse)
     case error(RpcError)
 
@@ -5944,7 +5945,7 @@ public enum JsonRpcResponseForRpcTransactionResponseAndRpcError: Codable {
 
 // MARK: - JsonRpcResponseForRpcValidatorResponseAndRpcError
 
-public enum JsonRpcResponseForRpcValidatorResponseAndRpcError: Codable {
+public enum JsonRpcResponseForRpcValidatorResponseAndRpcError: Codable, Sendable {
     case result(RpcValidatorResponse)
     case error(RpcError)
 
@@ -6012,7 +6013,7 @@ public enum JsonRpcResponseForRpcValidatorResponseAndRpcError: Codable {
 
 // MARK: - MissingTrieValueContext
 
-public enum MissingTrieValueContext: Codable {
+public enum MissingTrieValueContext: Codable, Sendable {
     case trieIterator
     case triePrefetchingStorage
     case trieMemoryPartialStorage
@@ -6074,7 +6075,7 @@ public enum MissingTrieValueContext: Codable {
 
 // MARK: - NonDelegateAction
 
-public enum NonDelegateAction: Codable {
+public enum NonDelegateAction: Codable, Sendable {
     case createAccount(CreateAccountAction)
     case deployContract(DeployContractAction)
     case functionCall(FunctionCallAction)
@@ -6300,7 +6301,7 @@ public enum NonDelegateAction: Codable {
 
 // MARK: - PrepareError
 
-public enum PrepareError: Codable {
+public enum PrepareError: Codable, Sendable {
     case serialization
     case deserialization
     case internalMemoryDeclared
@@ -6418,7 +6419,7 @@ public enum PrepareError: Codable {
 
 // MARK: - ReceiptEnumView
 
-public struct ReceiptEnumViewOneOfActionInline: Codable {
+public struct ReceiptEnumViewOneOfActionInline: Codable, Sendable {
     public let actions: [ActionView]
     public let gasPrice: NearToken
     public let inputDataIds: [CryptoHash]
@@ -6434,7 +6435,7 @@ public struct ReceiptEnumViewOneOfActionInline: Codable {
         isPromiseYield: Bool?,
         outputDataReceivers: [DataReceiverView],
         signerId: AccountId,
-        signerPublicKey: PublicKey
+        signerPublicKey: PublicKey,
     ) {
         self.actions = actions
         self.gasPrice = gasPrice
@@ -6446,7 +6447,7 @@ public struct ReceiptEnumViewOneOfActionInline: Codable {
     }
 }
 
-public struct ReceiptEnumViewOneOfDataInline: Codable {
+public struct ReceiptEnumViewOneOfDataInline: Codable, Sendable {
     public let data: String?
     public let dataId: CryptoHash
     public let isPromiseResume: Bool?
@@ -6454,7 +6455,7 @@ public struct ReceiptEnumViewOneOfDataInline: Codable {
     public init(
         data: String?,
         dataId: CryptoHash,
-        isPromiseResume: Bool?
+        isPromiseResume: Bool?,
     ) {
         self.data = data
         self.dataId = dataId
@@ -6462,7 +6463,7 @@ public struct ReceiptEnumViewOneOfDataInline: Codable {
     }
 }
 
-public struct ReceiptEnumViewOneOfGlobalContractDistributionInline: Codable {
+public struct ReceiptEnumViewOneOfGlobalContractDistributionInline: Codable, Sendable {
     public let alreadyDeliveredShards: [ShardId]
     public let code: String
     public let id: GlobalContractIdentifier
@@ -6472,7 +6473,7 @@ public struct ReceiptEnumViewOneOfGlobalContractDistributionInline: Codable {
         alreadyDeliveredShards: [ShardId],
         code: String,
         id: GlobalContractIdentifier,
-        targetShard: ShardId
+        targetShard: ShardId,
     ) {
         self.alreadyDeliveredShards = alreadyDeliveredShards
         self.code = code
@@ -6481,7 +6482,7 @@ public struct ReceiptEnumViewOneOfGlobalContractDistributionInline: Codable {
     }
 }
 
-public enum ReceiptEnumView: Codable {
+public enum ReceiptEnumView: Codable, Sendable {
     case action(ReceiptEnumViewOneOfActionInline)
     case data(ReceiptEnumViewOneOfDataInline)
     case globalContractDistribution(ReceiptEnumViewOneOfGlobalContractDistributionInline)
@@ -6521,7 +6522,7 @@ public enum ReceiptEnumView: Codable {
                     }) {
                     let value = try container.decode(
                         ReceiptEnumViewOneOfGlobalContractDistributionInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .globalContractDistribution(value)
                     return
@@ -6570,86 +6571,86 @@ public enum ReceiptEnumView: Codable {
 
 // MARK: - ReceiptValidationError
 
-public struct ReceiptValidationErrorOneOfInvalidPredecessorIdInline: Codable {
+public struct ReceiptValidationErrorOneOfInvalidPredecessorIdInline: Codable, Sendable {
     public let accountId: String
 
     public init(
-        accountId: String
+        accountId: String,
     ) {
         self.accountId = accountId
     }
 }
 
-public struct ReceiptValidationErrorOneOfInvalidReceiverIdInline: Codable {
+public struct ReceiptValidationErrorOneOfInvalidReceiverIdInline: Codable, Sendable {
     public let accountId: String
 
     public init(
-        accountId: String
+        accountId: String,
     ) {
         self.accountId = accountId
     }
 }
 
-public struct ReceiptValidationErrorOneOfInvalidSignerIdInline: Codable {
+public struct ReceiptValidationErrorOneOfInvalidSignerIdInline: Codable, Sendable {
     public let accountId: String
 
     public init(
-        accountId: String
+        accountId: String,
     ) {
         self.accountId = accountId
     }
 }
 
-public struct ReceiptValidationErrorOneOfInvalidDataReceiverIdInline: Codable {
+public struct ReceiptValidationErrorOneOfInvalidDataReceiverIdInline: Codable, Sendable {
     public let accountId: String
 
     public init(
-        accountId: String
+        accountId: String,
     ) {
         self.accountId = accountId
     }
 }
 
-public struct ReceiptValidationErrorOneOfReturnedValueLengthExceededInline: Codable {
+public struct ReceiptValidationErrorOneOfReturnedValueLengthExceededInline: Codable, Sendable {
     public let length: UInt64
     public let limit: UInt64
 
     public init(
         length: UInt64,
-        limit: UInt64
+        limit: UInt64,
     ) {
         self.length = length
         self.limit = limit
     }
 }
 
-public struct ReceiptValidationErrorOneOfNumberInputDataDependenciesExceededInline: Codable {
+public struct ReceiptValidationErrorOneOfNumberInputDataDependenciesExceededInline: Codable, Sendable {
     public let limit: UInt64
     public let numberOfInputDataDependencies: UInt64
 
     public init(
         limit: UInt64,
-        numberOfInputDataDependencies: UInt64
+        numberOfInputDataDependencies: UInt64,
     ) {
         self.limit = limit
         self.numberOfInputDataDependencies = numberOfInputDataDependencies
     }
 }
 
-public struct ReceiptValidationErrorOneOfReceiptSizeExceededInline: Codable {
+public struct ReceiptValidationErrorOneOfReceiptSizeExceededInline: Codable, Sendable {
     public let limit: UInt64
     public let size: UInt64
 
     public init(
         limit: UInt64,
-        size: UInt64
+        size: UInt64,
     ) {
         self.limit = limit
         self.size = size
     }
 }
 
-public enum ReceiptValidationError: Codable {
+public enum ReceiptValidationError: Codable, Sendable {
     case invalidPredecessorId(ReceiptValidationErrorOneOfInvalidPredecessorIdInline)
     case invalidReceiverId(ReceiptValidationErrorOneOfInvalidReceiverIdInline)
     case invalidSignerId(ReceiptValidationErrorOneOfInvalidSignerIdInline)
@@ -6670,7 +6671,7 @@ public enum ReceiptValidationError: Codable {
                     }) {
                     let value = try container.decode(
                         ReceiptValidationErrorOneOfInvalidPredecessorIdInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .invalidPredecessorId(value)
                     return
@@ -6687,7 +6688,7 @@ public enum ReceiptValidationError: Codable {
                     }) {
                     let value = try container.decode(
                         ReceiptValidationErrorOneOfInvalidReceiverIdInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .invalidReceiverId(value)
                     return
@@ -6704,7 +6705,7 @@ public enum ReceiptValidationError: Codable {
                     }) {
                     let value = try container.decode(
                         ReceiptValidationErrorOneOfInvalidSignerIdInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .invalidSignerId(value)
                     return
@@ -6721,7 +6722,7 @@ public enum ReceiptValidationError: Codable {
                     }) {
                     let value = try container.decode(
                         ReceiptValidationErrorOneOfInvalidDataReceiverIdInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .invalidDataReceiverId(value)
                     return
@@ -6738,7 +6739,7 @@ public enum ReceiptValidationError: Codable {
                     }) {
                     let value = try container.decode(
                         ReceiptValidationErrorOneOfReturnedValueLengthExceededInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .returnedValueLengthExceeded(value)
                     return
@@ -6755,7 +6756,7 @@ public enum ReceiptValidationError: Codable {
                     }) {
                     let value = try container.decode(
                         ReceiptValidationErrorOneOfNumberInputDataDependenciesExceededInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .numberInputDataDependenciesExceeded(value)
                     return
@@ -6786,7 +6787,7 @@ public enum ReceiptValidationError: Codable {
                     }) {
                     let value = try container.decode(
                         ReceiptValidationErrorOneOfReceiptSizeExceededInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .receiptSizeExceeded(value)
                     return
@@ -6855,7 +6856,7 @@ public enum ReceiptValidationError: Codable {
 
 // MARK: - RpcBlockRequest
 
-public enum RpcBlockRequest: Codable {
+public enum RpcBlockRequest: Codable, Sendable {
     case blockId(BlockId)
     case finality(Finality)
     case syncCheckpoint(SyncCheckpoint)
@@ -6943,20 +6944,20 @@ public enum RpcBlockRequest: Codable {
 
 // MARK: - RpcChunkRequest
 
-public struct BlockShardId: Codable {
+public struct BlockShardId: Codable, Sendable {
     public let blockId: BlockId
     public let shardId: ShardId
 
     public init(
         blockId: BlockId,
-        shardId: ShardId
+        shardId: ShardId,
     ) {
         self.blockId = blockId
         self.shardId = shardId
     }
 }
 
-public enum RpcChunkRequest: Codable {
+public enum RpcChunkRequest: Codable, Sendable {
     case blockShardId(BlockShardId)
     case chunkId(CryptoHash)
 
@@ -7016,7 +7017,7 @@ public enum RpcChunkRequest: Codable {
 
 // MARK: - RpcCongestionLevelRequest
 
-public enum RpcCongestionLevelRequest: Codable {
+public enum RpcCongestionLevelRequest: Codable, Sendable {
     case blockShardId(BlockShardId)
     case chunkId(CryptoHash)
 
@@ -7076,46 +7077,46 @@ public enum RpcCongestionLevelRequest: Codable {
 
 // MARK: - RpcError
 
-public struct RpcErrorOneOfCauseName: Codable {
+public struct RpcErrorOneOfCauseName: Codable, Sendable {
     public let cause: RpcRequestValidationErrorKind
     public let name: String
 
     public init(
         cause: RpcRequestValidationErrorKind,
-        name: String
+        name: String,
     ) {
         self.cause = cause
         self.name = name
     }
 }
 
-public struct RpcErrorOneOfCauseName1: Codable {
+public struct RpcErrorOneOfCauseName1: Codable, Sendable {
     public let cause: AnyCodable
     public let name: String
 
     public init(
         cause: AnyCodable,
-        name: String
+        name: String,
     ) {
         self.cause = cause
         self.name = name
     }
 }
 
-public struct RpcErrorOneOfCauseName2: Codable {
+public struct RpcErrorOneOfCauseName2: Codable, Sendable {
     public let cause: AnyCodable
     public let name: String
 
     public init(
         cause: AnyCodable,
-        name: String
+        name: String,
     ) {
         self.cause = cause
         self.name = name
     }
 }
 
-public enum RpcError: Codable {
+public enum RpcError: Codable, Sendable {
     case rpcErrorCauseName(RpcErrorOneOfCauseName)
     case rpcErrorCauseName1(RpcErrorOneOfCauseName1)
     case rpcErrorCauseName2(RpcErrorOneOfCauseName2)
@@ -7178,7 +7179,7 @@ public enum RpcError: Codable {
 
 // MARK: - RpcLightClientExecutionProofRequest
 
-public struct RpcLightClientExecutionProofRequestOneOfSenderIdTransactionHashType: Codable {
+public struct RpcLightClientExecutionProofRequestOneOfSenderIdTransactionHashType: Codable, Sendable {
     public let senderId: AccountId
     public let transactionHash: CryptoHash
     public let type: String
@@ -7186,7 +7187,7 @@ public struct RpcLightClientExecutionProofRequestOneOfSenderIdTransactionHashTyp
     public init(
         senderId: AccountId,
         transactionHash: CryptoHash,
-        type: String
+        type: String,
     ) {
         self.senderId = senderId
         self.transactionHash = transactionHash
@@ -7194,7 +7195,7 @@ public struct RpcLightClientExecutionProofRequestOneOfSenderIdTransactionHashTyp
     }
 }
 
-public struct RpcLightClientExecutionProofRequestOneOfReceiptIdReceiverIdType: Codable {
+public struct RpcLightClientExecutionProofRequestOneOfReceiptIdReceiverIdType: Codable, Sendable {
     public let receiptId: CryptoHash
     public let receiverId: AccountId
     public let type: String
@@ -7202,7 +7203,7 @@ public struct RpcLightClientExecutionProofRequestOneOfReceiptIdReceiverIdType: C
     public init(
         receiptId: CryptoHash,
         receiverId: AccountId,
-        type: String
+        type: String,
     ) {
         self.receiptId = receiptId
         self.receiverId = receiverId
@@ -7210,12 +7211,12 @@ public struct RpcLightClientExecutionProofRequestOneOfReceiptIdReceiverIdType: C
     }
 }
 
-public enum RpcLightClientExecutionProofRequest: Codable {
+public enum RpcLightClientExecutionProofRequest: Codable, Sendable {
     case rpcLightClientExecutionProofRequestSenderIdTransactionHashType(
-        RpcLightClientExecutionProofRequestOneOfSenderIdTransactionHashType
+        RpcLightClientExecutionProofRequestOneOfSenderIdTransactionHashType,
     )
     case rpcLightClientExecutionProofRequestReceiptIdReceiverIdType(
-        RpcLightClientExecutionProofRequestOneOfReceiptIdReceiverIdType
+        RpcLightClientExecutionProofRequestOneOfReceiptIdReceiverIdType,
     )
 
     public init(from decoder: Decoder) throws {
@@ -7229,7 +7230,7 @@ public enum RpcLightClientExecutionProofRequest: Codable {
         } catch {
             decodingErrors
                 .append(
-                    ".rpcLightClientExecutionProofRequestSenderIdTransactionHashType: \(describeDecodingError(error))"
+                    ".rpcLightClientExecutionProofRequestSenderIdTransactionHashType: \(describeDecodingError(error))",
                 )
         }
         do {
@@ -7273,7 +7274,7 @@ public enum RpcLightClientExecutionProofRequest: Codable {
 
 // MARK: - RpcProtocolConfigRequest
 
-public enum RpcProtocolConfigRequest: Codable {
+public enum RpcProtocolConfigRequest: Codable, Sendable {
     case blockId(BlockId)
     case finality(Finality)
     case syncCheckpoint(SyncCheckpoint)
@@ -7361,7 +7362,7 @@ public enum RpcProtocolConfigRequest: Codable {
 
 // MARK: - RpcQueryRequest
 
-public struct ViewAccountByBlockId: Codable {
+public struct ViewAccountByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountId: AccountId
     public let requestType: String
@@ -7369,7 +7370,7 @@ public struct ViewAccountByBlockId: Codable {
     public init(
         blockId: BlockId,
         accountId: AccountId,
-        requestType: String
+        requestType: String,
     ) {
         self.blockId = blockId
         self.accountId = accountId
@@ -7377,7 +7378,7 @@ public struct ViewAccountByBlockId: Codable {
     }
 }
 
-public struct ViewCodeByBlockId: Codable {
+public struct ViewCodeByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountId: AccountId
     public let requestType: String
@@ -7385,7 +7386,7 @@ public struct ViewCodeByBlockId: Codable {
     public init(
         blockId: BlockId,
         accountId: AccountId,
-        requestType: String
+        requestType: String,
     ) {
         self.blockId = blockId
         self.accountId = accountId
@@ -7393,7 +7394,7 @@ public struct ViewCodeByBlockId: Codable {
     }
 }
 
-public struct ViewStateByBlockId: Codable {
+public struct ViewStateByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountId: AccountId
     public let includeProof: Bool?
@@ -7405,7 +7406,7 @@ public struct ViewStateByBlockId: Codable {
         accountId: AccountId,
         includeProof: Bool?,
         prefixBase64: StoreKey,
-        requestType: String
+        requestType: String,
     ) {
         self.blockId = blockId
         self.accountId = accountId
@@ -7415,7 +7416,7 @@ public struct ViewStateByBlockId: Codable {
     }
 }
 
-public struct ViewAccessKeyByBlockId: Codable {
+public struct ViewAccessKeyByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountId: AccountId
     public let publicKey: PublicKey
@@ -7425,7 +7426,7 @@ public struct ViewAccessKeyByBlockId: Codable {
         blockId: BlockId,
         accountId: AccountId,
         publicKey: PublicKey,
-        requestType: String
+        requestType: String,
     ) {
         self.blockId = blockId
         self.accountId = accountId
@@ -7434,7 +7435,7 @@ public struct ViewAccessKeyByBlockId: Codable {
     }
 }
 
-public struct ViewAccessKeyListByBlockId: Codable {
+public struct ViewAccessKeyListByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountId: AccountId
     public let requestType: String
@@ -7442,7 +7443,7 @@ public struct ViewAccessKeyListByBlockId: Codable {
     public init(
         blockId: BlockId,
         accountId: AccountId,
-        requestType: String
+        requestType: String,
     ) {
         self.blockId = blockId
         self.accountId = accountId
@@ -7450,7 +7451,7 @@ public struct ViewAccessKeyListByBlockId: Codable {
     }
 }
 
-public struct CallFunctionByBlockId: Codable {
+public struct CallFunctionByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountId: AccountId
     public let argsBase64: FunctionArgs
@@ -7462,7 +7463,7 @@ public struct CallFunctionByBlockId: Codable {
         accountId: AccountId,
         argsBase64: FunctionArgs,
         methodName: String,
-        requestType: String
+        requestType: String,
     ) {
         self.blockId = blockId
         self.accountId = accountId
@@ -7472,7 +7473,7 @@ public struct CallFunctionByBlockId: Codable {
     }
 }
 
-public struct ViewGlobalContractCodeByBlockId: Codable {
+public struct ViewGlobalContractCodeByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let codeHash: CryptoHash
     public let requestType: String
@@ -7480,7 +7481,7 @@ public struct ViewGlobalContractCodeByBlockId: Codable {
     public init(
         blockId: BlockId,
         codeHash: CryptoHash,
-        requestType: String
+        requestType: String,
     ) {
         self.blockId = blockId
         self.codeHash = codeHash
@@ -7488,7 +7489,7 @@ public struct ViewGlobalContractCodeByBlockId: Codable {
     }
 }
 
-public struct ViewGlobalContractCodeByAccountIdByBlockId: Codable {
+public struct ViewGlobalContractCodeByAccountIdByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountId: AccountId
     public let requestType: String
@@ -7496,7 +7497,7 @@ public struct ViewGlobalContractCodeByAccountIdByBlockId: Codable {
     public init(
         blockId: BlockId,
         accountId: AccountId,
-        requestType: String
+        requestType: String,
     ) {
         self.blockId = blockId
         self.accountId = accountId
@@ -7504,7 +7505,7 @@ public struct ViewGlobalContractCodeByAccountIdByBlockId: Codable {
     }
 }
 
-public struct ViewAccountByFinality: Codable {
+public struct ViewAccountByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountId: AccountId
     public let requestType: String
@@ -7512,7 +7513,7 @@ public struct ViewAccountByFinality: Codable {
     public init(
         finality: Finality,
         accountId: AccountId,
-        requestType: String
+        requestType: String,
     ) {
         self.finality = finality
         self.accountId = accountId
@@ -7520,7 +7521,7 @@ public struct ViewAccountByFinality: Codable {
     }
 }
 
-public struct ViewCodeByFinality: Codable {
+public struct ViewCodeByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountId: AccountId
     public let requestType: String
@@ -7528,7 +7529,7 @@ public struct ViewCodeByFinality: Codable {
     public init(
         finality: Finality,
         accountId: AccountId,
-        requestType: String
+        requestType: String,
     ) {
         self.finality = finality
         self.accountId = accountId
@@ -7536,7 +7537,7 @@ public struct ViewCodeByFinality: Codable {
     }
 }
 
-public struct ViewStateByFinality: Codable {
+public struct ViewStateByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountId: AccountId
     public let includeProof: Bool?
@@ -7548,7 +7549,7 @@ public struct ViewStateByFinality: Codable {
         accountId: AccountId,
         includeProof: Bool?,
         prefixBase64: StoreKey,
-        requestType: String
+        requestType: String,
     ) {
         self.finality = finality
         self.accountId = accountId
@@ -7558,7 +7559,7 @@ public struct ViewStateByFinality: Codable {
     }
 }
 
-public struct ViewAccessKeyByFinality: Codable {
+public struct ViewAccessKeyByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountId: AccountId
     public let publicKey: PublicKey
@@ -7568,7 +7569,7 @@ public struct ViewAccessKeyByFinality: Codable {
         finality: Finality,
         accountId: AccountId,
         publicKey: PublicKey,
-        requestType: String
+        requestType: String,
     ) {
         self.finality = finality
         self.accountId = accountId
@@ -7577,7 +7578,7 @@ public struct ViewAccessKeyByFinality: Codable {
     }
 }
 
-public struct ViewAccessKeyListByFinality: Codable {
+public struct ViewAccessKeyListByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountId: AccountId
     public let requestType: String
@@ -7585,7 +7586,7 @@ public struct ViewAccessKeyListByFinality: Codable {
     public init(
         finality: Finality,
         accountId: AccountId,
-        requestType: String
+        requestType: String,
     ) {
         self.finality = finality
         self.accountId = accountId
@@ -7593,7 +7594,7 @@ public struct ViewAccessKeyListByFinality: Codable {
     }
 }
 
-public struct CallFunctionByFinality: Codable {
+public struct CallFunctionByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountId: AccountId
     public let argsBase64: FunctionArgs
@@ -7605,7 +7606,7 @@ public struct CallFunctionByFinality: Codable {
         accountId: AccountId,
         argsBase64: FunctionArgs,
         methodName: String,
-        requestType: String
+        requestType: String,
     ) {
         self.finality = finality
         self.accountId = accountId
@@ -7615,7 +7616,7 @@ public struct CallFunctionByFinality: Codable {
     }
 }
 
-public struct ViewGlobalContractCodeByFinality: Codable {
+public struct ViewGlobalContractCodeByFinality: Codable, Sendable {
     public let finality: Finality
     public let codeHash: CryptoHash
     public let requestType: String
@@ -7623,7 +7624,7 @@ public struct ViewGlobalContractCodeByFinality: Codable {
     public init(
         finality: Finality,
         codeHash: CryptoHash,
-        requestType: String
+        requestType: String,
     ) {
         self.finality = finality
         self.codeHash = codeHash
@@ -7631,7 +7632,7 @@ public struct ViewGlobalContractCodeByFinality: Codable {
     }
 }
 
-public struct ViewGlobalContractCodeByAccountIdByFinality: Codable {
+public struct ViewGlobalContractCodeByAccountIdByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountId: AccountId
     public let requestType: String
@@ -7639,7 +7640,7 @@ public struct ViewGlobalContractCodeByAccountIdByFinality: Codable {
     public init(
         finality: Finality,
         accountId: AccountId,
-        requestType: String
+        requestType: String,
     ) {
         self.finality = finality
         self.accountId = accountId
@@ -7647,7 +7648,7 @@ public struct ViewGlobalContractCodeByAccountIdByFinality: Codable {
     }
 }
 
-public struct ViewAccountBySyncCheckpoint: Codable {
+public struct ViewAccountBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountId: AccountId
     public let requestType: String
@@ -7655,7 +7656,7 @@ public struct ViewAccountBySyncCheckpoint: Codable {
     public init(
         syncCheckpoint: SyncCheckpoint,
         accountId: AccountId,
-        requestType: String
+        requestType: String,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountId = accountId
@@ -7663,7 +7664,7 @@ public struct ViewAccountBySyncCheckpoint: Codable {
     }
 }
 
-public struct ViewCodeBySyncCheckpoint: Codable {
+public struct ViewCodeBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountId: AccountId
     public let requestType: String
@@ -7671,7 +7672,7 @@ public struct ViewCodeBySyncCheckpoint: Codable {
     public init(
         syncCheckpoint: SyncCheckpoint,
         accountId: AccountId,
-        requestType: String
+        requestType: String,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountId = accountId
@@ -7679,7 +7680,7 @@ public struct ViewCodeBySyncCheckpoint: Codable {
     }
 }
 
-public struct ViewStateBySyncCheckpoint: Codable {
+public struct ViewStateBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountId: AccountId
     public let includeProof: Bool?
@@ -7691,7 +7692,7 @@ public struct ViewStateBySyncCheckpoint: Codable {
         accountId: AccountId,
         includeProof: Bool?,
         prefixBase64: StoreKey,
-        requestType: String
+        requestType: String,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountId = accountId
@@ -7701,7 +7702,7 @@ public struct ViewStateBySyncCheckpoint: Codable {
     }
 }
 
-public struct ViewAccessKeyBySyncCheckpoint: Codable {
+public struct ViewAccessKeyBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountId: AccountId
     public let publicKey: PublicKey
@@ -7711,7 +7712,7 @@ public struct ViewAccessKeyBySyncCheckpoint: Codable {
         syncCheckpoint: SyncCheckpoint,
         accountId: AccountId,
         publicKey: PublicKey,
-        requestType: String
+        requestType: String,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountId = accountId
@@ -7720,7 +7721,7 @@ public struct ViewAccessKeyBySyncCheckpoint: Codable {
     }
 }
 
-public struct ViewAccessKeyListBySyncCheckpoint: Codable {
+public struct ViewAccessKeyListBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountId: AccountId
     public let requestType: String
@@ -7728,7 +7729,7 @@ public struct ViewAccessKeyListBySyncCheckpoint: Codable {
     public init(
         syncCheckpoint: SyncCheckpoint,
         accountId: AccountId,
-        requestType: String
+        requestType: String,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountId = accountId
@@ -7736,7 +7737,7 @@ public struct ViewAccessKeyListBySyncCheckpoint: Codable {
     }
 }
 
-public struct CallFunctionBySyncCheckpoint: Codable {
+public struct CallFunctionBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountId: AccountId
     public let argsBase64: FunctionArgs
@@ -7748,7 +7749,7 @@ public struct CallFunctionBySyncCheckpoint: Codable {
         accountId: AccountId,
         argsBase64: FunctionArgs,
         methodName: String,
-        requestType: String
+        requestType: String,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountId = accountId
@@ -7758,7 +7759,7 @@ public struct CallFunctionBySyncCheckpoint: Codable {
     }
 }
 
-public struct ViewGlobalContractCodeBySyncCheckpoint: Codable {
+public struct ViewGlobalContractCodeBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let codeHash: CryptoHash
     public let requestType: String
@@ -7766,7 +7767,7 @@ public struct ViewGlobalContractCodeBySyncCheckpoint: Codable {
     public init(
         syncCheckpoint: SyncCheckpoint,
         codeHash: CryptoHash,
-        requestType: String
+        requestType: String,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.codeHash = codeHash
@@ -7774,7 +7775,7 @@ public struct ViewGlobalContractCodeBySyncCheckpoint: Codable {
     }
 }
 
-public struct ViewGlobalContractCodeByAccountIdBySyncCheckpoint: Codable {
+public struct ViewGlobalContractCodeByAccountIdBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountId: AccountId
     public let requestType: String
@@ -7782,7 +7783,7 @@ public struct ViewGlobalContractCodeByAccountIdBySyncCheckpoint: Codable {
     public init(
         syncCheckpoint: SyncCheckpoint,
         accountId: AccountId,
-        requestType: String
+        requestType: String,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountId = accountId
@@ -7790,7 +7791,7 @@ public struct ViewGlobalContractCodeByAccountIdBySyncCheckpoint: Codable {
     }
 }
 
-public enum RpcQueryRequest: Codable {
+public enum RpcQueryRequest: Codable, Sendable {
     case viewAccountByBlockId(ViewAccountByBlockId)
     case viewCodeByBlockId(ViewCodeByBlockId)
     case viewStateByBlockId(ViewStateByBlockId)
@@ -8085,7 +8086,7 @@ public enum RpcQueryRequest: Codable {
 
 // MARK: - RpcQueryResponse
 
-public enum RpcQueryResponse: Codable {
+public enum RpcQueryResponse: Codable, Sendable {
     case accountView(AccountView)
     case contractCodeView(ContractCodeView)
     case viewStateResult(ViewStateResult)
@@ -8181,33 +8182,33 @@ public enum RpcQueryResponse: Codable {
 
 // MARK: - RpcRequestValidationErrorKind
 
-public struct RpcRequestValidationErrorKindOneOfInfoName: Codable {
+public struct RpcRequestValidationErrorKindOneOfInfoName: Codable, Sendable {
     public let info: AnyCodable
     public let name: String
 
     public init(
         info: AnyCodable,
-        name: String
+        name: String,
     ) {
         self.info = info
         self.name = name
     }
 }
 
-public struct RpcRequestValidationErrorKindOneOfInfoName1: Codable {
+public struct RpcRequestValidationErrorKindOneOfInfoName1: Codable, Sendable {
     public let info: AnyCodable
     public let name: String
 
     public init(
         info: AnyCodable,
-        name: String
+        name: String,
     ) {
         self.info = info
         self.name = name
     }
 }
 
-public enum RpcRequestValidationErrorKind: Codable {
+public enum RpcRequestValidationErrorKind: Codable, Sendable {
     case rpcRequestValidationErrorKindInfoName(RpcRequestValidationErrorKindOneOfInfoName)
     case rpcRequestValidationErrorKindInfoName1(RpcRequestValidationErrorKindOneOfInfoName1)
 
@@ -8260,7 +8261,7 @@ public enum RpcRequestValidationErrorKind: Codable {
 
 // MARK: - RpcStateChangesInBlockByTypeRequest
 
-public struct AccountChangesByBlockId: Codable {
+public struct AccountChangesByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountIds: [AccountId]
     public let changesType: String
@@ -8268,7 +8269,7 @@ public struct AccountChangesByBlockId: Codable {
     public init(
         blockId: BlockId,
         accountIds: [AccountId],
-        changesType: String
+        changesType: String,
     ) {
         self.blockId = blockId
         self.accountIds = accountIds
@@ -8276,7 +8277,7 @@ public struct AccountChangesByBlockId: Codable {
     }
 }
 
-public struct SingleAccessKeyChangesByBlockId: Codable {
+public struct SingleAccessKeyChangesByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let changesType: String
     public let keys: [AccountWithPublicKey]
@@ -8284,7 +8285,7 @@ public struct SingleAccessKeyChangesByBlockId: Codable {
     public init(
         blockId: BlockId,
         changesType: String,
-        keys: [AccountWithPublicKey]
+        keys: [AccountWithPublicKey],
     ) {
         self.blockId = blockId
         self.changesType = changesType
@@ -8292,7 +8293,7 @@ public struct SingleAccessKeyChangesByBlockId: Codable {
     }
 }
 
-public struct SingleGasKeyChangesByBlockId: Codable {
+public struct SingleGasKeyChangesByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let changesType: String
     public let keys: [AccountWithPublicKey]
@@ -8300,7 +8301,7 @@ public struct SingleGasKeyChangesByBlockId: Codable {
     public init(
         blockId: BlockId,
         changesType: String,
-        keys: [AccountWithPublicKey]
+        keys: [AccountWithPublicKey],
     ) {
         self.blockId = blockId
         self.changesType = changesType
@@ -8308,7 +8309,7 @@ public struct SingleGasKeyChangesByBlockId: Codable {
     }
 }
 
-public struct AllAccessKeyChangesByBlockId: Codable {
+public struct AllAccessKeyChangesByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountIds: [AccountId]
     public let changesType: String
@@ -8316,7 +8317,7 @@ public struct AllAccessKeyChangesByBlockId: Codable {
     public init(
         blockId: BlockId,
         accountIds: [AccountId],
-        changesType: String
+        changesType: String,
     ) {
         self.blockId = blockId
         self.accountIds = accountIds
@@ -8324,7 +8325,7 @@ public struct AllAccessKeyChangesByBlockId: Codable {
     }
 }
 
-public struct AllGasKeyChangesByBlockId: Codable {
+public struct AllGasKeyChangesByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountIds: [AccountId]
     public let changesType: String
@@ -8332,7 +8333,7 @@ public struct AllGasKeyChangesByBlockId: Codable {
     public init(
         blockId: BlockId,
         accountIds: [AccountId],
-        changesType: String
+        changesType: String,
     ) {
         self.blockId = blockId
         self.accountIds = accountIds
@@ -8340,7 +8341,7 @@ public struct AllGasKeyChangesByBlockId: Codable {
     }
 }
 
-public struct ContractCodeChangesByBlockId: Codable {
+public struct ContractCodeChangesByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountIds: [AccountId]
     public let changesType: String
@@ -8348,7 +8349,7 @@ public struct ContractCodeChangesByBlockId: Codable {
     public init(
         blockId: BlockId,
         accountIds: [AccountId],
-        changesType: String
+        changesType: String,
     ) {
         self.blockId = blockId
         self.accountIds = accountIds
@@ -8356,7 +8357,7 @@ public struct ContractCodeChangesByBlockId: Codable {
     }
 }
 
-public struct DataChangesByBlockId: Codable {
+public struct DataChangesByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountIds: [AccountId]
     public let changesType: String
@@ -8366,7 +8367,7 @@ public struct DataChangesByBlockId: Codable {
         blockId: BlockId,
         accountIds: [AccountId],
         changesType: String,
-        keyPrefixBase64: StoreKey
+        keyPrefixBase64: StoreKey,
     ) {
         self.blockId = blockId
         self.accountIds = accountIds
@@ -8375,7 +8376,7 @@ public struct DataChangesByBlockId: Codable {
     }
 }
 
-public struct AccountChangesByFinality: Codable {
+public struct AccountChangesByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountIds: [AccountId]
     public let changesType: String
@@ -8383,7 +8384,7 @@ public struct AccountChangesByFinality: Codable {
     public init(
         finality: Finality,
         accountIds: [AccountId],
-        changesType: String
+        changesType: String,
     ) {
         self.finality = finality
         self.accountIds = accountIds
@@ -8391,7 +8392,7 @@ public struct AccountChangesByFinality: Codable {
     }
 }
 
-public struct SingleAccessKeyChangesByFinality: Codable {
+public struct SingleAccessKeyChangesByFinality: Codable, Sendable {
     public let finality: Finality
     public let changesType: String
     public let keys: [AccountWithPublicKey]
@@ -8399,7 +8400,7 @@ public struct SingleAccessKeyChangesByFinality: Codable {
     public init(
         finality: Finality,
         changesType: String,
-        keys: [AccountWithPublicKey]
+        keys: [AccountWithPublicKey],
     ) {
         self.finality = finality
         self.changesType = changesType
@@ -8407,7 +8408,7 @@ public struct SingleAccessKeyChangesByFinality: Codable {
     }
 }
 
-public struct SingleGasKeyChangesByFinality: Codable {
+public struct SingleGasKeyChangesByFinality: Codable, Sendable {
     public let finality: Finality
     public let changesType: String
     public let keys: [AccountWithPublicKey]
@@ -8415,7 +8416,7 @@ public struct SingleGasKeyChangesByFinality: Codable {
     public init(
         finality: Finality,
         changesType: String,
-        keys: [AccountWithPublicKey]
+        keys: [AccountWithPublicKey],
     ) {
         self.finality = finality
         self.changesType = changesType
@@ -8423,7 +8424,7 @@ public struct SingleGasKeyChangesByFinality: Codable {
     }
 }
 
-public struct AllAccessKeyChangesByFinality: Codable {
+public struct AllAccessKeyChangesByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountIds: [AccountId]
     public let changesType: String
@@ -8431,7 +8432,7 @@ public struct AllAccessKeyChangesByFinality: Codable {
     public init(
         finality: Finality,
         accountIds: [AccountId],
-        changesType: String
+        changesType: String,
     ) {
         self.finality = finality
         self.accountIds = accountIds
@@ -8439,7 +8440,7 @@ public struct AllAccessKeyChangesByFinality: Codable {
     }
 }
 
-public struct AllGasKeyChangesByFinality: Codable {
+public struct AllGasKeyChangesByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountIds: [AccountId]
     public let changesType: String
@@ -8447,7 +8448,7 @@ public struct AllGasKeyChangesByFinality: Codable {
     public init(
         finality: Finality,
         accountIds: [AccountId],
-        changesType: String
+        changesType: String,
     ) {
         self.finality = finality
         self.accountIds = accountIds
@@ -8455,7 +8456,7 @@ public struct AllGasKeyChangesByFinality: Codable {
     }
 }
 
-public struct ContractCodeChangesByFinality: Codable {
+public struct ContractCodeChangesByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountIds: [AccountId]
     public let changesType: String
@@ -8463,7 +8464,7 @@ public struct ContractCodeChangesByFinality: Codable {
     public init(
         finality: Finality,
         accountIds: [AccountId],
-        changesType: String
+        changesType: String,
     ) {
         self.finality = finality
         self.accountIds = accountIds
@@ -8471,7 +8472,7 @@ public struct ContractCodeChangesByFinality: Codable {
     }
 }
 
-public struct DataChangesByFinality: Codable {
+public struct DataChangesByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountIds: [AccountId]
     public let changesType: String
@@ -8481,7 +8482,7 @@ public struct DataChangesByFinality: Codable {
         finality: Finality,
         accountIds: [AccountId],
         changesType: String,
-        keyPrefixBase64: StoreKey
+        keyPrefixBase64: StoreKey,
     ) {
         self.finality = finality
         self.accountIds = accountIds
@@ -8490,7 +8491,7 @@ public struct DataChangesByFinality: Codable {
     }
 }
 
-public struct AccountChangesBySyncCheckpoint: Codable {
+public struct AccountChangesBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountIds: [AccountId]
     public let changesType: String
@@ -8498,7 +8499,7 @@ public struct AccountChangesBySyncCheckpoint: Codable {
     public init(
         syncCheckpoint: SyncCheckpoint,
         accountIds: [AccountId],
-        changesType: String
+        changesType: String,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountIds = accountIds
@@ -8506,7 +8507,7 @@ public struct AccountChangesBySyncCheckpoint: Codable {
     }
 }
 
-public struct SingleAccessKeyChangesBySyncCheckpoint: Codable {
+public struct SingleAccessKeyChangesBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let changesType: String
     public let keys: [AccountWithPublicKey]
@@ -8514,7 +8515,7 @@ public struct SingleAccessKeyChangesBySyncCheckpoint: Codable {
     public init(
         syncCheckpoint: SyncCheckpoint,
         changesType: String,
-        keys: [AccountWithPublicKey]
+        keys: [AccountWithPublicKey],
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.changesType = changesType
@@ -8522,7 +8523,7 @@ public struct SingleAccessKeyChangesBySyncCheckpoint: Codable {
     }
 }
 
-public struct SingleGasKeyChangesBySyncCheckpoint: Codable {
+public struct SingleGasKeyChangesBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let changesType: String
     public let keys: [AccountWithPublicKey]
@@ -8530,7 +8531,7 @@ public struct SingleGasKeyChangesBySyncCheckpoint: Codable {
     public init(
         syncCheckpoint: SyncCheckpoint,
         changesType: String,
-        keys: [AccountWithPublicKey]
+        keys: [AccountWithPublicKey],
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.changesType = changesType
@@ -8538,7 +8539,7 @@ public struct SingleGasKeyChangesBySyncCheckpoint: Codable {
     }
 }
 
-public struct AllAccessKeyChangesBySyncCheckpoint: Codable {
+public struct AllAccessKeyChangesBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountIds: [AccountId]
     public let changesType: String
@@ -8546,7 +8547,7 @@ public struct AllAccessKeyChangesBySyncCheckpoint: Codable {
     public init(
         syncCheckpoint: SyncCheckpoint,
         accountIds: [AccountId],
-        changesType: String
+        changesType: String,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountIds = accountIds
@@ -8554,7 +8555,7 @@ public struct AllAccessKeyChangesBySyncCheckpoint: Codable {
     }
 }
 
-public struct AllGasKeyChangesBySyncCheckpoint: Codable {
+public struct AllGasKeyChangesBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountIds: [AccountId]
     public let changesType: String
@@ -8562,7 +8563,7 @@ public struct AllGasKeyChangesBySyncCheckpoint: Codable {
     public init(
         syncCheckpoint: SyncCheckpoint,
         accountIds: [AccountId],
-        changesType: String
+        changesType: String,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountIds = accountIds
@@ -8570,7 +8571,7 @@ public struct AllGasKeyChangesBySyncCheckpoint: Codable {
     }
 }
 
-public struct ContractCodeChangesBySyncCheckpoint: Codable {
+public struct ContractCodeChangesBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountIds: [AccountId]
     public let changesType: String
@@ -8578,7 +8579,7 @@ public struct ContractCodeChangesBySyncCheckpoint: Codable {
     public init(
         syncCheckpoint: SyncCheckpoint,
         accountIds: [AccountId],
-        changesType: String
+        changesType: String,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountIds = accountIds
@@ -8586,7 +8587,7 @@ public struct ContractCodeChangesBySyncCheckpoint: Codable {
     }
 }
 
-public struct DataChangesBySyncCheckpoint: Codable {
+public struct DataChangesBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountIds: [AccountId]
     public let changesType: String
@@ -8596,7 +8597,7 @@ public struct DataChangesBySyncCheckpoint: Codable {
         syncCheckpoint: SyncCheckpoint,
         accountIds: [AccountId],
         changesType: String,
-        keyPrefixBase64: StoreKey
+        keyPrefixBase64: StoreKey,
     ) {
         self.syncCheckpoint = syncCheckpoint
         self.accountIds = accountIds
@@ -8605,7 +8606,7 @@ public struct DataChangesBySyncCheckpoint: Codable {
     }
 }
 
-public enum RpcStateChangesInBlockByTypeRequest: Codable {
+public enum RpcStateChangesInBlockByTypeRequest: Codable, Sendable {
     case accountChangesByBlockId(AccountChangesByBlockId)
     case singleAccessKeyChangesByBlockId(SingleAccessKeyChangesByBlockId)
     case singleGasKeyChangesByBlockId(SingleGasKeyChangesByBlockId)
@@ -8867,7 +8868,7 @@ public enum RpcStateChangesInBlockByTypeRequest: Codable {
 
 // MARK: - RpcStateChangesInBlockRequest
 
-public enum RpcStateChangesInBlockRequest: Codable {
+public enum RpcStateChangesInBlockRequest: Codable, Sendable {
     case blockId(BlockId)
     case finality(Finality)
     case syncCheckpoint(SyncCheckpoint)
@@ -8956,7 +8957,7 @@ public enum RpcStateChangesInBlockRequest: Codable {
 
 // MARK: - RpcTransactionResponse
 
-public enum RpcTransactionResponse: Codable {
+public enum RpcTransactionResponse: Codable, Sendable {
     case finalExecutionOutcomeWithReceiptView(FinalExecutionOutcomeWithReceiptView)
     case finalExecutionOutcomeView(FinalExecutionOutcomeView)
 
@@ -9008,20 +9009,20 @@ public enum RpcTransactionResponse: Codable {
 
 // MARK: - RpcTransactionStatusRequest
 
-public struct RpcTransactionStatusRequestOneOfSenderAccountIdTxHash: Codable {
+public struct RpcTransactionStatusRequestOneOfSenderAccountIdTxHash: Codable, Sendable {
     public let senderAccountId: AccountId
     public let txHash: CryptoHash
 
     public init(
         senderAccountId: AccountId,
-        txHash: CryptoHash
+        txHash: CryptoHash,
     ) {
         self.senderAccountId = senderAccountId
         self.txHash = txHash
     }
 }
 
-public enum RpcTransactionStatusRequest: Codable {
+public enum RpcTransactionStatusRequest: Codable, Sendable {
     case signedTxBase64(SignedTransaction)
     case rpcTransactionStatusRequestSenderAccountIdTxHash(RpcTransactionStatusRequestOneOfSenderAccountIdTxHash)
 
@@ -9082,7 +9083,7 @@ public enum RpcTransactionStatusRequest: Codable {
 
 // MARK: - RpcValidatorRequest
 
-public enum RpcValidatorRequest: Codable {
+public enum RpcValidatorRequest: Codable, Sendable {
     case latest
     case epochId(EpochId)
     case blockId(BlockId)
@@ -9158,7 +9159,7 @@ public enum RpcValidatorRequest: Codable {
 
 // MARK: - ShardLayout
 
-public enum ShardLayout: Codable {
+public enum ShardLayout: Codable, Sendable {
     case v0(ShardLayoutV0)
     case v1(ShardLayoutV1)
     case v2(ShardLayoutV2)
@@ -9242,72 +9243,72 @@ public enum ShardLayout: Codable {
 
 // MARK: - StateChangeCauseView
 
-public struct StateChangeCauseViewOneOfTxHashType: Codable {
+public struct StateChangeCauseViewOneOfTxHashType: Codable, Sendable {
     public let txHash: CryptoHash
     public let type: String
 
     public init(
         txHash: CryptoHash,
-        type: String
+        type: String,
     ) {
         self.txHash = txHash
         self.type = type
     }
 }
 
-public struct StateChangeCauseViewOneOfReceiptHashType: Codable {
+public struct StateChangeCauseViewOneOfReceiptHashType: Codable, Sendable {
     public let receiptHash: CryptoHash
     public let type: String
 
     public init(
         receiptHash: CryptoHash,
-        type: String
+        type: String,
     ) {
         self.receiptHash = receiptHash
         self.type = type
     }
 }
 
-public struct StateChangeCauseViewOneOfReceiptHashType1: Codable {
+public struct StateChangeCauseViewOneOfReceiptHashType1: Codable, Sendable {
     public let receiptHash: CryptoHash
     public let type: String
 
     public init(
         receiptHash: CryptoHash,
-        type: String
+        type: String,
     ) {
         self.receiptHash = receiptHash
         self.type = type
     }
 }
 
-public struct StateChangeCauseViewOneOfReceiptHashType2: Codable {
+public struct StateChangeCauseViewOneOfReceiptHashType2: Codable, Sendable {
     public let receiptHash: CryptoHash
     public let type: String
 
     public init(
         receiptHash: CryptoHash,
-        type: String
+        type: String,
     ) {
         self.receiptHash = receiptHash
         self.type = type
     }
 }
 
-public struct StateChangeCauseViewOneOfReceiptHashType3: Codable {
+public struct StateChangeCauseViewOneOfReceiptHashType3: Codable, Sendable {
     public let receiptHash: CryptoHash
     public let type: String
 
     public init(
         receiptHash: CryptoHash,
-        type: String
+        type: String,
     ) {
         self.receiptHash = receiptHash
         self.type = type
     }
 }
 
-public enum StateChangeCauseView: Codable {
+public enum StateChangeCauseView: Codable, Sendable {
     case type(String)
     case type1(String)
     case stateChangeCauseViewTxHashType(StateChangeCauseViewOneOfTxHashType)
@@ -9492,59 +9493,59 @@ public enum StateChangeCauseView: Codable {
 
 // MARK: - StateChangeKindView
 
-public struct StateChangeKindViewOneOfAccountIdType: Codable {
+public struct StateChangeKindViewOneOfAccountIdType: Codable, Sendable {
     public let accountId: AccountId
     public let type: String
 
     public init(
         accountId: AccountId,
-        type: String
+        type: String,
     ) {
         self.accountId = accountId
         self.type = type
     }
 }
 
-public struct StateChangeKindViewOneOfAccountIdType1: Codable {
+public struct StateChangeKindViewOneOfAccountIdType1: Codable, Sendable {
     public let accountId: AccountId
     public let type: String
 
     public init(
         accountId: AccountId,
-        type: String
+        type: String,
     ) {
         self.accountId = accountId
         self.type = type
     }
 }
 
-public struct StateChangeKindViewOneOfAccountIdType2: Codable {
+public struct StateChangeKindViewOneOfAccountIdType2: Codable, Sendable {
     public let accountId: AccountId
     public let type: String
 
     public init(
         accountId: AccountId,
-        type: String
+        type: String,
     ) {
         self.accountId = accountId
         self.type = type
     }
 }
 
-public struct StateChangeKindViewOneOfAccountIdType3: Codable {
+public struct StateChangeKindViewOneOfAccountIdType3: Codable, Sendable {
     public let accountId: AccountId
     public let type: String
 
     public init(
         accountId: AccountId,
-        type: String
+        type: String,
     ) {
         self.accountId = accountId
         self.type = type
     }
 }
 
-public enum StateChangeKindView: Codable {
+public enum StateChangeKindView: Codable, Sendable {
     case stateChangeKindViewAccountIdType(StateChangeKindViewOneOfAccountIdType)
     case stateChangeKindViewAccountIdType1(StateChangeKindViewOneOfAccountIdType1)
     case stateChangeKindViewAccountIdType2(StateChangeKindViewOneOfAccountIdType2)
@@ -9618,150 +9619,150 @@ public enum StateChangeKindView: Codable {
 
 // MARK: - StateChangeWithCauseView
 
-public struct StateChangeWithCauseViewOneOfChangeType: Codable {
+public struct StateChangeWithCauseViewOneOfChangeType: Codable, Sendable {
     public let change: InlineObject
     public let type: String
 
     public init(
         change: InlineObject,
-        type: String
+        type: String,
     ) {
         self.change = change
         self.type = type
     }
 }
 
-public struct StateChangeWithCauseViewOneOfChangeType1: Codable {
+public struct StateChangeWithCauseViewOneOfChangeType1: Codable, Sendable {
     public let change: InlineObject
     public let type: String
 
     public init(
         change: InlineObject,
-        type: String
+        type: String,
     ) {
         self.change = change
         self.type = type
     }
 }
 
-public struct StateChangeWithCauseViewOneOfChangeType2: Codable {
+public struct StateChangeWithCauseViewOneOfChangeType2: Codable, Sendable {
     public let change: InlineObject
     public let type: String
 
     public init(
         change: InlineObject,
-        type: String
+        type: String,
     ) {
         self.change = change
         self.type = type
     }
 }
 
-public struct StateChangeWithCauseViewOneOfChangeType3: Codable {
+public struct StateChangeWithCauseViewOneOfChangeType3: Codable, Sendable {
     public let change: InlineObject
     public let type: String
 
     public init(
         change: InlineObject,
-        type: String
+        type: String,
     ) {
         self.change = change
         self.type = type
     }
 }
 
-public struct StateChangeWithCauseViewOneOfChangeType4: Codable {
+public struct StateChangeWithCauseViewOneOfChangeType4: Codable, Sendable {
     public let change: InlineObject
     public let type: String
 
     public init(
         change: InlineObject,
-        type: String
+        type: String,
     ) {
         self.change = change
         self.type = type
     }
 }
 
-public struct StateChangeWithCauseViewOneOfChangeType5: Codable {
+public struct StateChangeWithCauseViewOneOfChangeType5: Codable, Sendable {
     public let change: InlineObject
     public let type: String
 
     public init(
         change: InlineObject,
-        type: String
+        type: String,
     ) {
         self.change = change
         self.type = type
     }
 }
 
-public struct StateChangeWithCauseViewOneOfChangeType6: Codable {
+public struct StateChangeWithCauseViewOneOfChangeType6: Codable, Sendable {
     public let change: InlineObject
     public let type: String
 
     public init(
         change: InlineObject,
-        type: String
+        type: String,
     ) {
         self.change = change
         self.type = type
     }
 }
 
-public struct StateChangeWithCauseViewOneOfChangeType7: Codable {
+public struct StateChangeWithCauseViewOneOfChangeType7: Codable, Sendable {
     public let change: InlineObject
     public let type: String
 
     public init(
         change: InlineObject,
-        type: String
+        type: String,
     ) {
         self.change = change
         self.type = type
     }
 }
 
-public struct StateChangeWithCauseViewOneOfChangeType8: Codable {
+public struct StateChangeWithCauseViewOneOfChangeType8: Codable, Sendable {
     public let change: InlineObject
     public let type: String
 
     public init(
         change: InlineObject,
-        type: String
+        type: String,
     ) {
         self.change = change
         self.type = type
     }
 }
 
-public struct StateChangeWithCauseViewOneOfChangeType9: Codable {
+public struct StateChangeWithCauseViewOneOfChangeType9: Codable, Sendable {
     public let change: InlineObject
     public let type: String
 
     public init(
         change: InlineObject,
-        type: String
+        type: String,
     ) {
         self.change = change
         self.type = type
     }
 }
 
-public struct StateChangeWithCauseViewOneOfChangeType10: Codable {
+public struct StateChangeWithCauseViewOneOfChangeType10: Codable, Sendable {
     public let change: InlineObject
     public let type: String
 
     public init(
         change: InlineObject,
-        type: String
+        type: String,
     ) {
         self.change = change
         self.type = type
     }
 }
 
-public enum StateChangeWithCauseView: Codable {
+public enum StateChangeWithCauseView: Codable, Sendable {
     case stateChangeWithCauseViewChangeType(StateChangeWithCauseViewOneOfChangeType)
     case stateChangeWithCauseViewChangeType1(StateChangeWithCauseViewOneOfChangeType1)
     case stateChangeWithCauseViewChangeType2(StateChangeWithCauseViewOneOfChangeType2)
@@ -9912,7 +9913,7 @@ public enum StateChangeWithCauseView: Codable {
 
 // MARK: - StorageError
 
-public enum StorageError: Codable {
+public enum StorageError: Codable, Sendable {
     case storageInternalError
     case missingTrieValue(MissingTrieValue)
     case unexpectedTrieValue
@@ -10037,7 +10038,7 @@ public enum StorageError: Codable {
 
 // MARK: - SyncConfig
 
-public enum SyncConfig: Codable {
+public enum SyncConfig: Codable, Sendable {
     case peers
     case externalStorage(ExternalStorageConfig)
 
@@ -10097,7 +10098,7 @@ public enum SyncConfig: Codable {
 
 // MARK: - TrackedShardsConfig
 
-public enum TrackedShardsConfig: Codable {
+public enum TrackedShardsConfig: Codable, Sendable {
     case noShards
     case shards([ShardUId])
     case allShards
@@ -10216,7 +10217,7 @@ public enum TrackedShardsConfig: Codable {
 
 // MARK: - TxExecutionError
 
-public enum TxExecutionError: Codable {
+public enum TxExecutionError: Codable, Sendable {
     case actionError(ActionError)
     case invalidTxError(InvalidTxError)
 
@@ -10283,7 +10284,7 @@ public enum TxExecutionError: Codable {
 
 // MARK: - TxExecutionStatus
 
-public enum TxExecutionStatus: Codable {
+public enum TxExecutionStatus: Codable, Sendable {
     case none
     case included
     case executedOPTIMISTIC
@@ -10361,7 +10362,7 @@ public enum TxExecutionStatus: Codable {
 
 // MARK: - VMKind
 
-public enum VMKind: Codable {
+public enum VMKind: Codable, Sendable {
     case wasmer0
     case wasmtime
     case wasmer2
@@ -10423,72 +10424,72 @@ public enum VMKind: Codable {
 
 // MARK: - ValidatorKickoutReason
 
-public struct ValidatorKickoutReasonOneOfNotEnoughBlocksInline: Codable {
+public struct ValidatorKickoutReasonOneOfNotEnoughBlocksInline: Codable, Sendable {
     public let expected: UInt64
     public let produced: UInt64
 
     public init(
         expected: UInt64,
-        produced: UInt64
+        produced: UInt64,
     ) {
         self.expected = expected
         self.produced = produced
     }
 }
 
-public struct ValidatorKickoutReasonOneOfNotEnoughChunksInline: Codable {
+public struct ValidatorKickoutReasonOneOfNotEnoughChunksInline: Codable, Sendable {
     public let expected: UInt64
     public let produced: UInt64
 
     public init(
         expected: UInt64,
-        produced: UInt64
+        produced: UInt64,
     ) {
         self.expected = expected
         self.produced = produced
     }
 }
 
-public struct ValidatorKickoutReasonOneOfNotEnoughStakeInline: Codable {
+public struct ValidatorKickoutReasonOneOfNotEnoughStakeInline: Codable, Sendable {
     public let stakeU128: NearToken
     public let thresholdU128: NearToken
 
     public init(
         stakeU128: NearToken,
-        thresholdU128: NearToken
+        thresholdU128: NearToken,
     ) {
         self.stakeU128 = stakeU128
         self.thresholdU128 = thresholdU128
     }
 }
 
-public struct ValidatorKickoutReasonOneOfNotEnoughChunkEndorsementsInline: Codable {
+public struct ValidatorKickoutReasonOneOfNotEnoughChunkEndorsementsInline: Codable, Sendable {
     public let expected: UInt64
     public let produced: UInt64
 
     public init(
         expected: UInt64,
-        produced: UInt64
+        produced: UInt64,
     ) {
         self.expected = expected
         self.produced = produced
     }
 }
 
-public struct ValidatorKickoutReasonOneOfProtocolVersionTooOldInline: Codable {
+public struct ValidatorKickoutReasonOneOfProtocolVersionTooOldInline: Codable, Sendable {
     public let networkVersion: Int
     public let version: Int
 
     public init(
         networkVersion: Int,
-        version: Int
+        version: Int,
     ) {
         self.networkVersion = networkVersion
         self.version = version
     }
 }
 
-public enum ValidatorKickoutReason: Codable {
+public enum ValidatorKickoutReason: Codable, Sendable {
     case UnusedSlashed
     case notEnoughBlocks(ValidatorKickoutReasonOneOfNotEnoughBlocksInline)
     case notEnoughChunks(ValidatorKickoutReasonOneOfNotEnoughChunksInline)
@@ -10513,7 +10514,7 @@ public enum ValidatorKickoutReason: Codable {
                     }) {
                     let value = try container.decode(
                         ValidatorKickoutReasonOneOfNotEnoughBlocksInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .notEnoughBlocks(value)
                     return
@@ -10530,7 +10531,7 @@ public enum ValidatorKickoutReason: Codable {
                     }) {
                     let value = try container.decode(
                         ValidatorKickoutReasonOneOfNotEnoughChunksInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .notEnoughChunks(value)
                     return
@@ -10549,7 +10550,7 @@ public enum ValidatorKickoutReason: Codable {
                     .first(where: { key in key.stringValue.caseInsensitiveCompare("NotEnoughStake") == .orderedSame }) {
                     let value = try container.decode(
                         ValidatorKickoutReasonOneOfNotEnoughStakeInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .notEnoughStake(value)
                     return
@@ -10570,7 +10571,7 @@ public enum ValidatorKickoutReason: Codable {
                     }) {
                     let value = try container.decode(
                         ValidatorKickoutReasonOneOfNotEnoughChunkEndorsementsInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .notEnoughChunkEndorsements(value)
                     return
@@ -10587,7 +10588,7 @@ public enum ValidatorKickoutReason: Codable {
                     }) {
                     let value = try container.decode(
                         ValidatorKickoutReasonOneOfProtocolVersionTooOldInline.self,
-                        forKey: matchingKey
+                        forKey: matchingKey,
                     )
                     self = .protocolVersionTooOld(value)
                     return
@@ -10653,7 +10654,7 @@ public enum ValidatorKickoutReason: Codable {
 
 // MARK: - ValidatorStakeView
 
-public struct ValidatorStakeViewOneOfAccountIdPublicKeyStake: Codable {
+public struct ValidatorStakeViewOneOfAccountIdPublicKeyStake: Codable, Sendable {
     public let accountId: AccountId
     public let publicKey: PublicKey
     public let stake: NearToken
@@ -10661,7 +10662,7 @@ public struct ValidatorStakeViewOneOfAccountIdPublicKeyStake: Codable {
     public init(
         accountId: AccountId,
         publicKey: PublicKey,
-        stake: NearToken
+        stake: NearToken,
     ) {
         self.accountId = accountId
         self.publicKey = publicKey
@@ -10669,7 +10670,7 @@ public struct ValidatorStakeViewOneOfAccountIdPublicKeyStake: Codable {
     }
 }
 
-public enum ValidatorStakeView: Codable {
+public enum ValidatorStakeView: Codable, Sendable {
     case validatorStakeViewAccountIdPublicKeyStake(ValidatorStakeViewOneOfAccountIdPublicKeyStake)
 
     public init(from decoder: Decoder) throws {
@@ -10710,7 +10711,7 @@ public enum ValidatorStakeView: Codable {
 
 // MARK: - WasmTrap
 
-public enum WasmTrap: Codable {
+public enum WasmTrap: Codable, Sendable {
     case unreachable
     case incorrectCallIndirectSignature
     case memoryOutOfBounds
@@ -10821,13 +10822,13 @@ public typealias PeerId = PublicKey
 
 // MARK: - AccessKey
 
-public struct AccessKey: Codable {
+public struct AccessKey: Codable, Sendable {
     public let nonce: UInt64
     public let permission: AccessKeyPermission
 
     public init(
         nonce: UInt64,
-        permission: AccessKeyPermission
+        permission: AccessKeyPermission,
     ) {
         self.nonce = nonce
         self.permission = permission
@@ -10836,7 +10837,7 @@ public struct AccessKey: Codable {
 
 // MARK: - AccessKeyCreationConfigView
 
-public struct AccessKeyCreationConfigView: Codable {
+public struct AccessKeyCreationConfigView: Codable, Sendable {
     public let fullAccessCost: Fee
     public let functionCallCost: Fee
     public let functionCallCostPerByte: Fee
@@ -10844,7 +10845,7 @@ public struct AccessKeyCreationConfigView: Codable {
     public init(
         fullAccessCost: Fee,
         functionCallCost: Fee,
-        functionCallCostPerByte: Fee
+        functionCallCostPerByte: Fee,
     ) {
         self.fullAccessCost = fullAccessCost
         self.functionCallCost = functionCallCost
@@ -10854,13 +10855,13 @@ public struct AccessKeyCreationConfigView: Codable {
 
 // MARK: - AccessKeyInfoView
 
-public struct AccessKeyInfoView: Codable {
+public struct AccessKeyInfoView: Codable, Sendable {
     public let accessKey: AccessKeyView
     public let publicKey: PublicKey
 
     public init(
         accessKey: AccessKeyView,
-        publicKey: PublicKey
+        publicKey: PublicKey,
     ) {
         self.accessKey = accessKey
         self.publicKey = publicKey
@@ -10869,11 +10870,11 @@ public struct AccessKeyInfoView: Codable {
 
 // MARK: - AccessKeyList
 
-public struct AccessKeyList: Codable {
+public struct AccessKeyList: Codable, Sendable {
     public let keys: [AccessKeyInfoView]
 
     public init(
-        keys: [AccessKeyInfoView]
+        keys: [AccessKeyInfoView],
     ) {
         self.keys = keys
     }
@@ -10881,13 +10882,13 @@ public struct AccessKeyList: Codable {
 
 // MARK: - AccessKeyView
 
-public struct AccessKeyView: Codable {
+public struct AccessKeyView: Codable, Sendable {
     public let nonce: UInt64
     public let permission: AccessKeyPermissionView
 
     public init(
         nonce: UInt64,
-        permission: AccessKeyPermissionView
+        permission: AccessKeyPermissionView,
     ) {
         self.nonce = nonce
         self.permission = permission
@@ -10896,13 +10897,13 @@ public struct AccessKeyView: Codable {
 
 // MARK: - AccountCreationConfigView
 
-public struct AccountCreationConfigView: Codable {
+public struct AccountCreationConfigView: Codable, Sendable {
     public let minAllowedTopLevelAccountLength: Int
     public let registrarAccountId: AccountId
 
     public init(
         minAllowedTopLevelAccountLength: Int,
-        registrarAccountId: AccountId
+        registrarAccountId: AccountId,
     ) {
         self.minAllowedTopLevelAccountLength = minAllowedTopLevelAccountLength
         self.registrarAccountId = registrarAccountId
@@ -10911,7 +10912,7 @@ public struct AccountCreationConfigView: Codable {
 
 // MARK: - AccountDataView
 
-public struct AccountDataView: Codable {
+public struct AccountDataView: Codable, Sendable {
     public let accountKey: PublicKey
     public let peerId: PublicKey
     public let proxies: [Tier1ProxyView]
@@ -10921,7 +10922,7 @@ public struct AccountDataView: Codable {
         accountKey: PublicKey,
         peerId: PublicKey,
         proxies: [Tier1ProxyView],
-        timestamp: String
+        timestamp: String,
     ) {
         self.accountKey = accountKey
         self.peerId = peerId
@@ -10932,7 +10933,7 @@ public struct AccountDataView: Codable {
 
 // MARK: - AccountInfo
 
-public struct AccountInfo: Codable {
+public struct AccountInfo: Codable, Sendable {
     public let accountId: AccountId
     public let amount: NearToken
     public let publicKey: PublicKey
@@ -10940,7 +10941,7 @@ public struct AccountInfo: Codable {
     public init(
         accountId: AccountId,
         amount: NearToken,
-        publicKey: PublicKey
+        publicKey: PublicKey,
     ) {
         self.accountId = accountId
         self.amount = amount
@@ -10950,7 +10951,7 @@ public struct AccountInfo: Codable {
 
 // MARK: - AccountView
 
-public struct AccountView: Codable {
+public struct AccountView: Codable, Sendable {
     public let amount: NearToken
     public let codeHash: CryptoHash
     public let globalContractAccountId: AccountId?
@@ -10966,7 +10967,7 @@ public struct AccountView: Codable {
         globalContractHash: CryptoHash?,
         locked: NearToken,
         storagePaidAt: UInt64?,
-        storageUsage: UInt64
+        storageUsage: UInt64,
     ) {
         self.amount = amount
         self.codeHash = codeHash
@@ -10980,13 +10981,13 @@ public struct AccountView: Codable {
 
 // MARK: - AccountWithPublicKey
 
-public struct AccountWithPublicKey: Codable {
+public struct AccountWithPublicKey: Codable, Sendable {
     public let accountId: AccountId
     public let publicKey: PublicKey
 
     public init(
         accountId: AccountId,
-        publicKey: PublicKey
+        publicKey: PublicKey,
     ) {
         self.accountId = accountId
         self.publicKey = publicKey
@@ -10995,7 +10996,7 @@ public struct AccountWithPublicKey: Codable {
 
 // MARK: - ActionCreationConfigView
 
-public struct ActionCreationConfigView: Codable {
+public struct ActionCreationConfigView: Codable, Sendable {
     public let addKeyCost: AccessKeyCreationConfigView
     public let createAccountCost: Fee
     public let delegateCost: Fee
@@ -11019,7 +11020,7 @@ public struct ActionCreationConfigView: Codable {
         functionCallCost: Fee,
         functionCallCostPerByte: Fee,
         stakeCost: Fee,
-        transferCost: Fee
+        transferCost: Fee,
     ) {
         self.addKeyCost = addKeyCost
         self.createAccountCost = createAccountCost
@@ -11037,13 +11038,13 @@ public struct ActionCreationConfigView: Codable {
 
 // MARK: - ActionError
 
-public struct ActionError: Codable {
+public struct ActionError: Codable, Sendable {
     public let index: UInt64?
     public let kind: ActionErrorKind
 
     public init(
         index: UInt64?,
-        kind: ActionErrorKind
+        kind: ActionErrorKind,
     ) {
         self.index = index
         self.kind = kind
@@ -11052,13 +11053,13 @@ public struct ActionError: Codable {
 
 // MARK: - AddKeyAction
 
-public struct AddKeyAction: Codable {
+public struct AddKeyAction: Codable, Sendable {
     public let accessKey: AccessKey
     public let publicKey: PublicKey
 
     public init(
         accessKey: AccessKey,
-        publicKey: PublicKey
+        publicKey: PublicKey,
     ) {
         self.accessKey = accessKey
         self.publicKey = publicKey
@@ -11067,13 +11068,13 @@ public struct AddKeyAction: Codable {
 
 // MARK: - BandwidthRequest
 
-public struct BandwidthRequest: Codable {
+public struct BandwidthRequest: Codable, Sendable {
     public let requestedValuesBitmap: BandwidthRequestBitmap
     public let toShard: Int
 
     public init(
         requestedValuesBitmap: BandwidthRequestBitmap,
-        toShard: Int
+        toShard: Int,
     ) {
         self.requestedValuesBitmap = requestedValuesBitmap
         self.toShard = toShard
@@ -11082,11 +11083,11 @@ public struct BandwidthRequest: Codable {
 
 // MARK: - BandwidthRequestBitmap
 
-public struct BandwidthRequestBitmap: Codable {
+public struct BandwidthRequestBitmap: Codable, Sendable {
     public let data: [Int]
 
     public init(
-        data: [Int]
+        data: [Int],
     ) {
         self.data = data
     }
@@ -11094,11 +11095,11 @@ public struct BandwidthRequestBitmap: Codable {
 
 // MARK: - BandwidthRequestsV1
 
-public struct BandwidthRequestsV1: Codable {
+public struct BandwidthRequestsV1: Codable, Sendable {
     public let requests: [BandwidthRequest]
 
     public init(
-        requests: [BandwidthRequest]
+        requests: [BandwidthRequest],
     ) {
         self.requests = requests
     }
@@ -11106,7 +11107,7 @@ public struct BandwidthRequestsV1: Codable {
 
 // MARK: - BlockHeaderInnerLiteView
 
-public struct BlockHeaderInnerLiteView: Codable {
+public struct BlockHeaderInnerLiteView: Codable, Sendable {
     public let blockMerkleRoot: CryptoHash
     public let epochId: CryptoHash
     public let height: UInt64
@@ -11126,7 +11127,7 @@ public struct BlockHeaderInnerLiteView: Codable {
         outcomeRoot: CryptoHash,
         prevStateRoot: CryptoHash,
         timestamp: UInt64,
-        timestampNanosec: String
+        timestampNanosec: String,
     ) {
         self.blockMerkleRoot = blockMerkleRoot
         self.epochId = epochId
@@ -11142,7 +11143,7 @@ public struct BlockHeaderInnerLiteView: Codable {
 
 // MARK: - BlockHeaderView
 
-public struct BlockHeaderView: Codable {
+public struct BlockHeaderView: Codable, Sendable {
     public let approvals: [Signature?]
     public let blockBodyHash: CryptoHash?
     public let blockMerkleRoot: CryptoHash
@@ -11212,7 +11213,7 @@ public struct BlockHeaderView: Codable {
         timestampNanosec: String,
         totalSupply: NearToken,
         validatorProposals: [ValidatorStakeView],
-        validatorReward: NearToken?
+        validatorReward: NearToken?,
     ) {
         self.approvals = approvals
         self.blockBodyHash = blockBodyHash
@@ -11253,13 +11254,13 @@ public struct BlockHeaderView: Codable {
 
 // MARK: - BlockStatusView
 
-public struct BlockStatusView: Codable {
+public struct BlockStatusView: Codable, Sendable {
     public let hash: CryptoHash
     public let height: UInt64
 
     public init(
         hash: CryptoHash,
-        height: UInt64
+        height: UInt64,
     ) {
         self.hash = hash
         self.height = height
@@ -11268,13 +11269,13 @@ public struct BlockStatusView: Codable {
 
 // MARK: - CallResult
 
-public struct CallResult: Codable {
+public struct CallResult: Codable, Sendable {
     public let logs: [String]
     public let result: [Int]
 
     public init(
         logs: [String],
-        result: [Int]
+        result: [Int],
     ) {
         self.logs = logs
         self.result = result
@@ -11283,7 +11284,7 @@ public struct CallResult: Codable {
 
 // MARK: - CatchupStatusView
 
-public struct CatchupStatusView: Codable {
+public struct CatchupStatusView: Codable, Sendable {
     public let blocksToCatchup: [BlockStatusView]
     public let shardSyncStatus: AnyCodable
     public let syncBlockHash: CryptoHash
@@ -11293,7 +11294,7 @@ public struct CatchupStatusView: Codable {
         blocksToCatchup: [BlockStatusView],
         shardSyncStatus: AnyCodable,
         syncBlockHash: CryptoHash,
-        syncBlockHeight: UInt64
+        syncBlockHeight: UInt64,
     ) {
         self.blocksToCatchup = blocksToCatchup
         self.shardSyncStatus = shardSyncStatus
@@ -11304,13 +11305,13 @@ public struct CatchupStatusView: Codable {
 
 // MARK: - ChunkDistributionNetworkConfig
 
-public struct ChunkDistributionNetworkConfig: Codable {
+public struct ChunkDistributionNetworkConfig: Codable, Sendable {
     public let enabled: Bool
     public let uris: ChunkDistributionUris
 
     public init(
         enabled: Bool,
-        uris: ChunkDistributionUris
+        uris: ChunkDistributionUris,
     ) {
         self.enabled = enabled
         self.uris = uris
@@ -11319,13 +11320,13 @@ public struct ChunkDistributionNetworkConfig: Codable {
 
 // MARK: - ChunkDistributionUris
 
-public struct ChunkDistributionUris: Codable {
+public struct ChunkDistributionUris: Codable, Sendable {
     public let get: String
     public let set: String
 
     public init(
         get: String,
-        set: String
+        set: String,
     ) {
         self.get = get
         self.set = set
@@ -11334,7 +11335,7 @@ public struct ChunkDistributionUris: Codable {
 
 // MARK: - ChunkHeaderView
 
-public struct ChunkHeaderView: Codable {
+public struct ChunkHeaderView: Codable, Sendable {
     public let balanceBurnt: NearToken
     public let bandwidthRequests: BandwidthRequests?
     public let chunkHash: CryptoHash
@@ -11376,7 +11377,7 @@ public struct ChunkHeaderView: Codable {
         signature: Signature,
         txRoot: CryptoHash,
         validatorProposals: [ValidatorStakeView],
-        validatorReward: NearToken?
+        validatorReward: NearToken?,
     ) {
         self.balanceBurnt = balanceBurnt
         self.bandwidthRequests = bandwidthRequests
@@ -11403,11 +11404,11 @@ public struct ChunkHeaderView: Codable {
 
 // MARK: - CloudArchivalReaderConfig
 
-public struct CloudArchivalReaderConfig: Codable {
+public struct CloudArchivalReaderConfig: Codable, Sendable {
     public let cloudStorage: CloudStorageConfig
 
     public init(
-        cloudStorage: CloudStorageConfig
+        cloudStorage: CloudStorageConfig,
     ) {
         self.cloudStorage = cloudStorage
     }
@@ -11415,7 +11416,7 @@ public struct CloudArchivalReaderConfig: Codable {
 
 // MARK: - CloudArchivalWriterConfig
 
-public struct CloudArchivalWriterConfig: Codable {
+public struct CloudArchivalWriterConfig: Codable, Sendable {
     public let archiveBlockData: Bool?
     public let cloudStorage: CloudStorageConfig
     public let pollingInterval: DurationAsStdSchemaProvider?
@@ -11423,7 +11424,7 @@ public struct CloudArchivalWriterConfig: Codable {
     public init(
         archiveBlockData: Bool?,
         cloudStorage: CloudStorageConfig,
-        pollingInterval: DurationAsStdSchemaProvider?
+        pollingInterval: DurationAsStdSchemaProvider?,
     ) {
         self.archiveBlockData = archiveBlockData
         self.cloudStorage = cloudStorage
@@ -11433,13 +11434,13 @@ public struct CloudArchivalWriterConfig: Codable {
 
 // MARK: - CloudStorageConfig
 
-public struct CloudStorageConfig: Codable {
+public struct CloudStorageConfig: Codable, Sendable {
     public let credentialsFile: String?
     public let storage: ExternalStorageLocation
 
     public init(
         credentialsFile: String?,
-        storage: ExternalStorageLocation
+        storage: ExternalStorageLocation,
     ) {
         self.credentialsFile = credentialsFile
         self.storage = storage
@@ -11448,7 +11449,7 @@ public struct CloudStorageConfig: Codable {
 
 // MARK: - CongestionControlConfigView
 
-public struct CongestionControlConfigView: Codable {
+public struct CongestionControlConfigView: Codable, Sendable {
     public let allowedShardOutgoingGas: NearGas
     public let maxCongestionIncomingGas: NearGas
     public let maxCongestionMemoryConsumption: UInt64
@@ -11474,7 +11475,7 @@ public struct CongestionControlConfigView: Codable {
         minTxGas: NearGas,
         outgoingReceiptsBigSizeLimit: UInt64,
         outgoingReceiptsUsualSizeLimit: UInt64,
-        rejectTxCongestionThreshold: Double
+        rejectTxCongestionThreshold: Double,
     ) {
         self.allowedShardOutgoingGas = allowedShardOutgoingGas
         self.maxCongestionIncomingGas = maxCongestionIncomingGas
@@ -11493,7 +11494,7 @@ public struct CongestionControlConfigView: Codable {
 
 // MARK: - CongestionInfoView
 
-public struct CongestionInfoView: Codable {
+public struct CongestionInfoView: Codable, Sendable {
     public let allowedShard: Int
     public let bufferedReceiptsGas: String
     public let delayedReceiptsGas: String
@@ -11503,7 +11504,7 @@ public struct CongestionInfoView: Codable {
         allowedShard: Int,
         bufferedReceiptsGas: String,
         delayedReceiptsGas: String,
-        receiptBytes: UInt64
+        receiptBytes: UInt64,
     ) {
         self.allowedShard = allowedShard
         self.bufferedReceiptsGas = bufferedReceiptsGas
@@ -11514,13 +11515,13 @@ public struct CongestionInfoView: Codable {
 
 // MARK: - ContractCodeView
 
-public struct ContractCodeView: Codable {
+public struct ContractCodeView: Codable, Sendable {
     public let codeBase64: String
     public let hash: CryptoHash
 
     public init(
         codeBase64: String,
-        hash: CryptoHash
+        hash: CryptoHash,
     ) {
         self.codeBase64 = codeBase64
         self.hash = hash
@@ -11529,7 +11530,7 @@ public struct ContractCodeView: Codable {
 
 // MARK: - CostGasUsed
 
-public struct CostGasUsed: Codable {
+public struct CostGasUsed: Codable, Sendable {
     public let cost: String
     public let costCategory: String
     public let gasUsed: String
@@ -11537,7 +11538,7 @@ public struct CostGasUsed: Codable {
     public init(
         cost: String,
         costCategory: String,
-        gasUsed: String
+        gasUsed: String,
     ) {
         self.cost = cost
         self.costCategory = costCategory
@@ -11547,13 +11548,13 @@ public struct CostGasUsed: Codable {
 
 // MARK: - CreateAccountAction
 
-public struct CreateAccountAction: Codable {
+public struct CreateAccountAction: Codable, Sendable {
     public init() {}
 }
 
 // MARK: - CurrentEpochValidatorInfo
 
-public struct CurrentEpochValidatorInfo: Codable {
+public struct CurrentEpochValidatorInfo: Codable, Sendable {
     public let accountId: AccountId
     public let isSlashed: Bool
     public let numExpectedBlocks: UInt64
@@ -11587,7 +11588,7 @@ public struct CurrentEpochValidatorInfo: Codable {
         publicKey: PublicKey,
         shards: [ShardId],
         shardsEndorsed: [ShardId]?,
-        stake: NearToken
+        stake: NearToken,
     ) {
         self.accountId = accountId
         self.isSlashed = isSlashed
@@ -11610,13 +11611,13 @@ public struct CurrentEpochValidatorInfo: Codable {
 
 // MARK: - DataReceiptCreationConfigView
 
-public struct DataReceiptCreationConfigView: Codable {
+public struct DataReceiptCreationConfigView: Codable, Sendable {
     public let baseCost: Fee
     public let costPerByte: Fee
 
     public init(
         baseCost: Fee,
-        costPerByte: Fee
+        costPerByte: Fee,
     ) {
         self.baseCost = baseCost
         self.costPerByte = costPerByte
@@ -11625,13 +11626,13 @@ public struct DataReceiptCreationConfigView: Codable {
 
 // MARK: - DataReceiverView
 
-public struct DataReceiverView: Codable {
+public struct DataReceiverView: Codable, Sendable {
     public let dataId: CryptoHash
     public let receiverId: AccountId
 
     public init(
         dataId: CryptoHash,
-        receiverId: AccountId
+        receiverId: AccountId,
     ) {
         self.dataId = dataId
         self.receiverId = receiverId
@@ -11640,7 +11641,7 @@ public struct DataReceiverView: Codable {
 
 // MARK: - DelegateAction
 
-public struct DelegateAction: Codable {
+public struct DelegateAction: Codable, Sendable {
     public let actions: [NonDelegateAction]
     public let maxBlockHeight: UInt64
     public let nonce: UInt64
@@ -11654,7 +11655,7 @@ public struct DelegateAction: Codable {
         nonce: UInt64,
         publicKey: PublicKey,
         receiverId: AccountId,
-        senderId: AccountId
+        senderId: AccountId,
     ) {
         self.actions = actions
         self.maxBlockHeight = maxBlockHeight
@@ -11667,11 +11668,11 @@ public struct DelegateAction: Codable {
 
 // MARK: - DeleteAccountAction
 
-public struct DeleteAccountAction: Codable {
+public struct DeleteAccountAction: Codable, Sendable {
     public let beneficiaryId: AccountId
 
     public init(
-        beneficiaryId: AccountId
+        beneficiaryId: AccountId,
     ) {
         self.beneficiaryId = beneficiaryId
     }
@@ -11679,11 +11680,11 @@ public struct DeleteAccountAction: Codable {
 
 // MARK: - DeleteKeyAction
 
-public struct DeleteKeyAction: Codable {
+public struct DeleteKeyAction: Codable, Sendable {
     public let publicKey: PublicKey
 
     public init(
-        publicKey: PublicKey
+        publicKey: PublicKey,
     ) {
         self.publicKey = publicKey
     }
@@ -11691,11 +11692,11 @@ public struct DeleteKeyAction: Codable {
 
 // MARK: - DeployContractAction
 
-public struct DeployContractAction: Codable {
+public struct DeployContractAction: Codable, Sendable {
     public let code: String
 
     public init(
-        code: String
+        code: String,
     ) {
         self.code = code
     }
@@ -11703,13 +11704,13 @@ public struct DeployContractAction: Codable {
 
 // MARK: - DeployGlobalContractAction
 
-public struct DeployGlobalContractAction: Codable {
+public struct DeployGlobalContractAction: Codable, Sendable {
     public let code: String
     public let deployMode: GlobalContractDeployMode
 
     public init(
         code: String,
-        deployMode: GlobalContractDeployMode
+        deployMode: GlobalContractDeployMode,
     ) {
         self.code = code
         self.deployMode = deployMode
@@ -11718,7 +11719,7 @@ public struct DeployGlobalContractAction: Codable {
 
 // MARK: - DetailedDebugStatus
 
-public struct DetailedDebugStatus: Codable {
+public struct DetailedDebugStatus: Codable, Sendable {
     public let blockProductionDelayMillis: UInt64
     public let catchupStatus: [CatchupStatusView]
     public let currentHeadStatus: BlockStatusView
@@ -11732,7 +11733,7 @@ public struct DetailedDebugStatus: Codable {
         currentHeadStatus: BlockStatusView,
         currentHeaderHeadStatus: BlockStatusView,
         networkInfo: NetworkInfoView,
-        syncStatus: String
+        syncStatus: String,
     ) {
         self.blockProductionDelayMillis = blockProductionDelayMillis
         self.catchupStatus = catchupStatus
@@ -11745,13 +11746,13 @@ public struct DetailedDebugStatus: Codable {
 
 // MARK: - DeterministicAccountStateInitV1
 
-public struct DeterministicAccountStateInitV1: Codable {
+public struct DeterministicAccountStateInitV1: Codable, Sendable {
     public let code: GlobalContractIdentifier
     public let data: [String: String]
 
     public init(
         code: GlobalContractIdentifier,
-        data: [String: String]
+        data: [String: String],
     ) {
         self.code = code
         self.data = data
@@ -11760,13 +11761,13 @@ public struct DeterministicAccountStateInitV1: Codable {
 
 // MARK: - DeterministicStateInitAction
 
-public struct DeterministicStateInitAction: Codable {
+public struct DeterministicStateInitAction: Codable, Sendable {
     public let deposit: NearToken
     public let stateInit: DeterministicAccountStateInit
 
     public init(
         deposit: NearToken,
-        stateInit: DeterministicAccountStateInit
+        stateInit: DeterministicAccountStateInit,
     ) {
         self.deposit = deposit
         self.stateInit = stateInit
@@ -11775,7 +11776,7 @@ public struct DeterministicStateInitAction: Codable {
 
 // MARK: - DumpConfig
 
-public struct DumpConfig: Codable {
+public struct DumpConfig: Codable, Sendable {
     public let credentialsFile: String?
     public let iterationDelay: DurationAsStdSchemaProvider?
     public let location: ExternalStorageLocation
@@ -11785,7 +11786,7 @@ public struct DumpConfig: Codable {
         credentialsFile: String?,
         iterationDelay: DurationAsStdSchemaProvider?,
         location: ExternalStorageLocation,
-        restartDumpForShards: [ShardId]?
+        restartDumpForShards: [ShardId]?,
     ) {
         self.credentialsFile = credentialsFile
         self.iterationDelay = iterationDelay
@@ -11796,13 +11797,13 @@ public struct DumpConfig: Codable {
 
 // MARK: - DurationAsStdSchemaProvider
 
-public struct DurationAsStdSchemaProvider: Codable {
+public struct DurationAsStdSchemaProvider: Codable, Sendable {
     public let nanos: Int32
     public let secs: Int64
 
     public init(
         nanos: Int32,
-        secs: Int64
+        secs: Int64,
     ) {
         self.nanos = nanos
         self.secs = secs
@@ -11811,7 +11812,7 @@ public struct DurationAsStdSchemaProvider: Codable {
 
 // MARK: - EpochSyncConfig
 
-public struct EpochSyncConfig: Codable {
+public struct EpochSyncConfig: Codable, Sendable {
     public let disableEpochSyncForBootstrapping: Bool?
     public let epochSyncHorizon: UInt64
     public let ignoreEpochSyncNetworkRequests: Bool?
@@ -11821,7 +11822,7 @@ public struct EpochSyncConfig: Codable {
         disableEpochSyncForBootstrapping: Bool?,
         epochSyncHorizon: UInt64,
         ignoreEpochSyncNetworkRequests: Bool?,
-        timeoutForEpochSync: DurationAsStdSchemaProvider
+        timeoutForEpochSync: DurationAsStdSchemaProvider,
     ) {
         self.disableEpochSyncForBootstrapping = disableEpochSyncForBootstrapping
         self.epochSyncHorizon = epochSyncHorizon
@@ -11832,13 +11833,13 @@ public struct EpochSyncConfig: Codable {
 
 // MARK: - ExecutionMetadataView
 
-public struct ExecutionMetadataView: Codable {
+public struct ExecutionMetadataView: Codable, Sendable {
     public let gasProfile: [CostGasUsed]?
     public let version: Int
 
     public init(
         gasProfile: [CostGasUsed]?,
-        version: Int
+        version: Int,
     ) {
         self.gasProfile = gasProfile
         self.version = version
@@ -11847,7 +11848,7 @@ public struct ExecutionMetadataView: Codable {
 
 // MARK: - ExecutionOutcomeView
 
-public struct ExecutionOutcomeView: Codable {
+public struct ExecutionOutcomeView: Codable, Sendable {
     public let executorId: AccountId
     public let gasBurnt: NearGas
     public let logs: [String]
@@ -11863,7 +11864,7 @@ public struct ExecutionOutcomeView: Codable {
         metadata: ExecutionMetadataView?,
         receiptIds: [CryptoHash],
         status: ExecutionStatusView,
-        tokensBurnt: NearToken
+        tokensBurnt: NearToken,
     ) {
         self.executorId = executorId
         self.gasBurnt = gasBurnt
@@ -11877,7 +11878,7 @@ public struct ExecutionOutcomeView: Codable {
 
 // MARK: - ExecutionOutcomeWithIdView
 
-public struct ExecutionOutcomeWithIdView: Codable {
+public struct ExecutionOutcomeWithIdView: Codable, Sendable {
     public let blockHash: CryptoHash
     public let id: CryptoHash
     public let outcome: ExecutionOutcomeView
@@ -11887,7 +11888,7 @@ public struct ExecutionOutcomeWithIdView: Codable {
         blockHash: CryptoHash,
         id: CryptoHash,
         outcome: ExecutionOutcomeView,
-        proof: [MerklePathItem]
+        proof: [MerklePathItem],
     ) {
         self.blockHash = blockHash
         self.id = id
@@ -11898,7 +11899,7 @@ public struct ExecutionOutcomeWithIdView: Codable {
 
 // MARK: - ExtCostsConfigView
 
-public struct ExtCostsConfigView: Codable {
+public struct ExtCostsConfigView: Codable, Sendable {
     public let altBn128G1MultiexpBase: NearGas
     public let altBn128G1MultiexpElement: NearGas
     public let altBn128G1SumBase: NearGas
@@ -12074,7 +12075,7 @@ public struct ExtCostsConfigView: Codable {
         yieldCreateBase: NearGas,
         yieldCreateByte: NearGas,
         yieldResumeBase: NearGas,
-        yieldResumeByte: NearGas
+        yieldResumeByte: NearGas,
     ) {
         self.altBn128G1MultiexpBase = altBn128G1MultiexpBase
         self.altBn128G1MultiexpElement = altBn128G1MultiexpElement
@@ -12168,7 +12169,7 @@ public struct ExtCostsConfigView: Codable {
 
 // MARK: - ExternalStorageConfig
 
-public struct ExternalStorageConfig: Codable {
+public struct ExternalStorageConfig: Codable, Sendable {
     public let externalStorageFallbackThreshold: UInt64?
     public let location: ExternalStorageLocation
     public let numConcurrentRequests: Int?
@@ -12178,7 +12179,7 @@ public struct ExternalStorageConfig: Codable {
         externalStorageFallbackThreshold: UInt64?,
         location: ExternalStorageLocation,
         numConcurrentRequests: Int?,
-        numConcurrentRequestsDuringCatchup: Int?
+        numConcurrentRequestsDuringCatchup: Int?,
     ) {
         self.externalStorageFallbackThreshold = externalStorageFallbackThreshold
         self.location = location
@@ -12189,7 +12190,7 @@ public struct ExternalStorageConfig: Codable {
 
 // MARK: - Fee
 
-public struct Fee: Codable {
+public struct Fee: Codable, Sendable {
     public let execution: NearGas
     public let sendNotSir: NearGas
     public let sendSir: NearGas
@@ -12197,7 +12198,7 @@ public struct Fee: Codable {
     public init(
         execution: NearGas,
         sendNotSir: NearGas,
-        sendSir: NearGas
+        sendSir: NearGas,
     ) {
         self.execution = execution
         self.sendNotSir = sendNotSir
@@ -12207,7 +12208,7 @@ public struct Fee: Codable {
 
 // MARK: - FinalExecutionOutcomeView
 
-public struct FinalExecutionOutcomeView: Codable {
+public struct FinalExecutionOutcomeView: Codable, Sendable {
     public let receiptsOutcome: [ExecutionOutcomeWithIdView]
     public let status: FinalExecutionStatus
     public let transaction: SignedTransactionView
@@ -12217,7 +12218,7 @@ public struct FinalExecutionOutcomeView: Codable {
         receiptsOutcome: [ExecutionOutcomeWithIdView],
         status: FinalExecutionStatus,
         transaction: SignedTransactionView,
-        transactionOutcome: ExecutionOutcomeWithIdView
+        transactionOutcome: ExecutionOutcomeWithIdView,
     ) {
         self.receiptsOutcome = receiptsOutcome
         self.status = status
@@ -12228,7 +12229,7 @@ public struct FinalExecutionOutcomeView: Codable {
 
 // MARK: - FinalExecutionOutcomeWithReceiptView
 
-public struct FinalExecutionOutcomeWithReceiptView: Codable {
+public struct FinalExecutionOutcomeWithReceiptView: Codable, Sendable {
     public let receipts: [ReceiptView]
     public let receiptsOutcome: [ExecutionOutcomeWithIdView]
     public let status: FinalExecutionStatus
@@ -12240,7 +12241,7 @@ public struct FinalExecutionOutcomeWithReceiptView: Codable {
         receiptsOutcome: [ExecutionOutcomeWithIdView],
         status: FinalExecutionStatus,
         transaction: SignedTransactionView,
-        transactionOutcome: ExecutionOutcomeWithIdView
+        transactionOutcome: ExecutionOutcomeWithIdView,
     ) {
         self.receipts = receipts
         self.receiptsOutcome = receiptsOutcome
@@ -12252,7 +12253,7 @@ public struct FinalExecutionOutcomeWithReceiptView: Codable {
 
 // MARK: - FunctionCallAction
 
-public struct FunctionCallAction: Codable {
+public struct FunctionCallAction: Codable, Sendable {
     public let args: String
     public let deposit: NearToken
     public let gas: NearGas
@@ -12262,7 +12263,7 @@ public struct FunctionCallAction: Codable {
         args: String,
         deposit: NearToken,
         gas: NearGas,
-        methodName: String
+        methodName: String,
     ) {
         self.args = args
         self.deposit = deposit
@@ -12273,7 +12274,7 @@ public struct FunctionCallAction: Codable {
 
 // MARK: - FunctionCallPermission
 
-public struct FunctionCallPermission: Codable {
+public struct FunctionCallPermission: Codable, Sendable {
     public let allowance: NearToken?
     public let methodNames: [String]
     public let receiverId: String
@@ -12281,7 +12282,7 @@ public struct FunctionCallPermission: Codable {
     public init(
         allowance: NearToken?,
         methodNames: [String],
-        receiverId: String
+        receiverId: String,
     ) {
         self.allowance = allowance
         self.methodNames = methodNames
@@ -12291,7 +12292,7 @@ public struct FunctionCallPermission: Codable {
 
 // MARK: - GCConfig
 
-public struct GCConfig: Codable {
+public struct GCConfig: Codable, Sendable {
     public let gcBlocksLimit: UInt64?
     public let gcForkCleanStep: UInt64?
     public let gcNumEpochsToKeep: UInt64?
@@ -12301,7 +12302,7 @@ public struct GCConfig: Codable {
         gcBlocksLimit: UInt64?,
         gcForkCleanStep: UInt64?,
         gcNumEpochsToKeep: UInt64?,
-        gcStepPeriod: DurationAsStdSchemaProvider?
+        gcStepPeriod: DurationAsStdSchemaProvider?,
     ) {
         self.gcBlocksLimit = gcBlocksLimit
         self.gcForkCleanStep = gcForkCleanStep
@@ -12312,7 +12313,7 @@ public struct GCConfig: Codable {
 
 // MARK: - GasKeyView
 
-public struct GasKeyView: Codable {
+public struct GasKeyView: Codable, Sendable {
     public let balance: NearToken
     public let numNonces: Int
     public let permission: AccessKeyPermissionView
@@ -12320,7 +12321,7 @@ public struct GasKeyView: Codable {
     public init(
         balance: NearToken,
         numNonces: Int,
-        permission: AccessKeyPermissionView
+        permission: AccessKeyPermissionView,
     ) {
         self.balance = balance
         self.numNonces = numNonces
@@ -12330,7 +12331,7 @@ public struct GasKeyView: Codable {
 
 // MARK: - GenesisConfig
 
-public struct GenesisConfig: Codable {
+public struct GenesisConfig: Codable, Sendable {
     public let avgHiddenValidatorSeatsPerShard: [UInt64]
     public let blockProducerKickoutThreshold: Int
     public let chainId: String
@@ -12410,7 +12411,7 @@ public struct GenesisConfig: Codable {
         totalSupply: NearToken,
         transactionValidityPeriod: UInt64,
         useProductionConfig: Bool?,
-        validators: [AccountInfo]
+        validators: [AccountInfo],
     ) {
         self.avgHiddenValidatorSeatsPerShard = avgHiddenValidatorSeatsPerShard
         self.blockProducerKickoutThreshold = blockProducerKickoutThreshold
@@ -12456,7 +12457,7 @@ public struct GenesisConfig: Codable {
 
 // MARK: - JsonRpcRequestForEXPERIMENTALChanges
 
-public struct JsonRpcRequestForEXPERIMENTALChanges: Codable {
+public struct JsonRpcRequestForEXPERIMENTALChanges: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -12466,7 +12467,7 @@ public struct JsonRpcRequestForEXPERIMENTALChanges: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcStateChangesInBlockByTypeRequest
+        params: RpcStateChangesInBlockByTypeRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -12477,7 +12478,7 @@ public struct JsonRpcRequestForEXPERIMENTALChanges: Codable {
 
 // MARK: - JsonRpcRequestForEXPERIMENTALChangesInBlock
 
-public struct JsonRpcRequestForEXPERIMENTALChangesInBlock: Codable {
+public struct JsonRpcRequestForEXPERIMENTALChangesInBlock: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -12487,7 +12488,7 @@ public struct JsonRpcRequestForEXPERIMENTALChangesInBlock: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcStateChangesInBlockRequest
+        params: RpcStateChangesInBlockRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -12498,7 +12499,7 @@ public struct JsonRpcRequestForEXPERIMENTALChangesInBlock: Codable {
 
 // MARK: - JsonRpcRequestForEXPERIMENTALCongestionLevel
 
-public struct JsonRpcRequestForEXPERIMENTALCongestionLevel: Codable {
+public struct JsonRpcRequestForEXPERIMENTALCongestionLevel: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -12508,7 +12509,7 @@ public struct JsonRpcRequestForEXPERIMENTALCongestionLevel: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcCongestionLevelRequest
+        params: RpcCongestionLevelRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -12519,7 +12520,7 @@ public struct JsonRpcRequestForEXPERIMENTALCongestionLevel: Codable {
 
 // MARK: - JsonRpcRequestForEXPERIMENTALGenesisConfig
 
-public struct JsonRpcRequestForEXPERIMENTALGenesisConfig: Codable {
+public struct JsonRpcRequestForEXPERIMENTALGenesisConfig: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -12529,7 +12530,7 @@ public struct JsonRpcRequestForEXPERIMENTALGenesisConfig: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: GenesisConfigRequest
+        params: GenesisConfigRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -12540,7 +12541,7 @@ public struct JsonRpcRequestForEXPERIMENTALGenesisConfig: Codable {
 
 // MARK: - JsonRpcRequestForEXPERIMENTALLightClientBlockProof
 
-public struct JsonRpcRequestForEXPERIMENTALLightClientBlockProof: Codable {
+public struct JsonRpcRequestForEXPERIMENTALLightClientBlockProof: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -12550,7 +12551,7 @@ public struct JsonRpcRequestForEXPERIMENTALLightClientBlockProof: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcLightClientBlockProofRequest
+        params: RpcLightClientBlockProofRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -12561,7 +12562,7 @@ public struct JsonRpcRequestForEXPERIMENTALLightClientBlockProof: Codable {
 
 // MARK: - JsonRpcRequestForEXPERIMENTALLightClientProof
 
-public struct JsonRpcRequestForEXPERIMENTALLightClientProof: Codable {
+public struct JsonRpcRequestForEXPERIMENTALLightClientProof: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -12571,7 +12572,7 @@ public struct JsonRpcRequestForEXPERIMENTALLightClientProof: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcLightClientExecutionProofRequest
+        params: RpcLightClientExecutionProofRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -12582,7 +12583,7 @@ public struct JsonRpcRequestForEXPERIMENTALLightClientProof: Codable {
 
 // MARK: - JsonRpcRequestForEXPERIMENTALMaintenanceWindows
 
-public struct JsonRpcRequestForEXPERIMENTALMaintenanceWindows: Codable {
+public struct JsonRpcRequestForEXPERIMENTALMaintenanceWindows: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -12592,7 +12593,7 @@ public struct JsonRpcRequestForEXPERIMENTALMaintenanceWindows: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcMaintenanceWindowsRequest
+        params: RpcMaintenanceWindowsRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -12603,7 +12604,7 @@ public struct JsonRpcRequestForEXPERIMENTALMaintenanceWindows: Codable {
 
 // MARK: - JsonRpcRequestForEXPERIMENTALProtocolConfig
 
-public struct JsonRpcRequestForEXPERIMENTALProtocolConfig: Codable {
+public struct JsonRpcRequestForEXPERIMENTALProtocolConfig: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -12613,7 +12614,7 @@ public struct JsonRpcRequestForEXPERIMENTALProtocolConfig: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcProtocolConfigRequest
+        params: RpcProtocolConfigRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -12624,7 +12625,7 @@ public struct JsonRpcRequestForEXPERIMENTALProtocolConfig: Codable {
 
 // MARK: - JsonRpcRequestForEXPERIMENTALReceipt
 
-public struct JsonRpcRequestForEXPERIMENTALReceipt: Codable {
+public struct JsonRpcRequestForEXPERIMENTALReceipt: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -12634,7 +12635,7 @@ public struct JsonRpcRequestForEXPERIMENTALReceipt: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcReceiptRequest
+        params: RpcReceiptRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -12645,7 +12646,7 @@ public struct JsonRpcRequestForEXPERIMENTALReceipt: Codable {
 
 // MARK: - JsonRpcRequestForEXPERIMENTALSplitStorageInfo
 
-public struct JsonRpcRequestForEXPERIMENTALSplitStorageInfo: Codable {
+public struct JsonRpcRequestForEXPERIMENTALSplitStorageInfo: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -12655,7 +12656,7 @@ public struct JsonRpcRequestForEXPERIMENTALSplitStorageInfo: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcSplitStorageInfoRequest
+        params: RpcSplitStorageInfoRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -12666,7 +12667,7 @@ public struct JsonRpcRequestForEXPERIMENTALSplitStorageInfo: Codable {
 
 // MARK: - JsonRpcRequestForEXPERIMENTALTxStatus
 
-public struct JsonRpcRequestForEXPERIMENTALTxStatus: Codable {
+public struct JsonRpcRequestForEXPERIMENTALTxStatus: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -12676,7 +12677,7 @@ public struct JsonRpcRequestForEXPERIMENTALTxStatus: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcTransactionStatusRequest
+        params: RpcTransactionStatusRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -12687,7 +12688,7 @@ public struct JsonRpcRequestForEXPERIMENTALTxStatus: Codable {
 
 // MARK: - JsonRpcRequestForEXPERIMENTALValidatorsOrdered
 
-public struct JsonRpcRequestForEXPERIMENTALValidatorsOrdered: Codable {
+public struct JsonRpcRequestForEXPERIMENTALValidatorsOrdered: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -12697,7 +12698,7 @@ public struct JsonRpcRequestForEXPERIMENTALValidatorsOrdered: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcValidatorsOrderedRequest
+        params: RpcValidatorsOrderedRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -12708,7 +12709,7 @@ public struct JsonRpcRequestForEXPERIMENTALValidatorsOrdered: Codable {
 
 // MARK: - JsonRpcRequestForBlock
 
-public struct JsonRpcRequestForBlock: Codable {
+public struct JsonRpcRequestForBlock: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -12718,7 +12719,7 @@ public struct JsonRpcRequestForBlock: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcBlockRequest
+        params: RpcBlockRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -12729,7 +12730,7 @@ public struct JsonRpcRequestForBlock: Codable {
 
 // MARK: - JsonRpcRequestForBlockEffects
 
-public struct JsonRpcRequestForBlockEffects: Codable {
+public struct JsonRpcRequestForBlockEffects: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -12739,7 +12740,7 @@ public struct JsonRpcRequestForBlockEffects: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcStateChangesInBlockRequest
+        params: RpcStateChangesInBlockRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -12750,7 +12751,7 @@ public struct JsonRpcRequestForBlockEffects: Codable {
 
 // MARK: - JsonRpcRequestForBroadcastTxAsync
 
-public struct JsonRpcRequestForBroadcastTxAsync: Codable {
+public struct JsonRpcRequestForBroadcastTxAsync: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -12760,7 +12761,7 @@ public struct JsonRpcRequestForBroadcastTxAsync: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcSendTransactionRequest
+        params: RpcSendTransactionRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -12771,7 +12772,7 @@ public struct JsonRpcRequestForBroadcastTxAsync: Codable {
 
 // MARK: - JsonRpcRequestForBroadcastTxCommit
 
-public struct JsonRpcRequestForBroadcastTxCommit: Codable {
+public struct JsonRpcRequestForBroadcastTxCommit: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -12781,7 +12782,7 @@ public struct JsonRpcRequestForBroadcastTxCommit: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcSendTransactionRequest
+        params: RpcSendTransactionRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -12792,7 +12793,7 @@ public struct JsonRpcRequestForBroadcastTxCommit: Codable {
 
 // MARK: - JsonRpcRequestForChanges
 
-public struct JsonRpcRequestForChanges: Codable {
+public struct JsonRpcRequestForChanges: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -12802,7 +12803,7 @@ public struct JsonRpcRequestForChanges: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcStateChangesInBlockByTypeRequest
+        params: RpcStateChangesInBlockByTypeRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -12813,7 +12814,7 @@ public struct JsonRpcRequestForChanges: Codable {
 
 // MARK: - JsonRpcRequestForChunk
 
-public struct JsonRpcRequestForChunk: Codable {
+public struct JsonRpcRequestForChunk: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -12823,7 +12824,7 @@ public struct JsonRpcRequestForChunk: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcChunkRequest
+        params: RpcChunkRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -12834,7 +12835,7 @@ public struct JsonRpcRequestForChunk: Codable {
 
 // MARK: - JsonRpcRequestForClientConfig
 
-public struct JsonRpcRequestForClientConfig: Codable {
+public struct JsonRpcRequestForClientConfig: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -12844,7 +12845,7 @@ public struct JsonRpcRequestForClientConfig: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcClientConfigRequest
+        params: RpcClientConfigRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -12855,7 +12856,7 @@ public struct JsonRpcRequestForClientConfig: Codable {
 
 // MARK: - JsonRpcRequestForGasPrice
 
-public struct JsonRpcRequestForGasPrice: Codable {
+public struct JsonRpcRequestForGasPrice: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -12865,7 +12866,7 @@ public struct JsonRpcRequestForGasPrice: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcGasPriceRequest
+        params: RpcGasPriceRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -12876,7 +12877,7 @@ public struct JsonRpcRequestForGasPrice: Codable {
 
 // MARK: - JsonRpcRequestForGenesisConfig
 
-public struct JsonRpcRequestForGenesisConfig: Codable {
+public struct JsonRpcRequestForGenesisConfig: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -12886,7 +12887,7 @@ public struct JsonRpcRequestForGenesisConfig: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: GenesisConfigRequest
+        params: GenesisConfigRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -12897,7 +12898,7 @@ public struct JsonRpcRequestForGenesisConfig: Codable {
 
 // MARK: - JsonRpcRequestForHealth
 
-public struct JsonRpcRequestForHealth: Codable {
+public struct JsonRpcRequestForHealth: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -12907,7 +12908,7 @@ public struct JsonRpcRequestForHealth: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcHealthRequest
+        params: RpcHealthRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -12918,7 +12919,7 @@ public struct JsonRpcRequestForHealth: Codable {
 
 // MARK: - JsonRpcRequestForLightClientProof
 
-public struct JsonRpcRequestForLightClientProof: Codable {
+public struct JsonRpcRequestForLightClientProof: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -12928,7 +12929,7 @@ public struct JsonRpcRequestForLightClientProof: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcLightClientExecutionProofRequest
+        params: RpcLightClientExecutionProofRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -12939,7 +12940,7 @@ public struct JsonRpcRequestForLightClientProof: Codable {
 
 // MARK: - JsonRpcRequestForMaintenanceWindows
 
-public struct JsonRpcRequestForMaintenanceWindows: Codable {
+public struct JsonRpcRequestForMaintenanceWindows: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -12949,7 +12950,7 @@ public struct JsonRpcRequestForMaintenanceWindows: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcMaintenanceWindowsRequest
+        params: RpcMaintenanceWindowsRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -12960,7 +12961,7 @@ public struct JsonRpcRequestForMaintenanceWindows: Codable {
 
 // MARK: - JsonRpcRequestForNetworkInfo
 
-public struct JsonRpcRequestForNetworkInfo: Codable {
+public struct JsonRpcRequestForNetworkInfo: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -12970,7 +12971,7 @@ public struct JsonRpcRequestForNetworkInfo: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcNetworkInfoRequest
+        params: RpcNetworkInfoRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -12981,7 +12982,7 @@ public struct JsonRpcRequestForNetworkInfo: Codable {
 
 // MARK: - JsonRpcRequestForNextLightClientBlock
 
-public struct JsonRpcRequestForNextLightClientBlock: Codable {
+public struct JsonRpcRequestForNextLightClientBlock: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -12991,7 +12992,7 @@ public struct JsonRpcRequestForNextLightClientBlock: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcLightClientNextBlockRequest
+        params: RpcLightClientNextBlockRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -13002,7 +13003,7 @@ public struct JsonRpcRequestForNextLightClientBlock: Codable {
 
 // MARK: - JsonRpcRequestForQuery
 
-public struct JsonRpcRequestForQuery: Codable {
+public struct JsonRpcRequestForQuery: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -13012,7 +13013,7 @@ public struct JsonRpcRequestForQuery: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcQueryRequest
+        params: RpcQueryRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -13023,7 +13024,7 @@ public struct JsonRpcRequestForQuery: Codable {
 
 // MARK: - JsonRpcRequestForSendTx
 
-public struct JsonRpcRequestForSendTx: Codable {
+public struct JsonRpcRequestForSendTx: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -13033,7 +13034,7 @@ public struct JsonRpcRequestForSendTx: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcSendTransactionRequest
+        params: RpcSendTransactionRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -13044,7 +13045,7 @@ public struct JsonRpcRequestForSendTx: Codable {
 
 // MARK: - JsonRpcRequestForStatus
 
-public struct JsonRpcRequestForStatus: Codable {
+public struct JsonRpcRequestForStatus: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -13054,7 +13055,7 @@ public struct JsonRpcRequestForStatus: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcStatusRequest
+        params: RpcStatusRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -13065,7 +13066,7 @@ public struct JsonRpcRequestForStatus: Codable {
 
 // MARK: - JsonRpcRequestForTx
 
-public struct JsonRpcRequestForTx: Codable {
+public struct JsonRpcRequestForTx: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -13075,7 +13076,7 @@ public struct JsonRpcRequestForTx: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcTransactionStatusRequest
+        params: RpcTransactionStatusRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -13086,7 +13087,7 @@ public struct JsonRpcRequestForTx: Codable {
 
 // MARK: - JsonRpcRequestForValidators
 
-public struct JsonRpcRequestForValidators: Codable {
+public struct JsonRpcRequestForValidators: Codable, Sendable {
     public let id: String
     public let jsonrpc: String
     public let method: String
@@ -13096,7 +13097,7 @@ public struct JsonRpcRequestForValidators: Codable {
         id: String,
         jsonrpc: String,
         method: String,
-        params: RpcValidatorRequest
+        params: RpcValidatorRequest,
     ) {
         self.id = id
         self.jsonrpc = jsonrpc
@@ -13107,7 +13108,7 @@ public struct JsonRpcRequestForValidators: Codable {
 
 // MARK: - KnownProducerView
 
-public struct KnownProducerView: Codable {
+public struct KnownProducerView: Codable, Sendable {
     public let accountId: AccountId
     public let nextHops: [PublicKey]?
     public let peerId: PublicKey
@@ -13115,7 +13116,7 @@ public struct KnownProducerView: Codable {
     public init(
         accountId: AccountId,
         nextHops: [PublicKey]?,
-        peerId: PublicKey
+        peerId: PublicKey,
     ) {
         self.accountId = accountId
         self.nextHops = nextHops
@@ -13125,7 +13126,7 @@ public struct KnownProducerView: Codable {
 
 // MARK: - LightClientBlockLiteView
 
-public struct LightClientBlockLiteView: Codable {
+public struct LightClientBlockLiteView: Codable, Sendable {
     public let innerLite: BlockHeaderInnerLiteView
     public let innerRestHash: CryptoHash
     public let prevBlockHash: CryptoHash
@@ -13133,7 +13134,7 @@ public struct LightClientBlockLiteView: Codable {
     public init(
         innerLite: BlockHeaderInnerLiteView,
         innerRestHash: CryptoHash,
-        prevBlockHash: CryptoHash
+        prevBlockHash: CryptoHash,
     ) {
         self.innerLite = innerLite
         self.innerRestHash = innerRestHash
@@ -13143,7 +13144,7 @@ public struct LightClientBlockLiteView: Codable {
 
 // MARK: - LimitConfig
 
-public struct LimitConfig: Codable {
+public struct LimitConfig: Codable, Sendable {
     public let accountIdValidityRulesVersion: AccountIdValidityRulesVersion?
     public let initialMemoryPages: Int
     public let maxActionsPerReceipt: UInt64
@@ -13205,7 +13206,7 @@ public struct LimitConfig: Codable {
         maxYieldPayloadSize: UInt64,
         perReceiptStorageProofSizeLimit: Int,
         registersMemoryLimit: UInt64,
-        yieldTimeoutLengthInBlocks: UInt64
+        yieldTimeoutLengthInBlocks: UInt64,
     ) {
         self.accountIdValidityRulesVersion = accountIdValidityRulesVersion
         self.initialMemoryPages = initialMemoryPages
@@ -13242,13 +13243,13 @@ public struct LimitConfig: Codable {
 
 // MARK: - MerklePathItem
 
-public struct MerklePathItem: Codable {
+public struct MerklePathItem: Codable, Sendable {
     public let direction: Direction
     public let hash: CryptoHash
 
     public init(
         direction: Direction,
-        hash: CryptoHash
+        hash: CryptoHash,
     ) {
         self.direction = direction
         self.hash = hash
@@ -13257,13 +13258,13 @@ public struct MerklePathItem: Codable {
 
 // MARK: - MissingTrieValue
 
-public struct MissingTrieValue: Codable {
+public struct MissingTrieValue: Codable, Sendable {
     public let context: MissingTrieValueContext
     public let hash: CryptoHash
 
     public init(
         context: MissingTrieValueContext,
-        hash: CryptoHash
+        hash: CryptoHash,
     ) {
         self.context = context
         self.hash = hash
@@ -13272,7 +13273,7 @@ public struct MissingTrieValue: Codable {
 
 // MARK: - NetworkInfoView
 
-public struct NetworkInfoView: Codable {
+public struct NetworkInfoView: Codable, Sendable {
     public let connectedPeers: [PeerInfoView]
     public let knownProducers: [KnownProducerView]
     public let numConnectedPeers: Int
@@ -13288,7 +13289,7 @@ public struct NetworkInfoView: Codable {
         peerMaxCount: Int,
         tier1AccountsData: [AccountDataView],
         tier1AccountsKeys: [PublicKey],
-        tier1Connections: [PeerInfoView]
+        tier1Connections: [PeerInfoView],
     ) {
         self.connectedPeers = connectedPeers
         self.knownProducers = knownProducers
@@ -13302,7 +13303,7 @@ public struct NetworkInfoView: Codable {
 
 // MARK: - NextEpochValidatorInfo
 
-public struct NextEpochValidatorInfo: Codable {
+public struct NextEpochValidatorInfo: Codable, Sendable {
     public let accountId: AccountId
     public let publicKey: PublicKey
     public let shards: [ShardId]
@@ -13312,7 +13313,7 @@ public struct NextEpochValidatorInfo: Codable {
         accountId: AccountId,
         publicKey: PublicKey,
         shards: [ShardId],
-        stake: NearToken
+        stake: NearToken,
     ) {
         self.accountId = accountId
         self.publicKey = publicKey
@@ -13323,7 +13324,7 @@ public struct NextEpochValidatorInfo: Codable {
 
 // MARK: - PeerInfoView
 
-public struct PeerInfoView: Codable {
+public struct PeerInfoView: Codable, Sendable {
     public let accountId: AccountId?
     public let addr: String
     public let archival: Bool
@@ -13355,7 +13356,7 @@ public struct PeerInfoView: Codable {
         peerId: PublicKey,
         receivedBytesPerSec: UInt64,
         sentBytesPerSec: UInt64,
-        trackedShards: [ShardId]
+        trackedShards: [ShardId],
     ) {
         self.accountId = accountId
         self.addr = addr
@@ -13377,13 +13378,13 @@ public struct PeerInfoView: Codable {
 
 // MARK: - RangeOfUint64
 
-public struct RangeOfUint64: Codable {
+public struct RangeOfUint64: Codable, Sendable {
     public let end: UInt64
     public let start: UInt64
 
     public init(
         end: UInt64,
-        start: UInt64
+        start: UInt64,
     ) {
         self.end = end
         self.start = start
@@ -13392,7 +13393,7 @@ public struct RangeOfUint64: Codable {
 
 // MARK: - ReceiptView
 
-public struct ReceiptView: Codable {
+public struct ReceiptView: Codable, Sendable {
     public let predecessorId: AccountId
     public let priority: UInt64?
     public let receipt: ReceiptEnumView
@@ -13404,7 +13405,7 @@ public struct ReceiptView: Codable {
         priority: UInt64?,
         receipt: ReceiptEnumView,
         receiptId: CryptoHash,
-        receiverId: AccountId
+        receiverId: AccountId,
     ) {
         self.predecessorId = predecessorId
         self.priority = priority
@@ -13416,7 +13417,7 @@ public struct ReceiptView: Codable {
 
 // MARK: - RpcBlockResponse
 
-public struct RpcBlockResponse: Codable {
+public struct RpcBlockResponse: Codable, Sendable {
     public let author: AccountId
     public let chunks: [ChunkHeaderView]
     public let header: BlockHeaderView
@@ -13424,7 +13425,7 @@ public struct RpcBlockResponse: Codable {
     public init(
         author: AccountId,
         chunks: [ChunkHeaderView],
-        header: BlockHeaderView
+        header: BlockHeaderView,
     ) {
         self.author = author
         self.chunks = chunks
@@ -13434,7 +13435,7 @@ public struct RpcBlockResponse: Codable {
 
 // MARK: - RpcChunkResponse
 
-public struct RpcChunkResponse: Codable {
+public struct RpcChunkResponse: Codable, Sendable {
     public let author: AccountId
     public let header: ChunkHeaderView
     public let receipts: [ReceiptView]
@@ -13444,7 +13445,7 @@ public struct RpcChunkResponse: Codable {
         author: AccountId,
         header: ChunkHeaderView,
         receipts: [ReceiptView],
-        transactions: [SignedTransactionView]
+        transactions: [SignedTransactionView],
     ) {
         self.author = author
         self.header = header
@@ -13455,7 +13456,7 @@ public struct RpcChunkResponse: Codable {
 
 // MARK: - RpcClientConfigResponse
 
-public struct RpcClientConfigResponse: Codable {
+public struct RpcClientConfigResponse: Codable, Sendable {
     public let archive: Bool
     public let blockFetchHorizon: UInt64
     public let blockHeaderFetchHorizon: UInt64
@@ -13589,7 +13590,7 @@ public struct RpcClientConfigResponse: Codable {
         ttlAccountIdRouter: [UInt64],
         txRoutingHeightHorizon: UInt64,
         version: Version,
-        viewClientThreads: Int
+        viewClientThreads: Int,
     ) {
         self.archive = archive
         self.blockFetchHorizon = blockFetchHorizon
@@ -13662,11 +13663,11 @@ public struct RpcClientConfigResponse: Codable {
 
 // MARK: - RpcCongestionLevelResponse
 
-public struct RpcCongestionLevelResponse: Codable {
+public struct RpcCongestionLevelResponse: Codable, Sendable {
     public let congestionLevel: Double
 
     public init(
-        congestionLevel: Double
+        congestionLevel: Double,
     ) {
         self.congestionLevel = congestionLevel
     }
@@ -13674,11 +13675,11 @@ public struct RpcCongestionLevelResponse: Codable {
 
 // MARK: - RpcGasPriceRequest
 
-public struct RpcGasPriceRequest: Codable {
+public struct RpcGasPriceRequest: Codable, Sendable {
     public let blockId: BlockId?
 
     public init(
-        blockId: BlockId?
+        blockId: BlockId?,
     ) {
         self.blockId = blockId
     }
@@ -13686,11 +13687,11 @@ public struct RpcGasPriceRequest: Codable {
 
 // MARK: - RpcGasPriceResponse
 
-public struct RpcGasPriceResponse: Codable {
+public struct RpcGasPriceResponse: Codable, Sendable {
     public let gasPrice: NearToken
 
     public init(
-        gasPrice: NearToken
+        gasPrice: NearToken,
     ) {
         self.gasPrice = gasPrice
     }
@@ -13698,7 +13699,7 @@ public struct RpcGasPriceResponse: Codable {
 
 // MARK: - RpcKnownProducer
 
-public struct RpcKnownProducer: Codable {
+public struct RpcKnownProducer: Codable, Sendable {
     public let accountId: AccountId
     public let addr: String?
     public let peerId: PeerId
@@ -13706,7 +13707,7 @@ public struct RpcKnownProducer: Codable {
     public init(
         accountId: AccountId,
         addr: String?,
-        peerId: PeerId
+        peerId: PeerId,
     ) {
         self.accountId = accountId
         self.addr = addr
@@ -13716,13 +13717,13 @@ public struct RpcKnownProducer: Codable {
 
 // MARK: - RpcLightClientBlockProofRequest
 
-public struct RpcLightClientBlockProofRequest: Codable {
+public struct RpcLightClientBlockProofRequest: Codable, Sendable {
     public let blockHash: CryptoHash
     public let lightClientHead: CryptoHash
 
     public init(
         blockHash: CryptoHash,
-        lightClientHead: CryptoHash
+        lightClientHead: CryptoHash,
     ) {
         self.blockHash = blockHash
         self.lightClientHead = lightClientHead
@@ -13731,13 +13732,13 @@ public struct RpcLightClientBlockProofRequest: Codable {
 
 // MARK: - RpcLightClientBlockProofResponse
 
-public struct RpcLightClientBlockProofResponse: Codable {
+public struct RpcLightClientBlockProofResponse: Codable, Sendable {
     public let blockHeaderLite: LightClientBlockLiteView
     public let blockProof: [MerklePathItem]
 
     public init(
         blockHeaderLite: LightClientBlockLiteView,
-        blockProof: [MerklePathItem]
+        blockProof: [MerklePathItem],
     ) {
         self.blockHeaderLite = blockHeaderLite
         self.blockProof = blockProof
@@ -13746,7 +13747,7 @@ public struct RpcLightClientBlockProofResponse: Codable {
 
 // MARK: - RpcLightClientExecutionProofResponse
 
-public struct RpcLightClientExecutionProofResponse: Codable {
+public struct RpcLightClientExecutionProofResponse: Codable, Sendable {
     public let blockHeaderLite: LightClientBlockLiteView
     public let blockProof: [MerklePathItem]
     public let outcomeProof: ExecutionOutcomeWithIdView
@@ -13756,7 +13757,7 @@ public struct RpcLightClientExecutionProofResponse: Codable {
         blockHeaderLite: LightClientBlockLiteView,
         blockProof: [MerklePathItem],
         outcomeProof: ExecutionOutcomeWithIdView,
-        outcomeRootProof: [MerklePathItem]
+        outcomeRootProof: [MerklePathItem],
     ) {
         self.blockHeaderLite = blockHeaderLite
         self.blockProof = blockProof
@@ -13767,11 +13768,11 @@ public struct RpcLightClientExecutionProofResponse: Codable {
 
 // MARK: - RpcLightClientNextBlockRequest
 
-public struct RpcLightClientNextBlockRequest: Codable {
+public struct RpcLightClientNextBlockRequest: Codable, Sendable {
     public let lastBlockHash: CryptoHash
 
     public init(
-        lastBlockHash: CryptoHash
+        lastBlockHash: CryptoHash,
     ) {
         self.lastBlockHash = lastBlockHash
     }
@@ -13779,7 +13780,7 @@ public struct RpcLightClientNextBlockRequest: Codable {
 
 // MARK: - RpcLightClientNextBlockResponse
 
-public struct RpcLightClientNextBlockResponse: Codable {
+public struct RpcLightClientNextBlockResponse: Codable, Sendable {
     public let approvalsAfterNext: [Signature?]?
     public let innerLite: BlockHeaderInnerLiteView?
     public let innerRestHash: CryptoHash?
@@ -13793,7 +13794,7 @@ public struct RpcLightClientNextBlockResponse: Codable {
         innerRestHash: CryptoHash?,
         nextBlockInnerHash: CryptoHash?,
         nextBps: [ValidatorStakeView]?,
-        prevBlockHash: CryptoHash?
+        prevBlockHash: CryptoHash?,
     ) {
         self.approvalsAfterNext = approvalsAfterNext
         self.innerLite = innerLite
@@ -13806,11 +13807,11 @@ public struct RpcLightClientNextBlockResponse: Codable {
 
 // MARK: - RpcMaintenanceWindowsRequest
 
-public struct RpcMaintenanceWindowsRequest: Codable {
+public struct RpcMaintenanceWindowsRequest: Codable, Sendable {
     public let accountId: AccountId
 
     public init(
-        accountId: AccountId
+        accountId: AccountId,
     ) {
         self.accountId = accountId
     }
@@ -13818,7 +13819,7 @@ public struct RpcMaintenanceWindowsRequest: Codable {
 
 // MARK: - RpcNetworkInfoResponse
 
-public struct RpcNetworkInfoResponse: Codable {
+public struct RpcNetworkInfoResponse: Codable, Sendable {
     public let activePeers: [RpcPeerInfo]
     public let knownProducers: [RpcKnownProducer]
     public let numActivePeers: Int
@@ -13832,7 +13833,7 @@ public struct RpcNetworkInfoResponse: Codable {
         numActivePeers: Int,
         peerMaxCount: Int,
         receivedBytesPerSec: UInt64,
-        sentBytesPerSec: UInt64
+        sentBytesPerSec: UInt64,
     ) {
         self.activePeers = activePeers
         self.knownProducers = knownProducers
@@ -13845,7 +13846,7 @@ public struct RpcNetworkInfoResponse: Codable {
 
 // MARK: - RpcPeerInfo
 
-public struct RpcPeerInfo: Codable {
+public struct RpcPeerInfo: Codable, Sendable {
     public let accountId: AccountId?
     public let addr: String?
     public let id: PeerId
@@ -13853,7 +13854,7 @@ public struct RpcPeerInfo: Codable {
     public init(
         accountId: AccountId?,
         addr: String?,
-        id: PeerId
+        id: PeerId,
     ) {
         self.accountId = accountId
         self.addr = addr
@@ -13863,7 +13864,7 @@ public struct RpcPeerInfo: Codable {
 
 // MARK: - RpcProtocolConfigResponse
 
-public struct RpcProtocolConfigResponse: Codable {
+public struct RpcProtocolConfigResponse: Codable, Sendable {
     public let avgHiddenValidatorSeatsPerShard: [UInt64]
     public let blockProducerKickoutThreshold: Int
     public let chainId: String
@@ -13931,7 +13932,7 @@ public struct RpcProtocolConfigResponse: Codable {
         shardLayout: ShardLayout,
         shuffleShardAssignmentForChunkProducers: Bool,
         targetValidatorMandatesPerShard: UInt64,
-        transactionValidityPeriod: UInt64
+        transactionValidityPeriod: UInt64,
     ) {
         self.avgHiddenValidatorSeatsPerShard = avgHiddenValidatorSeatsPerShard
         self.blockProducerKickoutThreshold = blockProducerKickoutThreshold
@@ -13971,11 +13972,11 @@ public struct RpcProtocolConfigResponse: Codable {
 
 // MARK: - RpcReceiptRequest
 
-public struct RpcReceiptRequest: Codable {
+public struct RpcReceiptRequest: Codable, Sendable {
     public let receiptId: CryptoHash
 
     public init(
-        receiptId: CryptoHash
+        receiptId: CryptoHash,
     ) {
         self.receiptId = receiptId
     }
@@ -13983,7 +13984,7 @@ public struct RpcReceiptRequest: Codable {
 
 // MARK: - RpcReceiptResponse
 
-public struct RpcReceiptResponse: Codable {
+public struct RpcReceiptResponse: Codable, Sendable {
     public let predecessorId: AccountId
     public let priority: UInt64?
     public let receipt: ReceiptEnumView
@@ -13995,7 +13996,7 @@ public struct RpcReceiptResponse: Codable {
         priority: UInt64?,
         receipt: ReceiptEnumView,
         receiptId: CryptoHash,
-        receiverId: AccountId
+        receiverId: AccountId,
     ) {
         self.predecessorId = predecessorId
         self.priority = priority
@@ -14007,13 +14008,13 @@ public struct RpcReceiptResponse: Codable {
 
 // MARK: - RpcSendTransactionRequest
 
-public struct RpcSendTransactionRequest: Codable {
+public struct RpcSendTransactionRequest: Codable, Sendable {
     public let signedTxBase64: SignedTransaction
     public let waitUntil: TxExecutionStatus?
 
     public init(
         signedTxBase64: SignedTransaction,
-        waitUntil: TxExecutionStatus?
+        waitUntil: TxExecutionStatus?,
     ) {
         self.signedTxBase64 = signedTxBase64
         self.waitUntil = waitUntil
@@ -14022,13 +14023,13 @@ public struct RpcSendTransactionRequest: Codable {
 
 // MARK: - RpcSplitStorageInfoRequest
 
-public struct RpcSplitStorageInfoRequest: Codable {
+public struct RpcSplitStorageInfoRequest: Codable, Sendable {
     public init() {}
 }
 
 // MARK: - RpcSplitStorageInfoResponse
 
-public struct RpcSplitStorageInfoResponse: Codable {
+public struct RpcSplitStorageInfoResponse: Codable, Sendable {
     public let coldHeadHeight: UInt64?
     public let finalHeadHeight: UInt64?
     public let headHeight: UInt64?
@@ -14038,7 +14039,7 @@ public struct RpcSplitStorageInfoResponse: Codable {
         coldHeadHeight: UInt64?,
         finalHeadHeight: UInt64?,
         headHeight: UInt64?,
-        hotDbKind: String?
+        hotDbKind: String?,
     ) {
         self.coldHeadHeight = coldHeadHeight
         self.finalHeadHeight = finalHeadHeight
@@ -14049,13 +14050,13 @@ public struct RpcSplitStorageInfoResponse: Codable {
 
 // MARK: - RpcStateChangesInBlockByTypeResponse
 
-public struct RpcStateChangesInBlockByTypeResponse: Codable {
+public struct RpcStateChangesInBlockByTypeResponse: Codable, Sendable {
     public let blockHash: CryptoHash
     public let changes: [StateChangeKindView]
 
     public init(
         blockHash: CryptoHash,
-        changes: [StateChangeKindView]
+        changes: [StateChangeKindView],
     ) {
         self.blockHash = blockHash
         self.changes = changes
@@ -14064,13 +14065,13 @@ public struct RpcStateChangesInBlockByTypeResponse: Codable {
 
 // MARK: - RpcStateChangesInBlockResponse
 
-public struct RpcStateChangesInBlockResponse: Codable {
+public struct RpcStateChangesInBlockResponse: Codable, Sendable {
     public let blockHash: CryptoHash
     public let changes: [StateChangeWithCauseView]
 
     public init(
         blockHash: CryptoHash,
-        changes: [StateChangeWithCauseView]
+        changes: [StateChangeWithCauseView],
     ) {
         self.blockHash = blockHash
         self.changes = changes
@@ -14079,7 +14080,7 @@ public struct RpcStateChangesInBlockResponse: Codable {
 
 // MARK: - RpcStatusResponse
 
-public struct RpcStatusResponse: Codable {
+public struct RpcStatusResponse: Codable, Sendable {
     public let chainId: String
     public let detailedDebugStatus: DetailedDebugStatus?
     public let genesisHash: CryptoHash
@@ -14109,7 +14110,7 @@ public struct RpcStatusResponse: Codable {
         validatorAccountId: AccountId?,
         validatorPublicKey: PublicKey?,
         validators: [ValidatorInfo],
-        version: Version
+        version: Version,
     ) {
         self.chainId = chainId
         self.detailedDebugStatus = detailedDebugStatus
@@ -14130,7 +14131,7 @@ public struct RpcStatusResponse: Codable {
 
 // MARK: - RpcValidatorResponse
 
-public struct RpcValidatorResponse: Codable {
+public struct RpcValidatorResponse: Codable, Sendable {
     public let currentFishermen: [ValidatorStakeView]
     public let currentProposals: [ValidatorStakeView]
     public let currentValidators: [CurrentEpochValidatorInfo]
@@ -14148,7 +14149,7 @@ public struct RpcValidatorResponse: Codable {
         epochStartHeight: UInt64,
         nextFishermen: [ValidatorStakeView],
         nextValidators: [NextEpochValidatorInfo],
-        prevEpochKickout: [ValidatorKickoutView]
+        prevEpochKickout: [ValidatorKickoutView],
     ) {
         self.currentFishermen = currentFishermen
         self.currentProposals = currentProposals
@@ -14163,11 +14164,11 @@ public struct RpcValidatorResponse: Codable {
 
 // MARK: - RpcValidatorsOrderedRequest
 
-public struct RpcValidatorsOrderedRequest: Codable {
+public struct RpcValidatorsOrderedRequest: Codable, Sendable {
     public let blockId: BlockId?
 
     public init(
-        blockId: BlockId?
+        blockId: BlockId?,
     ) {
         self.blockId = blockId
     }
@@ -14175,7 +14176,7 @@ public struct RpcValidatorsOrderedRequest: Codable {
 
 // MARK: - RuntimeConfigView
 
-public struct RuntimeConfigView: Codable {
+public struct RuntimeConfigView: Codable, Sendable {
     public let accountCreationConfig: AccountCreationConfigView
     public let congestionControlConfig: CongestionControlConfigView
     public let storageAmountPerByte: NearToken
@@ -14189,7 +14190,7 @@ public struct RuntimeConfigView: Codable {
         storageAmountPerByte: NearToken,
         transactionCosts: RuntimeFeesConfigView,
         wasmConfig: VMConfigView,
-        witnessConfig: WitnessConfigView
+        witnessConfig: WitnessConfigView,
     ) {
         self.accountCreationConfig = accountCreationConfig
         self.congestionControlConfig = congestionControlConfig
@@ -14202,7 +14203,7 @@ public struct RuntimeConfigView: Codable {
 
 // MARK: - RuntimeFeesConfigView
 
-public struct RuntimeFeesConfigView: Codable {
+public struct RuntimeFeesConfigView: Codable, Sendable {
     public let actionCreationConfig: ActionCreationConfigView
     public let actionReceiptCreationConfig: Fee
     public let burntGasReward: [Int32]
@@ -14216,7 +14217,7 @@ public struct RuntimeFeesConfigView: Codable {
         burntGasReward: [Int32],
         dataReceiptCreationConfig: DataReceiptCreationConfigView,
         pessimisticGasPriceInflationRatio: [Int32],
-        storageUsageConfig: StorageUsageConfigView
+        storageUsageConfig: StorageUsageConfigView,
     ) {
         self.actionCreationConfig = actionCreationConfig
         self.actionReceiptCreationConfig = actionReceiptCreationConfig
@@ -14229,13 +14230,13 @@ public struct RuntimeFeesConfigView: Codable {
 
 // MARK: - ShardLayoutV0
 
-public struct ShardLayoutV0: Codable {
+public struct ShardLayoutV0: Codable, Sendable {
     public let numShards: UInt64
     public let version: Int
 
     public init(
         numShards: UInt64,
-        version: Int
+        version: Int,
     ) {
         self.numShards = numShards
         self.version = version
@@ -14244,7 +14245,7 @@ public struct ShardLayoutV0: Codable {
 
 // MARK: - ShardLayoutV1
 
-public struct ShardLayoutV1: Codable {
+public struct ShardLayoutV1: Codable, Sendable {
     public let boundaryAccounts: [AccountId]
     public let shardsSplitMap: [[ShardId]]?
     public let toParentShardMap: [ShardId]?
@@ -14254,7 +14255,7 @@ public struct ShardLayoutV1: Codable {
         boundaryAccounts: [AccountId],
         shardsSplitMap: [[ShardId]]?,
         toParentShardMap: [ShardId]?,
-        version: Int
+        version: Int,
     ) {
         self.boundaryAccounts = boundaryAccounts
         self.shardsSplitMap = shardsSplitMap
@@ -14265,7 +14266,7 @@ public struct ShardLayoutV1: Codable {
 
 // MARK: - ShardLayoutV2
 
-public struct ShardLayoutV2: Codable {
+public struct ShardLayoutV2: Codable, Sendable {
     public let boundaryAccounts: [AccountId]
     public let idToIndexMap: [String: Int]
     public let indexToIdMap: [String: ShardId]
@@ -14281,7 +14282,7 @@ public struct ShardLayoutV2: Codable {
         shardIds: [ShardId],
         shardsParentMap: [String: ShardId]?,
         shardsSplitMap: [String: [ShardId]]?,
-        version: Int
+        version: Int,
     ) {
         self.boundaryAccounts = boundaryAccounts
         self.idToIndexMap = idToIndexMap
@@ -14295,13 +14296,13 @@ public struct ShardLayoutV2: Codable {
 
 // MARK: - ShardUId
 
-public struct ShardUId: Codable {
+public struct ShardUId: Codable, Sendable {
     public let shardId: Int
     public let version: Int
 
     public init(
         shardId: Int,
-        version: Int
+        version: Int,
     ) {
         self.shardId = shardId
         self.version = version
@@ -14310,13 +14311,13 @@ public struct ShardUId: Codable {
 
 // MARK: - SignedDelegateAction
 
-public struct SignedDelegateAction: Codable {
+public struct SignedDelegateAction: Codable, Sendable {
     public let delegateAction: DelegateAction
     public let signature: Signature
 
     public init(
         delegateAction: DelegateAction,
-        signature: Signature
+        signature: Signature,
     ) {
         self.delegateAction = delegateAction
         self.signature = signature
@@ -14325,7 +14326,7 @@ public struct SignedDelegateAction: Codable {
 
 // MARK: - SignedTransactionView
 
-public struct SignedTransactionView: Codable {
+public struct SignedTransactionView: Codable, Sendable {
     public let actions: [ActionView]
     public let hash: CryptoHash
     public let nonce: UInt64
@@ -14343,7 +14344,7 @@ public struct SignedTransactionView: Codable {
         publicKey: PublicKey,
         receiverId: AccountId,
         signature: Signature,
-        signerId: AccountId
+        signerId: AccountId,
     ) {
         self.actions = actions
         self.hash = hash
@@ -14358,13 +14359,13 @@ public struct SignedTransactionView: Codable {
 
 // MARK: - SlashedValidator
 
-public struct SlashedValidator: Codable {
+public struct SlashedValidator: Codable, Sendable {
     public let accountId: AccountId
     public let isDoubleSign: Bool
 
     public init(
         accountId: AccountId,
-        isDoubleSign: Bool
+        isDoubleSign: Bool,
     ) {
         self.accountId = accountId
         self.isDoubleSign = isDoubleSign
@@ -14373,13 +14374,13 @@ public struct SlashedValidator: Codable {
 
 // MARK: - StakeAction
 
-public struct StakeAction: Codable {
+public struct StakeAction: Codable, Sendable {
     public let publicKey: PublicKey
     public let stake: NearToken
 
     public init(
         publicKey: PublicKey,
-        stake: NearToken
+        stake: NearToken,
     ) {
         self.publicKey = publicKey
         self.stake = stake
@@ -14388,13 +14389,13 @@ public struct StakeAction: Codable {
 
 // MARK: - StateItem
 
-public struct StateItem: Codable {
+public struct StateItem: Codable, Sendable {
     public let key: StoreKey
     public let value: StoreValue
 
     public init(
         key: StoreKey,
-        value: StoreValue
+        value: StoreValue,
     ) {
         self.key = key
         self.value = value
@@ -14403,7 +14404,7 @@ public struct StateItem: Codable {
 
 // MARK: - StateSyncConfig
 
-public struct StateSyncConfig: Codable {
+public struct StateSyncConfig: Codable, Sendable {
     public let concurrency: SyncConcurrency?
     public let dump: DumpConfig?
     public let partsCompressionLvl: Int32?
@@ -14413,7 +14414,7 @@ public struct StateSyncConfig: Codable {
         concurrency: SyncConcurrency?,
         dump: DumpConfig?,
         partsCompressionLvl: Int32?,
-        sync: SyncConfig?
+        sync: SyncConfig?,
     ) {
         self.concurrency = concurrency
         self.dump = dump
@@ -14424,7 +14425,7 @@ public struct StateSyncConfig: Codable {
 
 // MARK: - StatusSyncInfo
 
-public struct StatusSyncInfo: Codable {
+public struct StatusSyncInfo: Codable, Sendable {
     public let earliestBlockHash: CryptoHash?
     public let earliestBlockHeight: UInt64?
     public let earliestBlockTime: String?
@@ -14446,7 +14447,7 @@ public struct StatusSyncInfo: Codable {
         latestBlockHeight: UInt64,
         latestBlockTime: String,
         latestStateRoot: CryptoHash,
-        syncing: Bool
+        syncing: Bool,
     ) {
         self.earliestBlockHash = earliestBlockHash
         self.earliestBlockHeight = earliestBlockHeight
@@ -14463,13 +14464,13 @@ public struct StatusSyncInfo: Codable {
 
 // MARK: - StorageUsageConfigView
 
-public struct StorageUsageConfigView: Codable {
+public struct StorageUsageConfigView: Codable, Sendable {
     public let numBytesAccount: UInt64
     public let numExtraBytesRecord: UInt64
 
     public init(
         numBytesAccount: UInt64,
-        numExtraBytesRecord: UInt64
+        numExtraBytesRecord: UInt64,
     ) {
         self.numBytesAccount = numBytesAccount
         self.numExtraBytesRecord = numExtraBytesRecord
@@ -14478,7 +14479,7 @@ public struct StorageUsageConfigView: Codable {
 
 // MARK: - SyncConcurrency
 
-public struct SyncConcurrency: Codable {
+public struct SyncConcurrency: Codable, Sendable {
     public let apply: Int
     public let applyDuringCatchup: Int
     public let peerDownloads: Int
@@ -14488,7 +14489,7 @@ public struct SyncConcurrency: Codable {
         apply: Int,
         applyDuringCatchup: Int,
         peerDownloads: Int,
-        perShard: Int
+        perShard: Int,
     ) {
         self.apply = apply
         self.applyDuringCatchup = applyDuringCatchup
@@ -14499,13 +14500,13 @@ public struct SyncConcurrency: Codable {
 
 // MARK: - Tier1ProxyView
 
-public struct Tier1ProxyView: Codable {
+public struct Tier1ProxyView: Codable, Sendable {
     public let addr: String
     public let peerId: PublicKey
 
     public init(
         addr: String,
-        peerId: PublicKey
+        peerId: PublicKey,
     ) {
         self.addr = addr
         self.peerId = peerId
@@ -14514,11 +14515,11 @@ public struct Tier1ProxyView: Codable {
 
 // MARK: - TransferAction
 
-public struct TransferAction: Codable {
+public struct TransferAction: Codable, Sendable {
     public let deposit: NearToken
 
     public init(
-        deposit: NearToken
+        deposit: NearToken,
     ) {
         self.deposit = deposit
     }
@@ -14526,11 +14527,11 @@ public struct TransferAction: Codable {
 
 // MARK: - UseGlobalContractAction
 
-public struct UseGlobalContractAction: Codable {
+public struct UseGlobalContractAction: Codable, Sendable {
     public let contractIdentifier: GlobalContractIdentifier
 
     public init(
-        contractIdentifier: GlobalContractIdentifier
+        contractIdentifier: GlobalContractIdentifier,
     ) {
         self.contractIdentifier = contractIdentifier
     }
@@ -14538,7 +14539,7 @@ public struct UseGlobalContractAction: Codable {
 
 // MARK: - VMConfigView
 
-public struct VMConfigView: Codable {
+public struct VMConfigView: Codable, Sendable {
     public let deterministicAccountIds: Bool
     public let discardCustomSections: Bool
     public let ethImplicitAccounts: Bool
@@ -14568,7 +14569,7 @@ public struct VMConfigView: Codable {
         regularOpCost: Int,
         saturatingFloatToInt: Bool,
         storageGetMode: StorageGetMode,
-        vmKind: VMKind
+        vmKind: VMKind,
     ) {
         self.deterministicAccountIds = deterministicAccountIds
         self.discardCustomSections = discardCustomSections
@@ -14589,11 +14590,11 @@ public struct VMConfigView: Codable {
 
 // MARK: - ValidatorInfo
 
-public struct ValidatorInfo: Codable {
+public struct ValidatorInfo: Codable, Sendable {
     public let accountId: AccountId
 
     public init(
-        accountId: AccountId
+        accountId: AccountId,
     ) {
         self.accountId = accountId
     }
@@ -14601,13 +14602,13 @@ public struct ValidatorInfo: Codable {
 
 // MARK: - ValidatorKickoutView
 
-public struct ValidatorKickoutView: Codable {
+public struct ValidatorKickoutView: Codable, Sendable {
     public let accountId: AccountId
     public let reason: ValidatorKickoutReason
 
     public init(
         accountId: AccountId,
-        reason: ValidatorKickoutReason
+        reason: ValidatorKickoutReason,
     ) {
         self.accountId = accountId
         self.reason = reason
@@ -14616,7 +14617,7 @@ public struct ValidatorKickoutView: Codable {
 
 // MARK: - ValidatorStakeViewV1
 
-public struct ValidatorStakeViewV1: Codable {
+public struct ValidatorStakeViewV1: Codable, Sendable {
     public let accountId: AccountId
     public let publicKey: PublicKey
     public let stake: NearToken
@@ -14624,7 +14625,7 @@ public struct ValidatorStakeViewV1: Codable {
     public init(
         accountId: AccountId,
         publicKey: PublicKey,
-        stake: NearToken
+        stake: NearToken,
     ) {
         self.accountId = accountId
         self.publicKey = publicKey
@@ -14634,7 +14635,7 @@ public struct ValidatorStakeViewV1: Codable {
 
 // MARK: - Version
 
-public struct Version: Codable {
+public struct Version: Codable, Sendable {
     public let build: String
     public let commit: String
     public let rustcVersion: String?
@@ -14644,7 +14645,7 @@ public struct Version: Codable {
         build: String,
         commit: String,
         rustcVersion: String?,
-        version: String
+        version: String,
     ) {
         self.build = build
         self.commit = commit
@@ -14655,13 +14656,13 @@ public struct Version: Codable {
 
 // MARK: - ViewStateResult
 
-public struct ViewStateResult: Codable {
+public struct ViewStateResult: Codable, Sendable {
     public let proof: [String]?
     public let values: [StateItem]
 
     public init(
         proof: [String]?,
-        values: [StateItem]
+        values: [StateItem],
     ) {
         self.proof = proof
         self.values = values
@@ -14670,7 +14671,7 @@ public struct ViewStateResult: Codable {
 
 // MARK: - WitnessConfigView
 
-public struct WitnessConfigView: Codable {
+public struct WitnessConfigView: Codable, Sendable {
     public let combinedTransactionsSizeLimit: Int
     public let mainStorageProofSizeSoftLimit: UInt64
     public let newTransactionsValidationStateSizeSoftLimit: UInt64
@@ -14678,7 +14679,7 @@ public struct WitnessConfigView: Codable {
     public init(
         combinedTransactionsSizeLimit: Int,
         mainStorageProofSizeSoftLimit: UInt64,
-        newTransactionsValidationStateSizeSoftLimit: UInt64
+        newTransactionsValidationStateSizeSoftLimit: UInt64,
     ) {
         self.combinedTransactionsSizeLimit = combinedTransactionsSizeLimit
         self.mainStorageProofSizeSoftLimit = mainStorageProofSizeSoftLimit
@@ -14688,11 +14689,11 @@ public struct WitnessConfigView: Codable {
 
 // MARK: - Generated Inline Types
 
-public struct InlineObject: Codable {
+public struct InlineObject: Codable, Sendable {
     public let accountId: AccountId
 
     public init(
-        accountId: AccountId
+        accountId: AccountId,
     ) {
         self.accountId = accountId
     }

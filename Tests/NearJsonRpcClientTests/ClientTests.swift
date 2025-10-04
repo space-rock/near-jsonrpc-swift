@@ -19,12 +19,12 @@ struct ClientTests {
         guard let url = testBundle.url(
             forResource: filename.replacingOccurrences(of: ".json", with: ""),
             withExtension: "json",
-            subdirectory: "Mock"
+            subdirectory: "Mock",
         ) else {
             throw NSError(
                 domain: "TestError",
                 code: 1,
-                userInfo: [NSLocalizedDescriptionKey: "Mock file not found: \(filename)"]
+                userInfo: [NSLocalizedDescriptionKey: "Mock file not found: \(filename)"],
             )
         }
         return try Data(contentsOf: url)
@@ -63,7 +63,7 @@ struct ClientTests {
             try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError_Success.json")
         _ = try decoder.decode(
             JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError.self,
-            from: responseData
+            from: responseData,
         )
     }
 
@@ -78,7 +78,7 @@ struct ClientTests {
             try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError_Error.json")
         _ = try decoder.decode(
             JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError.self,
-            from: responseData
+            from: responseData,
         )
     }
 
@@ -160,7 +160,7 @@ struct ClientTests {
             try loadMockJSON("JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError_Success.json")
         _ = try decoder.decode(
             JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError.self,
-            from: responseData
+            from: responseData,
         )
     }
 
@@ -175,7 +175,7 @@ struct ClientTests {
             try loadMockJSON("JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError_Error.json")
         _ = try decoder.decode(
             JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError.self,
-            from: responseData
+            from: responseData,
         )
     }
 
@@ -344,7 +344,7 @@ struct ClientTests {
             try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError_Success.json")
         _ = try decoder.decode(
             JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError.self,
-            from: responseData
+            from: responseData,
         )
     }
 
@@ -359,7 +359,7 @@ struct ClientTests {
             try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError_Error.json")
         _ = try decoder.decode(
             JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError.self,
-            from: responseData
+            from: responseData,
         )
     }
 
@@ -550,7 +550,7 @@ struct ClientTests {
             try loadMockJSON("JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError_Success.json")
         _ = try decoder.decode(
             JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError.self,
-            from: responseData
+            from: responseData,
         )
     }
 
@@ -565,7 +565,7 @@ struct ClientTests {
             try loadMockJSON("JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError_Error.json")
         _ = try decoder.decode(
             JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError.self,
-            from: responseData
+            from: responseData,
         )
     }
 

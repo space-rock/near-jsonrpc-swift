@@ -46,8 +46,8 @@ struct NearJsonRpcExample {
                     AccountChangesByBlockId(
                         blockId: .integer(216_862_270),
                         accountIds: ["relay.aurora"],
-                        changesType: "account_changes"
-                    )
+                        changesType: "account_changes",
+                    ),
                 )
                 let response = try await client.experimentalChanges(request)
                 prettyPrint(response, label: "✓ Response")
@@ -83,7 +83,7 @@ struct NearJsonRpcExample {
             print(String(repeating: "=", count: 80))
             do {
                 let request = RpcCongestionLevelRequest.blockShardId(
-                    BlockShardId(blockId: .integer(216_838_942), shardId: 1)
+                    BlockShardId(blockId: .integer(216_838_942), shardId: 1),
                 )
                 let response = try await client.experimentalCongestionLevel(request)
                 prettyPrint(response, label: "✓ Response")
@@ -175,8 +175,8 @@ struct NearJsonRpcExample {
                 let request = RpcTransactionStatusRequest.rpcTransactionStatusRequestSenderAccountIdTxHash(
                     RpcTransactionStatusRequestOneOfSenderAccountIdTxHash(
                         senderAccountId: "relay.aurora",
-                        txHash: "FB5d5Ehn7Q4Bx8XwrWV19jtTDJsTvaR7YnPgCkbSKPRP"
-                    )
+                        txHash: "FB5d5Ehn7Q4Bx8XwrWV19jtTDJsTvaR7YnPgCkbSKPRP",
+                    ),
                 )
                 let response = try await client.experimentalTxStatus(request)
                 prettyPrint(response, label: "✓ Response")
@@ -232,8 +232,8 @@ struct NearJsonRpcExample {
                     AccountChangesByBlockId(
                         blockId: .integer(216_910_612),
                         accountIds: ["aurora.pool.f863973.m0"],
-                        changesType: "account_changes"
-                    )
+                        changesType: "account_changes",
+                    ),
                 )
                 let response = try await client.changes(request)
                 prettyPrint(response, label: "✓ Response")
@@ -357,8 +357,8 @@ struct NearJsonRpcExample {
                     ViewAccountByFinality(
                         finality: .final,
                         accountId: "relay.aurora",
-                        requestType: "view_account"
-                    )
+                        requestType: "view_account",
+                    ),
                 )
                 let response = try await client.query(request)
                 prettyPrint(response, label: "✓ Response")
@@ -397,8 +397,8 @@ struct NearJsonRpcExample {
                 let request = RpcTransactionStatusRequest.rpcTransactionStatusRequestSenderAccountIdTxHash(
                     RpcTransactionStatusRequestOneOfSenderAccountIdTxHash(
                         senderAccountId: "relay.aurora",
-                        txHash: "FB5d5Ehn7Q4Bx8XwrWV19jtTDJsTvaR7YnPgCkbSKPRP"
-                    )
+                        txHash: "FB5d5Ehn7Q4Bx8XwrWV19jtTDJsTvaR7YnPgCkbSKPRP",
+                    ),
                 )
                 let response = try await client.tx(request)
                 prettyPrint(response, label: "✓ Response")

@@ -6,9 +6,34 @@ import Testing
 
 // MARK: - Mock URLProtocol for Testing
 
+actor MockResponseHandler {
+    var requestHandler: ((URLRequest) throws -> (HTTPURLResponse, Data))?
+    var lastRequest: URLRequest?
+
+    func setRequestHandler(_ handler: @escaping (URLRequest) throws -> (HTTPURLResponse, Data)) {
+        requestHandler = handler
+    }
+
+    func getRequestHandler() -> ((URLRequest) throws -> (HTTPURLResponse, Data))? {
+        requestHandler
+    }
+
+    func setLastRequest(_ request: URLRequest) {
+        lastRequest = request
+    }
+
+    func getLastRequest() -> URLRequest? {
+        lastRequest
+    }
+
+    func reset() {
+        requestHandler = nil
+        lastRequest = nil
+    }
+}
+
 class MockURLProtocol: URLProtocol {
-    static var requestHandler: ((URLRequest) throws -> (HTTPURLResponse, Data))?
-    static var lastRequest: URLRequest?
+    static let handler = MockResponseHandler()
 
     override class func canInit(with _: URLRequest) -> Bool {
         true
@@ -19,19 +44,21 @@ class MockURLProtocol: URLProtocol {
     }
 
     override func startLoading() {
-        guard let handler = MockURLProtocol.requestHandler else {
-            fatalError("Handler is unavailable.")
-        }
+        Task {
+            guard let handlerFunc = await MockURLProtocol.handler.getRequestHandler() else {
+                fatalError("Handler is unavailable.")
+            }
 
-        MockURLProtocol.lastRequest = request
+            await MockURLProtocol.handler.setLastRequest(request)
 
-        do {
-            let (response, data) = try handler(request)
-            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-            client?.urlProtocol(self, didLoad: data)
-            client?.urlProtocolDidFinishLoading(self)
-        } catch {
-            client?.urlProtocol(self, didFailWithError: error)
+            do {
+                let (response, data) = try handlerFunc(request)
+                client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+                client?.urlProtocol(self, didLoad: data)
+                client?.urlProtocolDidFinishLoading(self)
+            } catch {
+                client?.urlProtocol(self, didFailWithError: error)
+            }
         }
     }
 
@@ -58,7 +85,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -70,13 +97,13 @@ struct ClientMethodTests {
 
         // Load mock success response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError_Success.json")
-        setupMockSuccessResponse(with: responseData)
+        await setupMockSuccessResponse(with: responseData)
 
         // Execute
         let result = try await client.experimentalChanges(request)
 
         // Verify
-        verifyRequest(expectedMethod: "EXPERIMENTAL_changes")
+        await verifyRequest(expectedMethod: "EXPERIMENTAL_changes")
         #expect(result != nil)
     }
 
@@ -86,7 +113,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -98,7 +125,7 @@ struct ClientMethodTests {
 
         // Load mock error response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError_Error.json")
-        setupMockErrorResponse(with: responseData)
+        await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
         do {
@@ -118,7 +145,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -129,7 +156,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Setup HTTP error response
-        setupMockHTTPError(statusCode: 500)
+        await setupMockHTTPError(statusCode: 500)
 
         // Execute & Verify
         do {
@@ -156,7 +183,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -169,13 +196,13 @@ struct ClientMethodTests {
         // Load mock success response data
         let responseData =
             try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError_Success.json")
-        setupMockSuccessResponse(with: responseData)
+        await setupMockSuccessResponse(with: responseData)
 
         // Execute
         let result = try await client.experimentalChangesInBlock(request)
 
         // Verify
-        verifyRequest(expectedMethod: "EXPERIMENTAL_changes_in_block")
+        await verifyRequest(expectedMethod: "EXPERIMENTAL_changes_in_block")
         #expect(result != nil)
     }
 
@@ -185,7 +212,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -198,7 +225,7 @@ struct ClientMethodTests {
         // Load mock error response data
         let responseData =
             try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError_Error.json")
-        setupMockErrorResponse(with: responseData)
+        await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
         do {
@@ -218,7 +245,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -229,7 +256,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Setup HTTP error response
-        setupMockHTTPError(statusCode: 500)
+        await setupMockHTTPError(statusCode: 500)
 
         // Execute & Verify
         do {
@@ -256,7 +283,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -268,13 +295,13 @@ struct ClientMethodTests {
 
         // Load mock success response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcCongestionLevelResponseAndRpcError_Success.json")
-        setupMockSuccessResponse(with: responseData)
+        await setupMockSuccessResponse(with: responseData)
 
         // Execute
         let result = try await client.experimentalCongestionLevel(request)
 
         // Verify
-        verifyRequest(expectedMethod: "EXPERIMENTAL_congestion_level")
+        await verifyRequest(expectedMethod: "EXPERIMENTAL_congestion_level")
         #expect(result != nil)
     }
 
@@ -284,7 +311,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -296,7 +323,7 @@ struct ClientMethodTests {
 
         // Load mock error response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcCongestionLevelResponseAndRpcError_Error.json")
-        setupMockErrorResponse(with: responseData)
+        await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
         do {
@@ -316,7 +343,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -327,7 +354,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Setup HTTP error response
-        setupMockHTTPError(statusCode: 500)
+        await setupMockHTTPError(statusCode: 500)
 
         // Execute & Verify
         do {
@@ -354,7 +381,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -366,13 +393,13 @@ struct ClientMethodTests {
 
         // Load mock success response data
         let responseData = try loadMockJSON("JsonRpcResponseForGenesisConfigAndRpcError_Success.json")
-        setupMockSuccessResponse(with: responseData)
+        await setupMockSuccessResponse(with: responseData)
 
         // Execute
         let result = try await client.experimentalGenesisConfig(request)
 
         // Verify
-        verifyRequest(expectedMethod: "EXPERIMENTAL_genesis_config")
+        await verifyRequest(expectedMethod: "EXPERIMENTAL_genesis_config")
         #expect(result != nil)
     }
 
@@ -382,7 +409,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -394,7 +421,7 @@ struct ClientMethodTests {
 
         // Load mock error response data
         let responseData = try loadMockJSON("JsonRpcResponseForGenesisConfigAndRpcError_Error.json")
-        setupMockErrorResponse(with: responseData)
+        await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
         do {
@@ -414,7 +441,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -425,7 +452,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Setup HTTP error response
-        setupMockHTTPError(statusCode: 500)
+        await setupMockHTTPError(statusCode: 500)
 
         // Execute & Verify
         do {
@@ -452,7 +479,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -461,20 +488,20 @@ struct ClientMethodTests {
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         let requestWrapper = try decoder.decode(
             JsonRpcRequestForEXPERIMENTALLightClientBlockProof.self,
-            from: requestData
+            from: requestData,
         )
         let request = requestWrapper.params
 
         // Load mock success response data
         let responseData =
             try loadMockJSON("JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError_Success.json")
-        setupMockSuccessResponse(with: responseData)
+        await setupMockSuccessResponse(with: responseData)
 
         // Execute
         let result = try await client.experimentalLightClientBlockProof(request)
 
         // Verify
-        verifyRequest(expectedMethod: "EXPERIMENTAL_light_client_block_proof")
+        await verifyRequest(expectedMethod: "EXPERIMENTAL_light_client_block_proof")
         #expect(result != nil)
     }
 
@@ -484,7 +511,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -493,13 +520,13 @@ struct ClientMethodTests {
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         let requestWrapper = try decoder.decode(
             JsonRpcRequestForEXPERIMENTALLightClientBlockProof.self,
-            from: requestData
+            from: requestData,
         )
         let request = requestWrapper.params
 
         // Load mock error response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError_Error.json")
-        setupMockErrorResponse(with: responseData)
+        await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
         do {
@@ -519,7 +546,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -528,12 +555,12 @@ struct ClientMethodTests {
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         let requestWrapper = try decoder.decode(
             JsonRpcRequestForEXPERIMENTALLightClientBlockProof.self,
-            from: requestData
+            from: requestData,
         )
         let request = requestWrapper.params
 
         // Setup HTTP error response
-        setupMockHTTPError(statusCode: 500)
+        await setupMockHTTPError(statusCode: 500)
 
         // Execute & Verify
         do {
@@ -560,7 +587,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -573,13 +600,13 @@ struct ClientMethodTests {
         // Load mock success response data
         let responseData =
             try loadMockJSON("JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError_Success.json")
-        setupMockSuccessResponse(with: responseData)
+        await setupMockSuccessResponse(with: responseData)
 
         // Execute
         let result = try await client.experimentalLightClientProof(request)
 
         // Verify
-        verifyRequest(expectedMethod: "EXPERIMENTAL_light_client_proof")
+        await verifyRequest(expectedMethod: "EXPERIMENTAL_light_client_proof")
         #expect(result != nil)
     }
 
@@ -589,7 +616,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -602,7 +629,7 @@ struct ClientMethodTests {
         // Load mock error response data
         let responseData =
             try loadMockJSON("JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError_Error.json")
-        setupMockErrorResponse(with: responseData)
+        await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
         do {
@@ -622,7 +649,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -633,7 +660,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Setup HTTP error response
-        setupMockHTTPError(statusCode: 500)
+        await setupMockHTTPError(statusCode: 500)
 
         // Execute & Verify
         do {
@@ -660,7 +687,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -672,13 +699,13 @@ struct ClientMethodTests {
 
         // Load mock success response data
         let responseData = try loadMockJSON("JsonRpcResponseForArrayOfRangeOfUint64AndRpcError_Success.json")
-        setupMockSuccessResponse(with: responseData)
+        await setupMockSuccessResponse(with: responseData)
 
         // Execute
         let result = try await client.experimentalMaintenanceWindows(request)
 
         // Verify
-        verifyRequest(expectedMethod: "EXPERIMENTAL_maintenance_windows")
+        await verifyRequest(expectedMethod: "EXPERIMENTAL_maintenance_windows")
         #expect(result != nil)
     }
 
@@ -688,7 +715,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -700,7 +727,7 @@ struct ClientMethodTests {
 
         // Load mock error response data
         let responseData = try loadMockJSON("JsonRpcResponseForArrayOfRangeOfUint64AndRpcError_Error.json")
-        setupMockErrorResponse(with: responseData)
+        await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
         do {
@@ -720,7 +747,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -731,7 +758,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Setup HTTP error response
-        setupMockHTTPError(statusCode: 500)
+        await setupMockHTTPError(statusCode: 500)
 
         // Execute & Verify
         do {
@@ -758,7 +785,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -770,13 +797,13 @@ struct ClientMethodTests {
 
         // Load mock success response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcProtocolConfigResponseAndRpcError_Success.json")
-        setupMockSuccessResponse(with: responseData)
+        await setupMockSuccessResponse(with: responseData)
 
         // Execute
         let result = try await client.experimentalProtocolConfig(request)
 
         // Verify
-        verifyRequest(expectedMethod: "EXPERIMENTAL_protocol_config")
+        await verifyRequest(expectedMethod: "EXPERIMENTAL_protocol_config")
         #expect(result != nil)
     }
 
@@ -786,7 +813,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -798,7 +825,7 @@ struct ClientMethodTests {
 
         // Load mock error response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcProtocolConfigResponseAndRpcError_Error.json")
-        setupMockErrorResponse(with: responseData)
+        await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
         do {
@@ -818,7 +845,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -829,7 +856,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Setup HTTP error response
-        setupMockHTTPError(statusCode: 500)
+        await setupMockHTTPError(statusCode: 500)
 
         // Execute & Verify
         do {
@@ -856,7 +883,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -868,13 +895,13 @@ struct ClientMethodTests {
 
         // Load mock success response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcReceiptResponseAndRpcError_Success.json")
-        setupMockSuccessResponse(with: responseData)
+        await setupMockSuccessResponse(with: responseData)
 
         // Execute
         let result = try await client.experimentalReceipt(request)
 
         // Verify
-        verifyRequest(expectedMethod: "EXPERIMENTAL_receipt")
+        await verifyRequest(expectedMethod: "EXPERIMENTAL_receipt")
         #expect(result != nil)
     }
 
@@ -884,7 +911,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -896,7 +923,7 @@ struct ClientMethodTests {
 
         // Load mock error response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcReceiptResponseAndRpcError_Error.json")
-        setupMockErrorResponse(with: responseData)
+        await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
         do {
@@ -916,7 +943,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -927,7 +954,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Setup HTTP error response
-        setupMockHTTPError(statusCode: 500)
+        await setupMockHTTPError(statusCode: 500)
 
         // Execute & Verify
         do {
@@ -954,7 +981,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -966,13 +993,13 @@ struct ClientMethodTests {
 
         // Load mock success response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError_Success.json")
-        setupMockSuccessResponse(with: responseData)
+        await setupMockSuccessResponse(with: responseData)
 
         // Execute
         let result = try await client.experimentalSplitStorageInfo(request)
 
         // Verify
-        verifyRequest(expectedMethod: "EXPERIMENTAL_split_storage_info")
+        await verifyRequest(expectedMethod: "EXPERIMENTAL_split_storage_info")
         #expect(result != nil)
     }
 
@@ -982,7 +1009,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -994,7 +1021,7 @@ struct ClientMethodTests {
 
         // Load mock error response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError_Error.json")
-        setupMockErrorResponse(with: responseData)
+        await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
         do {
@@ -1014,7 +1041,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -1025,7 +1052,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Setup HTTP error response
-        setupMockHTTPError(statusCode: 500)
+        await setupMockHTTPError(statusCode: 500)
 
         // Execute & Verify
         do {
@@ -1052,7 +1079,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -1064,13 +1091,13 @@ struct ClientMethodTests {
 
         // Load mock success response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcError_Success.json")
-        setupMockSuccessResponse(with: responseData)
+        await setupMockSuccessResponse(with: responseData)
 
         // Execute
         let result = try await client.experimentalTxStatus(request)
 
         // Verify
-        verifyRequest(expectedMethod: "EXPERIMENTAL_tx_status")
+        await verifyRequest(expectedMethod: "EXPERIMENTAL_tx_status")
         #expect(result != nil)
     }
 
@@ -1080,7 +1107,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -1092,7 +1119,7 @@ struct ClientMethodTests {
 
         // Load mock error response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcError_Error.json")
-        setupMockErrorResponse(with: responseData)
+        await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
         do {
@@ -1112,7 +1139,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -1123,7 +1150,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Setup HTTP error response
-        setupMockHTTPError(statusCode: 500)
+        await setupMockHTTPError(statusCode: 500)
 
         // Execute & Verify
         do {
@@ -1150,7 +1177,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -1162,13 +1189,13 @@ struct ClientMethodTests {
 
         // Load mock success response data
         let responseData = try loadMockJSON("JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError_Success.json")
-        setupMockSuccessResponse(with: responseData)
+        await setupMockSuccessResponse(with: responseData)
 
         // Execute
         let result = try await client.experimentalValidatorsOrdered(request)
 
         // Verify
-        verifyRequest(expectedMethod: "EXPERIMENTAL_validators_ordered")
+        await verifyRequest(expectedMethod: "EXPERIMENTAL_validators_ordered")
         #expect(result != nil)
     }
 
@@ -1178,7 +1205,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -1190,7 +1217,7 @@ struct ClientMethodTests {
 
         // Load mock error response data
         let responseData = try loadMockJSON("JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError_Error.json")
-        setupMockErrorResponse(with: responseData)
+        await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
         do {
@@ -1210,7 +1237,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -1221,7 +1248,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Setup HTTP error response
-        setupMockHTTPError(statusCode: 500)
+        await setupMockHTTPError(statusCode: 500)
 
         // Execute & Verify
         do {
@@ -1248,7 +1275,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -1260,13 +1287,13 @@ struct ClientMethodTests {
 
         // Load mock success response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcBlockResponseAndRpcError_Success.json")
-        setupMockSuccessResponse(with: responseData)
+        await setupMockSuccessResponse(with: responseData)
 
         // Execute
         let result = try await client.block(request)
 
         // Verify
-        verifyRequest(expectedMethod: "block")
+        await verifyRequest(expectedMethod: "block")
         #expect(result != nil)
     }
 
@@ -1276,7 +1303,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -1288,7 +1315,7 @@ struct ClientMethodTests {
 
         // Load mock error response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcBlockResponseAndRpcError_Error.json")
-        setupMockErrorResponse(with: responseData)
+        await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
         do {
@@ -1308,7 +1335,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -1319,7 +1346,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Setup HTTP error response
-        setupMockHTTPError(statusCode: 500)
+        await setupMockHTTPError(statusCode: 500)
 
         // Execute & Verify
         do {
@@ -1346,7 +1373,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -1359,13 +1386,13 @@ struct ClientMethodTests {
         // Load mock success response data
         let responseData =
             try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError_Success.json")
-        setupMockSuccessResponse(with: responseData)
+        await setupMockSuccessResponse(with: responseData)
 
         // Execute
         let result = try await client.blockEffects(request)
 
         // Verify
-        verifyRequest(expectedMethod: "block_effects")
+        await verifyRequest(expectedMethod: "block_effects")
         #expect(result != nil)
     }
 
@@ -1375,7 +1402,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -1388,7 +1415,7 @@ struct ClientMethodTests {
         // Load mock error response data
         let responseData =
             try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError_Error.json")
-        setupMockErrorResponse(with: responseData)
+        await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
         do {
@@ -1408,7 +1435,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -1419,7 +1446,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Setup HTTP error response
-        setupMockHTTPError(statusCode: 500)
+        await setupMockHTTPError(statusCode: 500)
 
         // Execute & Verify
         do {
@@ -1446,7 +1473,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -1458,13 +1485,13 @@ struct ClientMethodTests {
 
         // Load mock success response data
         let responseData = try loadMockJSON("JsonRpcResponseForCryptoHashAndRpcError_Success.json")
-        setupMockSuccessResponse(with: responseData)
+        await setupMockSuccessResponse(with: responseData)
 
         // Execute
         let result = try await client.broadcastTxAsync(request)
 
         // Verify
-        verifyRequest(expectedMethod: "broadcast_tx_async")
+        await verifyRequest(expectedMethod: "broadcast_tx_async")
         #expect(result != nil)
     }
 
@@ -1474,7 +1501,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -1486,7 +1513,7 @@ struct ClientMethodTests {
 
         // Load mock error response data
         let responseData = try loadMockJSON("JsonRpcResponseForCryptoHashAndRpcError_Error.json")
-        setupMockErrorResponse(with: responseData)
+        await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
         do {
@@ -1506,7 +1533,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -1517,7 +1544,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Setup HTTP error response
-        setupMockHTTPError(statusCode: 500)
+        await setupMockHTTPError(statusCode: 500)
 
         // Execute & Verify
         do {
@@ -1544,7 +1571,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -1556,13 +1583,13 @@ struct ClientMethodTests {
 
         // Load mock success response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcError_Success.json")
-        setupMockSuccessResponse(with: responseData)
+        await setupMockSuccessResponse(with: responseData)
 
         // Execute
         let result = try await client.broadcastTxCommit(request)
 
         // Verify
-        verifyRequest(expectedMethod: "broadcast_tx_commit")
+        await verifyRequest(expectedMethod: "broadcast_tx_commit")
         #expect(result != nil)
     }
 
@@ -1572,7 +1599,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -1584,7 +1611,7 @@ struct ClientMethodTests {
 
         // Load mock error response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcError_Error.json")
-        setupMockErrorResponse(with: responseData)
+        await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
         do {
@@ -1604,7 +1631,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -1615,7 +1642,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Setup HTTP error response
-        setupMockHTTPError(statusCode: 500)
+        await setupMockHTTPError(statusCode: 500)
 
         // Execute & Verify
         do {
@@ -1642,7 +1669,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -1654,13 +1681,13 @@ struct ClientMethodTests {
 
         // Load mock success response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError_Success.json")
-        setupMockSuccessResponse(with: responseData)
+        await setupMockSuccessResponse(with: responseData)
 
         // Execute
         let result = try await client.changes(request)
 
         // Verify
-        verifyRequest(expectedMethod: "changes")
+        await verifyRequest(expectedMethod: "changes")
         #expect(result != nil)
     }
 
@@ -1670,7 +1697,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -1682,7 +1709,7 @@ struct ClientMethodTests {
 
         // Load mock error response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError_Error.json")
-        setupMockErrorResponse(with: responseData)
+        await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
         do {
@@ -1702,7 +1729,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -1713,7 +1740,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Setup HTTP error response
-        setupMockHTTPError(statusCode: 500)
+        await setupMockHTTPError(statusCode: 500)
 
         // Execute & Verify
         do {
@@ -1740,7 +1767,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -1752,13 +1779,13 @@ struct ClientMethodTests {
 
         // Load mock success response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcChunkResponseAndRpcError_Success.json")
-        setupMockSuccessResponse(with: responseData)
+        await setupMockSuccessResponse(with: responseData)
 
         // Execute
         let result = try await client.chunk(request)
 
         // Verify
-        verifyRequest(expectedMethod: "chunk")
+        await verifyRequest(expectedMethod: "chunk")
         #expect(result != nil)
     }
 
@@ -1768,7 +1795,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -1780,7 +1807,7 @@ struct ClientMethodTests {
 
         // Load mock error response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcChunkResponseAndRpcError_Error.json")
-        setupMockErrorResponse(with: responseData)
+        await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
         do {
@@ -1800,7 +1827,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -1811,7 +1838,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Setup HTTP error response
-        setupMockHTTPError(statusCode: 500)
+        await setupMockHTTPError(statusCode: 500)
 
         // Execute & Verify
         do {
@@ -1838,7 +1865,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -1850,13 +1877,13 @@ struct ClientMethodTests {
 
         // Load mock success response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcClientConfigResponseAndRpcError_Success.json")
-        setupMockSuccessResponse(with: responseData)
+        await setupMockSuccessResponse(with: responseData)
 
         // Execute
         let result = try await client.clientConfig(request)
 
         // Verify
-        verifyRequest(expectedMethod: "client_config")
+        await verifyRequest(expectedMethod: "client_config")
         #expect(result != nil)
     }
 
@@ -1866,7 +1893,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -1878,7 +1905,7 @@ struct ClientMethodTests {
 
         // Load mock error response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcClientConfigResponseAndRpcError_Error.json")
-        setupMockErrorResponse(with: responseData)
+        await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
         do {
@@ -1898,7 +1925,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -1909,7 +1936,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Setup HTTP error response
-        setupMockHTTPError(statusCode: 500)
+        await setupMockHTTPError(statusCode: 500)
 
         // Execute & Verify
         do {
@@ -1936,7 +1963,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -1948,13 +1975,13 @@ struct ClientMethodTests {
 
         // Load mock success response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcGasPriceResponseAndRpcError_Success.json")
-        setupMockSuccessResponse(with: responseData)
+        await setupMockSuccessResponse(with: responseData)
 
         // Execute
         let result = try await client.gasPrice(request)
 
         // Verify
-        verifyRequest(expectedMethod: "gas_price")
+        await verifyRequest(expectedMethod: "gas_price")
         #expect(result != nil)
     }
 
@@ -1964,7 +1991,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -1976,7 +2003,7 @@ struct ClientMethodTests {
 
         // Load mock error response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcGasPriceResponseAndRpcError_Error.json")
-        setupMockErrorResponse(with: responseData)
+        await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
         do {
@@ -1996,7 +2023,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -2007,7 +2034,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Setup HTTP error response
-        setupMockHTTPError(statusCode: 500)
+        await setupMockHTTPError(statusCode: 500)
 
         // Execute & Verify
         do {
@@ -2034,7 +2061,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -2046,13 +2073,13 @@ struct ClientMethodTests {
 
         // Load mock success response data
         let responseData = try loadMockJSON("JsonRpcResponseForGenesisConfigAndRpcError_Success.json")
-        setupMockSuccessResponse(with: responseData)
+        await setupMockSuccessResponse(with: responseData)
 
         // Execute
         let result = try await client.genesisConfig(request)
 
         // Verify
-        verifyRequest(expectedMethod: "genesis_config")
+        await verifyRequest(expectedMethod: "genesis_config")
         #expect(result != nil)
     }
 
@@ -2062,7 +2089,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -2074,7 +2101,7 @@ struct ClientMethodTests {
 
         // Load mock error response data
         let responseData = try loadMockJSON("JsonRpcResponseForGenesisConfigAndRpcError_Error.json")
-        setupMockErrorResponse(with: responseData)
+        await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
         do {
@@ -2094,7 +2121,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -2105,7 +2132,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Setup HTTP error response
-        setupMockHTTPError(statusCode: 500)
+        await setupMockHTTPError(statusCode: 500)
 
         // Execute & Verify
         do {
@@ -2132,7 +2159,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -2144,13 +2171,13 @@ struct ClientMethodTests {
 
         // Load mock success response data
         let responseData = try loadMockJSON("JsonRpcResponseForNullableRpcHealthResponseAndRpcError_Success.json")
-        setupMockSuccessResponse(with: responseData)
+        await setupMockSuccessResponse(with: responseData)
 
         // Execute
         let result = try await client.health(request)
 
         // Verify
-        verifyRequest(expectedMethod: "health")
+        await verifyRequest(expectedMethod: "health")
         #expect(result != nil)
     }
 
@@ -2160,7 +2187,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -2172,7 +2199,7 @@ struct ClientMethodTests {
 
         // Load mock error response data
         let responseData = try loadMockJSON("JsonRpcResponseForNullableRpcHealthResponseAndRpcError_Error.json")
-        setupMockErrorResponse(with: responseData)
+        await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
         do {
@@ -2192,7 +2219,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -2203,7 +2230,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Setup HTTP error response
-        setupMockHTTPError(statusCode: 500)
+        await setupMockHTTPError(statusCode: 500)
 
         // Execute & Verify
         do {
@@ -2230,7 +2257,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -2243,13 +2270,13 @@ struct ClientMethodTests {
         // Load mock success response data
         let responseData =
             try loadMockJSON("JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError_Success.json")
-        setupMockSuccessResponse(with: responseData)
+        await setupMockSuccessResponse(with: responseData)
 
         // Execute
         let result = try await client.lightClientProof(request)
 
         // Verify
-        verifyRequest(expectedMethod: "light_client_proof")
+        await verifyRequest(expectedMethod: "light_client_proof")
         #expect(result != nil)
     }
 
@@ -2259,7 +2286,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -2272,7 +2299,7 @@ struct ClientMethodTests {
         // Load mock error response data
         let responseData =
             try loadMockJSON("JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError_Error.json")
-        setupMockErrorResponse(with: responseData)
+        await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
         do {
@@ -2292,7 +2319,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -2303,7 +2330,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Setup HTTP error response
-        setupMockHTTPError(statusCode: 500)
+        await setupMockHTTPError(statusCode: 500)
 
         // Execute & Verify
         do {
@@ -2330,7 +2357,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -2342,13 +2369,13 @@ struct ClientMethodTests {
 
         // Load mock success response data
         let responseData = try loadMockJSON("JsonRpcResponseForArrayOfRangeOfUint64AndRpcError_Success.json")
-        setupMockSuccessResponse(with: responseData)
+        await setupMockSuccessResponse(with: responseData)
 
         // Execute
         let result = try await client.maintenanceWindows(request)
 
         // Verify
-        verifyRequest(expectedMethod: "maintenance_windows")
+        await verifyRequest(expectedMethod: "maintenance_windows")
         #expect(result != nil)
     }
 
@@ -2358,7 +2385,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -2370,7 +2397,7 @@ struct ClientMethodTests {
 
         // Load mock error response data
         let responseData = try loadMockJSON("JsonRpcResponseForArrayOfRangeOfUint64AndRpcError_Error.json")
-        setupMockErrorResponse(with: responseData)
+        await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
         do {
@@ -2390,7 +2417,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -2401,7 +2428,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Setup HTTP error response
-        setupMockHTTPError(statusCode: 500)
+        await setupMockHTTPError(statusCode: 500)
 
         // Execute & Verify
         do {
@@ -2428,7 +2455,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -2440,13 +2467,13 @@ struct ClientMethodTests {
 
         // Load mock success response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcNetworkInfoResponseAndRpcError_Success.json")
-        setupMockSuccessResponse(with: responseData)
+        await setupMockSuccessResponse(with: responseData)
 
         // Execute
         let result = try await client.networkInfo(request)
 
         // Verify
-        verifyRequest(expectedMethod: "network_info")
+        await verifyRequest(expectedMethod: "network_info")
         #expect(result != nil)
     }
 
@@ -2456,7 +2483,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -2468,7 +2495,7 @@ struct ClientMethodTests {
 
         // Load mock error response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcNetworkInfoResponseAndRpcError_Error.json")
-        setupMockErrorResponse(with: responseData)
+        await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
         do {
@@ -2488,7 +2515,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -2499,7 +2526,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Setup HTTP error response
-        setupMockHTTPError(statusCode: 500)
+        await setupMockHTTPError(statusCode: 500)
 
         // Execute & Verify
         do {
@@ -2526,7 +2553,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -2538,13 +2565,13 @@ struct ClientMethodTests {
 
         // Load mock success response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError_Success.json")
-        setupMockSuccessResponse(with: responseData)
+        await setupMockSuccessResponse(with: responseData)
 
         // Execute
         let result = try await client.nextLightClientBlock(request)
 
         // Verify
-        verifyRequest(expectedMethod: "next_light_client_block")
+        await verifyRequest(expectedMethod: "next_light_client_block")
         #expect(result != nil)
     }
 
@@ -2554,7 +2581,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -2566,7 +2593,7 @@ struct ClientMethodTests {
 
         // Load mock error response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError_Error.json")
-        setupMockErrorResponse(with: responseData)
+        await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
         do {
@@ -2586,7 +2613,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -2597,7 +2624,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Setup HTTP error response
-        setupMockHTTPError(statusCode: 500)
+        await setupMockHTTPError(statusCode: 500)
 
         // Execute & Verify
         do {
@@ -2624,7 +2651,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -2636,13 +2663,13 @@ struct ClientMethodTests {
 
         // Load mock success response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcQueryResponseAndRpcError_Success.json")
-        setupMockSuccessResponse(with: responseData)
+        await setupMockSuccessResponse(with: responseData)
 
         // Execute
         let result = try await client.query(request)
 
         // Verify
-        verifyRequest(expectedMethod: "query")
+        await verifyRequest(expectedMethod: "query")
         #expect(result != nil)
     }
 
@@ -2652,7 +2679,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -2664,7 +2691,7 @@ struct ClientMethodTests {
 
         // Load mock error response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcQueryResponseAndRpcError_Error.json")
-        setupMockErrorResponse(with: responseData)
+        await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
         do {
@@ -2684,7 +2711,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -2695,7 +2722,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Setup HTTP error response
-        setupMockHTTPError(statusCode: 500)
+        await setupMockHTTPError(statusCode: 500)
 
         // Execute & Verify
         do {
@@ -2722,7 +2749,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -2734,13 +2761,13 @@ struct ClientMethodTests {
 
         // Load mock success response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcError_Success.json")
-        setupMockSuccessResponse(with: responseData)
+        await setupMockSuccessResponse(with: responseData)
 
         // Execute
         let result = try await client.sendTx(request)
 
         // Verify
-        verifyRequest(expectedMethod: "send_tx")
+        await verifyRequest(expectedMethod: "send_tx")
         #expect(result != nil)
     }
 
@@ -2750,7 +2777,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -2762,7 +2789,7 @@ struct ClientMethodTests {
 
         // Load mock error response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcError_Error.json")
-        setupMockErrorResponse(with: responseData)
+        await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
         do {
@@ -2782,7 +2809,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -2793,7 +2820,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Setup HTTP error response
-        setupMockHTTPError(statusCode: 500)
+        await setupMockHTTPError(statusCode: 500)
 
         // Execute & Verify
         do {
@@ -2820,7 +2847,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -2832,13 +2859,13 @@ struct ClientMethodTests {
 
         // Load mock success response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcStatusResponseAndRpcError_Success.json")
-        setupMockSuccessResponse(with: responseData)
+        await setupMockSuccessResponse(with: responseData)
 
         // Execute
         let result = try await client.status(request)
 
         // Verify
-        verifyRequest(expectedMethod: "status")
+        await verifyRequest(expectedMethod: "status")
         #expect(result != nil)
     }
 
@@ -2848,7 +2875,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -2860,7 +2887,7 @@ struct ClientMethodTests {
 
         // Load mock error response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcStatusResponseAndRpcError_Error.json")
-        setupMockErrorResponse(with: responseData)
+        await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
         do {
@@ -2880,7 +2907,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -2891,7 +2918,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Setup HTTP error response
-        setupMockHTTPError(statusCode: 500)
+        await setupMockHTTPError(statusCode: 500)
 
         // Execute & Verify
         do {
@@ -2918,7 +2945,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -2930,13 +2957,13 @@ struct ClientMethodTests {
 
         // Load mock success response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcError_Success.json")
-        setupMockSuccessResponse(with: responseData)
+        await setupMockSuccessResponse(with: responseData)
 
         // Execute
         let result = try await client.tx(request)
 
         // Verify
-        verifyRequest(expectedMethod: "tx")
+        await verifyRequest(expectedMethod: "tx")
         #expect(result != nil)
     }
 
@@ -2946,7 +2973,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -2958,7 +2985,7 @@ struct ClientMethodTests {
 
         // Load mock error response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcError_Error.json")
-        setupMockErrorResponse(with: responseData)
+        await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
         do {
@@ -2978,7 +3005,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -2989,7 +3016,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Setup HTTP error response
-        setupMockHTTPError(statusCode: 500)
+        await setupMockHTTPError(statusCode: 500)
 
         // Execute & Verify
         do {
@@ -3016,7 +3043,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -3028,13 +3055,13 @@ struct ClientMethodTests {
 
         // Load mock success response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcValidatorResponseAndRpcError_Success.json")
-        setupMockSuccessResponse(with: responseData)
+        await setupMockSuccessResponse(with: responseData)
 
         // Execute
         let result = try await client.validators(request)
 
         // Verify
-        verifyRequest(expectedMethod: "validators")
+        await verifyRequest(expectedMethod: "validators")
         #expect(result != nil)
     }
 
@@ -3044,7 +3071,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -3056,7 +3083,7 @@ struct ClientMethodTests {
 
         // Load mock error response data
         let responseData = try loadMockJSON("JsonRpcResponseForRpcValidatorResponseAndRpcError_Error.json")
-        setupMockErrorResponse(with: responseData)
+        await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
         do {
@@ -3076,7 +3103,7 @@ struct ClientMethodTests {
         let mockSession = createMockSession()
         let client = NearJsonRpcClient(
             baseURL: URL(string: "https://rpc.testnet.near.org")!,
-            session: mockSession
+            session: mockSession,
         )
 
         // Load mock request data and extract params
@@ -3087,7 +3114,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Setup HTTP error response
-        setupMockHTTPError(statusCode: 500)
+        await setupMockHTTPError(statusCode: 500)
 
         // Execute & Verify
         do {
@@ -3125,12 +3152,12 @@ extension ClientMethodTests {
         guard let url = testBundle.url(
             forResource: filename.replacingOccurrences(of: ".json", with: ""),
             withExtension: "json",
-            subdirectory: "Mock"
+            subdirectory: "Mock",
         ) else {
             throw NSError(
                 domain: "TestError",
                 code: 1,
-                userInfo: [NSLocalizedDescriptionKey: "Mock file not found: \(filename)"]
+                userInfo: [NSLocalizedDescriptionKey: "Mock file not found: \(filename)"],
             )
         }
         return try Data(contentsOf: url)
@@ -3142,52 +3169,52 @@ extension ClientMethodTests {
             url: URL(string: "https://rpc.testnet.near.org")!,
             statusCode: statusCode,
             httpVersion: nil,
-            headerFields: ["Content-Type": "application/json"]
+            headerFields: ["Content-Type": "application/json"],
         )!
     }
 
     /// Setup mock response handler for success case
-    func setupMockSuccessResponse(with data: Data) {
-        MockURLProtocol.requestHandler = { _ in
+    func setupMockSuccessResponse(with data: Data) async {
+        await MockURLProtocol.handler.setRequestHandler { _ in
             let response = HTTPURLResponse(
                 url: URL(string: "https://rpc.testnet.near.org")!,
                 statusCode: 200,
                 httpVersion: nil,
-                headerFields: ["Content-Type": "application/json"]
+                headerFields: ["Content-Type": "application/json"],
             )!
             return (response, data)
         }
     }
 
     /// Setup mock response handler for error case
-    func setupMockErrorResponse(with data: Data) {
-        MockURLProtocol.requestHandler = { _ in
+    func setupMockErrorResponse(with data: Data) async {
+        await MockURLProtocol.handler.setRequestHandler { _ in
             let response = HTTPURLResponse(
                 url: URL(string: "https://rpc.testnet.near.org")!,
                 statusCode: 200,
                 httpVersion: nil,
-                headerFields: ["Content-Type": "application/json"]
+                headerFields: ["Content-Type": "application/json"],
             )!
             return (response, data)
         }
     }
 
     /// Setup mock response handler for HTTP error
-    func setupMockHTTPError(statusCode: Int) {
-        MockURLProtocol.requestHandler = { _ in
+    func setupMockHTTPError(statusCode: Int) async {
+        await MockURLProtocol.handler.setRequestHandler { _ in
             let response = HTTPURLResponse(
                 url: URL(string: "https://rpc.testnet.near.org")!,
                 statusCode: statusCode,
                 httpVersion: nil,
-                headerFields: ["Content-Type": "application/json"]
+                headerFields: ["Content-Type": "application/json"],
             )!
             return (response, Data())
         }
     }
 
     /// Verify that a request was made with the expected method
-    func verifyRequest(expectedMethod: String) {
-        guard let request = MockURLProtocol.lastRequest else {
+    func verifyRequest(expectedMethod: String) async {
+        guard let request = await MockURLProtocol.handler.getLastRequest() else {
             Issue.record("No request was captured")
             return
         }
