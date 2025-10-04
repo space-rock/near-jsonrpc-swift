@@ -1,8 +1,11 @@
 
 import Foundation
+import Testing
+#if canImport(FoundationNetworking)
+    import FoundationNetworking
+#endif
 @testable import NearJsonRpcClient
 @testable import NearJsonRpcTypes
-import Testing
 
 @Suite("Client Method Tests")
 struct ClientTests {

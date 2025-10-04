@@ -83,15 +83,6 @@ jobs:
           cd Scripts
           bash codegen.sh
 
-      - name: Format generated Swift code
-        if: steps.git-check.outputs.has_changes == 'true'
-        run: |
-          if command -v swiftformat &> /dev/null; then
-            swiftformat Sources/ Tests/
-          else
-            echo "⚠️ swiftformat not installed, skipping code formatting"
-          fi
-
       - name: Verify Swift package builds
         if: steps.git-check.outputs.has_changes == 'true'
         run: swift build

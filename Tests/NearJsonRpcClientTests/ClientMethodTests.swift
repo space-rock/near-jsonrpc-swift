@@ -1,39 +1,35 @@
 
 import Foundation
+import Testing
+#if canImport(FoundationNetworking)
+    import FoundationNetworking
+#endif
 @testable import NearJsonRpcClient
 @testable import NearJsonRpcTypes
-import Testing
 
-// MARK: - Mock URLProtocol for Testing
+@preconcurrency class MockURLProtocol: URLProtocol {
+    nonisolated(unsafe) static var handler: MockHandler = .init()
 
-actor MockResponseHandler {
-    var requestHandler: ((URLRequest) throws -> (HTTPURLResponse, Data))?
-    var lastRequest: URLRequest?
+    actor MockHandler {
+        private var requestHandler: (@Sendable (URLRequest) throws -> (HTTPURLResponse, Data))?
+        private var lastRequest: URLRequest?
 
-    func setRequestHandler(_ handler: @escaping (URLRequest) throws -> (HTTPURLResponse, Data)) {
-        requestHandler = handler
+        func setRequestHandler(_ handler: @Sendable @escaping (URLRequest) throws -> (HTTPURLResponse, Data)) {
+            requestHandler = handler
+        }
+
+        func getRequestHandler() -> (@Sendable (URLRequest) throws -> (HTTPURLResponse, Data))? {
+            requestHandler
+        }
+
+        func captureRequest(_ request: URLRequest) {
+            lastRequest = request
+        }
+
+        func getLastRequest() -> URLRequest? {
+            lastRequest
+        }
     }
-
-    func getRequestHandler() -> ((URLRequest) throws -> (HTTPURLResponse, Data))? {
-        requestHandler
-    }
-
-    func setLastRequest(_ request: URLRequest) {
-        lastRequest = request
-    }
-
-    func getLastRequest() -> URLRequest? {
-        lastRequest
-    }
-
-    func reset() {
-        requestHandler = nil
-        lastRequest = nil
-    }
-}
-
-class MockURLProtocol: URLProtocol {
-    static let handler = MockResponseHandler()
 
     override class func canInit(with _: URLRequest) -> Bool {
         true
@@ -44,25 +40,30 @@ class MockURLProtocol: URLProtocol {
     }
 
     override func startLoading() {
+        let currentRequest = request
+        let protocolClient = client
+
         Task {
+            await MockURLProtocol.handler.captureRequest(currentRequest)
+
             guard let handlerFunc = await MockURLProtocol.handler.getRequestHandler() else {
                 fatalError("Handler is unavailable.")
             }
 
-            await MockURLProtocol.handler.setLastRequest(request)
-
             do {
-                let (response, data) = try handlerFunc(request)
-                client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-                client?.urlProtocol(self, didLoad: data)
-                client?.urlProtocolDidFinishLoading(self)
+                let (response, data) = try handlerFunc(currentRequest)
+                protocolClient?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+                protocolClient?.urlProtocol(self, didLoad: data)
+                protocolClient?.urlProtocolDidFinishLoading(self)
             } catch {
-                client?.urlProtocol(self, didFailWithError: error)
+                protocolClient?.urlProtocol(self, didFailWithError: error)
             }
         }
     }
 
-    override func stopLoading() {}
+    override func stopLoading() {
+        // No-op
+    }
 }
 
 @Suite("Client Method Integration Tests", .serialized)
@@ -3226,7 +3227,7 @@ extension ClientMethodTests {
         if let body = request.httpBody {
             do {
                 let json = try JSONSerialization.jsonObject(with: body) as? [String: Any]
-                let method = json?["method"] as? String
+                let method: String? = json?["method"] as? String
                 #expect(method == expectedMethod)
             } catch {
                 Issue.record("Failed to decode request body: \(error)")

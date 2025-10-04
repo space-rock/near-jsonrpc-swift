@@ -96,26 +96,9 @@ jobs:
           cat > release_notes.md << EOF
           # NearJsonRpc Swift SDK v${VERSION}
           
-          ## 📦 Installation
-          
-          ### Swift Package Manager
-          
-          Add the following to your \`Package.swift\` file:
-          
-          \`\`\`swift
-          dependencies: [
-              .package(url: "https://github.com/space-rock/near-jsonrpc-swift.git", from: "${VERSION}")
-          ]
-          \`\`\`
-          
-          Or add it directly in Xcode:
-          1. File → Add Package Dependencies
-          2. Enter: \`https://github.com/space-rock/near-jsonrpc-swift.git\`
-          3. Select version: \`${VERSION}\`
-          
           ## 📚 Documentation
           
-          See the [README](https://github.com/space-rock/near-jsonrpc-swift/blob/main/README.md) for usage examples and API documentation.
+          See the [README](https://github.com/space-rock/near-jsonrpc-swift/blob/main/README.md) for installation instructions, usage examples, and API documentation.
           
           ## 🔧 Supported Platforms
           

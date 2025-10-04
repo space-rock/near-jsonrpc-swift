@@ -515,6 +515,9 @@ def generate_client_tests(methods: List[Tuple[str, str, str, str, str]]) -> str:
     code = """
 import Testing
 import Foundation
+#if canImport(FoundationNetworking)
+    import FoundationNetworking
+#endif
 @testable import NearJsonRpcClient
 @testable import NearJsonRpcTypes
 
@@ -585,11 +588,12 @@ struct ClientTests {
 # =============================================================================
 
 def generate_mock_url_protocol_class() -> str:
-    return """class MockURLProtocol: URLProtocol {
-    static var handler: MockHandler = MockHandler()
+    return """@preconcurrency class MockURLProtocol: URLProtocol {
+    nonisolated(unsafe) static var handler: MockHandler = MockHandler()
 
     actor MockHandler {
         private var requestHandler: (@Sendable (URLRequest) throws -> (HTTPURLResponse, Data))?
+        private var lastRequest: URLRequest?
 
         func setRequestHandler(_ handler: @Sendable @escaping (URLRequest) throws -> (HTTPURLResponse, Data)) {
             self.requestHandler = handler
@@ -597,6 +601,14 @@ def generate_mock_url_protocol_class() -> str:
 
         func getRequestHandler() -> (@Sendable (URLRequest) throws -> (HTTPURLResponse, Data))? {
             return self.requestHandler
+        }
+        
+        func captureRequest(_ request: URLRequest) {
+            self.lastRequest = request
+        }
+        
+        func getLastRequest() -> URLRequest? {
+            return self.lastRequest
         }
     }
 
@@ -609,18 +621,23 @@ def generate_mock_url_protocol_class() -> str:
     }
 
     override func startLoading() {
+        let currentRequest = request
+        let protocolClient = client
+        
         Task {
+            await MockURLProtocol.handler.captureRequest(currentRequest)
+            
             guard let handlerFunc = await MockURLProtocol.handler.getRequestHandler() else {
                 fatalError("Handler is unavailable.")
             }
 
             do {
-                let (response, data) = try handlerFunc(request)
-                self.client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-                self.client?.urlProtocol(self, didLoad: data)
-                self.client?.urlProtocolDidFinishLoading(self)
+                let (response, data) = try handlerFunc(currentRequest)
+                protocolClient?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+                protocolClient?.urlProtocol(self, didLoad: data)
+                protocolClient?.urlProtocolDidFinishLoading(self)
             } catch {
-                self.client?.urlProtocol(self, didFailWithError: error)
+                protocolClient?.urlProtocol(self, didFailWithError: error)
             }
         }
     }
@@ -726,7 +743,7 @@ extension ClientMethodTests {
         if let body = request.httpBody {
             do {
                 let json = try JSONSerialization.jsonObject(with: body) as? [String: Any]
-                let method = json?["method"] as? String
+                let method: String? = json?["method"] as? String
                 #expect(method == expectedMethod)
             } catch {
                 Issue.record("Failed to decode request body: \\(error)")
@@ -855,6 +872,9 @@ def generate_client_method_tests(methods: List[Tuple[str, str, str, str, str]]) 
     code = """
 import Testing
 import Foundation
+#if canImport(FoundationNetworking)
+    import FoundationNetworking
+#endif
 @testable import NearJsonRpcClient
 @testable import NearJsonRpcTypes
 """
