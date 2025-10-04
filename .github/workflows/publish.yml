@@ -1,12 +1,9 @@
-name: Release & Tag
+name: Release Please
 
 on:
   push:
-    branches: [main]
-    paths:
-      - 'VERSION'
-      - 'Sources/**'
-      - 'Package.swift'
+    branches:
+      - main
 
 permissions:
   contents: write
@@ -14,41 +11,58 @@ permissions:
   issues: write
 
 jobs:
-  release:
-    name: Create GitHub Release
+  release-please:
+    name: Release Please
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      paths_released: ${{ steps.release-please.outputs.paths_released }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      version: ${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}
+    
+    steps:
+      - name: Run Release Please
+        id: release
+        uses: googleapis/release-please-action@v4
+        with:
+          release-type: simple
+          package-name: near-jsonrpc-swift
+          bump-minor-pre-major: true
+          bump-patch-for-minor-pre-major: true
+
+  publish-release:
+    name: Publish Release Assets
     runs-on: macos-latest
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
     
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Swift
         uses: swift-actions/setup-swift@v2
         with:
           swift-version: '6.1'
 
-      - name: Read version
-        id: version
-        run: |
-          VERSION=$(cat VERSION)
-          echo "version=${VERSION}" >> $GITHUB_OUTPUT
-          echo "📦 Package version: ${VERSION}"
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: 'Scripts/requirements.txt'
 
-      - name: Check if tag exists
-        id: check-tag
+      - name: Install Python dependencies
         run: |
-          if git rev-parse "v${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
-            echo "Tag v${{ steps.version.outputs.version }} already exists"
-            echo "tag_exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "Tag v${{ steps.version.outputs.version }} does not exist"
-            echo "tag_exists=false" >> $GITHUB_OUTPUT
-          fi
+          cd Scripts
+          pip install -r requirements.txt
+
+      - name: Generate Swift code from OpenAPI spec
+        run: |
+          cd Scripts
+          bash codegen.sh
 
       - name: Validate Swift Package
-        if: steps.check-tag.outputs.tag_exists == 'false'
         run: |
           echo "🔍 Validating Swift Package..."
           swift package resolve
@@ -57,7 +71,7 @@ jobs:
           echo "✅ Package validation successful"
 
       - name: Build documentation
-        if: steps.check-tag.outputs.tag_exists == 'false'
+        continue-on-error: true
         run: |
           if swift package plugin --list | grep -q "generate-documentation"; then
             echo "📚 Generating documentation..."
@@ -67,9 +81,9 @@ jobs:
           fi
 
       - name: Create Release Archive
-        if: steps.check-tag.outputs.tag_exists == 'false'
+        id: archive
         run: |
-          VERSION="${{ steps.version.outputs.version }}"
+          VERSION="${{ needs.release-please.outputs.version }}"
           ARCHIVE_NAME="NearJsonRpc-${VERSION}.zip"
           
           zip -r "${ARCHIVE_NAME}" \
@@ -77,7 +91,6 @@ jobs:
             Package.swift \
             README.md \
             LICENSE \
-            VERSION \
             Examples/ \
             -x "*.DS_Store" \
             -x ".build/*" \
@@ -85,59 +98,18 @@ jobs:
           
           echo "archive_name=${ARCHIVE_NAME}" >> $GITHUB_OUTPUT
           echo "✅ Created release archive: ${ARCHIVE_NAME}"
-        id: archive
 
-      - name: Generate Release Notes
-        if: steps.check-tag.outputs.tag_exists == 'false'
-        id: release-notes
-        run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          
-          cat > release_notes.md << EOF
-          # NearJsonRpc Swift SDK v${VERSION}
-          
-          ## 📚 Documentation
-          
-          See the [README](https://github.com/space-rock/near-jsonrpc-swift/blob/main/README.md) for installation instructions, usage examples, and API documentation.
-          
-          ## 🔧 Supported Platforms
-          
-          - iOS 13.0+
-          - macOS 10.15+
-          
-          ## 📝 Changes
-          
-          For detailed changes, see the commit history.
-          EOF
-          
-          echo "✅ Generated release notes"
-
-      - name: Create Git Tag
-        if: steps.check-tag.outputs.tag_exists == 'false'
-        run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "v${VERSION}" -m "Release version ${VERSION}"
-          git push origin "v${VERSION}"
-          echo "✅ Created and pushed tag v${VERSION}"
-
-      - name: Create GitHub Release
-        if: steps.check-tag.outputs.tag_exists == 'false'
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ steps.version.outputs.version }}
-          name: v${{ steps.version.outputs.version }}
-          body_path: release_notes.md
-          files: ${{ steps.archive.outputs.archive_name }}
-          draft: false
-          prerelease: false
+      - name: Upload Release Assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload ${{ needs.release-please.outputs.tag_name }} \
+            ${{ steps.archive.outputs.archive_name }} \
+            --clobber
 
       - name: Release Summary
-        if: steps.check-tag.outputs.tag_exists == 'false'
         run: |
-          echo "🎉 Release v${{ steps.version.outputs.version }} published successfully!"
-          echo "📦 Package URL: https://github.com/space-rock/near-jsonrpc-swift"
-          echo "🏷️ Tag: v${{ steps.version.outputs.version }}"
+          echo "🎉 Release ${{ needs.release-please.outputs.tag_name }} published successfully!"
+          echo "📦 Package URL: https://github.com/${{ github.repository }}"
+          echo "🏷️ Tag: ${{ needs.release-please.outputs.tag_name }}"
+          echo "📝 Release URL: https://github.com/${{ github.repository }}/releases/tag/${{ needs.release-please.outputs.tag_name }}"
