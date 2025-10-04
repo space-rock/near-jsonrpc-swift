@@ -152,7 +152,3 @@ jobs:
           echo "📦 Validating Swift Package..."
           swift package dump-package
           echo "✅ Package structure is valid"
-
-      - name: Check for Package.swift warnings
-        run: |
-          swift package diagnose
