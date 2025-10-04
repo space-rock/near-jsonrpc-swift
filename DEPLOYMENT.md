@@ -7,7 +7,8 @@ This guide covers the deployment and release process for the NEAR JSON-RPC Swift
 The project uses:
 
 - **Git Tags** for version management
-- **GitHub Actions** for CI/CD
+- **GitHub Actions** for CI/CD automation
+- **Release Please** for automated releases and changelog generation
 - **Swift Package Manager** for distribution
 - **Semantic Versioning** for version numbers
 - **Conventional Commits** for changelog generation
@@ -34,24 +35,47 @@ NearJsonRpc
 
 ### Release Types
 
-Following Semantic Versioning:
+Following Semantic Versioning (automated via Release Please):
 
 - `fix:` commits → Patch release (0.0.X)
 - `feat:` commits → Minor release (0.X.0)
 - `feat!:` or `BREAKING CHANGE:` → Major release (X.0.0)
 
+### Automated Release Process
+
+The project uses **Release Please** for automated releases:
+
+1. **Merge PRs** with conventional commits to `main`
+2. **Release Please** automatically:
+   - Creates/updates a release PR with changelog
+   - Bumps version based on commit types
+   - Updates CHANGELOG.md
+3. **Merge Release PR** to trigger:
+   - Tag creation
+   - GitHub release creation
+   - Release asset publishing
+
 ## Version Management
+
+### Automated Version Management
+
+Versions are automatically managed by **Release Please**:
+
+- Analyzes conventional commits since last release
+- Determines version bump (major/minor/patch)
+- Updates CHANGELOG.md automatically
+- Creates release PR with version changes
 
 ### Version File
 
-The project maintains a `VERSION` file at the root:
+The project uses CHANGELOG.md for version tracking (managed by Release Please):
 
 ```bash
 # View current version
-cat VERSION
+head -n 10 CHANGELOG.md
 
-# Update version
-echo "1.1.0" > VERSION
+# Version is automatically updated by Release Please
+# Do not manually edit CHANGELOG.md
 ```
 
 ### Semantic Versioning
@@ -72,14 +96,49 @@ Follow [SemVer](https://semver.org/) guidelines:
 
 ## Creating a Release
 
-### Prerequisites
+### Automated Release Process (Recommended)
 
-1. **Repository Access**: Write access to the repository
-2. **Clean Working Directory**: All changes committed
-3. **Tests Passing**: All tests must pass
-4. **Updated Documentation**: README and docs reflect changes
+The project uses **Release Please** for automated releases. Simply merge PRs with conventional commits:
 
-### Release Steps
+#### 1. Develop with Conventional Commits
+
+```bash
+# Make changes and commit with conventional commit format
+git commit -m "feat: add new RPC method support"
+git commit -m "fix: correct decoding issue for AccountView"
+git push origin feature-branch
+```
+
+#### 2. Merge PR to Main
+
+```bash
+# Create and merge PR to main
+# Release Please will automatically:
+# - Analyze commits since last release
+# - Create/update a release PR
+```
+
+#### 3. Review Release PR
+
+- Release Please creates a PR titled "chore(main): release X.Y.Z"
+- Review the generated CHANGELOG.md
+- Verify version bump is correct
+- Check that all changes are documented
+
+#### 4. Merge Release PR
+
+```bash
+# Merge the release PR
+# This automatically:
+# - Creates a git tag (vX.Y.Z)
+# - Creates a GitHub release
+# - Publishes release assets
+# - Updates CHANGELOG.md on main
+```
+
+### Manual Release Process (Not Recommended)
+
+For emergency releases or if automation fails:
 
 #### 1. Prepare the Release
 
@@ -101,18 +160,11 @@ swiftformat Sources/ Tests/ Examples/
 swift build -c release
 ```
 
-#### 2. Update Version
+#### 2. Update CHANGELOG.md
 
 ```bash
-# Update VERSION file
-echo "1.1.0" > VERSION
-
-# Update Package.swift if needed (version references in comments)
-
-# Commit version change
-git add VERSION
-git commit -m "chore: bump version to 1.1.0"
-git push origin main
+# Manually update CHANGELOG.md with release notes
+# Follow the existing format
 ```
 
 #### 3. Create and Push Tag
@@ -219,45 +271,103 @@ swift package update
 
 ## CI/CD Pipeline
 
-### CI Workflow
+### Workflow Overview
 
-The `.github/workflows/ci.yml` runs on every push and PR:
+The project uses three GitHub Actions workflows:
 
-```yaml
-name: CI
+1. **CI/CD** (`.github/workflows/ci-cd.yml`)
+2. **Daily OpenAPI Spec Fetch** (`.github/workflows/generate.yml`)
+3. **Release Please** (`.github/workflows/publish.yml`)
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+### CI/CD Workflow
 
-jobs:
-  test:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Build
-        run: swift build
-      - name: Run tests
-        run: swift test
-```
+The `.github/workflows/ci-cd.yml` runs on every push and PR:
+
+**Triggers:**
+- Push to `main` branch
+- Pull requests to `main` branch
+
+**Jobs:**
+
+1. **test-macos**: Tests on macOS 14 with Swift 6.1
+   - Generates Swift code from OpenAPI spec
+   - Builds Swift package
+   - Runs tests with code coverage
+   - Uploads coverage to Codecov
+
+2. **test-linux**: Tests on Linux with Swift 6.1
+   - Generates Swift code from OpenAPI spec
+   - Builds Swift package
+   - Runs tests
+
+3. **validate-package**: Validates Swift package structure (PR only)
+   - Runs after macOS and Linux tests pass
+   - Validates package manifest
+
+### Daily OpenAPI Spec Fetch Workflow
+
+The `.github/workflows/generate.yml` automatically updates the OpenAPI spec:
+
+**Triggers:**
+- Daily at midnight (cron: `0 0 * * *`)
+- Manual workflow dispatch with optional custom URL
+
+**Process:**
+1. Downloads latest OpenAPI spec from configured URL (repository variable `INPUT_JSON_URL`)
+2. Checks for changes in the spec
+3. If changes detected:
+   - Regenerates Swift code
+   - Builds and tests the package
+   - Creates/updates PR with changes
+
+**Configuration:**
+- Set repository variable `INPUT_JSON_URL` to the OpenAPI spec URL
+- Or provide URL via manual workflow dispatch
+
+### Release Please Workflow
+
+The `.github/workflows/publish.yml` automates releases:
+
+**Triggers:**
+- Push to `main` branch
+
+**Jobs:**
+
+1. **release-please**: Creates/updates release PR
+   - Analyzes conventional commits since last release
+   - Determines version bump (major/minor/patch)
+   - Updates CHANGELOG.md
+   - Creates/updates release PR
+
+2. **publish-release**: Publishes release assets (when release PR is merged)
+   - Generates Swift code from OpenAPI spec
+   - Validates package (build + test)
+   - Builds documentation (if available)
+   - Creates release archive (.zip)
+   - Uploads assets to GitHub release
 
 ### Release Pipeline Stages
 
-1. **PR Checks**
-   - Swift build verification
-   - Unit tests
-   - Code formatting (swiftformat)
-   - Integration tests (if applicable)
+1. **PR Checks** (CI/CD Workflow)
+   - Swift build verification on macOS and Linux
+   - Unit tests with code coverage
+   - Code generation from OpenAPI spec
+   - Package structure validation
 
-2. **Tag Push**
-   - Automatic tagging (optional)
+2. **Release PR Creation** (Release Please Workflow)
+   - Automatic release PR creation/update
+   - Changelog generation from conventional commits
+   - Version bumping based on commit types
+
+3. **Release Publishing** (Release Please Workflow)
+   - Triggered when release PR is merged
+   - Tag creation
    - GitHub release creation
+   - Release assets upload
    - SPM cache updates
 
-3. **Post-Release**
-   - Documentation updates
+4. **Post-Release**
+   - Documentation updates (automated)
    - Announcement (if major release)
    - Version verification
 
@@ -431,6 +541,43 @@ gh run view <run-id> --log
 
 # Re-run failed jobs
 gh run rerun <run-id>
+
+# Check specific workflow runs
+gh run list --workflow=ci-cd.yml
+gh run list --workflow=generate.yml
+gh run list --workflow=publish.yml
+```
+
+#### Release Please Not Creating PR
+
+```bash
+# Ensure commits follow conventional commit format
+git log --oneline -10
+
+# Check if release PR already exists
+gh pr list --label "autorelease: pending"
+
+# Manually trigger Release Please workflow
+gh workflow run publish.yml
+
+# Check workflow logs
+gh run list --workflow=publish.yml
+```
+
+#### OpenAPI Spec Update Fails
+
+```bash
+# Check if INPUT_JSON_URL repository variable is set
+gh variable list
+
+# Set the variable if missing
+gh variable set INPUT_JSON_URL --body "https://raw.githubusercontent.com/near/near-jsonrpc-client-rs/master/openapi.json"
+
+# Manually trigger the workflow
+gh workflow run generate.yml
+
+# Or with custom URL
+gh workflow run generate.yml -f openapi_url="https://custom-url.com/openapi.json"
 ```
 
 #### SPM Cannot Resolve Package
@@ -536,13 +683,23 @@ swift package show-dependencies
 
 ### Pre-Release Checklist
 
+**For Automated Releases (Release Please):**
+- [ ] All PRs use conventional commit format
+- [ ] All tests passing in CI/CD workflow
+- [ ] Code formatted (`swiftformat Sources/ Tests/ Examples/`)
+- [ ] No compiler warnings
+- [ ] Generated code up to date (if OpenAPI spec changed)
+- [ ] Documentation updated
+- [ ] Examples still work
+- [ ] Review Release Please PR before merging
+
+**For Manual Releases (Emergency Only):**
 - [ ] All tests passing (`swift test`)
 - [ ] Code formatted (`swiftformat Sources/ Tests/ Examples/`)
 - [ ] No compiler warnings
 - [ ] Generated code up to date (if OpenAPI spec changed)
 - [ ] Documentation updated
-- [ ] CHANGELOG.md updated
-- [ ] VERSION file updated
+- [ ] CHANGELOG.md manually updated
 - [ ] Migration guide (if breaking changes)
 - [ ] Examples still work
 

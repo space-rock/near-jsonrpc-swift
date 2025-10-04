@@ -6,7 +6,7 @@ This guide will help you set up your development environment for contributing to
 
 ### Required Software
 
-- **Swift**: 5.9 or higher
+- **Swift**: 6.1 or higher
 
   ```bash
   # Check version
@@ -74,11 +74,11 @@ This guide will help you set up your development environment for contributing to
 ```bash
 # Fork the repository on GitHub first
 # Then clone your fork
-git clone https://github.com/YOUR_USERNAME/jsonrpc-client.git
-cd jsonrpc-client
+git clone https://github.com/YOUR_USERNAME/near-jsonrpc-swift.git
+cd near-jsonrpc-swift
 
 # Add upstream remote
-git remote add upstream https://github.com/@near-js/jsonrpc-client.git
+git remote add upstream https://github.com/space-rock/near-jsonrpc-swift.git
 
 # Verify remotes
 git remote -v
@@ -168,7 +168,7 @@ swiftformat Sources/ Tests/ Examples/
 swiftformat --lint Sources/ Tests/ Examples/
 
 # Format with specific rules
-swiftformat --swiftversion 5.9 Sources/
+swiftformat --swiftversion 6.1 Sources/
 ```
 
 ## Code Generation Setup
@@ -282,11 +282,14 @@ The project has two test targets:
 - [NEAR RPC Documentation](https://docs.near.org/api/rpc/introduction)
 - [OpenAPI Specification](https://github.com/near/near-jsonrpc-client-rs/blob/master/openapi.json)
 - [CONTRIBUTING.md](./CONTRIBUTING.md) - Contribution guidelines
+- [DEPLOYMENT.md](./DEPLOYMENT.md) - Release and deployment procedures
 - [README.md](./README.md) - Project overview
 
 ## CI/CD Local Setup
 
 ### Running CI Checks Locally
+
+Simulate the CI/CD workflow locally:
 
 ```bash
 # Run all CI checks
@@ -297,20 +300,58 @@ cat > check-ci.sh << 'EOF'
 #!/bin/bash
 set -e
 
+echo "🐍 Setting up Python environment..."
+cd Scripts
+if [ ! -d "venv" ]; then
+  ./setup.sh
+fi
+source venv/bin/activate
+
+echo "🔄 Generating Swift code from OpenAPI spec..."
+bash codegen.sh
+deactivate
+cd ..
+
+echo "📦 Resolving Swift package..."
+swift package resolve
+
+echo "🔨 Building Swift package..."
+swift build
+
 echo "🧪 Running tests..."
 swift test
 
+echo "✨ Checking code formatting..."
 swiftformat --lint Sources/ Tests/ Examples/
 
-echo "📦 Building package..."
-swift build
-
-echo "✅ All checks passed!"
+echo "✅ All CI checks passed!"
 EOF
 
 chmod +x check-ci.sh
 ./check-ci.sh
 ```
+
+### Understanding the CI/CD Workflows
+
+The project uses three GitHub Actions workflows:
+
+1. **CI/CD** (`.github/workflows/ci-cd.yml`)
+   - Runs on every push and PR
+   - Tests on macOS 14 and Linux
+   - Generates code from OpenAPI spec
+   - Runs tests with code coverage
+   - Validates package structure
+
+2. **Daily OpenAPI Spec Fetch** (`.github/workflows/generate.yml`)
+   - Runs daily at midnight
+   - Downloads latest OpenAPI spec
+   - Regenerates Swift code if changes detected
+   - Creates PR with updates
+
+3. **Release Please** (`.github/workflows/publish.yml`)
+   - Runs on push to main
+   - Creates/updates release PR based on conventional commits
+   - Publishes release assets when release PR is merged
 
 ## Troubleshooting
 
@@ -319,7 +360,7 @@ chmod +x check-ci.sh
 #### 1. Swift Version Mismatch
 
 ```bash
-# Error: Swift 5.9 required, but 5.8 found
+# Error: Swift 6.1 required, but 5.8 found
 # Solution: Update Swift/Xcode
 
 # macOS: Update Xcode from App Store
