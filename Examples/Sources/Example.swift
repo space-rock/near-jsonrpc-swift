@@ -46,7 +46,7 @@ struct NearJsonRpcExample {
                     AccountChangesByBlockId(
                         blockId: .integer(216_862_270),
                         accountIds: ["relay.aurora"],
-                        changesType: "account_changes",
+                        changesType: .accountChanges,
                     ),
                 )
                 let response = try await client.experimentalChanges(request)
@@ -232,7 +232,7 @@ struct NearJsonRpcExample {
                     AccountChangesByBlockId(
                         blockId: .integer(216_910_612),
                         accountIds: ["aurora.pool.f863973.m0"],
-                        changesType: "account_changes",
+                        changesType: .accountChanges,
                     ),
                 )
                 let response = try await client.changes(request)
@@ -350,14 +350,62 @@ struct NearJsonRpcExample {
             // MARK: - 17. query
 
             print("\n" + String(repeating: "=", count: 80))
-            print("17. query")
+            print("17. view_account")
             print(String(repeating: "=", count: 80))
             do {
                 let request = RpcQueryRequest.viewAccountByFinality(
                     ViewAccountByFinality(
                         finality: .final,
-                        accountId: "relay.aurora",
-                        requestType: "view_account",
+                        accountId: "guestbook.near-examples.testnet",
+                        requestType: .viewAccount,
+                    ),
+                )
+                let response = try await client.query(request)
+                prettyPrint(response, label: "✓ Response")
+                successCount += 1
+            } catch {
+                let errorMsg = error.localizedDescription
+                prettyPrint(["error": errorMsg], label: "✗ Error")
+                failureCount += 1
+                failures.append((method: "query", error: errorMsg))
+            }
+
+            print("\n" + String(repeating: "=", count: 80))
+            print("17. view_code")
+            print(String(repeating: "=", count: 80))
+            do {
+                let request = RpcQueryRequest.viewCodeByBlockId(
+                    ViewCodeByBlockId(
+                        blockId: .integer(217_371_061),
+                        accountId: "guestbook.near-examples.testnet",
+                        requestType: .viewCode,
+                    ),
+                )
+                let response = try await client.query(request)
+                prettyPrint(response, label: "✓ Response")
+                successCount += 1
+            } catch {
+                let errorMsg = error.localizedDescription
+                prettyPrint(["error": errorMsg], label: "✗ Error")
+                failureCount += 1
+                failures.append((method: "query", error: errorMsg))
+            }
+
+            print("\n" + String(repeating: "=", count: 80))
+            print("17. call_function")
+            print(String(repeating: "=", count: 80))
+            do {
+                let args = ["account_id": "zavodil2.testnet"]
+                let jsonData = try JSONEncoder().encode(args)
+                let argsBase64 = jsonData.base64EncodedString()
+
+                let request = RpcQueryRequest.callFunctionBySyncCheckpoint(
+                    CallFunctionBySyncCheckpoint(
+                        syncCheckpoint: .earliestAvailable,
+                        accountId: "usdn.testnet",
+                        argsBase64: argsBase64,
+                        methodName: "ft_balance_of",
+                        requestType: .callFunction,
                     ),
                 )
                 let response = try await client.query(request)
