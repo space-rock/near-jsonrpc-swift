@@ -1,9 +1,8 @@
 # NEAR JSON-RPC Swift Client
 
-[![Swift 5.9+](https://img.shields.io/badge/Swift-5.9+-orange.svg)](https://swift.org)
-[![Platforms](https://img.shields.io/badge/platforms-iOS%2013+%20%7C%20macOS%2010.15+-lightgrey.svg)](https://developer.apple.com)
+[![Swift 6.1+](https://img.shields.io/badge/Swift-6.1+-orange.svg)](https://swift.org)
+[![CI/CD](https://github.com/space-rock/near-jsonrpc-swift/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/space-rock/near-jsonrpc-swift/actions/workflows/ci-cd.yml) [![Coverage](https://codecov.io/gh/space-rock/near-jsonrpc-swift/branch/main/graph/badge.svg?token=SHQZTQA89C)](https://codecov.io/github/space-rock/near-jsonrpc-swift)[![Platforms](https://img.shields.io/badge/platforms-iOS%2013+%20%7C%20macOS%2010.15+-lightgrey.svg)](https://developer.apple.com)
 [![SPM Compatible](https://img.shields.io/badge/SPM-compatible-brightgreen.svg)](https://swift.org/package-manager)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
 ## 🚀 Features
 
@@ -38,6 +37,15 @@ Add to your `Package.swift`:
 ```swift
 dependencies: [
     .package(url: "https://github.com/space-rock/near-jsonrpc-swift.git", from: "1.0.0")
+]
+```
+
+Then you can add the NearJsonRpcClient and NearJsonRpcTypes module products as dependency to the targets of your choosing, by adding it to the dependencies value of your targets.
+
+```swift
+dependencies: [
+    .product(name: "NearJsonRpcClient", package: "near-jsonrpc-swift"),
+    .product(name: "NearJsonRpcTypes", package: "near-jsonrpc-swift")
 ]
 ```
 
@@ -78,7 +86,7 @@ let healthResponse = try await client.health(healthRequest)
 
 ### Prerequisites
 
-- Swift 5.9 or later
+- Swift 6.1 or later
 - Xcode 15.0+ (for iOS/macOS development)
 - Python 3.8+ (for code generation)
 

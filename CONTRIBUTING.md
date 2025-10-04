@@ -6,7 +6,7 @@ Thank you for your interest in contributing to the NEAR JSON-RPC Swift Client! T
 
 ### Prerequisites
 
-- Swift 5.9 or later
+- Swift 6.1 or later
 - Xcode 15.0+ (for iOS/macOS development)
 - Python 3.8+ (for code generation)
 - Git
@@ -219,28 +219,25 @@ BREAKING CHANGE: NearJsonRpcClient is now a global actor
 1. **Ensure all tests pass**
 
    ```bash
-   pnpm test
+   swift test
    ```
 
-2. **Check code coverage**
+2. **Format code**
 
    ```bash
-   pnpm test:coverage
+   swiftformat Sources/ Tests/ Examples/
    ```
 
-   - Maintain >80% coverage
-   - Add tests for new code
-
-3. **Format code**
+3. **Build package**
 
    ```bash
-   pnpm format
+   swift build
    ```
 
 4. **Update documentation**
    - Update relevant READMEs
-   - Add JSDoc comments for public APIs
-   - Update type definitions if needed
+   - Add documentation comments for public APIs
+   - Update examples if needed
 
 ### PR Title Format
 
@@ -275,15 +272,21 @@ Brief description of changes
 - [ ] Follows code style
 - [ ] Self-reviewed code
 - [ ] Updated documentation
-- [ ] No console.logs or debug code
+- [ ] No debug print statements
+- [ ] Follows conventional commit format
 ```
 
 ### Review Process
 
-1. Automated checks must pass
+1. **Automated CI/CD checks must pass**:
+   - macOS and Linux builds
+   - All tests pass
+   - Code generation succeeds
+   - Package validation passes
 2. At least one maintainer review required
 3. Address review feedback
 4. Maintainer merges when approved
+5. Release Please will automatically create release PR if needed
 
 ## Testing Requirements
 
