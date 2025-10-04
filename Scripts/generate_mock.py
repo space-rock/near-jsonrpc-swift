@@ -1,5 +1,3 @@
-# generate_mock_json.py
-# Script to generate sample JSON files for all request and response schemas from OpenAPI spec
 import json
 import os
 import random
@@ -12,9 +10,8 @@ TARGET_DIRECTORIES = [
     ("Types tests", "../Tests/NearJsonRpcTypesTests/Mock"),
     ("Client tests", "../Tests/NearJsonRpcClientTests/Mock")
 ]
-MAX_ATTEMPTS = 5  # attempts to generate a valid sample (useful because generation uses randomness)
+MAX_ATTEMPTS = 5
 
-# --- Swift Type Name Conversion (same logic as codegen.py) ---
 def to_swift_type_name(name: str) -> str:
     """Convert schema name to Swift type name (PascalCase)"""
     if not name:
@@ -55,7 +52,7 @@ def ensure_loaded():
         _openapi = load_openapi()
         _components_schemas = _openapi.get("components", {}).get("schemas", {}) or {}
 
-# --- Helpers (same enhanced generator from previous version) ---
+
 def resolve_ref_schema(ref: str, components: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     if not ref.startswith("#/components/schemas/"):
         return None
@@ -477,14 +474,19 @@ def convert_openapi_nullable_to_jsonschema(schema):
     
     return converted
 
-def generate_sample_for_schema(schema_name: str) -> Optional[Dict[str, Any]]:
+def generate_sample_for_schema(schema_name: str) -> Optional[Any]:
     """
     Generate a sample JSON for `schema_name` and validate it against the full schema using jsonschema.
     Tries multiple attempts (because generation uses randomness). Returns first valid sample or None.
+    Note: Can return None (null in JSON) for schemas that only allow null values.
     """
     schema = _components_schemas.get(schema_name)
     if schema is None:
         print(f"⚠️  Schema '{schema_name}' not found")
+        return None
+    
+    # Special case: if schema only allows null (enum: [null]), return None immediately
+    if schema.get("enum") == [None]:
         return None
 
     # Prepare a jsonschema resolver rooted at the whole OpenAPI doc so "#/components/..." refs resolve.
@@ -513,7 +515,7 @@ def generate_sample_for_schema(schema_name: str) -> Optional[Dict[str, Any]]:
         try:
             validator = ValidatorClass(converted_schema, resolver=resolver)  # Validate against converted schema
             validator.validate(sample)
-            # success
+            # success - sample can be None for schemas that only allow null
             return sample
         except jsonschema.ValidationError as ve:
             last_error = ve
@@ -739,7 +741,9 @@ def main():
             filename = f"{swift_name}.json"
             sample = generate_sample_for_schema(schema_name)
             
-            if sample:
+            # sample can be None for schemas that only allow null (e.g., enum: [null])
+            # Check if we successfully generated (not checking for truthiness)
+            if sample is not None or _components_schemas.get(schema_name, {}).get("enum") == [None]:
                 for label, directory in TARGET_DIRECTORIES:
                     filepath = os.path.join(directory, filename)
                     with open(filepath, "w", encoding="utf-8") as f:
@@ -755,7 +759,7 @@ def main():
     
     # Now generate standalone type mocks for better coverage
     print()
-    print("📋 Generating standalone type mocks for improved coverage...")
+    print("📋 Generating standalone type mocks...")
     
     standalone_schemas = {
         name: schema for name, schema in _components_schemas.items()
@@ -793,7 +797,9 @@ def main():
             filename = f"{swift_name}.json"
             sample = generate_sample_for_schema(schema_name)
             
-            if sample:
+            # sample can be None for schemas that only allow null (e.g., enum: [null])
+            # Check if we successfully generated (not checking for truthiness)
+            if sample is not None or _components_schemas.get(schema_name, {}).get("enum") == [None]:
                 for label, directory in TARGET_DIRECTORIES:
                     filepath = os.path.join(directory, filename)
                     with open(filepath, "w", encoding="utf-8") as f:

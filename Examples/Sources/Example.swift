@@ -1,9 +1,3 @@
-//
-// Example.swift
-// Comprehensive example usage of the NEAR Protocol JSON-RPC Client
-// All methods are demonstrated in the order they appear in openapi.json
-//
-
 import Foundation
 import NearJsonRpcClient
 import NearJsonRpcTypes
@@ -13,12 +7,12 @@ struct NearJsonRpcExample {
     static func main() async {
         await demonstrateAllMethods()
     }
-    
+
     // Helper function to pretty print JSON
-    static func prettyPrint<T: Encodable>(_ value: T, label: String) {
+    static func prettyPrint(_ value: some Encodable, label: String) {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        
+
         if let jsonData = try? encoder.encode(value),
            let jsonString = String(data: jsonData, encoding: .utf8) {
             print("\n\(label):")
@@ -27,29 +21,30 @@ struct NearJsonRpcExample {
             print("\n\(label): [Unable to encode]")
         }
     }
-    
+
     static func demonstrateAllMethods() async {
         // Track test results
         var successCount = 0
         var failureCount = 0
         var failures: [(method: String, error: String)] = []
-        
+
         do {
             // Initialize the client
             let client = try NearRpcClient(baseURLString: "https://archival-rpc.testnet.fastnear.com")
-            
+
             print("🚀 NEAR JSON-RPC Client - Complete Method Examples")
             print("===================================================")
             print("All methods in OpenAPI spec order with prettified JSON output\n")
-            
+
             // MARK: - 1. EXPERIMENTAL_changes
+
             print("\n" + String(repeating: "=", count: 80))
             print("1. EXPERIMENTAL_changes")
             print(String(repeating: "=", count: 80))
             do {
                 let request = RpcStateChangesInBlockByTypeRequest.accountChangesByBlockId(
                     AccountChangesByBlockId(
-                        blockId: .integer(216862270),
+                        blockId: .integer(216_862_270),
                         accountIds: ["relay.aurora"],
                         changesType: "account_changes"
                     )
@@ -63,13 +58,14 @@ struct NearJsonRpcExample {
                 failureCount += 1
                 failures.append((method: "EXPERIMENTAL_changes", error: errorMsg))
             }
-            
+
             // MARK: - 2. EXPERIMENTAL_changes_in_block
+
             print("\n" + String(repeating: "=", count: 80))
             print("2. EXPERIMENTAL_changes_in_block")
             print(String(repeating: "=", count: 80))
             do {
-                let request = RpcStateChangesInBlockRequest.blockId(.integer(216910612))
+                let request = RpcStateChangesInBlockRequest.blockId(.integer(216_910_612))
                 let response = try await client.experimentalChangesInBlock(request)
                 prettyPrint(response, label: "✓ Response")
                 successCount += 1
@@ -79,14 +75,15 @@ struct NearJsonRpcExample {
                 failureCount += 1
                 failures.append((method: "EXPERIMENTAL_changes_in_block", error: errorMsg))
             }
-            
+
             // MARK: - 3. EXPERIMENTAL_congestion_level
+
             print("\n" + String(repeating: "=", count: 80))
             print("3. EXPERIMENTAL_congestion_level")
             print(String(repeating: "=", count: 80))
             do {
                 let request = RpcCongestionLevelRequest.blockShardId(
-                    BlockShardId(blockId: .integer(216838942), shardId: 1)
+                    BlockShardId(blockId: .integer(216_838_942), shardId: 1)
                 )
                 let response = try await client.experimentalCongestionLevel(request)
                 prettyPrint(response, label: "✓ Response")
@@ -97,8 +94,9 @@ struct NearJsonRpcExample {
                 failureCount += 1
                 failures.append((method: "EXPERIMENTAL_congestion_level", error: errorMsg))
             }
-            
+
             // MARK: - 4. EXPERIMENTAL_genesis_config
+
             print("\n" + String(repeating: "=", count: 80))
             print("4. EXPERIMENTAL_genesis_config")
             print(String(repeating: "=", count: 80))
@@ -113,8 +111,9 @@ struct NearJsonRpcExample {
                 failureCount += 1
                 failures.append((method: "EXPERIMENTAL_genesis_config", error: errorMsg))
             }
-            
+
             // MARK: - 5. EXPERIMENTAL_maintenance_windows
+
             print("\n" + String(repeating: "=", count: 80))
             print("5. EXPERIMENTAL_maintenance_windows")
             print(String(repeating: "=", count: 80))
@@ -130,8 +129,9 @@ struct NearJsonRpcExample {
                 failureCount += 1
                 failures.append((method: "EXPERIMENTAL_maintenance_windows", error: errorMsg))
             }
-            
+
             // MARK: - 6. EXPERIMENTAL_receipt
+
             print("\n" + String(repeating: "=", count: 80))
             print("6. EXPERIMENTAL_receipt")
             print(String(repeating: "=", count: 80))
@@ -147,8 +147,9 @@ struct NearJsonRpcExample {
                 failureCount += 1
                 failures.append((method: "EXPERIMENTAL_receipt", error: errorMsg))
             }
-            
+
             // MARK: - 7. EXPERIMENTAL_split_storage_info
+
             print("\n" + String(repeating: "=", count: 80))
             print("7. EXPERIMENTAL_split_storage_info")
             print(String(repeating: "=", count: 80))
@@ -163,8 +164,9 @@ struct NearJsonRpcExample {
                 failureCount += 1
                 failures.append((method: "EXPERIMENTAL_split_storage_info", error: errorMsg))
             }
-            
+
             // MARK: - 8. EXPERIMENTAL_tx_status
+
             print("\n" + String(repeating: "=", count: 80))
             print("8. EXPERIMENTAL_tx_status")
             print(String(repeating: "=", count: 80))
@@ -185,13 +187,14 @@ struct NearJsonRpcExample {
                 failureCount += 1
                 failures.append((method: "EXPERIMENTAL_tx_status", error: errorMsg))
             }
-            
+
             // MARK: - 9. EXPERIMENTAL_validators_ordered
+
             print("\n" + String(repeating: "=", count: 80))
             print("9. EXPERIMENTAL_validators_ordered")
             print(String(repeating: "=", count: 80))
             do {
-                let request = RpcValidatorsOrderedRequest(blockId: .integer(216910612))
+                let request = RpcValidatorsOrderedRequest(blockId: .integer(216_910_612))
                 let response = try await client.experimentalValidatorsOrdered(request)
                 prettyPrint(response, label: "✓ Response")
                 successCount += 1
@@ -201,8 +204,9 @@ struct NearJsonRpcExample {
                 failureCount += 1
                 failures.append((method: "EXPERIMENTAL_validators_ordered", error: errorMsg))
             }
-            
+
             // MARK: - 10. block
+
             print("\n" + String(repeating: "=", count: 80))
             print("10. block")
             print(String(repeating: "=", count: 80))
@@ -217,15 +221,16 @@ struct NearJsonRpcExample {
                 failureCount += 1
                 failures.append((method: "block", error: errorMsg))
             }
-            
+
             // MARK: - 11. changes
+
             print("\n" + String(repeating: "=", count: 80))
             print("11. changes")
             print(String(repeating: "=", count: 80))
             do {
                 let request = RpcStateChangesInBlockByTypeRequest.accountChangesByBlockId(
                     AccountChangesByBlockId(
-                        blockId: .integer(216910612),
+                        blockId: .integer(216_910_612),
                         accountIds: ["aurora.pool.f863973.m0"],
                         changesType: "account_changes"
                     )
@@ -239,8 +244,9 @@ struct NearJsonRpcExample {
                 failureCount += 1
                 failures.append((method: "changes", error: errorMsg))
             }
-            
+
             // MARK: - 12. chunk
+
             print("\n" + String(repeating: "=", count: 80))
             print("12. chunk")
             print(String(repeating: "=", count: 80))
@@ -248,7 +254,7 @@ struct NearJsonRpcExample {
                 // Get a chunk hash from the latest block
                 let blockRequest = RpcBlockRequest.finality(.final)
                 let block = try await client.block(blockRequest)
-                
+
                 if let chunkHash = block.chunks.first?.chunkHash {
                     let request = RpcChunkRequest.chunkId(chunkHash)
                     let response = try await client.chunk(request)
@@ -265,8 +271,9 @@ struct NearJsonRpcExample {
                 failureCount += 1
                 failures.append((method: "chunk", error: errorMsg))
             }
-            
+
             // MARK: - 13. gas_price
+
             print("\n" + String(repeating: "=", count: 80))
             print("13. gas_price")
             print(String(repeating: "=", count: 80))
@@ -281,8 +288,9 @@ struct NearJsonRpcExample {
                 failureCount += 1
                 failures.append((method: "gas_price", error: errorMsg))
             }
-            
+
             // MARK: - 14. health
+
             print("\n" + String(repeating: "=", count: 80))
             print("14. health")
             print(String(repeating: "=", count: 80))
@@ -301,8 +309,9 @@ struct NearJsonRpcExample {
                 failureCount += 1
                 failures.append((method: "health", error: errorMsg))
             }
-            
+
             // MARK: - 15. network_info
+
             print("\n" + String(repeating: "=", count: 80))
             print("15. network_info")
             print(String(repeating: "=", count: 80))
@@ -317,15 +326,16 @@ struct NearJsonRpcExample {
                 failureCount += 1
                 failures.append((method: "network_info", error: errorMsg))
             }
-            
+
             // MARK: - 16. next_light_client_block
+
             print("\n" + String(repeating: "=", count: 80))
             print("16. next_light_client_block")
             print(String(repeating: "=", count: 80))
             do {
                 let blockRequest = RpcBlockRequest.finality(.final)
                 let block = try await client.block(blockRequest)
-                
+
                 let request = RpcLightClientNextBlockRequest(lastBlockHash: block.header.hash)
                 let response = try await client.nextLightClientBlock(request)
                 prettyPrint(response, label: "✓ Response")
@@ -336,8 +346,9 @@ struct NearJsonRpcExample {
                 failureCount += 1
                 failures.append((method: "next_light_client_block", error: errorMsg))
             }
-            
+
             // MARK: - 17. query
+
             print("\n" + String(repeating: "=", count: 80))
             print("17. query")
             print(String(repeating: "=", count: 80))
@@ -358,8 +369,9 @@ struct NearJsonRpcExample {
                 failureCount += 1
                 failures.append((method: "query", error: errorMsg))
             }
-            
+
             // MARK: - 18. status
+
             print("\n" + String(repeating: "=", count: 80))
             print("18. status")
             print(String(repeating: "=", count: 80))
@@ -374,8 +386,9 @@ struct NearJsonRpcExample {
                 failureCount += 1
                 failures.append((method: "status", error: errorMsg))
             }
-            
+
             // MARK: - 19. tx
+
             print("\n" + String(repeating: "=", count: 80))
             print("19. tx")
             print(String(repeating: "=", count: 80))
@@ -396,8 +409,9 @@ struct NearJsonRpcExample {
                 failureCount += 1
                 failures.append((method: "tx", error: errorMsg))
             }
-            
+
             // MARK: - 20. validators
+
             print("\n" + String(repeating: "=", count: 80))
             print("20. validators")
             print(String(repeating: "=", count: 80))
@@ -412,15 +426,16 @@ struct NearJsonRpcExample {
                 failureCount += 1
                 failures.append((method: "validators", error: errorMsg))
             }
-            
+
             // MARK: - Summary
+
             print("\n" + String(repeating: "=", count: 80))
             print("📊 TEST SUMMARY")
             print(String(repeating: "=", count: 80))
             print("\n✅ Successful: \(successCount)")
             print("❌ Failed: \(failureCount)")
             print("📈 Total: \(successCount + failureCount)")
-            
+
             if !failures.isEmpty {
                 print("\n" + String(repeating: "-", count: 80))
                 print("Failed Methods:")
@@ -430,7 +445,7 @@ struct NearJsonRpcExample {
                     print("   Error: \(failure.error)")
                 }
             }
-            
+
             print("\n" + String(repeating: "=", count: 80))
         } catch {
             print("\n❌ Fatal Error: \(error)")

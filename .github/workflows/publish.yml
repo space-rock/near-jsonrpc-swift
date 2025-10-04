@@ -1,0 +1,160 @@
+name: Release & Tag
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'VERSION'
+      - 'Sources/**'
+      - 'Package.swift'
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  release:
+    name: Create GitHub Release
+    runs-on: macos-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Swift
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: '5.9'
+
+      - name: Read version
+        id: version
+        run: |
+          VERSION=$(cat VERSION)
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "📦 Package version: ${VERSION}"
+
+      - name: Check if tag exists
+        id: check-tag
+        run: |
+          if git rev-parse "v${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
+            echo "Tag v${{ steps.version.outputs.version }} already exists"
+            echo "tag_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "Tag v${{ steps.version.outputs.version }} does not exist"
+            echo "tag_exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Validate Swift Package
+        if: steps.check-tag.outputs.tag_exists == 'false'
+        run: |
+          echo "🔍 Validating Swift Package..."
+          swift package resolve
+          swift build
+          swift test
+          echo "✅ Package validation successful"
+
+      - name: Build documentation
+        if: steps.check-tag.outputs.tag_exists == 'false'
+        run: |
+          if swift package plugin --list | grep -q "generate-documentation"; then
+            echo "📚 Generating documentation..."
+            swift package generate-documentation
+          else
+            echo "⚠️ swift-docc-plugin not available, skipping documentation generation"
+          fi
+
+      - name: Create Release Archive
+        if: steps.check-tag.outputs.tag_exists == 'false'
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          ARCHIVE_NAME="NearJsonRpc-${VERSION}.zip"
+          
+          zip -r "${ARCHIVE_NAME}" \
+            Sources/ \
+            Package.swift \
+            README.md \
+            LICENSE \
+            VERSION \
+            Examples/ \
+            -x "*.DS_Store" \
+            -x ".build/*" \
+            -x ".swiftpm/*"
+          
+          echo "archive_name=${ARCHIVE_NAME}" >> $GITHUB_OUTPUT
+          echo "✅ Created release archive: ${ARCHIVE_NAME}"
+        id: archive
+
+      - name: Generate Release Notes
+        if: steps.check-tag.outputs.tag_exists == 'false'
+        id: release-notes
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          
+          cat > release_notes.md << EOF
+          # NearJsonRpc Swift SDK v${VERSION}
+          
+          ## 📦 Installation
+          
+          ### Swift Package Manager
+          
+          Add the following to your \`Package.swift\` file:
+          
+          \`\`\`swift
+          dependencies: [
+              .package(url: "https://github.com/space-rock/near-jsonrpc-swift.git", from: "${VERSION}")
+          ]
+          \`\`\`
+          
+          Or add it directly in Xcode:
+          1. File → Add Package Dependencies
+          2. Enter: \`https://github.com/space-rock/near-jsonrpc-swift.git\`
+          3. Select version: \`${VERSION}\`
+          
+          ## 📚 Documentation
+          
+          See the [README](https://github.com/space-rock/near-jsonrpc-swift/blob/main/README.md) for usage examples and API documentation.
+          
+          ## 🔧 Supported Platforms
+          
+          - iOS 13.0+
+          - macOS 10.15+
+          
+          ## 📝 Changes
+          
+          For detailed changes, see the commit history.
+          EOF
+          
+          echo "✅ Generated release notes"
+
+      - name: Create Git Tag
+        if: steps.check-tag.outputs.tag_exists == 'false'
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "v${VERSION}" -m "Release version ${VERSION}"
+          git push origin "v${VERSION}"
+          echo "✅ Created and pushed tag v${VERSION}"
+
+      - name: Create GitHub Release
+        if: steps.check-tag.outputs.tag_exists == 'false'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: v${{ steps.version.outputs.version }}
+          body_path: release_notes.md
+          files: ${{ steps.archive.outputs.archive_name }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release Summary
+        if: steps.check-tag.outputs.tag_exists == 'false'
+        run: |
+          echo "🎉 Release v${{ steps.version.outputs.version }} published successfully!"
+          echo "📦 Package URL: https://github.com/space-rock/near-jsonrpc-swift"
+          echo "🏷️ Tag: v${{ steps.version.outputs.version }}"

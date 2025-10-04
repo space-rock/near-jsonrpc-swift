@@ -1,13 +1,10 @@
 #!/bin/bash
-# regenerate_all.sh
-# Complete regeneration script for NEAR Swift SDK
 
-set -e  # Exit on error
+set -e
 
-echo "🔄 Starting complete regeneration..."
+echo "🔄 Starting code generation..."
 echo ""
 
-# Navigate to scripts directory
 cd "$(dirname "$0")"
 
 echo "📝 Step 1/3: Generating Swift types and methods..."
@@ -23,3 +20,14 @@ echo ""
 echo "📝 Step 3/3: Generating test files..."
 python3 generate_tests.py
 echo "✅ All test files generated"
+echo ""
+
+echo "📝 Step 4/4: Formatting Swift code..."
+cd ..
+if command -v swiftformat &> /dev/null; then
+    swiftformat Sources/ Tests/ Examples/
+    echo "✅ Swift code formatted"
+else
+    echo "⚠️  swiftformat not installed, skipping code formatting"
+    echo "   Install with: brew install swiftformat"
+fi

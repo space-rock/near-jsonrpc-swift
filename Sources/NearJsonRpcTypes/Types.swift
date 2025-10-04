@@ -1,21 +1,17 @@
-//
-// Types.swift
-// Generated from OpenAPI specification
-//
-
 import Foundation
 
 // MARK: - AnyCodable Helper
+
 public struct AnyCodable: Codable {
     public let value: Any
-    
+
     public init(_ value: Any) {
         self.value = value
     }
-    
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
-        
+
         if container.decodeNil() {
             value = NSNull()
         } else if let bool = try? container.decode(Bool.self) {
@@ -27,17 +23,17 @@ public struct AnyCodable: Codable {
         } else if let string = try? container.decode(String.self) {
             value = string
         } else if let array = try? container.decode([AnyCodable].self) {
-            value = array.map { $0.value }
+            value = array.map(\.value)
         } else if let dictionary = try? container.decode([String: AnyCodable].self) {
             value = dictionary.mapValues { $0.value }
         } else {
             throw DecodingError.dataCorruptedError(in: container, debugDescription: "Cannot decode AnyCodable")
         }
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
-        
+
         if value is NSNull {
             try container.encodeNil()
         } else if let bool = value as? Bool {
@@ -53,30 +49,35 @@ public struct AnyCodable: Codable {
         } else if let dictionary = value as? [String: Any] {
             try container.encode(dictionary.mapValues(AnyCodable.init))
         } else {
-            throw EncodingError.invalidValue(value, EncodingError.Context(codingPath: [], debugDescription: "Cannot encode AnyCodable"))
+            throw EncodingError.invalidValue(
+                value,
+                EncodingError.Context(codingPath: [], debugDescription: "Cannot encode AnyCodable")
+            )
         }
     }
 }
 
 // MARK: - AnyCodingKey Helper
+
 /// A dynamic CodingKey that can represent any string key
 struct AnyCodingKey: CodingKey {
     var stringValue: String
     var intValue: Int?
-    
+
     init(stringValue: String) {
         self.stringValue = stringValue
-        self.intValue = nil
+        intValue = nil
     }
-    
+
     init?(intValue: Int) {
-        self.stringValue = String(intValue)
+        stringValue = String(intValue)
         self.intValue = intValue
     }
 }
 
 // MARK: - Decoding Diagnostics Helpers
-fileprivate func describeCodingKey(_ key: CodingKey) -> String {
+
+private func describeCodingKey(_ key: CodingKey) -> String {
     if let intValue = key.intValue {
         return "[\(intValue)]"
     }
@@ -84,7 +85,7 @@ fileprivate func describeCodingKey(_ key: CodingKey) -> String {
     return stringValue.isEmpty ? "\"\"" : stringValue
 }
 
-fileprivate func describeCodingPath(_ codingPath: [CodingKey]) -> String {
+private func describeCodingPath(_ codingPath: [CodingKey]) -> String {
     guard !codingPath.isEmpty else { return "<root>" }
     var description = ""
     for key in codingPath {
@@ -100,16 +101,16 @@ fileprivate func describeCodingPath(_ codingPath: [CodingKey]) -> String {
     return description
 }
 
-fileprivate func describeDecodingError(_ error: Error) -> String {
+private func describeDecodingError(_ error: Error) -> String {
     if let decodingError = error as? DecodingError {
         switch decodingError {
-        case .typeMismatch(_, let context):
+        case let .typeMismatch(_, context):
             return "typeMismatch at \(describeCodingPath(context.codingPath)): \(context.debugDescription)"
-        case .valueNotFound(_, let context):
+        case let .valueNotFound(_, context):
             return "valueNotFound at \(describeCodingPath(context.codingPath)): \(context.debugDescription)"
-        case .keyNotFound(let key, let context):
+        case let .keyNotFound(key, context):
             return "keyNotFound for key '\(describeCodingKey(key))' at \(describeCodingPath(context.codingPath)): \(context.debugDescription)"
-        case .dataCorrupted(let context):
+        case let .dataCorrupted(context):
             return "dataCorrupted at \(describeCodingPath(context.codingPath)): \(context.debugDescription)"
         @unknown default:
             return "Unknown DecodingError: \(decodingError)"
@@ -119,21 +120,26 @@ fileprivate func describeDecodingError(_ error: Error) -> String {
 }
 
 // MARK: - AccountId
+
 public typealias AccountId = String
 
 // MARK: - AccountIdValidityRulesVersion
+
 public typealias AccountIdValidityRulesVersion = Int
 
 // MARK: - CryptoHash
+
 public typealias CryptoHash = String
 
 // MARK: - Direction
+
 public enum Direction: String, Codable, Sendable {
     case left = "Left"
     case right = "Right"
 }
 
 // MARK: - Finality
+
 public enum Finality: String, Codable, Sendable {
     case optimistic
     case nearFinal = "near-final"
@@ -141,15 +147,18 @@ public enum Finality: String, Codable, Sendable {
 }
 
 // MARK: - FunctionArgs
+
 public typealias FunctionArgs = String
 
 // MARK: - LogSummaryStyle
+
 public enum LogSummaryStyle: String, Codable, Sendable {
     case plain
     case colored
 }
 
 // MARK: - MethodResolveError
+
 public enum MethodResolveError: String, Codable, Sendable {
     case methodEmptyName = "MethodEmptyName"
     case methodNotFound = "MethodNotFound"
@@ -157,61 +166,77 @@ public enum MethodResolveError: String, Codable, Sendable {
 }
 
 // MARK: - MutableConfigValue
+
 public typealias MutableConfigValue = String
 
 // MARK: - NearGas
+
 public typealias NearGas = UInt64
 
 // MARK: - NearToken
+
 public typealias NearToken = String
 
 // MARK: - ProtocolVersionCheckConfig
+
 public enum ProtocolVersionCheckConfig: String, Codable, Sendable {
     case next = "Next"
     case nextNext = "NextNext"
 }
 
 // MARK: - PublicKey
+
 public typealias PublicKey = String
 
 // MARK: - ShardId
+
 public typealias ShardId = UInt64
 
 // MARK: - Signature
+
 public typealias Signature = String
 
 // MARK: - SignedTransaction
+
 public typealias SignedTransaction = Data
 
 // MARK: - StorageGetMode
+
 public enum StorageGetMode: String, Codable, Sendable {
     case flatStorage = "FlatStorage"
     case trie = "Trie"
 }
 
 // MARK: - StoreKey
+
 public typealias StoreKey = String
 
 // MARK: - StoreValue
+
 public typealias StoreValue = String
 
 // MARK: - SyncCheckpoint
+
 public enum SyncCheckpoint: String, Codable, Sendable {
     case genesis
     case earliestAvailable = "earliest_available"
 }
 
 // MARK: - GenesisConfigRequest
+
 public struct GenesisConfigRequest: Codable {
     public init() {}
-    
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         if !container.decodeNil() {
-            throw DecodingError.typeMismatch(GenesisConfigRequest.self, DecodingError.Context(codingPath: [], debugDescription: "Expected null"))
+            throw DecodingError.typeMismatch(
+                GenesisConfigRequest.self,
+                DecodingError.Context(codingPath: [], debugDescription: "Expected null")
+            )
         }
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encodeNil()
@@ -219,16 +244,20 @@ public struct GenesisConfigRequest: Codable {
 }
 
 // MARK: - RpcClientConfigRequest
+
 public struct RpcClientConfigRequest: Codable {
     public init() {}
-    
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         if !container.decodeNil() {
-            throw DecodingError.typeMismatch(RpcClientConfigRequest.self, DecodingError.Context(codingPath: [], debugDescription: "Expected null"))
+            throw DecodingError.typeMismatch(
+                RpcClientConfigRequest.self,
+                DecodingError.Context(codingPath: [], debugDescription: "Expected null")
+            )
         }
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encodeNil()
@@ -236,16 +265,20 @@ public struct RpcClientConfigRequest: Codable {
 }
 
 // MARK: - RpcHealthRequest
+
 public struct RpcHealthRequest: Codable {
     public init() {}
-    
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         if !container.decodeNil() {
-            throw DecodingError.typeMismatch(RpcHealthRequest.self, DecodingError.Context(codingPath: [], debugDescription: "Expected null"))
+            throw DecodingError.typeMismatch(
+                RpcHealthRequest.self,
+                DecodingError.Context(codingPath: [], debugDescription: "Expected null")
+            )
         }
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encodeNil()
@@ -253,16 +286,20 @@ public struct RpcHealthRequest: Codable {
 }
 
 // MARK: - RpcHealthResponse
+
 public struct RpcHealthResponse: Codable {
     public init() {}
-    
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         if !container.decodeNil() {
-            throw DecodingError.typeMismatch(RpcHealthResponse.self, DecodingError.Context(codingPath: [], debugDescription: "Expected null"))
+            throw DecodingError.typeMismatch(
+                RpcHealthResponse.self,
+                DecodingError.Context(codingPath: [], debugDescription: "Expected null")
+            )
         }
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encodeNil()
@@ -270,16 +307,20 @@ public struct RpcHealthResponse: Codable {
 }
 
 // MARK: - RpcNetworkInfoRequest
+
 public struct RpcNetworkInfoRequest: Codable {
     public init() {}
-    
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         if !container.decodeNil() {
-            throw DecodingError.typeMismatch(RpcNetworkInfoRequest.self, DecodingError.Context(codingPath: [], debugDescription: "Expected null"))
+            throw DecodingError.typeMismatch(
+                RpcNetworkInfoRequest.self,
+                DecodingError.Context(codingPath: [], debugDescription: "Expected null")
+            )
         }
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encodeNil()
@@ -287,16 +328,20 @@ public struct RpcNetworkInfoRequest: Codable {
 }
 
 // MARK: - RpcStatusRequest
+
 public struct RpcStatusRequest: Codable {
     public init() {}
-    
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         if !container.decodeNil() {
-            throw DecodingError.typeMismatch(RpcStatusRequest.self, DecodingError.Context(codingPath: [], debugDescription: "Expected null"))
+            throw DecodingError.typeMismatch(
+                RpcStatusRequest.self,
+                DecodingError.Context(codingPath: [], debugDescription: "Expected null")
+            )
         }
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encodeNil()
@@ -304,6 +349,7 @@ public struct RpcStatusRequest: Codable {
 }
 
 // MARK: - AccessKeyPermission
+
 public enum AccessKeyPermission: Codable {
     case functionCall(FunctionCallPermission)
     case fullAccess
@@ -313,13 +359,14 @@ public enum AccessKeyPermission: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("FunctionCall") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("FunctionCall") == .orderedSame }) {
                     let value = try container.decode(FunctionCallPermission.self, forKey: matchingKey)
                     self = .functionCall(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".functionCall: \(describeDecodingError(error))")
         }
         if let value = try? decoder.singleValueContainer().decode(String.self), value == "FullAccess" {
@@ -337,7 +384,8 @@ public enum AccessKeyPermission: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for AccessKeyPermission\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for AccessKeyPermission:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for AccessKeyPermission:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -348,7 +396,7 @@ public enum AccessKeyPermission: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .functionCall(let value):
+        case let .functionCall(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .functionCall)
         case .fullAccess:
@@ -359,6 +407,7 @@ public enum AccessKeyPermission: Codable {
 }
 
 // MARK: - AccessKeyPermissionView
+
 public struct AccessKeyPermissionViewOneOfFunctionCallInline: Codable {
     public let allowance: NearToken?
     public let methodNames: [String]
@@ -388,13 +437,17 @@ public enum AccessKeyPermissionView: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("FunctionCall") == .orderedSame }) {
-                    let value = try container.decode(AccessKeyPermissionViewOneOfFunctionCallInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("FunctionCall") == .orderedSame }) {
+                    let value = try container.decode(
+                        AccessKeyPermissionViewOneOfFunctionCallInline.self,
+                        forKey: matchingKey
+                    )
                     self = .functionCall(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".functionCall: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -408,7 +461,8 @@ public enum AccessKeyPermissionView: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for AccessKeyPermissionView\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for AccessKeyPermissionView:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for AccessKeyPermissionView:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -419,7 +473,7 @@ public enum AccessKeyPermissionView: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .functionCall(let value):
+        case let .functionCall(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .functionCall)
         case .fullAccess:
@@ -430,6 +484,7 @@ public enum AccessKeyPermissionView: Codable {
 }
 
 // MARK: - ActionErrorKind
+
 public struct ActionErrorKindOneOfAccountAlreadyExistsInline: Codable {
     public let accountId: AccountId
 
@@ -673,7 +728,8 @@ public enum ActionErrorKind: Codable {
     case onlyImplicitAccountCreationAllowed(ActionErrorKindOneOfOnlyImplicitAccountCreationAllowedInline)
     case deleteAccountWithLargeState(ActionErrorKindOneOfDeleteAccountWithLargeStateInline)
     case delegateActionInvalidSignature
-    case delegateActionSenderDoesNotMatchTxReceiver(ActionErrorKindOneOfDelegateActionSenderDoesNotMatchTxReceiverInline)
+    case delegateActionSenderDoesNotMatchTxReceiver(ActionErrorKindOneOfDelegateActionSenderDoesNotMatchTxReceiverInline
+    )
     case delegateActionExpired
     case delegateActionAccessKeyError(InvalidAccessKeyError)
     case delegateActionInvalidNonce(ActionErrorKindOneOfDelegateActionInvalidNonceInline)
@@ -685,193 +741,281 @@ public enum ActionErrorKind: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("AccountAlreadyExists") == .orderedSame }) {
-                    let value = try container.decode(ActionErrorKindOneOfAccountAlreadyExistsInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("AccountAlreadyExists") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfAccountAlreadyExistsInline.self,
+                        forKey: matchingKey
+                    )
                     self = .accountAlreadyExists(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".accountAlreadyExists: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("AccountDoesNotExist") == .orderedSame }) {
-                    let value = try container.decode(ActionErrorKindOneOfAccountDoesNotExistInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("AccountDoesNotExist") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfAccountDoesNotExistInline.self,
+                        forKey: matchingKey
+                    )
                     self = .accountDoesNotExist(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".accountDoesNotExist: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("CreateAccountOnlyByRegistrar") == .orderedSame }) {
-                    let value = try container.decode(ActionErrorKindOneOfCreateAccountOnlyByRegistrarInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("CreateAccountOnlyByRegistrar") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfCreateAccountOnlyByRegistrarInline.self,
+                        forKey: matchingKey
+                    )
                     self = .createAccountOnlyByRegistrar(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".createAccountOnlyByRegistrar: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("CreateAccountNotAllowed") == .orderedSame }) {
-                    let value = try container.decode(ActionErrorKindOneOfCreateAccountNotAllowedInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("CreateAccountNotAllowed") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfCreateAccountNotAllowedInline.self,
+                        forKey: matchingKey
+                    )
                     self = .createAccountNotAllowed(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".createAccountNotAllowed: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ActorNoPermission") == .orderedSame }) {
-                    let value = try container.decode(ActionErrorKindOneOfActorNoPermissionInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("ActorNoPermission") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfActorNoPermissionInline.self,
+                        forKey: matchingKey
+                    )
                     self = .actorNoPermission(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".actorNoPermission: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DeleteKeyDoesNotExist") == .orderedSame }) {
-                    let value = try container.decode(ActionErrorKindOneOfDeleteKeyDoesNotExistInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("DeleteKeyDoesNotExist") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfDeleteKeyDoesNotExistInline.self,
+                        forKey: matchingKey
+                    )
                     self = .deleteKeyDoesNotExist(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".deleteKeyDoesNotExist: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("AddKeyAlreadyExists") == .orderedSame }) {
-                    let value = try container.decode(ActionErrorKindOneOfAddKeyAlreadyExistsInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("AddKeyAlreadyExists") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfAddKeyAlreadyExistsInline.self,
+                        forKey: matchingKey
+                    )
                     self = .addKeyAlreadyExists(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".addKeyAlreadyExists: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DeleteAccountStaking") == .orderedSame }) {
-                    let value = try container.decode(ActionErrorKindOneOfDeleteAccountStakingInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("DeleteAccountStaking") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfDeleteAccountStakingInline.self,
+                        forKey: matchingKey
+                    )
                     self = .deleteAccountStaking(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".deleteAccountStaking: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("LackBalanceForState") == .orderedSame }) {
-                    let value = try container.decode(ActionErrorKindOneOfLackBalanceForStateInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("LackBalanceForState") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfLackBalanceForStateInline.self,
+                        forKey: matchingKey
+                    )
                     self = .lackBalanceForState(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".lackBalanceForState: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("TriesToUnstake") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("TriesToUnstake") == .orderedSame }) {
                     let value = try container.decode(ActionErrorKindOneOfTriesToUnstakeInline.self, forKey: matchingKey)
                     self = .triesToUnstake(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".triesToUnstake: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("TriesToStake") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("TriesToStake") == .orderedSame }) {
                     let value = try container.decode(ActionErrorKindOneOfTriesToStakeInline.self, forKey: matchingKey)
                     self = .triesToStake(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".triesToStake: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("InsufficientStake") == .orderedSame }) {
-                    let value = try container.decode(ActionErrorKindOneOfInsufficientStakeInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("InsufficientStake") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfInsufficientStakeInline.self,
+                        forKey: matchingKey
+                    )
                     self = .insufficientStake(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".insufficientStake: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("FunctionCallError") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("FunctionCallError") == .orderedSame
+                    }) {
                     let value = try container.decode(FunctionCallError.self, forKey: matchingKey)
                     self = .functionCallError(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".functionCallError: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("NewReceiptValidationError") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("NewReceiptValidationError") == .orderedSame
+                    }) {
                     let value = try container.decode(ReceiptValidationError.self, forKey: matchingKey)
                     self = .newReceiptValidationError(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".newReceiptValidationError: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("OnlyImplicitAccountCreationAllowed") == .orderedSame }) {
-                    let value = try container.decode(ActionErrorKindOneOfOnlyImplicitAccountCreationAllowedInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("OnlyImplicitAccountCreationAllowed") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfOnlyImplicitAccountCreationAllowedInline.self,
+                        forKey: matchingKey
+                    )
                     self = .onlyImplicitAccountCreationAllowed(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".onlyImplicitAccountCreationAllowed: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DeleteAccountWithLargeState") == .orderedSame }) {
-                    let value = try container.decode(ActionErrorKindOneOfDeleteAccountWithLargeStateInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("DeleteAccountWithLargeState") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfDeleteAccountWithLargeStateInline.self,
+                        forKey: matchingKey
+                    )
                     self = .deleteAccountWithLargeState(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".deleteAccountWithLargeState: \(describeDecodingError(error))")
         }
-        if let value = try? decoder.singleValueContainer().decode(String.self), value == "DelegateActionInvalidSignature" {
+        if let value = try? decoder.singleValueContainer().decode(String.self),
+           value == "DelegateActionInvalidSignature" {
             self = .delegateActionInvalidSignature
             return
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DelegateActionSenderDoesNotMatchTxReceiver") == .orderedSame }) {
-                    let value = try container.decode(ActionErrorKindOneOfDelegateActionSenderDoesNotMatchTxReceiverInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue
+                            .caseInsensitiveCompare("DelegateActionSenderDoesNotMatchTxReceiver") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfDelegateActionSenderDoesNotMatchTxReceiverInline.self,
+                        forKey: matchingKey
+                    )
                     self = .delegateActionSenderDoesNotMatchTxReceiver(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".delegateActionSenderDoesNotMatchTxReceiver: \(describeDecodingError(error))")
         }
         if let value = try? decoder.singleValueContainer().decode(String.self), value == "DelegateActionExpired" {
@@ -880,46 +1024,67 @@ public enum ActionErrorKind: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DelegateActionAccessKeyError") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("DelegateActionAccessKeyError") == .orderedSame
+                    }) {
                     let value = try container.decode(InvalidAccessKeyError.self, forKey: matchingKey)
                     self = .delegateActionAccessKeyError(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".delegateActionAccessKeyError: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DelegateActionInvalidNonce") == .orderedSame }) {
-                    let value = try container.decode(ActionErrorKindOneOfDelegateActionInvalidNonceInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("DelegateActionInvalidNonce") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfDelegateActionInvalidNonceInline.self,
+                        forKey: matchingKey
+                    )
                     self = .delegateActionInvalidNonce(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".delegateActionInvalidNonce: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DelegateActionNonceTooLarge") == .orderedSame }) {
-                    let value = try container.decode(ActionErrorKindOneOfDelegateActionNonceTooLargeInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("DelegateActionNonceTooLarge") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfDelegateActionNonceTooLargeInline.self,
+                        forKey: matchingKey
+                    )
                     self = .delegateActionNonceTooLarge(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".delegateActionNonceTooLarge: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("GlobalContractDoesNotExist") == .orderedSame }) {
-                    let value = try container.decode(ActionErrorKindOneOfGlobalContractDoesNotExistInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("GlobalContractDoesNotExist") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfGlobalContractDoesNotExistInline.self,
+                        forKey: matchingKey
+                    )
                     self = .globalContractDoesNotExist(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".globalContractDoesNotExist: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -933,7 +1098,8 @@ public enum ActionErrorKind: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for ActionErrorKind\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for ActionErrorKind:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ActionErrorKind:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -964,67 +1130,67 @@ public enum ActionErrorKind: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .accountAlreadyExists(let value):
+        case let .accountAlreadyExists(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .accountAlreadyExists)
-        case .accountDoesNotExist(let value):
+        case let .accountDoesNotExist(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .accountDoesNotExist)
-        case .createAccountOnlyByRegistrar(let value):
+        case let .createAccountOnlyByRegistrar(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .createAccountOnlyByRegistrar)
-        case .createAccountNotAllowed(let value):
+        case let .createAccountNotAllowed(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .createAccountNotAllowed)
-        case .actorNoPermission(let value):
+        case let .actorNoPermission(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .actorNoPermission)
-        case .deleteKeyDoesNotExist(let value):
+        case let .deleteKeyDoesNotExist(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deleteKeyDoesNotExist)
-        case .addKeyAlreadyExists(let value):
+        case let .addKeyAlreadyExists(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .addKeyAlreadyExists)
-        case .deleteAccountStaking(let value):
+        case let .deleteAccountStaking(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deleteAccountStaking)
-        case .lackBalanceForState(let value):
+        case let .lackBalanceForState(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .lackBalanceForState)
-        case .triesToUnstake(let value):
+        case let .triesToUnstake(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .triesToUnstake)
-        case .triesToStake(let value):
+        case let .triesToStake(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .triesToStake)
-        case .insufficientStake(let value):
+        case let .insufficientStake(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .insufficientStake)
-        case .functionCallError(let value):
+        case let .functionCallError(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .functionCallError)
-        case .newReceiptValidationError(let value):
+        case let .newReceiptValidationError(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .newReceiptValidationError)
-        case .onlyImplicitAccountCreationAllowed(let value):
+        case let .onlyImplicitAccountCreationAllowed(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .onlyImplicitAccountCreationAllowed)
-        case .deleteAccountWithLargeState(let value):
+        case let .deleteAccountWithLargeState(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deleteAccountWithLargeState)
-        case .delegateActionSenderDoesNotMatchTxReceiver(let value):
+        case let .delegateActionSenderDoesNotMatchTxReceiver(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .delegateActionSenderDoesNotMatchTxReceiver)
-        case .delegateActionAccessKeyError(let value):
+        case let .delegateActionAccessKeyError(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .delegateActionAccessKeyError)
-        case .delegateActionInvalidNonce(let value):
+        case let .delegateActionInvalidNonce(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .delegateActionInvalidNonce)
-        case .delegateActionNonceTooLarge(let value):
+        case let .delegateActionNonceTooLarge(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .delegateActionNonceTooLarge)
-        case .globalContractDoesNotExist(let value):
+        case let .globalContractDoesNotExist(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .globalContractDoesNotExist)
         case .delegateActionInvalidSignature:
@@ -1038,6 +1204,7 @@ public enum ActionErrorKind: Codable {
 }
 
 // MARK: - ActionView
+
 public struct ActionViewOneOfDeployContractInline: Codable {
     public let code: String
 
@@ -1217,145 +1384,180 @@ public enum ActionView: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DeployContract") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("DeployContract") == .orderedSame }) {
                     let value = try container.decode(ActionViewOneOfDeployContractInline.self, forKey: matchingKey)
                     self = .deployContract(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".deployContract: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("FunctionCall") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("FunctionCall") == .orderedSame }) {
                     let value = try container.decode(ActionViewOneOfFunctionCallInline.self, forKey: matchingKey)
                     self = .functionCall(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".functionCall: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("Transfer") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("Transfer") == .orderedSame }) {
                     let value = try container.decode(ActionViewOneOfTransferInline.self, forKey: matchingKey)
                     self = .transfer(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".transfer: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("Stake") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("Stake") == .orderedSame }) {
                     let value = try container.decode(ActionViewOneOfStakeInline.self, forKey: matchingKey)
                     self = .stake(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".stake: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("AddKey") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("AddKey") == .orderedSame }) {
                     let value = try container.decode(ActionViewOneOfAddKeyInline.self, forKey: matchingKey)
                     self = .addKey(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".addKey: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DeleteKey") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("DeleteKey") == .orderedSame }) {
                     let value = try container.decode(ActionViewOneOfDeleteKeyInline.self, forKey: matchingKey)
                     self = .deleteKey(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".deleteKey: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DeleteAccount") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("DeleteAccount") == .orderedSame }) {
                     let value = try container.decode(ActionViewOneOfDeleteAccountInline.self, forKey: matchingKey)
                     self = .deleteAccount(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".deleteAccount: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("Delegate") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("Delegate") == .orderedSame }) {
                     let value = try container.decode(ActionViewOneOfDelegateInline.self, forKey: matchingKey)
                     self = .delegate(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".delegate: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DeployGlobalContract") == .orderedSame }) {
-                    let value = try container.decode(ActionViewOneOfDeployGlobalContractInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("DeployGlobalContract") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionViewOneOfDeployGlobalContractInline.self,
+                        forKey: matchingKey
+                    )
                     self = .deployGlobalContract(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".deployGlobalContract: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DeployGlobalContractByAccountId") == .orderedSame }) {
-                    let value = try container.decode(ActionViewOneOfDeployGlobalContractByAccountIdInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("DeployGlobalContractByAccountId") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionViewOneOfDeployGlobalContractByAccountIdInline.self,
+                        forKey: matchingKey
+                    )
                     self = .deployGlobalContractByAccountId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".deployGlobalContractByAccountId: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("UseGlobalContract") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("UseGlobalContract") == .orderedSame
+                    }) {
                     let value = try container.decode(ActionViewOneOfUseGlobalContractInline.self, forKey: matchingKey)
                     self = .useGlobalContract(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".useGlobalContract: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("UseGlobalContractByAccountId") == .orderedSame }) {
-                    let value = try container.decode(ActionViewOneOfUseGlobalContractByAccountIdInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("UseGlobalContractByAccountId") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionViewOneOfUseGlobalContractByAccountIdInline.self,
+                        forKey: matchingKey
+                    )
                     self = .useGlobalContractByAccountId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".useGlobalContractByAccountId: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DeterministicStateInit") == .orderedSame }) {
-                    let value = try container.decode(ActionViewOneOfDeterministicStateInitInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("DeterministicStateInit") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionViewOneOfDeterministicStateInitInline.self,
+                        forKey: matchingKey
+                    )
                     self = .deterministicStateInit(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".deterministicStateInit: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -1369,7 +1571,8 @@ public enum ActionView: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for ActionView\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for ActionView:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ActionView:\n" + decodingErrors
+                .joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -1392,43 +1595,43 @@ public enum ActionView: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .deployContract(let value):
+        case let .deployContract(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deployContract)
-        case .functionCall(let value):
+        case let .functionCall(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .functionCall)
-        case .transfer(let value):
+        case let .transfer(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .transfer)
-        case .stake(let value):
+        case let .stake(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .stake)
-        case .addKey(let value):
+        case let .addKey(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .addKey)
-        case .deleteKey(let value):
+        case let .deleteKey(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deleteKey)
-        case .deleteAccount(let value):
+        case let .deleteAccount(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deleteAccount)
-        case .delegate(let value):
+        case let .delegate(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .delegate)
-        case .deployGlobalContract(let value):
+        case let .deployGlobalContract(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deployGlobalContract)
-        case .deployGlobalContractByAccountId(let value):
+        case let .deployGlobalContractByAccountId(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deployGlobalContractByAccountId)
-        case .useGlobalContract(let value):
+        case let .useGlobalContract(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .useGlobalContract)
-        case .useGlobalContractByAccountId(let value):
+        case let .useGlobalContractByAccountId(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .useGlobalContractByAccountId)
-        case .deterministicStateInit(let value):
+        case let .deterministicStateInit(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deterministicStateInit)
         case .createAccount:
@@ -1439,6 +1642,7 @@ public enum ActionView: Codable {
 }
 
 // MARK: - ActionsValidationError
+
 public struct ActionsValidationErrorOneOfTotalPrepaidGasExceededInline: Codable {
     public let limit: NearGas
     public let totalPrepaidGas: NearGas
@@ -1618,8 +1822,12 @@ public enum ActionsValidationError: Codable {
     case delegateActionMustBeOnlyOne
     case unsupportedProtocolFeature(ActionsValidationErrorOneOfUnsupportedProtocolFeatureInline)
     case invalidDeterministicStateInitReceiver(ActionsValidationErrorOneOfInvalidDeterministicStateInitReceiverInline)
-    case deterministicStateInitKeyLengthExceeded(ActionsValidationErrorOneOfDeterministicStateInitKeyLengthExceededInline)
-    case deterministicStateInitValueLengthExceeded(ActionsValidationErrorOneOfDeterministicStateInitValueLengthExceededInline)
+    case deterministicStateInitKeyLengthExceeded(
+        ActionsValidationErrorOneOfDeterministicStateInitKeyLengthExceededInline
+    )
+    case deterministicStateInitValueLengthExceeded(
+        ActionsValidationErrorOneOfDeterministicStateInitValueLengthExceededInline
+    )
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -1630,46 +1838,70 @@ public enum ActionsValidationError: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("TotalPrepaidGasExceeded") == .orderedSame }) {
-                    let value = try container.decode(ActionsValidationErrorOneOfTotalPrepaidGasExceededInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("TotalPrepaidGasExceeded") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionsValidationErrorOneOfTotalPrepaidGasExceededInline.self,
+                        forKey: matchingKey
+                    )
                     self = .totalPrepaidGasExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".totalPrepaidGasExceeded: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("TotalNumberOfActionsExceeded") == .orderedSame }) {
-                    let value = try container.decode(ActionsValidationErrorOneOfTotalNumberOfActionsExceededInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("TotalNumberOfActionsExceeded") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionsValidationErrorOneOfTotalNumberOfActionsExceededInline.self,
+                        forKey: matchingKey
+                    )
                     self = .totalNumberOfActionsExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".totalNumberOfActionsExceeded: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("AddKeyMethodNamesNumberOfBytesExceeded") == .orderedSame }) {
-                    let value = try container.decode(ActionsValidationErrorOneOfAddKeyMethodNamesNumberOfBytesExceededInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("AddKeyMethodNamesNumberOfBytesExceeded") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionsValidationErrorOneOfAddKeyMethodNamesNumberOfBytesExceededInline.self,
+                        forKey: matchingKey
+                    )
                     self = .addKeyMethodNamesNumberOfBytesExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".addKeyMethodNamesNumberOfBytesExceeded: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("AddKeyMethodNameLengthExceeded") == .orderedSame }) {
-                    let value = try container.decode(ActionsValidationErrorOneOfAddKeyMethodNameLengthExceededInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("AddKeyMethodNameLengthExceeded") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionsValidationErrorOneOfAddKeyMethodNameLengthExceededInline.self,
+                        forKey: matchingKey
+                    )
                     self = .addKeyMethodNameLengthExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".addKeyMethodNameLengthExceeded: \(describeDecodingError(error))")
         }
         if let value = try? decoder.singleValueContainer().decode(String.self), value == "IntegerOverflow" {
@@ -1678,57 +1910,87 @@ public enum ActionsValidationError: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidAccountId") == .orderedSame }) {
-                    let value = try container.decode(ActionsValidationErrorOneOfInvalidAccountIdInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("InvalidAccountId") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionsValidationErrorOneOfInvalidAccountIdInline.self,
+                        forKey: matchingKey
+                    )
                     self = .invalidAccountId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".invalidAccountId: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ContractSizeExceeded") == .orderedSame }) {
-                    let value = try container.decode(ActionsValidationErrorOneOfContractSizeExceededInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("ContractSizeExceeded") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionsValidationErrorOneOfContractSizeExceededInline.self,
+                        forKey: matchingKey
+                    )
                     self = .contractSizeExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".contractSizeExceeded: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("FunctionCallMethodNameLengthExceeded") == .orderedSame }) {
-                    let value = try container.decode(ActionsValidationErrorOneOfFunctionCallMethodNameLengthExceededInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("FunctionCallMethodNameLengthExceeded") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionsValidationErrorOneOfFunctionCallMethodNameLengthExceededInline.self,
+                        forKey: matchingKey
+                    )
                     self = .functionCallMethodNameLengthExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".functionCallMethodNameLengthExceeded: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("FunctionCallArgumentsLengthExceeded") == .orderedSame }) {
-                    let value = try container.decode(ActionsValidationErrorOneOfFunctionCallArgumentsLengthExceededInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("FunctionCallArgumentsLengthExceeded") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionsValidationErrorOneOfFunctionCallArgumentsLengthExceededInline.self,
+                        forKey: matchingKey
+                    )
                     self = .functionCallArgumentsLengthExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".functionCallArgumentsLengthExceeded: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("UnsuitableStakingKey") == .orderedSame }) {
-                    let value = try container.decode(ActionsValidationErrorOneOfUnsuitableStakingKeyInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("UnsuitableStakingKey") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionsValidationErrorOneOfUnsuitableStakingKeyInline.self,
+                        forKey: matchingKey
+                    )
                     self = .unsuitableStakingKey(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".unsuitableStakingKey: \(describeDecodingError(error))")
         }
         if let value = try? decoder.singleValueContainer().decode(String.self), value == "FunctionCallZeroAttachedGas" {
@@ -1741,46 +2003,72 @@ public enum ActionsValidationError: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("UnsupportedProtocolFeature") == .orderedSame }) {
-                    let value = try container.decode(ActionsValidationErrorOneOfUnsupportedProtocolFeatureInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("UnsupportedProtocolFeature") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionsValidationErrorOneOfUnsupportedProtocolFeatureInline.self,
+                        forKey: matchingKey
+                    )
                     self = .unsupportedProtocolFeature(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".unsupportedProtocolFeature: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidDeterministicStateInitReceiver") == .orderedSame }) {
-                    let value = try container.decode(ActionsValidationErrorOneOfInvalidDeterministicStateInitReceiverInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("InvalidDeterministicStateInitReceiver") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionsValidationErrorOneOfInvalidDeterministicStateInitReceiverInline.self,
+                        forKey: matchingKey
+                    )
                     self = .invalidDeterministicStateInitReceiver(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".invalidDeterministicStateInitReceiver: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DeterministicStateInitKeyLengthExceeded") == .orderedSame }) {
-                    let value = try container.decode(ActionsValidationErrorOneOfDeterministicStateInitKeyLengthExceededInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue
+                            .caseInsensitiveCompare("DeterministicStateInitKeyLengthExceeded") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionsValidationErrorOneOfDeterministicStateInitKeyLengthExceededInline.self,
+                        forKey: matchingKey
+                    )
                     self = .deterministicStateInitKeyLengthExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".deterministicStateInitKeyLengthExceeded: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DeterministicStateInitValueLengthExceeded") == .orderedSame }) {
-                    let value = try container.decode(ActionsValidationErrorOneOfDeterministicStateInitValueLengthExceededInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue
+                            .caseInsensitiveCompare("DeterministicStateInitValueLengthExceeded") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionsValidationErrorOneOfDeterministicStateInitValueLengthExceededInline.self,
+                        forKey: matchingKey
+                    )
                     self = .deterministicStateInitValueLengthExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".deterministicStateInitValueLengthExceeded: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -1794,7 +2082,8 @@ public enum ActionsValidationError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for ActionsValidationError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for ActionsValidationError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ActionsValidationError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -1817,43 +2106,43 @@ public enum ActionsValidationError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .totalPrepaidGasExceeded(let value):
+        case let .totalPrepaidGasExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .totalPrepaidGasExceeded)
-        case .totalNumberOfActionsExceeded(let value):
+        case let .totalNumberOfActionsExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .totalNumberOfActionsExceeded)
-        case .addKeyMethodNamesNumberOfBytesExceeded(let value):
+        case let .addKeyMethodNamesNumberOfBytesExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .addKeyMethodNamesNumberOfBytesExceeded)
-        case .addKeyMethodNameLengthExceeded(let value):
+        case let .addKeyMethodNameLengthExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .addKeyMethodNameLengthExceeded)
-        case .invalidAccountId(let value):
+        case let .invalidAccountId(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .invalidAccountId)
-        case .contractSizeExceeded(let value):
+        case let .contractSizeExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .contractSizeExceeded)
-        case .functionCallMethodNameLengthExceeded(let value):
+        case let .functionCallMethodNameLengthExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .functionCallMethodNameLengthExceeded)
-        case .functionCallArgumentsLengthExceeded(let value):
+        case let .functionCallArgumentsLengthExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .functionCallArgumentsLengthExceeded)
-        case .unsuitableStakingKey(let value):
+        case let .unsuitableStakingKey(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .unsuitableStakingKey)
-        case .unsupportedProtocolFeature(let value):
+        case let .unsupportedProtocolFeature(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .unsupportedProtocolFeature)
-        case .invalidDeterministicStateInitReceiver(let value):
+        case let .invalidDeterministicStateInitReceiver(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .invalidDeterministicStateInitReceiver)
-        case .deterministicStateInitKeyLengthExceeded(let value):
+        case let .deterministicStateInitKeyLengthExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deterministicStateInitKeyLengthExceeded)
-        case .deterministicStateInitValueLengthExceeded(let value):
+        case let .deterministicStateInitValueLengthExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deterministicStateInitValueLengthExceeded)
         case .deleteActionMustBeFinal:
@@ -1873,6 +2162,7 @@ public enum ActionsValidationError: Codable {
 }
 
 // MARK: - BandwidthRequests
+
 public enum BandwidthRequests: Codable {
     case v1(BandwidthRequestsV1)
 
@@ -1881,13 +2171,14 @@ public enum BandwidthRequests: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("V1") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("V1") == .orderedSame }) {
                     let value = try container.decode(BandwidthRequestsV1.self, forKey: matchingKey)
                     self = .v1(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".v1: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -1901,7 +2192,8 @@ public enum BandwidthRequests: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for BandwidthRequests\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for BandwidthRequests:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for BandwidthRequests:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -1912,7 +2204,7 @@ public enum BandwidthRequests: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .v1(let value):
+        case let .v1(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .v1)
         }
@@ -1920,6 +2212,7 @@ public enum BandwidthRequests: Codable {
 }
 
 // MARK: - BlockId
+
 public enum BlockId: Codable {
     case integer(UInt64)
     case cryptoHash(CryptoHash)
@@ -1931,14 +2224,14 @@ public enum BlockId: Codable {
             let value = try decoder.singleValueContainer().decode(UInt64.self)
             self = .integer(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".integer: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(CryptoHash.self)
             self = .cryptoHash(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".cryptoHash: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -1952,17 +2245,18 @@ public enum BlockId: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for BlockId\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for BlockId:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for BlockId:\n" + decodingErrors
+                .joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .integer(let value):
+        case let .integer(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .cryptoHash(let value):
+        case let .cryptoHash(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
         }
@@ -1970,6 +2264,7 @@ public enum BlockId: Codable {
 }
 
 // MARK: - CompilationError
+
 public struct CompilationErrorOneOfCodeDoesNotExistInline: Codable {
     public let accountId: AccountId
 
@@ -2000,35 +2295,48 @@ public enum CompilationError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("CodeDoesNotExist") == .orderedSame }) {
-                    let value = try container.decode(CompilationErrorOneOfCodeDoesNotExistInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("CodeDoesNotExist") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        CompilationErrorOneOfCodeDoesNotExistInline.self,
+                        forKey: matchingKey
+                    )
                     self = .codeDoesNotExist(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".codeDoesNotExist: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("PrepareError") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("PrepareError") == .orderedSame }) {
                     let value = try container.decode(PrepareError.self, forKey: matchingKey)
                     self = .prepareError(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".prepareError: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("WasmerCompileError") == .orderedSame }) {
-                    let value = try container.decode(CompilationErrorOneOfWasmerCompileErrorInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("WasmerCompileError") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        CompilationErrorOneOfWasmerCompileErrorInline.self,
+                        forKey: matchingKey
+                    )
                     self = .wasmerCompileError(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".wasmerCompileError: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -2042,7 +2350,8 @@ public enum CompilationError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for CompilationError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for CompilationError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for CompilationError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -2055,13 +2364,13 @@ public enum CompilationError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .codeDoesNotExist(let value):
+        case let .codeDoesNotExist(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .codeDoesNotExist)
-        case .prepareError(let value):
+        case let .prepareError(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .prepareError)
-        case .wasmerCompileError(let value):
+        case let .wasmerCompileError(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .wasmerCompileError)
         }
@@ -2069,6 +2378,7 @@ public enum CompilationError: Codable {
 }
 
 // MARK: - DeterministicAccountStateInit
+
 public enum DeterministicAccountStateInit: Codable {
     case v1(DeterministicAccountStateInitV1)
 
@@ -2077,13 +2387,14 @@ public enum DeterministicAccountStateInit: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("V1") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("V1") == .orderedSame }) {
                     let value = try container.decode(DeterministicAccountStateInitV1.self, forKey: matchingKey)
                     self = .v1(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".v1: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -2097,7 +2408,9 @@ public enum DeterministicAccountStateInit: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for DeterministicAccountStateInit\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for DeterministicAccountStateInit:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for DeterministicAccountStateInit:\n" + decodingErrors
+                    .joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -2108,7 +2421,7 @@ public enum DeterministicAccountStateInit: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .v1(let value):
+        case let .v1(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .v1)
         }
@@ -2116,6 +2429,7 @@ public enum DeterministicAccountStateInit: Codable {
 }
 
 // MARK: - ExecutionStatusView
+
 public enum ExecutionStatusView: Codable {
     case unknown
     case failure(TxExecutionError)
@@ -2131,35 +2445,40 @@ public enum ExecutionStatusView: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("Failure") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("Failure") == .orderedSame }) {
                     let value = try container.decode(TxExecutionError.self, forKey: matchingKey)
                     self = .failure(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".failure: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("SuccessValue") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("SuccessValue") == .orderedSame }) {
                     let value = try container.decode(String.self, forKey: matchingKey)
                     self = .successValue(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".successValue: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("SuccessReceiptId") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("SuccessReceiptId") == .orderedSame
+                    }) {
                     let value = try container.decode(CryptoHash.self, forKey: matchingKey)
                     self = .successReceiptId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".successReceiptId: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -2173,7 +2492,8 @@ public enum ExecutionStatusView: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for ExecutionStatusView\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for ExecutionStatusView:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ExecutionStatusView:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -2186,13 +2506,13 @@ public enum ExecutionStatusView: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .failure(let value):
+        case let .failure(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .failure)
-        case .successValue(let value):
+        case let .successValue(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .successValue)
-        case .successReceiptId(let value):
+        case let .successReceiptId(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .successReceiptId)
         case .unknown:
@@ -2203,6 +2523,7 @@ public enum ExecutionStatusView: Codable {
 }
 
 // MARK: - ExternalStorageLocation
+
 public struct ExternalStorageLocationOneOfS3Inline: Codable {
     public let bucket: String
     public let region: String
@@ -2246,35 +2567,41 @@ public enum ExternalStorageLocation: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("S3") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("S3") == .orderedSame }) {
                     let value = try container.decode(ExternalStorageLocationOneOfS3Inline.self, forKey: matchingKey)
                     self = .s3(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".s3: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("Filesystem") == .orderedSame }) {
-                    let value = try container.decode(ExternalStorageLocationOneOfFilesystemInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("Filesystem") == .orderedSame }) {
+                    let value = try container.decode(
+                        ExternalStorageLocationOneOfFilesystemInline.self,
+                        forKey: matchingKey
+                    )
                     self = .filesystem(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".filesystem: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("GCS") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("GCS") == .orderedSame }) {
                     let value = try container.decode(ExternalStorageLocationOneOfGCSInline.self, forKey: matchingKey)
                     self = .gcs(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".gcs: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -2288,7 +2615,8 @@ public enum ExternalStorageLocation: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for ExternalStorageLocation\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for ExternalStorageLocation:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ExternalStorageLocation:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -2301,13 +2629,13 @@ public enum ExternalStorageLocation: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .s3(let value):
+        case let .s3(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .s3)
-        case .filesystem(let value):
+        case let .filesystem(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .filesystem)
-        case .gcs(let value):
+        case let .gcs(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .gcs)
         }
@@ -2315,6 +2643,7 @@ public enum ExternalStorageLocation: Codable {
 }
 
 // MARK: - FinalExecutionStatus
+
 public enum FinalExecutionStatus: Codable {
     case notStarted
     case started
@@ -2334,24 +2663,26 @@ public enum FinalExecutionStatus: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("Failure") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("Failure") == .orderedSame }) {
                     let value = try container.decode(TxExecutionError.self, forKey: matchingKey)
                     self = .failure(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".failure: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("SuccessValue") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("SuccessValue") == .orderedSame }) {
                     let value = try container.decode(String.self, forKey: matchingKey)
                     self = .successValue(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".successValue: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -2365,7 +2696,8 @@ public enum FinalExecutionStatus: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for FinalExecutionStatus\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for FinalExecutionStatus:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for FinalExecutionStatus:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -2377,10 +2709,10 @@ public enum FinalExecutionStatus: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .failure(let value):
+        case let .failure(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .failure)
-        case .successValue(let value):
+        case let .successValue(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .successValue)
         case .notStarted:
@@ -2394,6 +2726,7 @@ public enum FinalExecutionStatus: Codable {
 }
 
 // MARK: - FunctionCallError
+
 public struct FunctionCallErrorOneOfLinkErrorInline: Codable {
     public let msg: String
 
@@ -2420,73 +2753,83 @@ public enum FunctionCallError: Codable {
             let value = try decoder.singleValueContainer().decode(String.self)
             self = .string(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".string: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("CompilationError") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("CompilationError") == .orderedSame
+                    }) {
                     let value = try container.decode(CompilationError.self, forKey: matchingKey)
                     self = .compilationError(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".compilationError: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("LinkError") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("LinkError") == .orderedSame }) {
                     let value = try container.decode(FunctionCallErrorOneOfLinkErrorInline.self, forKey: matchingKey)
                     self = .linkError(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".linkError: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("MethodResolveError") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("MethodResolveError") == .orderedSame
+                    }) {
                     let value = try container.decode(MethodResolveError.self, forKey: matchingKey)
                     self = .methodResolveError(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".methodResolveError: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("WasmTrap") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("WasmTrap") == .orderedSame }) {
                     let value = try container.decode(WasmTrap.self, forKey: matchingKey)
                     self = .wasmTrap(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".wasmTrap: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("HostError") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("HostError") == .orderedSame }) {
                     let value = try container.decode(HostError.self, forKey: matchingKey)
                     self = .hostError(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".hostError: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ExecutionError") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("ExecutionError") == .orderedSame }) {
                     let value = try container.decode(String.self, forKey: matchingKey)
                     self = .executionError(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".executionError: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -2500,7 +2843,8 @@ public enum FunctionCallError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for FunctionCallError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for FunctionCallError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for FunctionCallError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -2516,25 +2860,25 @@ public enum FunctionCallError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .compilationError(let value):
+        case let .compilationError(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .compilationError)
-        case .linkError(let value):
+        case let .linkError(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .linkError)
-        case .methodResolveError(let value):
+        case let .methodResolveError(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .methodResolveError)
-        case .wasmTrap(let value):
+        case let .wasmTrap(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .wasmTrap)
-        case .hostError(let value):
+        case let .hostError(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .hostError)
-        case .executionError(let value):
+        case let .executionError(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .executionError)
-        case .string(let value):
+        case let .string(value):
             var singleContainer = encoder.singleValueContainer()
             try singleContainer.encode(value)
         }
@@ -2542,6 +2886,7 @@ public enum FunctionCallError: Codable {
 }
 
 // MARK: - GlobalContractDeployMode
+
 public enum GlobalContractDeployMode: Codable {
     case codeHash
     case accountId
@@ -2568,7 +2913,8 @@ public enum GlobalContractDeployMode: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for GlobalContractDeployMode\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for GlobalContractDeployMode:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for GlobalContractDeployMode:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -2586,6 +2932,7 @@ public enum GlobalContractDeployMode: Codable {
 }
 
 // MARK: - GlobalContractIdentifier
+
 public enum GlobalContractIdentifier: Codable {
     case codeHash(CryptoHash)
     case accountId(AccountId)
@@ -2595,24 +2942,26 @@ public enum GlobalContractIdentifier: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("CodeHash") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("CodeHash") == .orderedSame }) {
                     let value = try container.decode(CryptoHash.self, forKey: matchingKey)
                     self = .codeHash(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".codeHash: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("AccountId") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("AccountId") == .orderedSame }) {
                     let value = try container.decode(AccountId.self, forKey: matchingKey)
                     self = .accountId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".accountId: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -2626,7 +2975,8 @@ public enum GlobalContractIdentifier: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for GlobalContractIdentifier\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for GlobalContractIdentifier:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for GlobalContractIdentifier:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -2638,10 +2988,10 @@ public enum GlobalContractIdentifier: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .codeHash(let value):
+        case let .codeHash(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .codeHash)
-        case .accountId(let value):
+        case let .accountId(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .accountId)
         }
@@ -2649,6 +2999,7 @@ public enum GlobalContractIdentifier: Codable {
 }
 
 // MARK: - GlobalContractIdentifierView
+
 public enum GlobalContractIdentifierView: Codable {
     case cryptoHash(CryptoHash)
     case accountId(AccountId)
@@ -2660,14 +3011,14 @@ public enum GlobalContractIdentifierView: Codable {
             let value = try decoder.singleValueContainer().decode(CryptoHash.self)
             self = .cryptoHash(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".cryptoHash: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(AccountId.self)
             self = .accountId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".accountId: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -2681,17 +3032,19 @@ public enum GlobalContractIdentifierView: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for GlobalContractIdentifierView\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for GlobalContractIdentifierView:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for GlobalContractIdentifierView:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .cryptoHash(let value):
+        case let .cryptoHash(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .accountId(let value):
+        case let .accountId(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
         }
@@ -2699,6 +3052,7 @@ public enum GlobalContractIdentifierView: Codable {
 }
 
 // MARK: - HostError
+
 public struct HostErrorOneOfGuestPanicInline: Codable {
     public let panicMsg: String
 
@@ -2984,13 +3338,14 @@ public enum HostError: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("GuestPanic") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("GuestPanic") == .orderedSame }) {
                     let value = try container.decode(HostErrorOneOfGuestPanicInline.self, forKey: matchingKey)
                     self = .guestPanic(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".guestPanic: \(describeDecodingError(error))")
         }
         if let value = try? decoder.singleValueContainer().decode(String.self), value == "IntegerOverflow" {
@@ -2999,16 +3354,20 @@ public enum HostError: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidPromiseIndex") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("InvalidPromiseIndex") == .orderedSame
+                    }) {
                     let value = try container.decode(HostErrorOneOfInvalidPromiseIndexInline.self, forKey: matchingKey)
                     self = .invalidPromiseIndex(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".invalidPromiseIndex: \(describeDecodingError(error))")
         }
-        if let value = try? decoder.singleValueContainer().decode(String.self), value == "CannotAppendActionToJointPromise" {
+        if let value = try? decoder.singleValueContainer().decode(String.self),
+           value == "CannotAppendActionToJointPromise" {
             self = .cannotAppendActionToJointPromise
             return
         }
@@ -3018,35 +3377,50 @@ public enum HostError: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidPromiseResultIndex") == .orderedSame }) {
-                    let value = try container.decode(HostErrorOneOfInvalidPromiseResultIndexInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("InvalidPromiseResultIndex") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        HostErrorOneOfInvalidPromiseResultIndexInline.self,
+                        forKey: matchingKey
+                    )
                     self = .invalidPromiseResultIndex(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".invalidPromiseResultIndex: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidRegisterId") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("InvalidRegisterId") == .orderedSame
+                    }) {
                     let value = try container.decode(HostErrorOneOfInvalidRegisterIdInline.self, forKey: matchingKey)
                     self = .invalidRegisterId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".invalidRegisterId: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("IteratorWasInvalidated") == .orderedSame }) {
-                    let value = try container.decode(HostErrorOneOfIteratorWasInvalidatedInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("IteratorWasInvalidated") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        HostErrorOneOfIteratorWasInvalidatedInline.self,
+                        forKey: matchingKey
+                    )
                     self = .iteratorWasInvalidated(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".iteratorWasInvalidated: \(describeDecodingError(error))")
         }
         if let value = try? decoder.singleValueContainer().decode(String.self), value == "MemoryAccessViolation" {
@@ -3055,24 +3429,30 @@ public enum HostError: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidReceiptIndex") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("InvalidReceiptIndex") == .orderedSame
+                    }) {
                     let value = try container.decode(HostErrorOneOfInvalidReceiptIndexInline.self, forKey: matchingKey)
                     self = .invalidReceiptIndex(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".invalidReceiptIndex: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidIteratorIndex") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("InvalidIteratorIndex") == .orderedSame
+                    }) {
                     let value = try container.decode(HostErrorOneOfInvalidIteratorIndexInline.self, forKey: matchingKey)
                     self = .invalidIteratorIndex(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".invalidIteratorIndex: \(describeDecodingError(error))")
         }
         if let value = try? decoder.singleValueContainer().decode(String.self), value == "InvalidAccountId" {
@@ -3089,145 +3469,195 @@ public enum HostError: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ProhibitedInView") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("ProhibitedInView") == .orderedSame
+                    }) {
                     let value = try container.decode(HostErrorOneOfProhibitedInViewInline.self, forKey: matchingKey)
                     self = .prohibitedInView(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".prohibitedInView: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("NumberOfLogsExceeded") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("NumberOfLogsExceeded") == .orderedSame
+                    }) {
                     let value = try container.decode(HostErrorOneOfNumberOfLogsExceededInline.self, forKey: matchingKey)
                     self = .numberOfLogsExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".numberOfLogsExceeded: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("KeyLengthExceeded") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("KeyLengthExceeded") == .orderedSame
+                    }) {
                     let value = try container.decode(HostErrorOneOfKeyLengthExceededInline.self, forKey: matchingKey)
                     self = .keyLengthExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".keyLengthExceeded: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ValueLengthExceeded") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("ValueLengthExceeded") == .orderedSame
+                    }) {
                     let value = try container.decode(HostErrorOneOfValueLengthExceededInline.self, forKey: matchingKey)
                     self = .valueLengthExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".valueLengthExceeded: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("TotalLogLengthExceeded") == .orderedSame }) {
-                    let value = try container.decode(HostErrorOneOfTotalLogLengthExceededInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("TotalLogLengthExceeded") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        HostErrorOneOfTotalLogLengthExceededInline.self,
+                        forKey: matchingKey
+                    )
                     self = .totalLogLengthExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".totalLogLengthExceeded: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("NumberPromisesExceeded") == .orderedSame }) {
-                    let value = try container.decode(HostErrorOneOfNumberPromisesExceededInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("NumberPromisesExceeded") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        HostErrorOneOfNumberPromisesExceededInline.self,
+                        forKey: matchingKey
+                    )
                     self = .numberPromisesExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".numberPromisesExceeded: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("NumberInputDataDependenciesExceeded") == .orderedSame }) {
-                    let value = try container.decode(HostErrorOneOfNumberInputDataDependenciesExceededInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("NumberInputDataDependenciesExceeded") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        HostErrorOneOfNumberInputDataDependenciesExceededInline.self,
+                        forKey: matchingKey
+                    )
                     self = .numberInputDataDependenciesExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".numberInputDataDependenciesExceeded: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ReturnedValueLengthExceeded") == .orderedSame }) {
-                    let value = try container.decode(HostErrorOneOfReturnedValueLengthExceededInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("ReturnedValueLengthExceeded") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        HostErrorOneOfReturnedValueLengthExceededInline.self,
+                        forKey: matchingKey
+                    )
                     self = .returnedValueLengthExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".returnedValueLengthExceeded: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ContractSizeExceeded") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("ContractSizeExceeded") == .orderedSame
+                    }) {
                     let value = try container.decode(HostErrorOneOfContractSizeExceededInline.self, forKey: matchingKey)
                     self = .contractSizeExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".contractSizeExceeded: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("Deprecated") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("Deprecated") == .orderedSame }) {
                     let value = try container.decode(HostErrorOneOfDeprecatedInline.self, forKey: matchingKey)
                     self = .deprecated(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".deprecated: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ECRecoverError") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("ECRecoverError") == .orderedSame }) {
                     let value = try container.decode(HostErrorOneOfECRecoverErrorInline.self, forKey: matchingKey)
                     self = .eCRecoverError(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".eCRecoverError: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("AltBn128InvalidInput") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("AltBn128InvalidInput") == .orderedSame
+                    }) {
                     let value = try container.decode(HostErrorOneOfAltBn128InvalidInputInline.self, forKey: matchingKey)
                     self = .altBn128InvalidInput(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".altBn128InvalidInput: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("Ed25519VerifyInvalidInput") == .orderedSame }) {
-                    let value = try container.decode(HostErrorOneOfEd25519VerifyInvalidInputInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("Ed25519VerifyInvalidInput") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        HostErrorOneOfEd25519VerifyInvalidInputInline.self,
+                        forKey: matchingKey
+                    )
                     self = .ed25519VerifyInvalidInput(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".ed25519VerifyInvalidInput: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -3241,7 +3671,8 @@ public enum HostError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for HostError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for HostError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for HostError:\n" + decodingErrors
+                .joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -3271,64 +3702,64 @@ public enum HostError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .guestPanic(let value):
+        case let .guestPanic(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .guestPanic)
-        case .invalidPromiseIndex(let value):
+        case let .invalidPromiseIndex(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .invalidPromiseIndex)
-        case .invalidPromiseResultIndex(let value):
+        case let .invalidPromiseResultIndex(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .invalidPromiseResultIndex)
-        case .invalidRegisterId(let value):
+        case let .invalidRegisterId(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .invalidRegisterId)
-        case .iteratorWasInvalidated(let value):
+        case let .iteratorWasInvalidated(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .iteratorWasInvalidated)
-        case .invalidReceiptIndex(let value):
+        case let .invalidReceiptIndex(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .invalidReceiptIndex)
-        case .invalidIteratorIndex(let value):
+        case let .invalidIteratorIndex(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .invalidIteratorIndex)
-        case .prohibitedInView(let value):
+        case let .prohibitedInView(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .prohibitedInView)
-        case .numberOfLogsExceeded(let value):
+        case let .numberOfLogsExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .numberOfLogsExceeded)
-        case .keyLengthExceeded(let value):
+        case let .keyLengthExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .keyLengthExceeded)
-        case .valueLengthExceeded(let value):
+        case let .valueLengthExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .valueLengthExceeded)
-        case .totalLogLengthExceeded(let value):
+        case let .totalLogLengthExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .totalLogLengthExceeded)
-        case .numberPromisesExceeded(let value):
+        case let .numberPromisesExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .numberPromisesExceeded)
-        case .numberInputDataDependenciesExceeded(let value):
+        case let .numberInputDataDependenciesExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .numberInputDataDependenciesExceeded)
-        case .returnedValueLengthExceeded(let value):
+        case let .returnedValueLengthExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .returnedValueLengthExceeded)
-        case .contractSizeExceeded(let value):
+        case let .contractSizeExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .contractSizeExceeded)
-        case .deprecated(let value):
+        case let .deprecated(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deprecated)
-        case .eCRecoverError(let value):
+        case let .eCRecoverError(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .eCRecoverError)
-        case .altBn128InvalidInput(let value):
+        case let .altBn128InvalidInput(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .altBn128InvalidInput)
-        case .ed25519VerifyInvalidInput(let value):
+        case let .ed25519VerifyInvalidInput(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .ed25519VerifyInvalidInput)
         case .badUTF16:
@@ -3375,6 +3806,7 @@ public enum HostError: Codable {
 }
 
 // MARK: - InvalidAccessKeyError
+
 public struct InvalidAccessKeyErrorOneOfAccessKeyNotFoundInline: Codable {
     public let accountId: AccountId
     public let publicKey: PublicKey
@@ -3443,35 +3875,53 @@ public enum InvalidAccessKeyError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("AccessKeyNotFound") == .orderedSame }) {
-                    let value = try container.decode(InvalidAccessKeyErrorOneOfAccessKeyNotFoundInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("AccessKeyNotFound") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        InvalidAccessKeyErrorOneOfAccessKeyNotFoundInline.self,
+                        forKey: matchingKey
+                    )
                     self = .accessKeyNotFound(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".accessKeyNotFound: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ReceiverMismatch") == .orderedSame }) {
-                    let value = try container.decode(InvalidAccessKeyErrorOneOfReceiverMismatchInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("ReceiverMismatch") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        InvalidAccessKeyErrorOneOfReceiverMismatchInline.self,
+                        forKey: matchingKey
+                    )
                     self = .receiverMismatch(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".receiverMismatch: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("MethodNameMismatch") == .orderedSame }) {
-                    let value = try container.decode(InvalidAccessKeyErrorOneOfMethodNameMismatchInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("MethodNameMismatch") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        InvalidAccessKeyErrorOneOfMethodNameMismatchInline.self,
+                        forKey: matchingKey
+                    )
                     self = .methodNameMismatch(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".methodNameMismatch: \(describeDecodingError(error))")
         }
         if let value = try? decoder.singleValueContainer().decode(String.self), value == "RequiresFullAccess" {
@@ -3480,13 +3930,19 @@ public enum InvalidAccessKeyError: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("NotEnoughAllowance") == .orderedSame }) {
-                    let value = try container.decode(InvalidAccessKeyErrorOneOfNotEnoughAllowanceInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("NotEnoughAllowance") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        InvalidAccessKeyErrorOneOfNotEnoughAllowanceInline.self,
+                        forKey: matchingKey
+                    )
                     self = .notEnoughAllowance(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".notEnoughAllowance: \(describeDecodingError(error))")
         }
         if let value = try? decoder.singleValueContainer().decode(String.self), value == "DepositWithFunctionCall" {
@@ -3504,7 +3960,8 @@ public enum InvalidAccessKeyError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for InvalidAccessKeyError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for InvalidAccessKeyError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for InvalidAccessKeyError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -3518,16 +3975,16 @@ public enum InvalidAccessKeyError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .accessKeyNotFound(let value):
+        case let .accessKeyNotFound(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .accessKeyNotFound)
-        case .receiverMismatch(let value):
+        case let .receiverMismatch(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .receiverMismatch)
-        case .methodNameMismatch(let value):
+        case let .methodNameMismatch(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .methodNameMismatch)
-        case .notEnoughAllowance(let value):
+        case let .notEnoughAllowance(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .notEnoughAllowance)
         case .requiresFullAccess:
@@ -3541,6 +3998,7 @@ public enum InvalidAccessKeyError: Codable {
 }
 
 // MARK: - InvalidTxError
+
 public struct InvalidTxErrorOneOfInvalidSignerIdInline: Codable {
     public let signerId: String
 
@@ -3690,68 +4148,88 @@ public enum InvalidTxError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidAccessKeyError") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("InvalidAccessKeyError") == .orderedSame
+                    }) {
                     let value = try container.decode(InvalidAccessKeyError.self, forKey: matchingKey)
                     self = .invalidAccessKeyError(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".invalidAccessKeyError: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidSignerId") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("InvalidSignerId") == .orderedSame
+                    }) {
                     let value = try container.decode(InvalidTxErrorOneOfInvalidSignerIdInline.self, forKey: matchingKey)
                     self = .invalidSignerId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".invalidSignerId: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("SignerDoesNotExist") == .orderedSame }) {
-                    let value = try container.decode(InvalidTxErrorOneOfSignerDoesNotExistInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("SignerDoesNotExist") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        InvalidTxErrorOneOfSignerDoesNotExistInline.self,
+                        forKey: matchingKey
+                    )
                     self = .signerDoesNotExist(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".signerDoesNotExist: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidNonce") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidNonce") == .orderedSame }) {
                     let value = try container.decode(InvalidTxErrorOneOfInvalidNonceInline.self, forKey: matchingKey)
                     self = .invalidNonce(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".invalidNonce: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("NonceTooLarge") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("NonceTooLarge") == .orderedSame }) {
                     let value = try container.decode(InvalidTxErrorOneOfNonceTooLargeInline.self, forKey: matchingKey)
                     self = .nonceTooLarge(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".nonceTooLarge: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidReceiverId") == .orderedSame }) {
-                    let value = try container.decode(InvalidTxErrorOneOfInvalidReceiverIdInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("InvalidReceiverId") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        InvalidTxErrorOneOfInvalidReceiverIdInline.self,
+                        forKey: matchingKey
+                    )
                     self = .invalidReceiverId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".invalidReceiverId: \(describeDecodingError(error))")
         }
         if let value = try? decoder.singleValueContainer().decode(String.self), value == "InvalidSignature" {
@@ -3760,24 +4238,36 @@ public enum InvalidTxError: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("NotEnoughBalance") == .orderedSame }) {
-                    let value = try container.decode(InvalidTxErrorOneOfNotEnoughBalanceInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("NotEnoughBalance") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        InvalidTxErrorOneOfNotEnoughBalanceInline.self,
+                        forKey: matchingKey
+                    )
                     self = .notEnoughBalance(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".notEnoughBalance: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("LackBalanceForState") == .orderedSame }) {
-                    let value = try container.decode(InvalidTxErrorOneOfLackBalanceForStateInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("LackBalanceForState") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        InvalidTxErrorOneOfLackBalanceForStateInline.self,
+                        forKey: matchingKey
+                    )
                     self = .lackBalanceForState(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".lackBalanceForState: \(describeDecodingError(error))")
         }
         if let value = try? decoder.singleValueContainer().decode(String.self), value == "CostOverflow" {
@@ -3794,24 +4284,33 @@ public enum InvalidTxError: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ActionsValidation") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("ActionsValidation") == .orderedSame
+                    }) {
                     let value = try container.decode(ActionsValidationError.self, forKey: matchingKey)
                     self = .actionsValidation(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".actionsValidation: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("TransactionSizeExceeded") == .orderedSame }) {
-                    let value = try container.decode(InvalidTxErrorOneOfTransactionSizeExceededInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("TransactionSizeExceeded") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        InvalidTxErrorOneOfTransactionSizeExceededInline.self,
+                        forKey: matchingKey
+                    )
                     self = .transactionSizeExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".transactionSizeExceeded: \(describeDecodingError(error))")
         }
         if let value = try? decoder.singleValueContainer().decode(String.self), value == "InvalidTransactionVersion" {
@@ -3820,35 +4319,38 @@ public enum InvalidTxError: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("StorageError") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("StorageError") == .orderedSame }) {
                     let value = try container.decode(StorageError.self, forKey: matchingKey)
                     self = .storageError(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".storageError: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ShardCongested") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("ShardCongested") == .orderedSame }) {
                     let value = try container.decode(InvalidTxErrorOneOfShardCongestedInline.self, forKey: matchingKey)
                     self = .shardCongested(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".shardCongested: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ShardStuck") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("ShardStuck") == .orderedSame }) {
                     let value = try container.decode(InvalidTxErrorOneOfShardStuckInline.self, forKey: matchingKey)
                     self = .shardStuck(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".shardStuck: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -3862,7 +4364,8 @@ public enum InvalidTxError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for InvalidTxError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for InvalidTxError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for InvalidTxError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -3885,43 +4388,43 @@ public enum InvalidTxError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .invalidAccessKeyError(let value):
+        case let .invalidAccessKeyError(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .invalidAccessKeyError)
-        case .invalidSignerId(let value):
+        case let .invalidSignerId(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .invalidSignerId)
-        case .signerDoesNotExist(let value):
+        case let .signerDoesNotExist(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .signerDoesNotExist)
-        case .invalidNonce(let value):
+        case let .invalidNonce(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .invalidNonce)
-        case .nonceTooLarge(let value):
+        case let .nonceTooLarge(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .nonceTooLarge)
-        case .invalidReceiverId(let value):
+        case let .invalidReceiverId(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .invalidReceiverId)
-        case .notEnoughBalance(let value):
+        case let .notEnoughBalance(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .notEnoughBalance)
-        case .lackBalanceForState(let value):
+        case let .lackBalanceForState(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .lackBalanceForState)
-        case .actionsValidation(let value):
+        case let .actionsValidation(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .actionsValidation)
-        case .transactionSizeExceeded(let value):
+        case let .transactionSizeExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .transactionSizeExceeded)
-        case .storageError(let value):
+        case let .storageError(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .storageError)
-        case .shardCongested(let value):
+        case let .shardCongested(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .shardCongested)
-        case .shardStuck(let value):
+        case let .shardStuck(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .shardStuck)
         case .invalidSignature:
@@ -3944,6 +4447,7 @@ public enum InvalidTxError: Codable {
 }
 
 // MARK: - JsonRpcResponseForArrayOfRangeOfUint64AndRpcError
+
 public enum JsonRpcResponseForArrayOfRangeOfUint64AndRpcError: Codable {
     case result([RangeOfUint64])
     case error(RpcError)
@@ -3953,24 +4457,26 @@ public enum JsonRpcResponseForArrayOfRangeOfUint64AndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode([RangeOfUint64].self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -3984,7 +4490,9 @@ public enum JsonRpcResponseForArrayOfRangeOfUint64AndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForArrayOfRangeOfUint64AndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForArrayOfRangeOfUint64AndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForArrayOfRangeOfUint64AndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -3996,10 +4504,10 @@ public enum JsonRpcResponseForArrayOfRangeOfUint64AndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -4007,6 +4515,7 @@ public enum JsonRpcResponseForArrayOfRangeOfUint64AndRpcError: Codable {
 }
 
 // MARK: - JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError
+
 public enum JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError: Codable {
     case result([ValidatorStakeView])
     case error(RpcError)
@@ -4016,24 +4525,26 @@ public enum JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode([ValidatorStakeView].self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -4047,7 +4558,9 @@ public enum JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -4059,10 +4572,10 @@ public enum JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -4070,6 +4583,7 @@ public enum JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError: Codable {
 }
 
 // MARK: - JsonRpcResponseForCryptoHashAndRpcError
+
 public enum JsonRpcResponseForCryptoHashAndRpcError: Codable {
     case result(CryptoHash)
     case error(RpcError)
@@ -4079,24 +4593,26 @@ public enum JsonRpcResponseForCryptoHashAndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(CryptoHash.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -4110,7 +4626,9 @@ public enum JsonRpcResponseForCryptoHashAndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForCryptoHashAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForCryptoHashAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForCryptoHashAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -4122,10 +4640,10 @@ public enum JsonRpcResponseForCryptoHashAndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -4133,6 +4651,7 @@ public enum JsonRpcResponseForCryptoHashAndRpcError: Codable {
 }
 
 // MARK: - JsonRpcResponseForGenesisConfigAndRpcError
+
 public enum JsonRpcResponseForGenesisConfigAndRpcError: Codable {
     case result(GenesisConfig)
     case error(RpcError)
@@ -4142,24 +4661,26 @@ public enum JsonRpcResponseForGenesisConfigAndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(GenesisConfig.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -4173,7 +4694,9 @@ public enum JsonRpcResponseForGenesisConfigAndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForGenesisConfigAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForGenesisConfigAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForGenesisConfigAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -4185,10 +4708,10 @@ public enum JsonRpcResponseForGenesisConfigAndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -4196,6 +4719,7 @@ public enum JsonRpcResponseForGenesisConfigAndRpcError: Codable {
 }
 
 // MARK: - JsonRpcResponseForNullableRpcHealthResponseAndRpcError
+
 public enum JsonRpcResponseForNullableRpcHealthResponseAndRpcError: Codable {
     case result(RpcHealthResponse)
     case error(RpcError)
@@ -4205,24 +4729,26 @@ public enum JsonRpcResponseForNullableRpcHealthResponseAndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcHealthResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -4236,7 +4762,9 @@ public enum JsonRpcResponseForNullableRpcHealthResponseAndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForNullableRpcHealthResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForNullableRpcHealthResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForNullableRpcHealthResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -4248,10 +4776,10 @@ public enum JsonRpcResponseForNullableRpcHealthResponseAndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -4259,6 +4787,7 @@ public enum JsonRpcResponseForNullableRpcHealthResponseAndRpcError: Codable {
 }
 
 // MARK: - JsonRpcResponseForRpcBlockResponseAndRpcError
+
 public enum JsonRpcResponseForRpcBlockResponseAndRpcError: Codable {
     case result(RpcBlockResponse)
     case error(RpcError)
@@ -4268,24 +4797,26 @@ public enum JsonRpcResponseForRpcBlockResponseAndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcBlockResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -4299,7 +4830,9 @@ public enum JsonRpcResponseForRpcBlockResponseAndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcBlockResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcBlockResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcBlockResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -4311,10 +4844,10 @@ public enum JsonRpcResponseForRpcBlockResponseAndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -4322,6 +4855,7 @@ public enum JsonRpcResponseForRpcBlockResponseAndRpcError: Codable {
 }
 
 // MARK: - JsonRpcResponseForRpcChunkResponseAndRpcError
+
 public enum JsonRpcResponseForRpcChunkResponseAndRpcError: Codable {
     case result(RpcChunkResponse)
     case error(RpcError)
@@ -4331,24 +4865,26 @@ public enum JsonRpcResponseForRpcChunkResponseAndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcChunkResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -4362,7 +4898,9 @@ public enum JsonRpcResponseForRpcChunkResponseAndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcChunkResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcChunkResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcChunkResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -4374,10 +4912,10 @@ public enum JsonRpcResponseForRpcChunkResponseAndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -4385,6 +4923,7 @@ public enum JsonRpcResponseForRpcChunkResponseAndRpcError: Codable {
 }
 
 // MARK: - JsonRpcResponseForRpcClientConfigResponseAndRpcError
+
 public enum JsonRpcResponseForRpcClientConfigResponseAndRpcError: Codable {
     case result(RpcClientConfigResponse)
     case error(RpcError)
@@ -4394,24 +4933,26 @@ public enum JsonRpcResponseForRpcClientConfigResponseAndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcClientConfigResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -4425,7 +4966,9 @@ public enum JsonRpcResponseForRpcClientConfigResponseAndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcClientConfigResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcClientConfigResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcClientConfigResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -4437,10 +4980,10 @@ public enum JsonRpcResponseForRpcClientConfigResponseAndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -4448,6 +4991,7 @@ public enum JsonRpcResponseForRpcClientConfigResponseAndRpcError: Codable {
 }
 
 // MARK: - JsonRpcResponseForRpcCongestionLevelResponseAndRpcError
+
 public enum JsonRpcResponseForRpcCongestionLevelResponseAndRpcError: Codable {
     case result(RpcCongestionLevelResponse)
     case error(RpcError)
@@ -4457,24 +5001,26 @@ public enum JsonRpcResponseForRpcCongestionLevelResponseAndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcCongestionLevelResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -4488,7 +5034,9 @@ public enum JsonRpcResponseForRpcCongestionLevelResponseAndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcCongestionLevelResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcCongestionLevelResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcCongestionLevelResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -4500,10 +5048,10 @@ public enum JsonRpcResponseForRpcCongestionLevelResponseAndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -4511,6 +5059,7 @@ public enum JsonRpcResponseForRpcCongestionLevelResponseAndRpcError: Codable {
 }
 
 // MARK: - JsonRpcResponseForRpcGasPriceResponseAndRpcError
+
 public enum JsonRpcResponseForRpcGasPriceResponseAndRpcError: Codable {
     case result(RpcGasPriceResponse)
     case error(RpcError)
@@ -4520,24 +5069,26 @@ public enum JsonRpcResponseForRpcGasPriceResponseAndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcGasPriceResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -4551,7 +5102,9 @@ public enum JsonRpcResponseForRpcGasPriceResponseAndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcGasPriceResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcGasPriceResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcGasPriceResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -4563,10 +5116,10 @@ public enum JsonRpcResponseForRpcGasPriceResponseAndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -4574,6 +5127,7 @@ public enum JsonRpcResponseForRpcGasPriceResponseAndRpcError: Codable {
 }
 
 // MARK: - JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError
+
 public enum JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError: Codable {
     case result(RpcLightClientBlockProofResponse)
     case error(RpcError)
@@ -4583,24 +5137,26 @@ public enum JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError: Codab
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcLightClientBlockProofResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -4614,7 +5170,9 @@ public enum JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError: Codab
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -4626,10 +5184,10 @@ public enum JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError: Codab
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -4637,6 +5195,7 @@ public enum JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError: Codab
 }
 
 // MARK: - JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError
+
 public enum JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError: Codable {
     case result(RpcLightClientExecutionProofResponse)
     case error(RpcError)
@@ -4646,24 +5205,26 @@ public enum JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError: C
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcLightClientExecutionProofResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -4677,7 +5238,9 @@ public enum JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError: C
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -4689,10 +5252,10 @@ public enum JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError: C
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -4700,6 +5263,7 @@ public enum JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError: C
 }
 
 // MARK: - JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError
+
 public enum JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError: Codable {
     case result(RpcLightClientNextBlockResponse)
     case error(RpcError)
@@ -4709,24 +5273,26 @@ public enum JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError: Codabl
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcLightClientNextBlockResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -4740,7 +5306,9 @@ public enum JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError: Codabl
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -4752,10 +5320,10 @@ public enum JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError: Codabl
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -4763,6 +5331,7 @@ public enum JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError: Codabl
 }
 
 // MARK: - JsonRpcResponseForRpcNetworkInfoResponseAndRpcError
+
 public enum JsonRpcResponseForRpcNetworkInfoResponseAndRpcError: Codable {
     case result(RpcNetworkInfoResponse)
     case error(RpcError)
@@ -4772,24 +5341,26 @@ public enum JsonRpcResponseForRpcNetworkInfoResponseAndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcNetworkInfoResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -4803,7 +5374,9 @@ public enum JsonRpcResponseForRpcNetworkInfoResponseAndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcNetworkInfoResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcNetworkInfoResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcNetworkInfoResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -4815,10 +5388,10 @@ public enum JsonRpcResponseForRpcNetworkInfoResponseAndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -4826,6 +5399,7 @@ public enum JsonRpcResponseForRpcNetworkInfoResponseAndRpcError: Codable {
 }
 
 // MARK: - JsonRpcResponseForRpcProtocolConfigResponseAndRpcError
+
 public enum JsonRpcResponseForRpcProtocolConfigResponseAndRpcError: Codable {
     case result(RpcProtocolConfigResponse)
     case error(RpcError)
@@ -4835,24 +5409,26 @@ public enum JsonRpcResponseForRpcProtocolConfigResponseAndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcProtocolConfigResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -4866,7 +5442,9 @@ public enum JsonRpcResponseForRpcProtocolConfigResponseAndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcProtocolConfigResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcProtocolConfigResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcProtocolConfigResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -4878,10 +5456,10 @@ public enum JsonRpcResponseForRpcProtocolConfigResponseAndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -4889,6 +5467,7 @@ public enum JsonRpcResponseForRpcProtocolConfigResponseAndRpcError: Codable {
 }
 
 // MARK: - JsonRpcResponseForRpcQueryResponseAndRpcError
+
 public enum JsonRpcResponseForRpcQueryResponseAndRpcError: Codable {
     case result(RpcQueryResponse)
     case error(RpcError)
@@ -4898,24 +5477,26 @@ public enum JsonRpcResponseForRpcQueryResponseAndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcQueryResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -4929,7 +5510,9 @@ public enum JsonRpcResponseForRpcQueryResponseAndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcQueryResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcQueryResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcQueryResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -4941,10 +5524,10 @@ public enum JsonRpcResponseForRpcQueryResponseAndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -4952,6 +5535,7 @@ public enum JsonRpcResponseForRpcQueryResponseAndRpcError: Codable {
 }
 
 // MARK: - JsonRpcResponseForRpcReceiptResponseAndRpcError
+
 public enum JsonRpcResponseForRpcReceiptResponseAndRpcError: Codable {
     case result(RpcReceiptResponse)
     case error(RpcError)
@@ -4961,24 +5545,26 @@ public enum JsonRpcResponseForRpcReceiptResponseAndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcReceiptResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -4992,7 +5578,9 @@ public enum JsonRpcResponseForRpcReceiptResponseAndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcReceiptResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcReceiptResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcReceiptResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -5004,10 +5592,10 @@ public enum JsonRpcResponseForRpcReceiptResponseAndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -5015,6 +5603,7 @@ public enum JsonRpcResponseForRpcReceiptResponseAndRpcError: Codable {
 }
 
 // MARK: - JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError
+
 public enum JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError: Codable {
     case result(RpcSplitStorageInfoResponse)
     case error(RpcError)
@@ -5024,24 +5613,26 @@ public enum JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcSplitStorageInfoResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -5055,7 +5646,9 @@ public enum JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -5067,10 +5660,10 @@ public enum JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -5078,6 +5671,7 @@ public enum JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError: Codable {
 }
 
 // MARK: - JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError
+
 public enum JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError: Codable {
     case result(RpcStateChangesInBlockByTypeResponse)
     case error(RpcError)
@@ -5087,24 +5681,26 @@ public enum JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError: C
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcStateChangesInBlockByTypeResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -5118,7 +5714,9 @@ public enum JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError: C
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -5130,10 +5728,10 @@ public enum JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError: C
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -5141,6 +5739,7 @@ public enum JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError: C
 }
 
 // MARK: - JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError
+
 public enum JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError: Codable {
     case result(RpcStateChangesInBlockResponse)
     case error(RpcError)
@@ -5150,24 +5749,26 @@ public enum JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError: Codable
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcStateChangesInBlockResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -5181,7 +5782,9 @@ public enum JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError: Codable
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -5193,10 +5796,10 @@ public enum JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError: Codable
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -5204,6 +5807,7 @@ public enum JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError: Codable
 }
 
 // MARK: - JsonRpcResponseForRpcStatusResponseAndRpcError
+
 public enum JsonRpcResponseForRpcStatusResponseAndRpcError: Codable {
     case result(RpcStatusResponse)
     case error(RpcError)
@@ -5213,24 +5817,26 @@ public enum JsonRpcResponseForRpcStatusResponseAndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcStatusResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -5244,7 +5850,9 @@ public enum JsonRpcResponseForRpcStatusResponseAndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcStatusResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcStatusResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcStatusResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -5256,10 +5864,10 @@ public enum JsonRpcResponseForRpcStatusResponseAndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -5267,6 +5875,7 @@ public enum JsonRpcResponseForRpcStatusResponseAndRpcError: Codable {
 }
 
 // MARK: - JsonRpcResponseForRpcTransactionResponseAndRpcError
+
 public enum JsonRpcResponseForRpcTransactionResponseAndRpcError: Codable {
     case result(RpcTransactionResponse)
     case error(RpcError)
@@ -5276,24 +5885,26 @@ public enum JsonRpcResponseForRpcTransactionResponseAndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcTransactionResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -5307,7 +5918,9 @@ public enum JsonRpcResponseForRpcTransactionResponseAndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcTransactionResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcTransactionResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcTransactionResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -5319,10 +5932,10 @@ public enum JsonRpcResponseForRpcTransactionResponseAndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -5330,6 +5943,7 @@ public enum JsonRpcResponseForRpcTransactionResponseAndRpcError: Codable {
 }
 
 // MARK: - JsonRpcResponseForRpcValidatorResponseAndRpcError
+
 public enum JsonRpcResponseForRpcValidatorResponseAndRpcError: Codable {
     case result(RpcValidatorResponse)
     case error(RpcError)
@@ -5339,24 +5953,26 @@ public enum JsonRpcResponseForRpcValidatorResponseAndRpcError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("result") == .orderedSame }) {
                     let value = try container.decode(RpcValidatorResponse.self, forKey: matchingKey)
                     self = .result(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".result: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
                     let value = try container.decode(RpcError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".error: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -5370,7 +5986,9 @@ public enum JsonRpcResponseForRpcValidatorResponseAndRpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcValidatorResponseAndRpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcValidatorResponseAndRpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcValidatorResponseAndRpcError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -5382,10 +6000,10 @@ public enum JsonRpcResponseForRpcValidatorResponseAndRpcError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .result(let value):
+        case let .result(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .result)
-        case .error(let value):
+        case let .error(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .error)
         }
@@ -5393,6 +6011,7 @@ public enum JsonRpcResponseForRpcValidatorResponseAndRpcError: Codable {
 }
 
 // MARK: - MissingTrieValueContext
+
 public enum MissingTrieValueContext: Codable {
     case trieIterator
     case triePrefetchingStorage
@@ -5429,7 +6048,8 @@ public enum MissingTrieValueContext: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for MissingTrieValueContext\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for MissingTrieValueContext:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for MissingTrieValueContext:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -5453,6 +6073,7 @@ public enum MissingTrieValueContext: Codable {
 }
 
 // MARK: - NonDelegateAction
+
 public enum NonDelegateAction: Codable {
     case createAccount(CreateAccountAction)
     case deployContract(DeployContractAction)
@@ -5471,123 +6092,140 @@ public enum NonDelegateAction: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("CreateAccount") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("CreateAccount") == .orderedSame }) {
                     let value = try container.decode(CreateAccountAction.self, forKey: matchingKey)
                     self = .createAccount(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".createAccount: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DeployContract") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("DeployContract") == .orderedSame }) {
                     let value = try container.decode(DeployContractAction.self, forKey: matchingKey)
                     self = .deployContract(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".deployContract: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("FunctionCall") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("FunctionCall") == .orderedSame }) {
                     let value = try container.decode(FunctionCallAction.self, forKey: matchingKey)
                     self = .functionCall(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".functionCall: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("Transfer") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("Transfer") == .orderedSame }) {
                     let value = try container.decode(TransferAction.self, forKey: matchingKey)
                     self = .transfer(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".transfer: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("Stake") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("Stake") == .orderedSame }) {
                     let value = try container.decode(StakeAction.self, forKey: matchingKey)
                     self = .stake(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".stake: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("AddKey") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("AddKey") == .orderedSame }) {
                     let value = try container.decode(AddKeyAction.self, forKey: matchingKey)
                     self = .addKey(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".addKey: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DeleteKey") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("DeleteKey") == .orderedSame }) {
                     let value = try container.decode(DeleteKeyAction.self, forKey: matchingKey)
                     self = .deleteKey(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".deleteKey: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DeleteAccount") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("DeleteAccount") == .orderedSame }) {
                     let value = try container.decode(DeleteAccountAction.self, forKey: matchingKey)
                     self = .deleteAccount(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".deleteAccount: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DeployGlobalContract") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("DeployGlobalContract") == .orderedSame
+                    }) {
                     let value = try container.decode(DeployGlobalContractAction.self, forKey: matchingKey)
                     self = .deployGlobalContract(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".deployGlobalContract: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("UseGlobalContract") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("UseGlobalContract") == .orderedSame
+                    }) {
                     let value = try container.decode(UseGlobalContractAction.self, forKey: matchingKey)
                     self = .useGlobalContract(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".useGlobalContract: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("DeterministicStateInit") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("DeterministicStateInit") == .orderedSame
+                    }) {
                     let value = try container.decode(DeterministicStateInitAction.self, forKey: matchingKey)
                     self = .deterministicStateInit(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".deterministicStateInit: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -5601,7 +6239,8 @@ public enum NonDelegateAction: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for NonDelegateAction\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for NonDelegateAction:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for NonDelegateAction:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -5622,37 +6261,37 @@ public enum NonDelegateAction: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .createAccount(let value):
+        case let .createAccount(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .createAccount)
-        case .deployContract(let value):
+        case let .deployContract(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deployContract)
-        case .functionCall(let value):
+        case let .functionCall(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .functionCall)
-        case .transfer(let value):
+        case let .transfer(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .transfer)
-        case .stake(let value):
+        case let .stake(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .stake)
-        case .addKey(let value):
+        case let .addKey(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .addKey)
-        case .deleteKey(let value):
+        case let .deleteKey(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deleteKey)
-        case .deleteAccount(let value):
+        case let .deleteAccount(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deleteAccount)
-        case .deployGlobalContract(let value):
+        case let .deployGlobalContract(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deployGlobalContract)
-        case .useGlobalContract(let value):
+        case let .useGlobalContract(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .useGlobalContract)
-        case .deterministicStateInit(let value):
+        case let .deterministicStateInit(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deterministicStateInit)
         }
@@ -5660,6 +6299,7 @@ public enum NonDelegateAction: Codable {
 }
 
 // MARK: - PrepareError
+
 public enum PrepareError: Codable {
     case serialization
     case deserialization
@@ -5731,7 +6371,8 @@ public enum PrepareError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for PrepareError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for PrepareError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for PrepareError:\n" + decodingErrors
+                .joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -5776,6 +6417,7 @@ public enum PrepareError: Codable {
 }
 
 // MARK: - ReceiptEnumView
+
 public struct ReceiptEnumViewOneOfActionInline: Codable {
     public let actions: [ActionView]
     public let gasPrice: NearToken
@@ -5849,35 +6491,43 @@ public enum ReceiptEnumView: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("Action") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("Action") == .orderedSame }) {
                     let value = try container.decode(ReceiptEnumViewOneOfActionInline.self, forKey: matchingKey)
                     self = .action(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".action: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("Data") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("Data") == .orderedSame }) {
                     let value = try container.decode(ReceiptEnumViewOneOfDataInline.self, forKey: matchingKey)
                     self = .data(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".data: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("GlobalContractDistribution") == .orderedSame }) {
-                    let value = try container.decode(ReceiptEnumViewOneOfGlobalContractDistributionInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("GlobalContractDistribution") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ReceiptEnumViewOneOfGlobalContractDistributionInline.self,
+                        forKey: matchingKey
+                    )
                     self = .globalContractDistribution(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".globalContractDistribution: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -5891,7 +6541,8 @@ public enum ReceiptEnumView: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for ReceiptEnumView\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for ReceiptEnumView:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ReceiptEnumView:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -5904,13 +6555,13 @@ public enum ReceiptEnumView: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .action(let value):
+        case let .action(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .action)
-        case .data(let value):
+        case let .data(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .data)
-        case .globalContractDistribution(let value):
+        case let .globalContractDistribution(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .globalContractDistribution)
         }
@@ -5918,6 +6569,7 @@ public enum ReceiptEnumView: Codable {
 }
 
 // MARK: - ReceiptValidationError
+
 public struct ReceiptValidationErrorOneOfInvalidPredecessorIdInline: Codable {
     public let accountId: String
 
@@ -6012,90 +6664,135 @@ public enum ReceiptValidationError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidPredecessorId") == .orderedSame }) {
-                    let value = try container.decode(ReceiptValidationErrorOneOfInvalidPredecessorIdInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("InvalidPredecessorId") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ReceiptValidationErrorOneOfInvalidPredecessorIdInline.self,
+                        forKey: matchingKey
+                    )
                     self = .invalidPredecessorId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".invalidPredecessorId: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidReceiverId") == .orderedSame }) {
-                    let value = try container.decode(ReceiptValidationErrorOneOfInvalidReceiverIdInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("InvalidReceiverId") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ReceiptValidationErrorOneOfInvalidReceiverIdInline.self,
+                        forKey: matchingKey
+                    )
                     self = .invalidReceiverId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".invalidReceiverId: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidSignerId") == .orderedSame }) {
-                    let value = try container.decode(ReceiptValidationErrorOneOfInvalidSignerIdInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("InvalidSignerId") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ReceiptValidationErrorOneOfInvalidSignerIdInline.self,
+                        forKey: matchingKey
+                    )
                     self = .invalidSignerId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".invalidSignerId: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidDataReceiverId") == .orderedSame }) {
-                    let value = try container.decode(ReceiptValidationErrorOneOfInvalidDataReceiverIdInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("InvalidDataReceiverId") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ReceiptValidationErrorOneOfInvalidDataReceiverIdInline.self,
+                        forKey: matchingKey
+                    )
                     self = .invalidDataReceiverId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".invalidDataReceiverId: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ReturnedValueLengthExceeded") == .orderedSame }) {
-                    let value = try container.decode(ReceiptValidationErrorOneOfReturnedValueLengthExceededInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("ReturnedValueLengthExceeded") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ReceiptValidationErrorOneOfReturnedValueLengthExceededInline.self,
+                        forKey: matchingKey
+                    )
                     self = .returnedValueLengthExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".returnedValueLengthExceeded: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("NumberInputDataDependenciesExceeded") == .orderedSame }) {
-                    let value = try container.decode(ReceiptValidationErrorOneOfNumberInputDataDependenciesExceededInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("NumberInputDataDependenciesExceeded") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ReceiptValidationErrorOneOfNumberInputDataDependenciesExceededInline.self,
+                        forKey: matchingKey
+                    )
                     self = .numberInputDataDependenciesExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".numberInputDataDependenciesExceeded: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ActionsValidation") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("ActionsValidation") == .orderedSame
+                    }) {
                     let value = try container.decode(ActionsValidationError.self, forKey: matchingKey)
                     self = .actionsValidation(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".actionsValidation: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ReceiptSizeExceeded") == .orderedSame }) {
-                    let value = try container.decode(ReceiptValidationErrorOneOfReceiptSizeExceededInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("ReceiptSizeExceeded") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ReceiptValidationErrorOneOfReceiptSizeExceededInline.self,
+                        forKey: matchingKey
+                    )
                     self = .receiptSizeExceeded(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".receiptSizeExceeded: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -6109,7 +6806,8 @@ public enum ReceiptValidationError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for ReceiptValidationError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for ReceiptValidationError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ReceiptValidationError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -6127,28 +6825,28 @@ public enum ReceiptValidationError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .invalidPredecessorId(let value):
+        case let .invalidPredecessorId(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .invalidPredecessorId)
-        case .invalidReceiverId(let value):
+        case let .invalidReceiverId(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .invalidReceiverId)
-        case .invalidSignerId(let value):
+        case let .invalidSignerId(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .invalidSignerId)
-        case .invalidDataReceiverId(let value):
+        case let .invalidDataReceiverId(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .invalidDataReceiverId)
-        case .returnedValueLengthExceeded(let value):
+        case let .returnedValueLengthExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .returnedValueLengthExceeded)
-        case .numberInputDataDependenciesExceeded(let value):
+        case let .numberInputDataDependenciesExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .numberInputDataDependenciesExceeded)
-        case .actionsValidation(let value):
+        case let .actionsValidation(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .actionsValidation)
-        case .receiptSizeExceeded(let value):
+        case let .receiptSizeExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .receiptSizeExceeded)
         }
@@ -6156,6 +6854,7 @@ public enum ReceiptValidationError: Codable {
 }
 
 // MARK: - RpcBlockRequest
+
 public enum RpcBlockRequest: Codable {
     case blockId(BlockId)
     case finality(Finality)
@@ -6166,35 +6865,44 @@ public enum RpcBlockRequest: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("block_id") == .orderedSame || key.stringValue.caseInsensitiveCompare("blockId") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("block_id") == .orderedSame || key.stringValue
+                            .caseInsensitiveCompare("blockId") == .orderedSame
+                    }) {
                     let value = try container.decode(BlockId.self, forKey: matchingKey)
                     self = .blockId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".blockId: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("finality") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("finality") == .orderedSame }) {
                     let value = try container.decode(Finality.self, forKey: matchingKey)
                     self = .finality(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".finality: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("sync_checkpoint") == .orderedSame || key.stringValue.caseInsensitiveCompare("syncCheckpoint") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("sync_checkpoint") == .orderedSame || key.stringValue
+                            .caseInsensitiveCompare("syncCheckpoint") == .orderedSame
+                    }) {
                     let value = try container.decode(SyncCheckpoint.self, forKey: matchingKey)
                     self = .syncCheckpoint(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".syncCheckpoint: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -6208,7 +6916,8 @@ public enum RpcBlockRequest: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcBlockRequest\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcBlockRequest:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcBlockRequest:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -6219,13 +6928,13 @@ public enum RpcBlockRequest: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .blockId(let value):
+        case let .blockId(value):
             var container = encoder.container(keyedBy: AnyCodingKey.self)
             try container.encode(value, forKey: AnyCodingKey(stringValue: "block_id"))
-        case .finality(let value):
+        case let .finality(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .finality)
-        case .syncCheckpoint(let value):
+        case let .syncCheckpoint(value):
             var container = encoder.container(keyedBy: AnyCodingKey.self)
             try container.encode(value, forKey: AnyCodingKey(stringValue: "sync_checkpoint"))
         }
@@ -6233,6 +6942,7 @@ public enum RpcBlockRequest: Codable {
 }
 
 // MARK: - RpcChunkRequest
+
 public struct BlockShardId: Codable {
     public let blockId: BlockId
     public let shardId: ShardId
@@ -6257,18 +6967,22 @@ public enum RpcChunkRequest: Codable {
             let value = try decoder.singleValueContainer().decode(BlockShardId.self)
             self = .blockShardId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".blockShardId: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("chunk_id") == .orderedSame || key.stringValue.caseInsensitiveCompare("chunkId") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("chunk_id") == .orderedSame || key.stringValue
+                            .caseInsensitiveCompare("chunkId") == .orderedSame
+                    }) {
                     let value = try container.decode(CryptoHash.self, forKey: matchingKey)
                     self = .chunkId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".chunkId: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -6282,17 +6996,18 @@ public enum RpcChunkRequest: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcChunkRequest\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcChunkRequest:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcChunkRequest:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .chunkId(let value):
+        case let .chunkId(value):
             var container = encoder.container(keyedBy: AnyCodingKey.self)
             try container.encode(value, forKey: AnyCodingKey(stringValue: "chunk_id"))
-        case .blockShardId(let value):
+        case let .blockShardId(value):
             var singleContainer = encoder.singleValueContainer()
             try singleContainer.encode(value)
         }
@@ -6300,6 +7015,7 @@ public enum RpcChunkRequest: Codable {
 }
 
 // MARK: - RpcCongestionLevelRequest
+
 public enum RpcCongestionLevelRequest: Codable {
     case blockShardId(BlockShardId)
     case chunkId(CryptoHash)
@@ -6311,18 +7027,22 @@ public enum RpcCongestionLevelRequest: Codable {
             let value = try decoder.singleValueContainer().decode(BlockShardId.self)
             self = .blockShardId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".blockShardId: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("chunk_id") == .orderedSame || key.stringValue.caseInsensitiveCompare("chunkId") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("chunk_id") == .orderedSame || key.stringValue
+                            .caseInsensitiveCompare("chunkId") == .orderedSame
+                    }) {
                     let value = try container.decode(CryptoHash.self, forKey: matchingKey)
                     self = .chunkId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".chunkId: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -6336,17 +7056,18 @@ public enum RpcCongestionLevelRequest: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcCongestionLevelRequest\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcCongestionLevelRequest:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcCongestionLevelRequest:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .chunkId(let value):
+        case let .chunkId(value):
             var container = encoder.container(keyedBy: AnyCodingKey.self)
             try container.encode(value, forKey: AnyCodingKey(stringValue: "chunk_id"))
-        case .blockShardId(let value):
+        case let .blockShardId(value):
             var singleContainer = encoder.singleValueContainer()
             try singleContainer.encode(value)
         }
@@ -6354,6 +7075,7 @@ public enum RpcCongestionLevelRequest: Codable {
 }
 
 // MARK: - RpcError
+
 public struct RpcErrorOneOfCauseName: Codable {
     public let cause: RpcRequestValidationErrorKind
     public let name: String
@@ -6405,21 +7127,21 @@ public enum RpcError: Codable {
             let value = try decoder.singleValueContainer().decode(RpcErrorOneOfCauseName.self)
             self = .rpcErrorCauseName(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".rpcErrorCauseName: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(RpcErrorOneOfCauseName1.self)
             self = .rpcErrorCauseName1(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".rpcErrorCauseName1: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(RpcErrorOneOfCauseName2.self)
             self = .rpcErrorCauseName2(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".rpcErrorCauseName2: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -6433,20 +7155,21 @@ public enum RpcError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcError:\n" + decodingErrors
+                .joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .rpcErrorCauseName(let value):
+        case let .rpcErrorCauseName(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .rpcErrorCauseName1(let value):
+        case let .rpcErrorCauseName1(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .rpcErrorCauseName2(let value):
+        case let .rpcErrorCauseName2(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
         }
@@ -6454,6 +7177,7 @@ public enum RpcError: Codable {
 }
 
 // MARK: - RpcLightClientExecutionProofRequest
+
 public struct RpcLightClientExecutionProofRequestOneOfSenderIdTransactionHashType: Codable {
     public let senderId: AccountId
     public let transactionHash: CryptoHash
@@ -6487,25 +7211,35 @@ public struct RpcLightClientExecutionProofRequestOneOfReceiptIdReceiverIdType: C
 }
 
 public enum RpcLightClientExecutionProofRequest: Codable {
-    case rpcLightClientExecutionProofRequestSenderIdTransactionHashType(RpcLightClientExecutionProofRequestOneOfSenderIdTransactionHashType)
-    case rpcLightClientExecutionProofRequestReceiptIdReceiverIdType(RpcLightClientExecutionProofRequestOneOfReceiptIdReceiverIdType)
+    case rpcLightClientExecutionProofRequestSenderIdTransactionHashType(
+        RpcLightClientExecutionProofRequestOneOfSenderIdTransactionHashType
+    )
+    case rpcLightClientExecutionProofRequestReceiptIdReceiverIdType(
+        RpcLightClientExecutionProofRequestOneOfReceiptIdReceiverIdType
+    )
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
-            let value = try decoder.singleValueContainer().decode(RpcLightClientExecutionProofRequestOneOfSenderIdTransactionHashType.self)
+            let value = try decoder.singleValueContainer()
+                .decode(RpcLightClientExecutionProofRequestOneOfSenderIdTransactionHashType.self)
             self = .rpcLightClientExecutionProofRequestSenderIdTransactionHashType(value)
             return
-        } catch let error {
-            decodingErrors.append(".rpcLightClientExecutionProofRequestSenderIdTransactionHashType: \(describeDecodingError(error))")
+        } catch {
+            decodingErrors
+                .append(
+                    ".rpcLightClientExecutionProofRequestSenderIdTransactionHashType: \(describeDecodingError(error))"
+                )
         }
         do {
-            let value = try decoder.singleValueContainer().decode(RpcLightClientExecutionProofRequestOneOfReceiptIdReceiverIdType.self)
+            let value = try decoder.singleValueContainer()
+                .decode(RpcLightClientExecutionProofRequestOneOfReceiptIdReceiverIdType.self)
             self = .rpcLightClientExecutionProofRequestReceiptIdReceiverIdType(value)
             return
-        } catch let error {
-            decodingErrors.append(".rpcLightClientExecutionProofRequestReceiptIdReceiverIdType: \(describeDecodingError(error))")
+        } catch {
+            decodingErrors
+                .append(".rpcLightClientExecutionProofRequestReceiptIdReceiverIdType: \(describeDecodingError(error))")
         }
         let contextDescription: String
         if decodingErrors.isEmpty {
@@ -6518,17 +7252,19 @@ public enum RpcLightClientExecutionProofRequest: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcLightClientExecutionProofRequest\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcLightClientExecutionProofRequest:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for RpcLightClientExecutionProofRequest:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .rpcLightClientExecutionProofRequestSenderIdTransactionHashType(let value):
+        case let .rpcLightClientExecutionProofRequestSenderIdTransactionHashType(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .rpcLightClientExecutionProofRequestReceiptIdReceiverIdType(let value):
+        case let .rpcLightClientExecutionProofRequestReceiptIdReceiverIdType(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
         }
@@ -6536,6 +7272,7 @@ public enum RpcLightClientExecutionProofRequest: Codable {
 }
 
 // MARK: - RpcProtocolConfigRequest
+
 public enum RpcProtocolConfigRequest: Codable {
     case blockId(BlockId)
     case finality(Finality)
@@ -6546,35 +7283,44 @@ public enum RpcProtocolConfigRequest: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("block_id") == .orderedSame || key.stringValue.caseInsensitiveCompare("blockId") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("block_id") == .orderedSame || key.stringValue
+                            .caseInsensitiveCompare("blockId") == .orderedSame
+                    }) {
                     let value = try container.decode(BlockId.self, forKey: matchingKey)
                     self = .blockId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".blockId: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("finality") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("finality") == .orderedSame }) {
                     let value = try container.decode(Finality.self, forKey: matchingKey)
                     self = .finality(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".finality: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("sync_checkpoint") == .orderedSame || key.stringValue.caseInsensitiveCompare("syncCheckpoint") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("sync_checkpoint") == .orderedSame || key.stringValue
+                            .caseInsensitiveCompare("syncCheckpoint") == .orderedSame
+                    }) {
                     let value = try container.decode(SyncCheckpoint.self, forKey: matchingKey)
                     self = .syncCheckpoint(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".syncCheckpoint: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -6588,7 +7334,8 @@ public enum RpcProtocolConfigRequest: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcProtocolConfigRequest\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcProtocolConfigRequest:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcProtocolConfigRequest:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -6599,13 +7346,13 @@ public enum RpcProtocolConfigRequest: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .blockId(let value):
+        case let .blockId(value):
             var container = encoder.container(keyedBy: AnyCodingKey.self)
             try container.encode(value, forKey: AnyCodingKey(stringValue: "block_id"))
-        case .finality(let value):
+        case let .finality(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .finality)
-        case .syncCheckpoint(let value):
+        case let .syncCheckpoint(value):
             var container = encoder.container(keyedBy: AnyCodingKey.self)
             try container.encode(value, forKey: AnyCodingKey(stringValue: "sync_checkpoint"))
         }
@@ -6613,6 +7360,7 @@ public enum RpcProtocolConfigRequest: Codable {
 }
 
 // MARK: - RpcQueryRequest
+
 public struct ViewAccountByBlockId: Codable {
     public let blockId: BlockId
     public let accountId: AccountId
@@ -7075,168 +7823,169 @@ public enum RpcQueryRequest: Codable {
             let value = try decoder.singleValueContainer().decode(ViewAccountByBlockId.self)
             self = .viewAccountByBlockId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewAccountByBlockId: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewCodeByBlockId.self)
             self = .viewCodeByBlockId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewCodeByBlockId: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewStateByBlockId.self)
             self = .viewStateByBlockId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewStateByBlockId: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewAccessKeyByBlockId.self)
             self = .viewAccessKeyByBlockId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewAccessKeyByBlockId: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewAccessKeyListByBlockId.self)
             self = .viewAccessKeyListByBlockId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewAccessKeyListByBlockId: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(CallFunctionByBlockId.self)
             self = .callFunctionByBlockId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".callFunctionByBlockId: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewGlobalContractCodeByBlockId.self)
             self = .viewGlobalContractCodeByBlockId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewGlobalContractCodeByBlockId: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewGlobalContractCodeByAccountIdByBlockId.self)
             self = .viewGlobalContractCodeByAccountIdByBlockId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewGlobalContractCodeByAccountIdByBlockId: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewAccountByFinality.self)
             self = .viewAccountByFinality(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewAccountByFinality: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewCodeByFinality.self)
             self = .viewCodeByFinality(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewCodeByFinality: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewStateByFinality.self)
             self = .viewStateByFinality(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewStateByFinality: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewAccessKeyByFinality.self)
             self = .viewAccessKeyByFinality(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewAccessKeyByFinality: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewAccessKeyListByFinality.self)
             self = .viewAccessKeyListByFinality(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewAccessKeyListByFinality: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(CallFunctionByFinality.self)
             self = .callFunctionByFinality(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".callFunctionByFinality: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewGlobalContractCodeByFinality.self)
             self = .viewGlobalContractCodeByFinality(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewGlobalContractCodeByFinality: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewGlobalContractCodeByAccountIdByFinality.self)
             self = .viewGlobalContractCodeByAccountIdByFinality(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewGlobalContractCodeByAccountIdByFinality: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewAccountBySyncCheckpoint.self)
             self = .viewAccountBySyncCheckpoint(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewAccountBySyncCheckpoint: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewCodeBySyncCheckpoint.self)
             self = .viewCodeBySyncCheckpoint(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewCodeBySyncCheckpoint: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewStateBySyncCheckpoint.self)
             self = .viewStateBySyncCheckpoint(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewStateBySyncCheckpoint: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewAccessKeyBySyncCheckpoint.self)
             self = .viewAccessKeyBySyncCheckpoint(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewAccessKeyBySyncCheckpoint: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewAccessKeyListBySyncCheckpoint.self)
             self = .viewAccessKeyListBySyncCheckpoint(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewAccessKeyListBySyncCheckpoint: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(CallFunctionBySyncCheckpoint.self)
             self = .callFunctionBySyncCheckpoint(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".callFunctionBySyncCheckpoint: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewGlobalContractCodeBySyncCheckpoint.self)
             self = .viewGlobalContractCodeBySyncCheckpoint(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewGlobalContractCodeBySyncCheckpoint: \(describeDecodingError(error))")
         }
         do {
-            let value = try decoder.singleValueContainer().decode(ViewGlobalContractCodeByAccountIdBySyncCheckpoint.self)
+            let value = try decoder.singleValueContainer()
+                .decode(ViewGlobalContractCodeByAccountIdBySyncCheckpoint.self)
             self = .viewGlobalContractCodeByAccountIdBySyncCheckpoint(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewGlobalContractCodeByAccountIdBySyncCheckpoint: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -7250,83 +7999,84 @@ public enum RpcQueryRequest: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcQueryRequest\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcQueryRequest:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcQueryRequest:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .viewAccountByBlockId(let value):
+        case let .viewAccountByBlockId(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewCodeByBlockId(let value):
+        case let .viewCodeByBlockId(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewStateByBlockId(let value):
+        case let .viewStateByBlockId(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewAccessKeyByBlockId(let value):
+        case let .viewAccessKeyByBlockId(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewAccessKeyListByBlockId(let value):
+        case let .viewAccessKeyListByBlockId(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .callFunctionByBlockId(let value):
+        case let .callFunctionByBlockId(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewGlobalContractCodeByBlockId(let value):
+        case let .viewGlobalContractCodeByBlockId(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewGlobalContractCodeByAccountIdByBlockId(let value):
+        case let .viewGlobalContractCodeByAccountIdByBlockId(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewAccountByFinality(let value):
+        case let .viewAccountByFinality(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewCodeByFinality(let value):
+        case let .viewCodeByFinality(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewStateByFinality(let value):
+        case let .viewStateByFinality(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewAccessKeyByFinality(let value):
+        case let .viewAccessKeyByFinality(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewAccessKeyListByFinality(let value):
+        case let .viewAccessKeyListByFinality(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .callFunctionByFinality(let value):
+        case let .callFunctionByFinality(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewGlobalContractCodeByFinality(let value):
+        case let .viewGlobalContractCodeByFinality(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewGlobalContractCodeByAccountIdByFinality(let value):
+        case let .viewGlobalContractCodeByAccountIdByFinality(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewAccountBySyncCheckpoint(let value):
+        case let .viewAccountBySyncCheckpoint(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewCodeBySyncCheckpoint(let value):
+        case let .viewCodeBySyncCheckpoint(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewStateBySyncCheckpoint(let value):
+        case let .viewStateBySyncCheckpoint(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewAccessKeyBySyncCheckpoint(let value):
+        case let .viewAccessKeyBySyncCheckpoint(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewAccessKeyListBySyncCheckpoint(let value):
+        case let .viewAccessKeyListBySyncCheckpoint(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .callFunctionBySyncCheckpoint(let value):
+        case let .callFunctionBySyncCheckpoint(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewGlobalContractCodeBySyncCheckpoint(let value):
+        case let .viewGlobalContractCodeBySyncCheckpoint(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewGlobalContractCodeByAccountIdBySyncCheckpoint(let value):
+        case let .viewGlobalContractCodeByAccountIdBySyncCheckpoint(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
         }
@@ -7334,6 +8084,7 @@ public enum RpcQueryRequest: Codable {
 }
 
 // MARK: - RpcQueryResponse
+
 public enum RpcQueryResponse: Codable {
     case accountView(AccountView)
     case contractCodeView(ContractCodeView)
@@ -7349,42 +8100,42 @@ public enum RpcQueryResponse: Codable {
             let value = try decoder.singleValueContainer().decode(AccountView.self)
             self = .accountView(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".accountView: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ContractCodeView.self)
             self = .contractCodeView(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".contractCodeView: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ViewStateResult.self)
             self = .viewStateResult(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".viewStateResult: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(CallResult.self)
             self = .callResult(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".callResult: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(AccessKeyView.self)
             self = .accessKeyView(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".accessKeyView: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(AccessKeyList.self)
             self = .accessKeyList(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".accessKeyList: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -7398,29 +8149,30 @@ public enum RpcQueryResponse: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcQueryResponse\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcQueryResponse:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcQueryResponse:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .accountView(let value):
+        case let .accountView(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .contractCodeView(let value):
+        case let .contractCodeView(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .viewStateResult(let value):
+        case let .viewStateResult(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .callResult(let value):
+        case let .callResult(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .accessKeyView(let value):
+        case let .accessKeyView(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .accessKeyList(let value):
+        case let .accessKeyList(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
         }
@@ -7428,6 +8180,7 @@ public enum RpcQueryResponse: Codable {
 }
 
 // MARK: - RpcRequestValidationErrorKind
+
 public struct RpcRequestValidationErrorKindOneOfInfoName: Codable {
     public let info: AnyCodable
     public let name: String
@@ -7465,14 +8218,14 @@ public enum RpcRequestValidationErrorKind: Codable {
             let value = try decoder.singleValueContainer().decode(RpcRequestValidationErrorKindOneOfInfoName.self)
             self = .rpcRequestValidationErrorKindInfoName(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".rpcRequestValidationErrorKindInfoName: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(RpcRequestValidationErrorKindOneOfInfoName1.self)
             self = .rpcRequestValidationErrorKindInfoName1(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".rpcRequestValidationErrorKindInfoName1: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -7486,17 +8239,19 @@ public enum RpcRequestValidationErrorKind: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcRequestValidationErrorKind\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcRequestValidationErrorKind:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for RpcRequestValidationErrorKind:\n" + decodingErrors
+                    .joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .rpcRequestValidationErrorKindInfoName(let value):
+        case let .rpcRequestValidationErrorKindInfoName(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .rpcRequestValidationErrorKindInfoName1(let value):
+        case let .rpcRequestValidationErrorKindInfoName1(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
         }
@@ -7504,6 +8259,7 @@ public enum RpcRequestValidationErrorKind: Codable {
 }
 
 // MARK: - RpcStateChangesInBlockByTypeRequest
+
 public struct AccountChangesByBlockId: Codable {
     public let blockId: BlockId
     public let accountIds: [AccountId]
@@ -7879,147 +8635,147 @@ public enum RpcStateChangesInBlockByTypeRequest: Codable {
             let value = try decoder.singleValueContainer().decode(AccountChangesByBlockId.self)
             self = .accountChangesByBlockId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".accountChangesByBlockId: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(SingleAccessKeyChangesByBlockId.self)
             self = .singleAccessKeyChangesByBlockId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".singleAccessKeyChangesByBlockId: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(SingleGasKeyChangesByBlockId.self)
             self = .singleGasKeyChangesByBlockId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".singleGasKeyChangesByBlockId: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(AllAccessKeyChangesByBlockId.self)
             self = .allAccessKeyChangesByBlockId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".allAccessKeyChangesByBlockId: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(AllGasKeyChangesByBlockId.self)
             self = .allGasKeyChangesByBlockId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".allGasKeyChangesByBlockId: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ContractCodeChangesByBlockId.self)
             self = .contractCodeChangesByBlockId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".contractCodeChangesByBlockId: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(DataChangesByBlockId.self)
             self = .dataChangesByBlockId(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".dataChangesByBlockId: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(AccountChangesByFinality.self)
             self = .accountChangesByFinality(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".accountChangesByFinality: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(SingleAccessKeyChangesByFinality.self)
             self = .singleAccessKeyChangesByFinality(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".singleAccessKeyChangesByFinality: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(SingleGasKeyChangesByFinality.self)
             self = .singleGasKeyChangesByFinality(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".singleGasKeyChangesByFinality: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(AllAccessKeyChangesByFinality.self)
             self = .allAccessKeyChangesByFinality(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".allAccessKeyChangesByFinality: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(AllGasKeyChangesByFinality.self)
             self = .allGasKeyChangesByFinality(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".allGasKeyChangesByFinality: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ContractCodeChangesByFinality.self)
             self = .contractCodeChangesByFinality(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".contractCodeChangesByFinality: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(DataChangesByFinality.self)
             self = .dataChangesByFinality(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".dataChangesByFinality: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(AccountChangesBySyncCheckpoint.self)
             self = .accountChangesBySyncCheckpoint(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".accountChangesBySyncCheckpoint: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(SingleAccessKeyChangesBySyncCheckpoint.self)
             self = .singleAccessKeyChangesBySyncCheckpoint(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".singleAccessKeyChangesBySyncCheckpoint: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(SingleGasKeyChangesBySyncCheckpoint.self)
             self = .singleGasKeyChangesBySyncCheckpoint(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".singleGasKeyChangesBySyncCheckpoint: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(AllAccessKeyChangesBySyncCheckpoint.self)
             self = .allAccessKeyChangesBySyncCheckpoint(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".allAccessKeyChangesBySyncCheckpoint: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(AllGasKeyChangesBySyncCheckpoint.self)
             self = .allGasKeyChangesBySyncCheckpoint(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".allGasKeyChangesBySyncCheckpoint: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(ContractCodeChangesBySyncCheckpoint.self)
             self = .contractCodeChangesBySyncCheckpoint(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".contractCodeChangesBySyncCheckpoint: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(DataChangesBySyncCheckpoint.self)
             self = .dataChangesBySyncCheckpoint(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".dataChangesBySyncCheckpoint: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -8033,74 +8789,76 @@ public enum RpcStateChangesInBlockByTypeRequest: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcStateChangesInBlockByTypeRequest\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcStateChangesInBlockByTypeRequest:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for RpcStateChangesInBlockByTypeRequest:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .accountChangesByBlockId(let value):
+        case let .accountChangesByBlockId(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .singleAccessKeyChangesByBlockId(let value):
+        case let .singleAccessKeyChangesByBlockId(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .singleGasKeyChangesByBlockId(let value):
+        case let .singleGasKeyChangesByBlockId(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .allAccessKeyChangesByBlockId(let value):
+        case let .allAccessKeyChangesByBlockId(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .allGasKeyChangesByBlockId(let value):
+        case let .allGasKeyChangesByBlockId(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .contractCodeChangesByBlockId(let value):
+        case let .contractCodeChangesByBlockId(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .dataChangesByBlockId(let value):
+        case let .dataChangesByBlockId(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .accountChangesByFinality(let value):
+        case let .accountChangesByFinality(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .singleAccessKeyChangesByFinality(let value):
+        case let .singleAccessKeyChangesByFinality(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .singleGasKeyChangesByFinality(let value):
+        case let .singleGasKeyChangesByFinality(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .allAccessKeyChangesByFinality(let value):
+        case let .allAccessKeyChangesByFinality(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .allGasKeyChangesByFinality(let value):
+        case let .allGasKeyChangesByFinality(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .contractCodeChangesByFinality(let value):
+        case let .contractCodeChangesByFinality(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .dataChangesByFinality(let value):
+        case let .dataChangesByFinality(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .accountChangesBySyncCheckpoint(let value):
+        case let .accountChangesBySyncCheckpoint(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .singleAccessKeyChangesBySyncCheckpoint(let value):
+        case let .singleAccessKeyChangesBySyncCheckpoint(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .singleGasKeyChangesBySyncCheckpoint(let value):
+        case let .singleGasKeyChangesBySyncCheckpoint(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .allAccessKeyChangesBySyncCheckpoint(let value):
+        case let .allAccessKeyChangesBySyncCheckpoint(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .allGasKeyChangesBySyncCheckpoint(let value):
+        case let .allGasKeyChangesBySyncCheckpoint(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .contractCodeChangesBySyncCheckpoint(let value):
+        case let .contractCodeChangesBySyncCheckpoint(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .dataChangesBySyncCheckpoint(let value):
+        case let .dataChangesBySyncCheckpoint(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
         }
@@ -8108,6 +8866,7 @@ public enum RpcStateChangesInBlockByTypeRequest: Codable {
 }
 
 // MARK: - RpcStateChangesInBlockRequest
+
 public enum RpcStateChangesInBlockRequest: Codable {
     case blockId(BlockId)
     case finality(Finality)
@@ -8118,35 +8877,44 @@ public enum RpcStateChangesInBlockRequest: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("block_id") == .orderedSame || key.stringValue.caseInsensitiveCompare("blockId") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("block_id") == .orderedSame || key.stringValue
+                            .caseInsensitiveCompare("blockId") == .orderedSame
+                    }) {
                     let value = try container.decode(BlockId.self, forKey: matchingKey)
                     self = .blockId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".blockId: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("finality") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("finality") == .orderedSame }) {
                     let value = try container.decode(Finality.self, forKey: matchingKey)
                     self = .finality(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".finality: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("sync_checkpoint") == .orderedSame || key.stringValue.caseInsensitiveCompare("syncCheckpoint") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("sync_checkpoint") == .orderedSame || key.stringValue
+                            .caseInsensitiveCompare("syncCheckpoint") == .orderedSame
+                    }) {
                     let value = try container.decode(SyncCheckpoint.self, forKey: matchingKey)
                     self = .syncCheckpoint(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".syncCheckpoint: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -8160,7 +8928,9 @@ public enum RpcStateChangesInBlockRequest: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcStateChangesInBlockRequest\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcStateChangesInBlockRequest:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for RpcStateChangesInBlockRequest:\n" + decodingErrors
+                    .joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -8171,13 +8941,13 @@ public enum RpcStateChangesInBlockRequest: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .blockId(let value):
+        case let .blockId(value):
             var container = encoder.container(keyedBy: AnyCodingKey.self)
             try container.encode(value, forKey: AnyCodingKey(stringValue: "block_id"))
-        case .finality(let value):
+        case let .finality(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .finality)
-        case .syncCheckpoint(let value):
+        case let .syncCheckpoint(value):
             var container = encoder.container(keyedBy: AnyCodingKey.self)
             try container.encode(value, forKey: AnyCodingKey(stringValue: "sync_checkpoint"))
         }
@@ -8185,6 +8955,7 @@ public enum RpcStateChangesInBlockRequest: Codable {
 }
 
 // MARK: - RpcTransactionResponse
+
 public enum RpcTransactionResponse: Codable {
     case finalExecutionOutcomeWithReceiptView(FinalExecutionOutcomeWithReceiptView)
     case finalExecutionOutcomeView(FinalExecutionOutcomeView)
@@ -8196,14 +8967,14 @@ public enum RpcTransactionResponse: Codable {
             let value = try decoder.singleValueContainer().decode(FinalExecutionOutcomeWithReceiptView.self)
             self = .finalExecutionOutcomeWithReceiptView(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".finalExecutionOutcomeWithReceiptView: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(FinalExecutionOutcomeView.self)
             self = .finalExecutionOutcomeView(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".finalExecutionOutcomeView: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -8217,17 +8988,18 @@ public enum RpcTransactionResponse: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcTransactionResponse\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcTransactionResponse:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcTransactionResponse:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .finalExecutionOutcomeWithReceiptView(let value):
+        case let .finalExecutionOutcomeWithReceiptView(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .finalExecutionOutcomeView(let value):
+        case let .finalExecutionOutcomeView(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
         }
@@ -8235,6 +9007,7 @@ public enum RpcTransactionResponse: Codable {
 }
 
 // MARK: - RpcTransactionStatusRequest
+
 public struct RpcTransactionStatusRequestOneOfSenderAccountIdTxHash: Codable {
     public let senderAccountId: AccountId
     public let txHash: CryptoHash
@@ -8257,20 +9030,25 @@ public enum RpcTransactionStatusRequest: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("signed_tx_base64") == .orderedSame || key.stringValue.caseInsensitiveCompare("signedTxBase64") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("signed_tx_base64") == .orderedSame || key.stringValue
+                            .caseInsensitiveCompare("signedTxBase64") == .orderedSame
+                    }) {
                     let value = try container.decode(SignedTransaction.self, forKey: matchingKey)
                     self = .signedTxBase64(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".signedTxBase64: \(describeDecodingError(error))")
         }
         do {
-            let value = try decoder.singleValueContainer().decode(RpcTransactionStatusRequestOneOfSenderAccountIdTxHash.self)
+            let value = try decoder.singleValueContainer()
+                .decode(RpcTransactionStatusRequestOneOfSenderAccountIdTxHash.self)
             self = .rpcTransactionStatusRequestSenderAccountIdTxHash(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".rpcTransactionStatusRequestSenderAccountIdTxHash: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -8284,17 +9062,18 @@ public enum RpcTransactionStatusRequest: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcTransactionStatusRequest\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcTransactionStatusRequest:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcTransactionStatusRequest:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .signedTxBase64(let value):
+        case let .signedTxBase64(value):
             var container = encoder.container(keyedBy: AnyCodingKey.self)
             try container.encode(value, forKey: AnyCodingKey(stringValue: "signed_tx_base64"))
-        case .rpcTransactionStatusRequestSenderAccountIdTxHash(let value):
+        case let .rpcTransactionStatusRequestSenderAccountIdTxHash(value):
             var singleContainer = encoder.singleValueContainer()
             try singleContainer.encode(value)
         }
@@ -8302,6 +9081,7 @@ public enum RpcTransactionStatusRequest: Codable {
 }
 
 // MARK: - RpcValidatorRequest
+
 public enum RpcValidatorRequest: Codable {
     case latest
     case epochId(EpochId)
@@ -8316,24 +9096,32 @@ public enum RpcValidatorRequest: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("epoch_id") == .orderedSame || key.stringValue.caseInsensitiveCompare("epochId") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("epoch_id") == .orderedSame || key.stringValue
+                            .caseInsensitiveCompare("epochId") == .orderedSame
+                    }) {
                     let value = try container.decode(EpochId.self, forKey: matchingKey)
                     self = .epochId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".epochId: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("block_id") == .orderedSame || key.stringValue.caseInsensitiveCompare("blockId") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("block_id") == .orderedSame || key.stringValue
+                            .caseInsensitiveCompare("blockId") == .orderedSame
+                    }) {
                     let value = try container.decode(BlockId.self, forKey: matchingKey)
                     self = .blockId(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".blockId: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -8347,17 +9135,18 @@ public enum RpcValidatorRequest: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcValidatorRequest\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcValidatorRequest:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcValidatorRequest:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .epochId(let value):
+        case let .epochId(value):
             var container = encoder.container(keyedBy: AnyCodingKey.self)
             try container.encode(value, forKey: AnyCodingKey(stringValue: "epoch_id"))
-        case .blockId(let value):
+        case let .blockId(value):
             var container = encoder.container(keyedBy: AnyCodingKey.self)
             try container.encode(value, forKey: AnyCodingKey(stringValue: "block_id"))
         case .latest:
@@ -8368,6 +9157,7 @@ public enum RpcValidatorRequest: Codable {
 }
 
 // MARK: - ShardLayout
+
 public enum ShardLayout: Codable {
     case v0(ShardLayoutV0)
     case v1(ShardLayoutV1)
@@ -8378,35 +9168,38 @@ public enum ShardLayout: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("V0") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("V0") == .orderedSame }) {
                     let value = try container.decode(ShardLayoutV0.self, forKey: matchingKey)
                     self = .v0(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".v0: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("V1") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("V1") == .orderedSame }) {
                     let value = try container.decode(ShardLayoutV1.self, forKey: matchingKey)
                     self = .v1(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".v1: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("V2") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("V2") == .orderedSame }) {
                     let value = try container.decode(ShardLayoutV2.self, forKey: matchingKey)
                     self = .v2(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".v2: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -8420,7 +9213,8 @@ public enum ShardLayout: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for ShardLayout\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for ShardLayout:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ShardLayout:\n" + decodingErrors
+                .joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -8433,13 +9227,13 @@ public enum ShardLayout: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .v0(let value):
+        case let .v0(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .v0)
-        case .v1(let value):
+        case let .v1(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .v1)
-        case .v2(let value):
+        case let .v2(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .v2)
         }
@@ -8447,6 +9241,7 @@ public enum ShardLayout: Codable {
 }
 
 // MARK: - StateChangeCauseView
+
 public struct StateChangeCauseViewOneOfTxHashType: Codable {
     public let txHash: CryptoHash
     public let type: String
@@ -8530,103 +9325,109 @@ public enum StateChangeCauseView: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("type") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("type") == .orderedSame }) {
                     let value = try container.decode(String.self, forKey: matchingKey)
                     self = .type(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".type: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("type") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("type") == .orderedSame }) {
                     let value = try container.decode(String.self, forKey: matchingKey)
                     self = .type1(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".type1: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeCauseViewOneOfTxHashType.self)
             self = .stateChangeCauseViewTxHashType(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeCauseViewTxHashType: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeCauseViewOneOfReceiptHashType.self)
             self = .stateChangeCauseViewReceiptHashType(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeCauseViewReceiptHashType: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeCauseViewOneOfReceiptHashType1.self)
             self = .stateChangeCauseViewReceiptHashType1(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeCauseViewReceiptHashType1: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeCauseViewOneOfReceiptHashType2.self)
             self = .stateChangeCauseViewReceiptHashType2(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeCauseViewReceiptHashType2: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeCauseViewOneOfReceiptHashType3.self)
             self = .stateChangeCauseViewReceiptHashType3(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeCauseViewReceiptHashType3: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("type") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("type") == .orderedSame }) {
                     let value = try container.decode(String.self, forKey: matchingKey)
                     self = .type2(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".type2: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("type") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("type") == .orderedSame }) {
                     let value = try container.decode(String.self, forKey: matchingKey)
                     self = .type3(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".type3: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("type") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("type") == .orderedSame }) {
                     let value = try container.decode(String.self, forKey: matchingKey)
                     self = .type4(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".type4: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("type") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("type") == .orderedSame }) {
                     let value = try container.decode(String.self, forKey: matchingKey)
                     self = .type5(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".type5: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -8640,7 +9441,8 @@ public enum StateChangeCauseView: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for StateChangeCauseView\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for StateChangeCauseView:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for StateChangeCauseView:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -8651,37 +9453,37 @@ public enum StateChangeCauseView: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .type(let value):
+        case let .type(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .type)
-        case .type1(let value):
+        case let .type1(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .type)
-        case .type2(let value):
+        case let .type2(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .type)
-        case .type3(let value):
+        case let .type3(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .type)
-        case .type4(let value):
+        case let .type4(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .type)
-        case .type5(let value):
+        case let .type5(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .type)
-        case .stateChangeCauseViewTxHashType(let value):
+        case let .stateChangeCauseViewTxHashType(value):
             var singleContainer = encoder.singleValueContainer()
             try singleContainer.encode(value)
-        case .stateChangeCauseViewReceiptHashType(let value):
+        case let .stateChangeCauseViewReceiptHashType(value):
             var singleContainer = encoder.singleValueContainer()
             try singleContainer.encode(value)
-        case .stateChangeCauseViewReceiptHashType1(let value):
+        case let .stateChangeCauseViewReceiptHashType1(value):
             var singleContainer = encoder.singleValueContainer()
             try singleContainer.encode(value)
-        case .stateChangeCauseViewReceiptHashType2(let value):
+        case let .stateChangeCauseViewReceiptHashType2(value):
             var singleContainer = encoder.singleValueContainer()
             try singleContainer.encode(value)
-        case .stateChangeCauseViewReceiptHashType3(let value):
+        case let .stateChangeCauseViewReceiptHashType3(value):
             var singleContainer = encoder.singleValueContainer()
             try singleContainer.encode(value)
         }
@@ -8689,6 +9491,7 @@ public enum StateChangeCauseView: Codable {
 }
 
 // MARK: - StateChangeKindView
+
 public struct StateChangeKindViewOneOfAccountIdType: Codable {
     public let accountId: AccountId
     public let type: String
@@ -8754,28 +9557,28 @@ public enum StateChangeKindView: Codable {
             let value = try decoder.singleValueContainer().decode(StateChangeKindViewOneOfAccountIdType.self)
             self = .stateChangeKindViewAccountIdType(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeKindViewAccountIdType: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeKindViewOneOfAccountIdType1.self)
             self = .stateChangeKindViewAccountIdType1(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeKindViewAccountIdType1: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeKindViewOneOfAccountIdType2.self)
             self = .stateChangeKindViewAccountIdType2(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeKindViewAccountIdType2: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeKindViewOneOfAccountIdType3.self)
             self = .stateChangeKindViewAccountIdType3(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeKindViewAccountIdType3: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -8789,23 +9592,24 @@ public enum StateChangeKindView: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for StateChangeKindView\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for StateChangeKindView:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for StateChangeKindView:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .stateChangeKindViewAccountIdType(let value):
+        case let .stateChangeKindViewAccountIdType(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .stateChangeKindViewAccountIdType1(let value):
+        case let .stateChangeKindViewAccountIdType1(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .stateChangeKindViewAccountIdType2(let value):
+        case let .stateChangeKindViewAccountIdType2(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .stateChangeKindViewAccountIdType3(let value):
+        case let .stateChangeKindViewAccountIdType3(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
         }
@@ -8813,6 +9617,7 @@ public enum StateChangeKindView: Codable {
 }
 
 // MARK: - StateChangeWithCauseView
+
 public struct StateChangeWithCauseViewOneOfChangeType: Codable {
     public let change: InlineObject
     public let type: String
@@ -8976,77 +9781,77 @@ public enum StateChangeWithCauseView: Codable {
             let value = try decoder.singleValueContainer().decode(StateChangeWithCauseViewOneOfChangeType.self)
             self = .stateChangeWithCauseViewChangeType(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeWithCauseViewChangeType: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeWithCauseViewOneOfChangeType1.self)
             self = .stateChangeWithCauseViewChangeType1(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeWithCauseViewChangeType1: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeWithCauseViewOneOfChangeType2.self)
             self = .stateChangeWithCauseViewChangeType2(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeWithCauseViewChangeType2: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeWithCauseViewOneOfChangeType3.self)
             self = .stateChangeWithCauseViewChangeType3(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeWithCauseViewChangeType3: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeWithCauseViewOneOfChangeType4.self)
             self = .stateChangeWithCauseViewChangeType4(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeWithCauseViewChangeType4: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeWithCauseViewOneOfChangeType5.self)
             self = .stateChangeWithCauseViewChangeType5(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeWithCauseViewChangeType5: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeWithCauseViewOneOfChangeType6.self)
             self = .stateChangeWithCauseViewChangeType6(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeWithCauseViewChangeType6: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeWithCauseViewOneOfChangeType7.self)
             self = .stateChangeWithCauseViewChangeType7(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeWithCauseViewChangeType7: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeWithCauseViewOneOfChangeType8.self)
             self = .stateChangeWithCauseViewChangeType8(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeWithCauseViewChangeType8: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeWithCauseViewOneOfChangeType9.self)
             self = .stateChangeWithCauseViewChangeType9(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeWithCauseViewChangeType9: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(StateChangeWithCauseViewOneOfChangeType10.self)
             self = .stateChangeWithCauseViewChangeType10(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".stateChangeWithCauseViewChangeType10: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -9060,44 +9865,45 @@ public enum StateChangeWithCauseView: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for StateChangeWithCauseView\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for StateChangeWithCauseView:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for StateChangeWithCauseView:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .stateChangeWithCauseViewChangeType(let value):
+        case let .stateChangeWithCauseViewChangeType(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .stateChangeWithCauseViewChangeType1(let value):
+        case let .stateChangeWithCauseViewChangeType1(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .stateChangeWithCauseViewChangeType2(let value):
+        case let .stateChangeWithCauseViewChangeType2(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .stateChangeWithCauseViewChangeType3(let value):
+        case let .stateChangeWithCauseViewChangeType3(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .stateChangeWithCauseViewChangeType4(let value):
+        case let .stateChangeWithCauseViewChangeType4(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .stateChangeWithCauseViewChangeType5(let value):
+        case let .stateChangeWithCauseViewChangeType5(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .stateChangeWithCauseViewChangeType6(let value):
+        case let .stateChangeWithCauseViewChangeType6(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .stateChangeWithCauseViewChangeType7(let value):
+        case let .stateChangeWithCauseViewChangeType7(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .stateChangeWithCauseViewChangeType8(let value):
+        case let .stateChangeWithCauseViewChangeType8(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .stateChangeWithCauseViewChangeType9(let value):
+        case let .stateChangeWithCauseViewChangeType9(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .stateChangeWithCauseViewChangeType10(let value):
+        case let .stateChangeWithCauseViewChangeType10(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
         }
@@ -9105,6 +9911,7 @@ public enum StateChangeWithCauseView: Codable {
 }
 
 // MARK: - StorageError
+
 public enum StorageError: Codable {
     case storageInternalError
     case missingTrieValue(MissingTrieValue)
@@ -9122,13 +9929,16 @@ public enum StorageError: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("MissingTrieValue") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("MissingTrieValue") == .orderedSame
+                    }) {
                     let value = try container.decode(MissingTrieValue.self, forKey: matchingKey)
                     self = .missingTrieValue(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".missingTrieValue: \(describeDecodingError(error))")
         }
         if let value = try? decoder.singleValueContainer().decode(String.self), value == "UnexpectedTrieValue" {
@@ -9137,35 +9947,44 @@ public enum StorageError: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("StorageInconsistentState") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("StorageInconsistentState") == .orderedSame
+                    }) {
                     let value = try container.decode(String.self, forKey: matchingKey)
                     self = .storageInconsistentState(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".storageInconsistentState: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("FlatStorageBlockNotSupported") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("FlatStorageBlockNotSupported") == .orderedSame
+                    }) {
                     let value = try container.decode(String.self, forKey: matchingKey)
                     self = .flatStorageBlockNotSupported(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".flatStorageBlockNotSupported: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("MemTrieLoadingError") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("MemTrieLoadingError") == .orderedSame
+                    }) {
                     let value = try container.decode(String.self, forKey: matchingKey)
                     self = .memTrieLoadingError(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".memTrieLoadingError: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -9179,7 +9998,8 @@ public enum StorageError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for StorageError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for StorageError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for StorageError:\n" + decodingErrors
+                .joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -9193,16 +10013,16 @@ public enum StorageError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .missingTrieValue(let value):
+        case let .missingTrieValue(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .missingTrieValue)
-        case .storageInconsistentState(let value):
+        case let .storageInconsistentState(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .storageInconsistentState)
-        case .flatStorageBlockNotSupported(let value):
+        case let .flatStorageBlockNotSupported(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .flatStorageBlockNotSupported)
-        case .memTrieLoadingError(let value):
+        case let .memTrieLoadingError(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .memTrieLoadingError)
         case .storageInternalError:
@@ -9216,6 +10036,7 @@ public enum StorageError: Codable {
 }
 
 // MARK: - SyncConfig
+
 public enum SyncConfig: Codable {
     case peers
     case externalStorage(ExternalStorageConfig)
@@ -9229,13 +10050,16 @@ public enum SyncConfig: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ExternalStorage") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("ExternalStorage") == .orderedSame
+                    }) {
                     let value = try container.decode(ExternalStorageConfig.self, forKey: matchingKey)
                     self = .externalStorage(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".externalStorage: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -9249,7 +10073,8 @@ public enum SyncConfig: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for SyncConfig\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for SyncConfig:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for SyncConfig:\n" + decodingErrors
+                .joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -9260,7 +10085,7 @@ public enum SyncConfig: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .externalStorage(let value):
+        case let .externalStorage(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .externalStorage)
         case .peers:
@@ -9271,6 +10096,7 @@ public enum SyncConfig: Codable {
 }
 
 // MARK: - TrackedShardsConfig
+
 public enum TrackedShardsConfig: Codable {
     case noShards
     case shards([ShardUId])
@@ -9288,13 +10114,14 @@ public enum TrackedShardsConfig: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("Shards") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("Shards") == .orderedSame }) {
                     let value = try container.decode([ShardUId].self, forKey: matchingKey)
                     self = .shards(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".shards: \(describeDecodingError(error))")
         }
         if let value = try? decoder.singleValueContainer().decode(String.self), value == "AllShards" {
@@ -9303,35 +10130,40 @@ public enum TrackedShardsConfig: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ShadowValidator") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("ShadowValidator") == .orderedSame
+                    }) {
                     let value = try container.decode(AccountId.self, forKey: matchingKey)
                     self = .shadowValidator(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".shadowValidator: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("Schedule") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("Schedule") == .orderedSame }) {
                     let value = try container.decode([[ShardId]].self, forKey: matchingKey)
                     self = .schedule(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".schedule: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("Accounts") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("Accounts") == .orderedSame }) {
                     let value = try container.decode([AccountId].self, forKey: matchingKey)
                     self = .accounts(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".accounts: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -9345,7 +10177,8 @@ public enum TrackedShardsConfig: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for TrackedShardsConfig\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for TrackedShardsConfig:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for TrackedShardsConfig:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -9359,16 +10192,16 @@ public enum TrackedShardsConfig: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .shards(let value):
+        case let .shards(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .shards)
-        case .shadowValidator(let value):
+        case let .shadowValidator(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .shadowValidator)
-        case .schedule(let value):
+        case let .schedule(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .schedule)
-        case .accounts(let value):
+        case let .accounts(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .accounts)
         case .noShards:
@@ -9382,6 +10215,7 @@ public enum TrackedShardsConfig: Codable {
 }
 
 // MARK: - TxExecutionError
+
 public enum TxExecutionError: Codable {
     case actionError(ActionError)
     case invalidTxError(InvalidTxError)
@@ -9391,24 +10225,26 @@ public enum TxExecutionError: Codable {
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ActionError") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("ActionError") == .orderedSame }) {
                     let value = try container.decode(ActionError.self, forKey: matchingKey)
                     self = .actionError(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".actionError: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidTxError") == .orderedSame }) {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("InvalidTxError") == .orderedSame }) {
                     let value = try container.decode(InvalidTxError.self, forKey: matchingKey)
                     self = .invalidTxError(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".invalidTxError: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -9422,7 +10258,8 @@ public enum TxExecutionError: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for TxExecutionError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for TxExecutionError:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for TxExecutionError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -9434,10 +10271,10 @@ public enum TxExecutionError: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .actionError(let value):
+        case let .actionError(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .actionError)
-        case .invalidTxError(let value):
+        case let .invalidTxError(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .invalidTxError)
         }
@@ -9445,6 +10282,7 @@ public enum TxExecutionError: Codable {
 }
 
 // MARK: - TxExecutionStatus
+
 public enum TxExecutionStatus: Codable {
     case none
     case included
@@ -9491,7 +10329,8 @@ public enum TxExecutionStatus: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for TxExecutionStatus\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for TxExecutionStatus:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for TxExecutionStatus:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -9521,6 +10360,7 @@ public enum TxExecutionStatus: Codable {
 }
 
 // MARK: - VMKind
+
 public enum VMKind: Codable {
     case wasmer0
     case wasmtime
@@ -9557,7 +10397,8 @@ public enum VMKind: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for VMKind\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for VMKind:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for VMKind:\n" + decodingErrors
+                .joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -9581,6 +10422,7 @@ public enum VMKind: Codable {
 }
 
 // MARK: - ValidatorKickoutReason
+
 public struct ValidatorKickoutReasonOneOfNotEnoughBlocksInline: Codable {
     public let expected: UInt64
     public let produced: UInt64
@@ -9665,24 +10507,36 @@ public enum ValidatorKickoutReason: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("NotEnoughBlocks") == .orderedSame }) {
-                    let value = try container.decode(ValidatorKickoutReasonOneOfNotEnoughBlocksInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("NotEnoughBlocks") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ValidatorKickoutReasonOneOfNotEnoughBlocksInline.self,
+                        forKey: matchingKey
+                    )
                     self = .notEnoughBlocks(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".notEnoughBlocks: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("NotEnoughChunks") == .orderedSame }) {
-                    let value = try container.decode(ValidatorKickoutReasonOneOfNotEnoughChunksInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("NotEnoughChunks") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ValidatorKickoutReasonOneOfNotEnoughChunksInline.self,
+                        forKey: matchingKey
+                    )
                     self = .notEnoughChunks(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".notEnoughChunks: \(describeDecodingError(error))")
         }
         if let value = try? decoder.singleValueContainer().decode(String.self), value == "Unstaked" {
@@ -9691,13 +10545,17 @@ public enum ValidatorKickoutReason: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("NotEnoughStake") == .orderedSame }) {
-                    let value = try container.decode(ValidatorKickoutReasonOneOfNotEnoughStakeInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("NotEnoughStake") == .orderedSame }) {
+                    let value = try container.decode(
+                        ValidatorKickoutReasonOneOfNotEnoughStakeInline.self,
+                        forKey: matchingKey
+                    )
                     self = .notEnoughStake(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".notEnoughStake: \(describeDecodingError(error))")
         }
         if let value = try? decoder.singleValueContainer().decode(String.self), value == "DidNotGetASeat" {
@@ -9706,24 +10564,36 @@ public enum ValidatorKickoutReason: Codable {
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("NotEnoughChunkEndorsements") == .orderedSame }) {
-                    let value = try container.decode(ValidatorKickoutReasonOneOfNotEnoughChunkEndorsementsInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("NotEnoughChunkEndorsements") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ValidatorKickoutReasonOneOfNotEnoughChunkEndorsementsInline.self,
+                        forKey: matchingKey
+                    )
                     self = .notEnoughChunkEndorsements(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".notEnoughChunkEndorsements: \(describeDecodingError(error))")
         }
         do {
             if let container = anyKeyContainer {
-                if let matchingKey = container.allKeys.first(where: { key in key.stringValue.caseInsensitiveCompare("ProtocolVersionTooOld") == .orderedSame }) {
-                    let value = try container.decode(ValidatorKickoutReasonOneOfProtocolVersionTooOldInline.self, forKey: matchingKey)
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("ProtocolVersionTooOld") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ValidatorKickoutReasonOneOfProtocolVersionTooOldInline.self,
+                        forKey: matchingKey
+                    )
                     self = .protocolVersionTooOld(value)
                     return
                 }
             }
-        } catch let error {
+        } catch {
             decodingErrors.append(".protocolVersionTooOld: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -9737,7 +10607,8 @@ public enum ValidatorKickoutReason: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for ValidatorKickoutReason\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for ValidatorKickoutReason:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ValidatorKickoutReason:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -9752,19 +10623,19 @@ public enum ValidatorKickoutReason: Codable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .notEnoughBlocks(let value):
+        case let .notEnoughBlocks(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .notEnoughBlocks)
-        case .notEnoughChunks(let value):
+        case let .notEnoughChunks(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .notEnoughChunks)
-        case .notEnoughStake(let value):
+        case let .notEnoughStake(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .notEnoughStake)
-        case .notEnoughChunkEndorsements(let value):
+        case let .notEnoughChunkEndorsements(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .notEnoughChunkEndorsements)
-        case .protocolVersionTooOld(let value):
+        case let .protocolVersionTooOld(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .protocolVersionTooOld)
         case .UnusedSlashed:
@@ -9781,6 +10652,7 @@ public enum ValidatorKickoutReason: Codable {
 }
 
 // MARK: - ValidatorStakeView
+
 public struct ValidatorStakeViewOneOfAccountIdPublicKeyStake: Codable {
     public let accountId: AccountId
     public let publicKey: PublicKey
@@ -9807,7 +10679,7 @@ public enum ValidatorStakeView: Codable {
             let value = try decoder.singleValueContainer().decode(ValidatorStakeViewOneOfAccountIdPublicKeyStake.self)
             self = .validatorStakeViewAccountIdPublicKeyStake(value)
             return
-        } catch let error {
+        } catch {
             decodingErrors.append(".validatorStakeViewAccountIdPublicKeyStake: \(describeDecodingError(error))")
         }
         let contextDescription: String
@@ -9821,14 +10693,15 @@ public enum ValidatorStakeView: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for ValidatorStakeView\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for ValidatorStakeView:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ValidatorStakeView:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case .validatorStakeViewAccountIdPublicKeyStake(let value):
+        case let .validatorStakeViewAccountIdPublicKeyStake(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
         }
@@ -9836,6 +10709,7 @@ public enum ValidatorStakeView: Codable {
 }
 
 // MARK: - WasmTrap
+
 public enum WasmTrap: Codable {
     case unreachable
     case incorrectCallIndirectSignature
@@ -9854,7 +10728,8 @@ public enum WasmTrap: Codable {
             self = .unreachable
             return
         }
-        if let value = try? decoder.singleValueContainer().decode(String.self), value == "IncorrectCallIndirectSignature" {
+        if let value = try? decoder.singleValueContainer().decode(String.self),
+           value == "IncorrectCallIndirectSignature" {
             self = .incorrectCallIndirectSignature
             return
         }
@@ -9897,7 +10772,8 @@ public enum WasmTrap: Codable {
             }
             contextDescription = "Could not decode any of the oneOf/anyOf variants for WasmTrap\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for WasmTrap:\n" + decodingErrors.joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for WasmTrap:\n" + decodingErrors
+                .joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
@@ -9936,12 +10812,15 @@ public enum WasmTrap: Codable {
 }
 
 // MARK: - EpochId
+
 public typealias EpochId = CryptoHash
 
 // MARK: - PeerId
+
 public typealias PeerId = PublicKey
 
 // MARK: - AccessKey
+
 public struct AccessKey: Codable {
     public let nonce: UInt64
     public let permission: AccessKeyPermission
@@ -9956,6 +10835,7 @@ public struct AccessKey: Codable {
 }
 
 // MARK: - AccessKeyCreationConfigView
+
 public struct AccessKeyCreationConfigView: Codable {
     public let fullAccessCost: Fee
     public let functionCallCost: Fee
@@ -9973,6 +10853,7 @@ public struct AccessKeyCreationConfigView: Codable {
 }
 
 // MARK: - AccessKeyInfoView
+
 public struct AccessKeyInfoView: Codable {
     public let accessKey: AccessKeyView
     public let publicKey: PublicKey
@@ -9987,6 +10868,7 @@ public struct AccessKeyInfoView: Codable {
 }
 
 // MARK: - AccessKeyList
+
 public struct AccessKeyList: Codable {
     public let keys: [AccessKeyInfoView]
 
@@ -9998,6 +10880,7 @@ public struct AccessKeyList: Codable {
 }
 
 // MARK: - AccessKeyView
+
 public struct AccessKeyView: Codable {
     public let nonce: UInt64
     public let permission: AccessKeyPermissionView
@@ -10012,6 +10895,7 @@ public struct AccessKeyView: Codable {
 }
 
 // MARK: - AccountCreationConfigView
+
 public struct AccountCreationConfigView: Codable {
     public let minAllowedTopLevelAccountLength: Int
     public let registrarAccountId: AccountId
@@ -10026,6 +10910,7 @@ public struct AccountCreationConfigView: Codable {
 }
 
 // MARK: - AccountDataView
+
 public struct AccountDataView: Codable {
     public let accountKey: PublicKey
     public let peerId: PublicKey
@@ -10046,6 +10931,7 @@ public struct AccountDataView: Codable {
 }
 
 // MARK: - AccountInfo
+
 public struct AccountInfo: Codable {
     public let accountId: AccountId
     public let amount: NearToken
@@ -10063,6 +10949,7 @@ public struct AccountInfo: Codable {
 }
 
 // MARK: - AccountView
+
 public struct AccountView: Codable {
     public let amount: NearToken
     public let codeHash: CryptoHash
@@ -10092,6 +10979,7 @@ public struct AccountView: Codable {
 }
 
 // MARK: - AccountWithPublicKey
+
 public struct AccountWithPublicKey: Codable {
     public let accountId: AccountId
     public let publicKey: PublicKey
@@ -10106,6 +10994,7 @@ public struct AccountWithPublicKey: Codable {
 }
 
 // MARK: - ActionCreationConfigView
+
 public struct ActionCreationConfigView: Codable {
     public let addKeyCost: AccessKeyCreationConfigView
     public let createAccountCost: Fee
@@ -10147,6 +11036,7 @@ public struct ActionCreationConfigView: Codable {
 }
 
 // MARK: - ActionError
+
 public struct ActionError: Codable {
     public let index: UInt64?
     public let kind: ActionErrorKind
@@ -10161,6 +11051,7 @@ public struct ActionError: Codable {
 }
 
 // MARK: - AddKeyAction
+
 public struct AddKeyAction: Codable {
     public let accessKey: AccessKey
     public let publicKey: PublicKey
@@ -10175,6 +11066,7 @@ public struct AddKeyAction: Codable {
 }
 
 // MARK: - BandwidthRequest
+
 public struct BandwidthRequest: Codable {
     public let requestedValuesBitmap: BandwidthRequestBitmap
     public let toShard: Int
@@ -10189,6 +11081,7 @@ public struct BandwidthRequest: Codable {
 }
 
 // MARK: - BandwidthRequestBitmap
+
 public struct BandwidthRequestBitmap: Codable {
     public let data: [Int]
 
@@ -10200,6 +11093,7 @@ public struct BandwidthRequestBitmap: Codable {
 }
 
 // MARK: - BandwidthRequestsV1
+
 public struct BandwidthRequestsV1: Codable {
     public let requests: [BandwidthRequest]
 
@@ -10211,6 +11105,7 @@ public struct BandwidthRequestsV1: Codable {
 }
 
 // MARK: - BlockHeaderInnerLiteView
+
 public struct BlockHeaderInnerLiteView: Codable {
     public let blockMerkleRoot: CryptoHash
     public let epochId: CryptoHash
@@ -10246,6 +11141,7 @@ public struct BlockHeaderInnerLiteView: Codable {
 }
 
 // MARK: - BlockHeaderView
+
 public struct BlockHeaderView: Codable {
     public let approvals: [Signature?]
     public let blockBodyHash: CryptoHash?
@@ -10356,6 +11252,7 @@ public struct BlockHeaderView: Codable {
 }
 
 // MARK: - BlockStatusView
+
 public struct BlockStatusView: Codable {
     public let hash: CryptoHash
     public let height: UInt64
@@ -10370,6 +11267,7 @@ public struct BlockStatusView: Codable {
 }
 
 // MARK: - CallResult
+
 public struct CallResult: Codable {
     public let logs: [String]
     public let result: [Int]
@@ -10384,6 +11282,7 @@ public struct CallResult: Codable {
 }
 
 // MARK: - CatchupStatusView
+
 public struct CatchupStatusView: Codable {
     public let blocksToCatchup: [BlockStatusView]
     public let shardSyncStatus: AnyCodable
@@ -10404,6 +11303,7 @@ public struct CatchupStatusView: Codable {
 }
 
 // MARK: - ChunkDistributionNetworkConfig
+
 public struct ChunkDistributionNetworkConfig: Codable {
     public let enabled: Bool
     public let uris: ChunkDistributionUris
@@ -10418,6 +11318,7 @@ public struct ChunkDistributionNetworkConfig: Codable {
 }
 
 // MARK: - ChunkDistributionUris
+
 public struct ChunkDistributionUris: Codable {
     public let get: String
     public let set: String
@@ -10432,6 +11333,7 @@ public struct ChunkDistributionUris: Codable {
 }
 
 // MARK: - ChunkHeaderView
+
 public struct ChunkHeaderView: Codable {
     public let balanceBurnt: NearToken
     public let bandwidthRequests: BandwidthRequests?
@@ -10500,6 +11402,7 @@ public struct ChunkHeaderView: Codable {
 }
 
 // MARK: - CloudArchivalReaderConfig
+
 public struct CloudArchivalReaderConfig: Codable {
     public let cloudStorage: CloudStorageConfig
 
@@ -10511,6 +11414,7 @@ public struct CloudArchivalReaderConfig: Codable {
 }
 
 // MARK: - CloudArchivalWriterConfig
+
 public struct CloudArchivalWriterConfig: Codable {
     public let archiveBlockData: Bool?
     public let cloudStorage: CloudStorageConfig
@@ -10528,6 +11432,7 @@ public struct CloudArchivalWriterConfig: Codable {
 }
 
 // MARK: - CloudStorageConfig
+
 public struct CloudStorageConfig: Codable {
     public let credentialsFile: String?
     public let storage: ExternalStorageLocation
@@ -10542,6 +11447,7 @@ public struct CloudStorageConfig: Codable {
 }
 
 // MARK: - CongestionControlConfigView
+
 public struct CongestionControlConfigView: Codable {
     public let allowedShardOutgoingGas: NearGas
     public let maxCongestionIncomingGas: NearGas
@@ -10586,6 +11492,7 @@ public struct CongestionControlConfigView: Codable {
 }
 
 // MARK: - CongestionInfoView
+
 public struct CongestionInfoView: Codable {
     public let allowedShard: Int
     public let bufferedReceiptsGas: String
@@ -10606,6 +11513,7 @@ public struct CongestionInfoView: Codable {
 }
 
 // MARK: - ContractCodeView
+
 public struct ContractCodeView: Codable {
     public let codeBase64: String
     public let hash: CryptoHash
@@ -10620,6 +11528,7 @@ public struct ContractCodeView: Codable {
 }
 
 // MARK: - CostGasUsed
+
 public struct CostGasUsed: Codable {
     public let cost: String
     public let costCategory: String
@@ -10637,12 +11546,13 @@ public struct CostGasUsed: Codable {
 }
 
 // MARK: - CreateAccountAction
-public struct CreateAccountAction: Codable {
 
+public struct CreateAccountAction: Codable {
     public init() {}
 }
 
 // MARK: - CurrentEpochValidatorInfo
+
 public struct CurrentEpochValidatorInfo: Codable {
     public let accountId: AccountId
     public let isSlashed: Bool
@@ -10699,6 +11609,7 @@ public struct CurrentEpochValidatorInfo: Codable {
 }
 
 // MARK: - DataReceiptCreationConfigView
+
 public struct DataReceiptCreationConfigView: Codable {
     public let baseCost: Fee
     public let costPerByte: Fee
@@ -10713,6 +11624,7 @@ public struct DataReceiptCreationConfigView: Codable {
 }
 
 // MARK: - DataReceiverView
+
 public struct DataReceiverView: Codable {
     public let dataId: CryptoHash
     public let receiverId: AccountId
@@ -10727,6 +11639,7 @@ public struct DataReceiverView: Codable {
 }
 
 // MARK: - DelegateAction
+
 public struct DelegateAction: Codable {
     public let actions: [NonDelegateAction]
     public let maxBlockHeight: UInt64
@@ -10753,6 +11666,7 @@ public struct DelegateAction: Codable {
 }
 
 // MARK: - DeleteAccountAction
+
 public struct DeleteAccountAction: Codable {
     public let beneficiaryId: AccountId
 
@@ -10764,6 +11678,7 @@ public struct DeleteAccountAction: Codable {
 }
 
 // MARK: - DeleteKeyAction
+
 public struct DeleteKeyAction: Codable {
     public let publicKey: PublicKey
 
@@ -10775,6 +11690,7 @@ public struct DeleteKeyAction: Codable {
 }
 
 // MARK: - DeployContractAction
+
 public struct DeployContractAction: Codable {
     public let code: String
 
@@ -10786,6 +11702,7 @@ public struct DeployContractAction: Codable {
 }
 
 // MARK: - DeployGlobalContractAction
+
 public struct DeployGlobalContractAction: Codable {
     public let code: String
     public let deployMode: GlobalContractDeployMode
@@ -10800,6 +11717,7 @@ public struct DeployGlobalContractAction: Codable {
 }
 
 // MARK: - DetailedDebugStatus
+
 public struct DetailedDebugStatus: Codable {
     public let blockProductionDelayMillis: UInt64
     public let catchupStatus: [CatchupStatusView]
@@ -10826,6 +11744,7 @@ public struct DetailedDebugStatus: Codable {
 }
 
 // MARK: - DeterministicAccountStateInitV1
+
 public struct DeterministicAccountStateInitV1: Codable {
     public let code: GlobalContractIdentifier
     public let data: [String: String]
@@ -10840,6 +11759,7 @@ public struct DeterministicAccountStateInitV1: Codable {
 }
 
 // MARK: - DeterministicStateInitAction
+
 public struct DeterministicStateInitAction: Codable {
     public let deposit: NearToken
     public let stateInit: DeterministicAccountStateInit
@@ -10854,6 +11774,7 @@ public struct DeterministicStateInitAction: Codable {
 }
 
 // MARK: - DumpConfig
+
 public struct DumpConfig: Codable {
     public let credentialsFile: String?
     public let iterationDelay: DurationAsStdSchemaProvider?
@@ -10874,6 +11795,7 @@ public struct DumpConfig: Codable {
 }
 
 // MARK: - DurationAsStdSchemaProvider
+
 public struct DurationAsStdSchemaProvider: Codable {
     public let nanos: Int32
     public let secs: Int64
@@ -10888,6 +11810,7 @@ public struct DurationAsStdSchemaProvider: Codable {
 }
 
 // MARK: - EpochSyncConfig
+
 public struct EpochSyncConfig: Codable {
     public let disableEpochSyncForBootstrapping: Bool?
     public let epochSyncHorizon: UInt64
@@ -10908,6 +11831,7 @@ public struct EpochSyncConfig: Codable {
 }
 
 // MARK: - ExecutionMetadataView
+
 public struct ExecutionMetadataView: Codable {
     public let gasProfile: [CostGasUsed]?
     public let version: Int
@@ -10922,6 +11846,7 @@ public struct ExecutionMetadataView: Codable {
 }
 
 // MARK: - ExecutionOutcomeView
+
 public struct ExecutionOutcomeView: Codable {
     public let executorId: AccountId
     public let gasBurnt: NearGas
@@ -10951,6 +11876,7 @@ public struct ExecutionOutcomeView: Codable {
 }
 
 // MARK: - ExecutionOutcomeWithIdView
+
 public struct ExecutionOutcomeWithIdView: Codable {
     public let blockHash: CryptoHash
     public let id: CryptoHash
@@ -10971,6 +11897,7 @@ public struct ExecutionOutcomeWithIdView: Codable {
 }
 
 // MARK: - ExtCostsConfigView
+
 public struct ExtCostsConfigView: Codable {
     public let altBn128G1MultiexpBase: NearGas
     public let altBn128G1MultiexpElement: NearGas
@@ -11240,6 +12167,7 @@ public struct ExtCostsConfigView: Codable {
 }
 
 // MARK: - ExternalStorageConfig
+
 public struct ExternalStorageConfig: Codable {
     public let externalStorageFallbackThreshold: UInt64?
     public let location: ExternalStorageLocation
@@ -11260,6 +12188,7 @@ public struct ExternalStorageConfig: Codable {
 }
 
 // MARK: - Fee
+
 public struct Fee: Codable {
     public let execution: NearGas
     public let sendNotSir: NearGas
@@ -11277,6 +12206,7 @@ public struct Fee: Codable {
 }
 
 // MARK: - FinalExecutionOutcomeView
+
 public struct FinalExecutionOutcomeView: Codable {
     public let receiptsOutcome: [ExecutionOutcomeWithIdView]
     public let status: FinalExecutionStatus
@@ -11297,6 +12227,7 @@ public struct FinalExecutionOutcomeView: Codable {
 }
 
 // MARK: - FinalExecutionOutcomeWithReceiptView
+
 public struct FinalExecutionOutcomeWithReceiptView: Codable {
     public let receipts: [ReceiptView]
     public let receiptsOutcome: [ExecutionOutcomeWithIdView]
@@ -11320,6 +12251,7 @@ public struct FinalExecutionOutcomeWithReceiptView: Codable {
 }
 
 // MARK: - FunctionCallAction
+
 public struct FunctionCallAction: Codable {
     public let args: String
     public let deposit: NearToken
@@ -11340,6 +12272,7 @@ public struct FunctionCallAction: Codable {
 }
 
 // MARK: - FunctionCallPermission
+
 public struct FunctionCallPermission: Codable {
     public let allowance: NearToken?
     public let methodNames: [String]
@@ -11357,6 +12290,7 @@ public struct FunctionCallPermission: Codable {
 }
 
 // MARK: - GCConfig
+
 public struct GCConfig: Codable {
     public let gcBlocksLimit: UInt64?
     public let gcForkCleanStep: UInt64?
@@ -11377,6 +12311,7 @@ public struct GCConfig: Codable {
 }
 
 // MARK: - GasKeyView
+
 public struct GasKeyView: Codable {
     public let balance: NearToken
     public let numNonces: Int
@@ -11394,6 +12329,7 @@ public struct GasKeyView: Codable {
 }
 
 // MARK: - GenesisConfig
+
 public struct GenesisConfig: Codable {
     public let avgHiddenValidatorSeatsPerShard: [UInt64]
     public let blockProducerKickoutThreshold: Int
@@ -11519,6 +12455,7 @@ public struct GenesisConfig: Codable {
 }
 
 // MARK: - JsonRpcRequestForEXPERIMENTALChanges
+
 public struct JsonRpcRequestForEXPERIMENTALChanges: Codable {
     public let id: String
     public let jsonrpc: String
@@ -11539,6 +12476,7 @@ public struct JsonRpcRequestForEXPERIMENTALChanges: Codable {
 }
 
 // MARK: - JsonRpcRequestForEXPERIMENTALChangesInBlock
+
 public struct JsonRpcRequestForEXPERIMENTALChangesInBlock: Codable {
     public let id: String
     public let jsonrpc: String
@@ -11559,6 +12497,7 @@ public struct JsonRpcRequestForEXPERIMENTALChangesInBlock: Codable {
 }
 
 // MARK: - JsonRpcRequestForEXPERIMENTALCongestionLevel
+
 public struct JsonRpcRequestForEXPERIMENTALCongestionLevel: Codable {
     public let id: String
     public let jsonrpc: String
@@ -11579,6 +12518,7 @@ public struct JsonRpcRequestForEXPERIMENTALCongestionLevel: Codable {
 }
 
 // MARK: - JsonRpcRequestForEXPERIMENTALGenesisConfig
+
 public struct JsonRpcRequestForEXPERIMENTALGenesisConfig: Codable {
     public let id: String
     public let jsonrpc: String
@@ -11599,6 +12539,7 @@ public struct JsonRpcRequestForEXPERIMENTALGenesisConfig: Codable {
 }
 
 // MARK: - JsonRpcRequestForEXPERIMENTALLightClientBlockProof
+
 public struct JsonRpcRequestForEXPERIMENTALLightClientBlockProof: Codable {
     public let id: String
     public let jsonrpc: String
@@ -11619,6 +12560,7 @@ public struct JsonRpcRequestForEXPERIMENTALLightClientBlockProof: Codable {
 }
 
 // MARK: - JsonRpcRequestForEXPERIMENTALLightClientProof
+
 public struct JsonRpcRequestForEXPERIMENTALLightClientProof: Codable {
     public let id: String
     public let jsonrpc: String
@@ -11639,6 +12581,7 @@ public struct JsonRpcRequestForEXPERIMENTALLightClientProof: Codable {
 }
 
 // MARK: - JsonRpcRequestForEXPERIMENTALMaintenanceWindows
+
 public struct JsonRpcRequestForEXPERIMENTALMaintenanceWindows: Codable {
     public let id: String
     public let jsonrpc: String
@@ -11659,6 +12602,7 @@ public struct JsonRpcRequestForEXPERIMENTALMaintenanceWindows: Codable {
 }
 
 // MARK: - JsonRpcRequestForEXPERIMENTALProtocolConfig
+
 public struct JsonRpcRequestForEXPERIMENTALProtocolConfig: Codable {
     public let id: String
     public let jsonrpc: String
@@ -11679,6 +12623,7 @@ public struct JsonRpcRequestForEXPERIMENTALProtocolConfig: Codable {
 }
 
 // MARK: - JsonRpcRequestForEXPERIMENTALReceipt
+
 public struct JsonRpcRequestForEXPERIMENTALReceipt: Codable {
     public let id: String
     public let jsonrpc: String
@@ -11699,6 +12644,7 @@ public struct JsonRpcRequestForEXPERIMENTALReceipt: Codable {
 }
 
 // MARK: - JsonRpcRequestForEXPERIMENTALSplitStorageInfo
+
 public struct JsonRpcRequestForEXPERIMENTALSplitStorageInfo: Codable {
     public let id: String
     public let jsonrpc: String
@@ -11719,6 +12665,7 @@ public struct JsonRpcRequestForEXPERIMENTALSplitStorageInfo: Codable {
 }
 
 // MARK: - JsonRpcRequestForEXPERIMENTALTxStatus
+
 public struct JsonRpcRequestForEXPERIMENTALTxStatus: Codable {
     public let id: String
     public let jsonrpc: String
@@ -11739,6 +12686,7 @@ public struct JsonRpcRequestForEXPERIMENTALTxStatus: Codable {
 }
 
 // MARK: - JsonRpcRequestForEXPERIMENTALValidatorsOrdered
+
 public struct JsonRpcRequestForEXPERIMENTALValidatorsOrdered: Codable {
     public let id: String
     public let jsonrpc: String
@@ -11759,6 +12707,7 @@ public struct JsonRpcRequestForEXPERIMENTALValidatorsOrdered: Codable {
 }
 
 // MARK: - JsonRpcRequestForBlock
+
 public struct JsonRpcRequestForBlock: Codable {
     public let id: String
     public let jsonrpc: String
@@ -11779,6 +12728,7 @@ public struct JsonRpcRequestForBlock: Codable {
 }
 
 // MARK: - JsonRpcRequestForBlockEffects
+
 public struct JsonRpcRequestForBlockEffects: Codable {
     public let id: String
     public let jsonrpc: String
@@ -11799,6 +12749,7 @@ public struct JsonRpcRequestForBlockEffects: Codable {
 }
 
 // MARK: - JsonRpcRequestForBroadcastTxAsync
+
 public struct JsonRpcRequestForBroadcastTxAsync: Codable {
     public let id: String
     public let jsonrpc: String
@@ -11819,6 +12770,7 @@ public struct JsonRpcRequestForBroadcastTxAsync: Codable {
 }
 
 // MARK: - JsonRpcRequestForBroadcastTxCommit
+
 public struct JsonRpcRequestForBroadcastTxCommit: Codable {
     public let id: String
     public let jsonrpc: String
@@ -11839,6 +12791,7 @@ public struct JsonRpcRequestForBroadcastTxCommit: Codable {
 }
 
 // MARK: - JsonRpcRequestForChanges
+
 public struct JsonRpcRequestForChanges: Codable {
     public let id: String
     public let jsonrpc: String
@@ -11859,6 +12812,7 @@ public struct JsonRpcRequestForChanges: Codable {
 }
 
 // MARK: - JsonRpcRequestForChunk
+
 public struct JsonRpcRequestForChunk: Codable {
     public let id: String
     public let jsonrpc: String
@@ -11879,6 +12833,7 @@ public struct JsonRpcRequestForChunk: Codable {
 }
 
 // MARK: - JsonRpcRequestForClientConfig
+
 public struct JsonRpcRequestForClientConfig: Codable {
     public let id: String
     public let jsonrpc: String
@@ -11899,6 +12854,7 @@ public struct JsonRpcRequestForClientConfig: Codable {
 }
 
 // MARK: - JsonRpcRequestForGasPrice
+
 public struct JsonRpcRequestForGasPrice: Codable {
     public let id: String
     public let jsonrpc: String
@@ -11919,6 +12875,7 @@ public struct JsonRpcRequestForGasPrice: Codable {
 }
 
 // MARK: - JsonRpcRequestForGenesisConfig
+
 public struct JsonRpcRequestForGenesisConfig: Codable {
     public let id: String
     public let jsonrpc: String
@@ -11939,6 +12896,7 @@ public struct JsonRpcRequestForGenesisConfig: Codable {
 }
 
 // MARK: - JsonRpcRequestForHealth
+
 public struct JsonRpcRequestForHealth: Codable {
     public let id: String
     public let jsonrpc: String
@@ -11959,6 +12917,7 @@ public struct JsonRpcRequestForHealth: Codable {
 }
 
 // MARK: - JsonRpcRequestForLightClientProof
+
 public struct JsonRpcRequestForLightClientProof: Codable {
     public let id: String
     public let jsonrpc: String
@@ -11979,6 +12938,7 @@ public struct JsonRpcRequestForLightClientProof: Codable {
 }
 
 // MARK: - JsonRpcRequestForMaintenanceWindows
+
 public struct JsonRpcRequestForMaintenanceWindows: Codable {
     public let id: String
     public let jsonrpc: String
@@ -11999,6 +12959,7 @@ public struct JsonRpcRequestForMaintenanceWindows: Codable {
 }
 
 // MARK: - JsonRpcRequestForNetworkInfo
+
 public struct JsonRpcRequestForNetworkInfo: Codable {
     public let id: String
     public let jsonrpc: String
@@ -12019,6 +12980,7 @@ public struct JsonRpcRequestForNetworkInfo: Codable {
 }
 
 // MARK: - JsonRpcRequestForNextLightClientBlock
+
 public struct JsonRpcRequestForNextLightClientBlock: Codable {
     public let id: String
     public let jsonrpc: String
@@ -12039,6 +13001,7 @@ public struct JsonRpcRequestForNextLightClientBlock: Codable {
 }
 
 // MARK: - JsonRpcRequestForQuery
+
 public struct JsonRpcRequestForQuery: Codable {
     public let id: String
     public let jsonrpc: String
@@ -12059,6 +13022,7 @@ public struct JsonRpcRequestForQuery: Codable {
 }
 
 // MARK: - JsonRpcRequestForSendTx
+
 public struct JsonRpcRequestForSendTx: Codable {
     public let id: String
     public let jsonrpc: String
@@ -12079,6 +13043,7 @@ public struct JsonRpcRequestForSendTx: Codable {
 }
 
 // MARK: - JsonRpcRequestForStatus
+
 public struct JsonRpcRequestForStatus: Codable {
     public let id: String
     public let jsonrpc: String
@@ -12099,6 +13064,7 @@ public struct JsonRpcRequestForStatus: Codable {
 }
 
 // MARK: - JsonRpcRequestForTx
+
 public struct JsonRpcRequestForTx: Codable {
     public let id: String
     public let jsonrpc: String
@@ -12119,6 +13085,7 @@ public struct JsonRpcRequestForTx: Codable {
 }
 
 // MARK: - JsonRpcRequestForValidators
+
 public struct JsonRpcRequestForValidators: Codable {
     public let id: String
     public let jsonrpc: String
@@ -12139,6 +13106,7 @@ public struct JsonRpcRequestForValidators: Codable {
 }
 
 // MARK: - KnownProducerView
+
 public struct KnownProducerView: Codable {
     public let accountId: AccountId
     public let nextHops: [PublicKey]?
@@ -12156,6 +13124,7 @@ public struct KnownProducerView: Codable {
 }
 
 // MARK: - LightClientBlockLiteView
+
 public struct LightClientBlockLiteView: Codable {
     public let innerLite: BlockHeaderInnerLiteView
     public let innerRestHash: CryptoHash
@@ -12173,6 +13142,7 @@ public struct LightClientBlockLiteView: Codable {
 }
 
 // MARK: - LimitConfig
+
 public struct LimitConfig: Codable {
     public let accountIdValidityRulesVersion: AccountIdValidityRulesVersion?
     public let initialMemoryPages: Int
@@ -12271,6 +13241,7 @@ public struct LimitConfig: Codable {
 }
 
 // MARK: - MerklePathItem
+
 public struct MerklePathItem: Codable {
     public let direction: Direction
     public let hash: CryptoHash
@@ -12285,6 +13256,7 @@ public struct MerklePathItem: Codable {
 }
 
 // MARK: - MissingTrieValue
+
 public struct MissingTrieValue: Codable {
     public let context: MissingTrieValueContext
     public let hash: CryptoHash
@@ -12299,6 +13271,7 @@ public struct MissingTrieValue: Codable {
 }
 
 // MARK: - NetworkInfoView
+
 public struct NetworkInfoView: Codable {
     public let connectedPeers: [PeerInfoView]
     public let knownProducers: [KnownProducerView]
@@ -12328,6 +13301,7 @@ public struct NetworkInfoView: Codable {
 }
 
 // MARK: - NextEpochValidatorInfo
+
 public struct NextEpochValidatorInfo: Codable {
     public let accountId: AccountId
     public let publicKey: PublicKey
@@ -12348,6 +13322,7 @@ public struct NextEpochValidatorInfo: Codable {
 }
 
 // MARK: - PeerInfoView
+
 public struct PeerInfoView: Codable {
     public let accountId: AccountId?
     public let addr: String
@@ -12401,6 +13376,7 @@ public struct PeerInfoView: Codable {
 }
 
 // MARK: - RangeOfUint64
+
 public struct RangeOfUint64: Codable {
     public let end: UInt64
     public let start: UInt64
@@ -12415,6 +13391,7 @@ public struct RangeOfUint64: Codable {
 }
 
 // MARK: - ReceiptView
+
 public struct ReceiptView: Codable {
     public let predecessorId: AccountId
     public let priority: UInt64?
@@ -12438,6 +13415,7 @@ public struct ReceiptView: Codable {
 }
 
 // MARK: - RpcBlockResponse
+
 public struct RpcBlockResponse: Codable {
     public let author: AccountId
     public let chunks: [ChunkHeaderView]
@@ -12455,6 +13433,7 @@ public struct RpcBlockResponse: Codable {
 }
 
 // MARK: - RpcChunkResponse
+
 public struct RpcChunkResponse: Codable {
     public let author: AccountId
     public let header: ChunkHeaderView
@@ -12475,6 +13454,7 @@ public struct RpcChunkResponse: Codable {
 }
 
 // MARK: - RpcClientConfigResponse
+
 public struct RpcClientConfigResponse: Codable {
     public let archive: Bool
     public let blockFetchHorizon: UInt64
@@ -12681,6 +13661,7 @@ public struct RpcClientConfigResponse: Codable {
 }
 
 // MARK: - RpcCongestionLevelResponse
+
 public struct RpcCongestionLevelResponse: Codable {
     public let congestionLevel: Double
 
@@ -12692,6 +13673,7 @@ public struct RpcCongestionLevelResponse: Codable {
 }
 
 // MARK: - RpcGasPriceRequest
+
 public struct RpcGasPriceRequest: Codable {
     public let blockId: BlockId?
 
@@ -12703,6 +13685,7 @@ public struct RpcGasPriceRequest: Codable {
 }
 
 // MARK: - RpcGasPriceResponse
+
 public struct RpcGasPriceResponse: Codable {
     public let gasPrice: NearToken
 
@@ -12714,6 +13697,7 @@ public struct RpcGasPriceResponse: Codable {
 }
 
 // MARK: - RpcKnownProducer
+
 public struct RpcKnownProducer: Codable {
     public let accountId: AccountId
     public let addr: String?
@@ -12731,6 +13715,7 @@ public struct RpcKnownProducer: Codable {
 }
 
 // MARK: - RpcLightClientBlockProofRequest
+
 public struct RpcLightClientBlockProofRequest: Codable {
     public let blockHash: CryptoHash
     public let lightClientHead: CryptoHash
@@ -12745,6 +13730,7 @@ public struct RpcLightClientBlockProofRequest: Codable {
 }
 
 // MARK: - RpcLightClientBlockProofResponse
+
 public struct RpcLightClientBlockProofResponse: Codable {
     public let blockHeaderLite: LightClientBlockLiteView
     public let blockProof: [MerklePathItem]
@@ -12759,6 +13745,7 @@ public struct RpcLightClientBlockProofResponse: Codable {
 }
 
 // MARK: - RpcLightClientExecutionProofResponse
+
 public struct RpcLightClientExecutionProofResponse: Codable {
     public let blockHeaderLite: LightClientBlockLiteView
     public let blockProof: [MerklePathItem]
@@ -12779,6 +13766,7 @@ public struct RpcLightClientExecutionProofResponse: Codable {
 }
 
 // MARK: - RpcLightClientNextBlockRequest
+
 public struct RpcLightClientNextBlockRequest: Codable {
     public let lastBlockHash: CryptoHash
 
@@ -12790,6 +13778,7 @@ public struct RpcLightClientNextBlockRequest: Codable {
 }
 
 // MARK: - RpcLightClientNextBlockResponse
+
 public struct RpcLightClientNextBlockResponse: Codable {
     public let approvalsAfterNext: [Signature?]?
     public let innerLite: BlockHeaderInnerLiteView?
@@ -12816,6 +13805,7 @@ public struct RpcLightClientNextBlockResponse: Codable {
 }
 
 // MARK: - RpcMaintenanceWindowsRequest
+
 public struct RpcMaintenanceWindowsRequest: Codable {
     public let accountId: AccountId
 
@@ -12827,6 +13817,7 @@ public struct RpcMaintenanceWindowsRequest: Codable {
 }
 
 // MARK: - RpcNetworkInfoResponse
+
 public struct RpcNetworkInfoResponse: Codable {
     public let activePeers: [RpcPeerInfo]
     public let knownProducers: [RpcKnownProducer]
@@ -12853,6 +13844,7 @@ public struct RpcNetworkInfoResponse: Codable {
 }
 
 // MARK: - RpcPeerInfo
+
 public struct RpcPeerInfo: Codable {
     public let accountId: AccountId?
     public let addr: String?
@@ -12870,6 +13862,7 @@ public struct RpcPeerInfo: Codable {
 }
 
 // MARK: - RpcProtocolConfigResponse
+
 public struct RpcProtocolConfigResponse: Codable {
     public let avgHiddenValidatorSeatsPerShard: [UInt64]
     public let blockProducerKickoutThreshold: Int
@@ -12977,6 +13970,7 @@ public struct RpcProtocolConfigResponse: Codable {
 }
 
 // MARK: - RpcReceiptRequest
+
 public struct RpcReceiptRequest: Codable {
     public let receiptId: CryptoHash
 
@@ -12988,6 +13982,7 @@ public struct RpcReceiptRequest: Codable {
 }
 
 // MARK: - RpcReceiptResponse
+
 public struct RpcReceiptResponse: Codable {
     public let predecessorId: AccountId
     public let priority: UInt64?
@@ -13011,6 +14006,7 @@ public struct RpcReceiptResponse: Codable {
 }
 
 // MARK: - RpcSendTransactionRequest
+
 public struct RpcSendTransactionRequest: Codable {
     public let signedTxBase64: SignedTransaction
     public let waitUntil: TxExecutionStatus?
@@ -13025,12 +14021,13 @@ public struct RpcSendTransactionRequest: Codable {
 }
 
 // MARK: - RpcSplitStorageInfoRequest
-public struct RpcSplitStorageInfoRequest: Codable {
 
+public struct RpcSplitStorageInfoRequest: Codable {
     public init() {}
 }
 
 // MARK: - RpcSplitStorageInfoResponse
+
 public struct RpcSplitStorageInfoResponse: Codable {
     public let coldHeadHeight: UInt64?
     public let finalHeadHeight: UInt64?
@@ -13051,6 +14048,7 @@ public struct RpcSplitStorageInfoResponse: Codable {
 }
 
 // MARK: - RpcStateChangesInBlockByTypeResponse
+
 public struct RpcStateChangesInBlockByTypeResponse: Codable {
     public let blockHash: CryptoHash
     public let changes: [StateChangeKindView]
@@ -13065,6 +14063,7 @@ public struct RpcStateChangesInBlockByTypeResponse: Codable {
 }
 
 // MARK: - RpcStateChangesInBlockResponse
+
 public struct RpcStateChangesInBlockResponse: Codable {
     public let blockHash: CryptoHash
     public let changes: [StateChangeWithCauseView]
@@ -13079,6 +14078,7 @@ public struct RpcStateChangesInBlockResponse: Codable {
 }
 
 // MARK: - RpcStatusResponse
+
 public struct RpcStatusResponse: Codable {
     public let chainId: String
     public let detailedDebugStatus: DetailedDebugStatus?
@@ -13129,6 +14129,7 @@ public struct RpcStatusResponse: Codable {
 }
 
 // MARK: - RpcValidatorResponse
+
 public struct RpcValidatorResponse: Codable {
     public let currentFishermen: [ValidatorStakeView]
     public let currentProposals: [ValidatorStakeView]
@@ -13161,6 +14162,7 @@ public struct RpcValidatorResponse: Codable {
 }
 
 // MARK: - RpcValidatorsOrderedRequest
+
 public struct RpcValidatorsOrderedRequest: Codable {
     public let blockId: BlockId?
 
@@ -13172,6 +14174,7 @@ public struct RpcValidatorsOrderedRequest: Codable {
 }
 
 // MARK: - RuntimeConfigView
+
 public struct RuntimeConfigView: Codable {
     public let accountCreationConfig: AccountCreationConfigView
     public let congestionControlConfig: CongestionControlConfigView
@@ -13198,6 +14201,7 @@ public struct RuntimeConfigView: Codable {
 }
 
 // MARK: - RuntimeFeesConfigView
+
 public struct RuntimeFeesConfigView: Codable {
     public let actionCreationConfig: ActionCreationConfigView
     public let actionReceiptCreationConfig: Fee
@@ -13224,6 +14228,7 @@ public struct RuntimeFeesConfigView: Codable {
 }
 
 // MARK: - ShardLayoutV0
+
 public struct ShardLayoutV0: Codable {
     public let numShards: UInt64
     public let version: Int
@@ -13238,6 +14243,7 @@ public struct ShardLayoutV0: Codable {
 }
 
 // MARK: - ShardLayoutV1
+
 public struct ShardLayoutV1: Codable {
     public let boundaryAccounts: [AccountId]
     public let shardsSplitMap: [[ShardId]]?
@@ -13258,6 +14264,7 @@ public struct ShardLayoutV1: Codable {
 }
 
 // MARK: - ShardLayoutV2
+
 public struct ShardLayoutV2: Codable {
     public let boundaryAccounts: [AccountId]
     public let idToIndexMap: [String: Int]
@@ -13287,6 +14294,7 @@ public struct ShardLayoutV2: Codable {
 }
 
 // MARK: - ShardUId
+
 public struct ShardUId: Codable {
     public let shardId: Int
     public let version: Int
@@ -13301,6 +14309,7 @@ public struct ShardUId: Codable {
 }
 
 // MARK: - SignedDelegateAction
+
 public struct SignedDelegateAction: Codable {
     public let delegateAction: DelegateAction
     public let signature: Signature
@@ -13315,6 +14324,7 @@ public struct SignedDelegateAction: Codable {
 }
 
 // MARK: - SignedTransactionView
+
 public struct SignedTransactionView: Codable {
     public let actions: [ActionView]
     public let hash: CryptoHash
@@ -13347,6 +14357,7 @@ public struct SignedTransactionView: Codable {
 }
 
 // MARK: - SlashedValidator
+
 public struct SlashedValidator: Codable {
     public let accountId: AccountId
     public let isDoubleSign: Bool
@@ -13361,6 +14372,7 @@ public struct SlashedValidator: Codable {
 }
 
 // MARK: - StakeAction
+
 public struct StakeAction: Codable {
     public let publicKey: PublicKey
     public let stake: NearToken
@@ -13375,6 +14387,7 @@ public struct StakeAction: Codable {
 }
 
 // MARK: - StateItem
+
 public struct StateItem: Codable {
     public let key: StoreKey
     public let value: StoreValue
@@ -13389,6 +14402,7 @@ public struct StateItem: Codable {
 }
 
 // MARK: - StateSyncConfig
+
 public struct StateSyncConfig: Codable {
     public let concurrency: SyncConcurrency?
     public let dump: DumpConfig?
@@ -13409,6 +14423,7 @@ public struct StateSyncConfig: Codable {
 }
 
 // MARK: - StatusSyncInfo
+
 public struct StatusSyncInfo: Codable {
     public let earliestBlockHash: CryptoHash?
     public let earliestBlockHeight: UInt64?
@@ -13447,6 +14462,7 @@ public struct StatusSyncInfo: Codable {
 }
 
 // MARK: - StorageUsageConfigView
+
 public struct StorageUsageConfigView: Codable {
     public let numBytesAccount: UInt64
     public let numExtraBytesRecord: UInt64
@@ -13461,6 +14477,7 @@ public struct StorageUsageConfigView: Codable {
 }
 
 // MARK: - SyncConcurrency
+
 public struct SyncConcurrency: Codable {
     public let apply: Int
     public let applyDuringCatchup: Int
@@ -13481,6 +14498,7 @@ public struct SyncConcurrency: Codable {
 }
 
 // MARK: - Tier1ProxyView
+
 public struct Tier1ProxyView: Codable {
     public let addr: String
     public let peerId: PublicKey
@@ -13495,6 +14513,7 @@ public struct Tier1ProxyView: Codable {
 }
 
 // MARK: - TransferAction
+
 public struct TransferAction: Codable {
     public let deposit: NearToken
 
@@ -13506,6 +14525,7 @@ public struct TransferAction: Codable {
 }
 
 // MARK: - UseGlobalContractAction
+
 public struct UseGlobalContractAction: Codable {
     public let contractIdentifier: GlobalContractIdentifier
 
@@ -13517,6 +14537,7 @@ public struct UseGlobalContractAction: Codable {
 }
 
 // MARK: - VMConfigView
+
 public struct VMConfigView: Codable {
     public let deterministicAccountIds: Bool
     public let discardCustomSections: Bool
@@ -13567,6 +14588,7 @@ public struct VMConfigView: Codable {
 }
 
 // MARK: - ValidatorInfo
+
 public struct ValidatorInfo: Codable {
     public let accountId: AccountId
 
@@ -13578,6 +14600,7 @@ public struct ValidatorInfo: Codable {
 }
 
 // MARK: - ValidatorKickoutView
+
 public struct ValidatorKickoutView: Codable {
     public let accountId: AccountId
     public let reason: ValidatorKickoutReason
@@ -13592,6 +14615,7 @@ public struct ValidatorKickoutView: Codable {
 }
 
 // MARK: - ValidatorStakeViewV1
+
 public struct ValidatorStakeViewV1: Codable {
     public let accountId: AccountId
     public let publicKey: PublicKey
@@ -13609,6 +14633,7 @@ public struct ValidatorStakeViewV1: Codable {
 }
 
 // MARK: - Version
+
 public struct Version: Codable {
     public let build: String
     public let commit: String
@@ -13629,6 +14654,7 @@ public struct Version: Codable {
 }
 
 // MARK: - ViewStateResult
+
 public struct ViewStateResult: Codable {
     public let proof: [String]?
     public let values: [StateItem]
@@ -13643,6 +14669,7 @@ public struct ViewStateResult: Codable {
 }
 
 // MARK: - WitnessConfigView
+
 public struct WitnessConfigView: Codable {
     public let combinedTransactionsSizeLimit: Int
     public let mainStorageProofSizeSoftLimit: UInt64
@@ -13670,5 +14697,3 @@ public struct InlineObject: Codable {
         self.accountId = accountId
     }
 }
-
-

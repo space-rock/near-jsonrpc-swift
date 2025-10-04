@@ -8,7 +8,7 @@ let package = Package(
         .iOS(.v13),
     ],
     dependencies: [
-        .package(name: "NearJsonRpc", path: "..")
+        .package(name: "NearJsonRpc", path: ".."),
     ],
     targets: [
         .executableTarget(
@@ -18,6 +18,6 @@ let package = Package(
                 .product(name: "NearJsonRpcTypes", package: "NearJsonRpc"),
             ],
             path: "Sources"
-        )
+        ),
     ]
 )

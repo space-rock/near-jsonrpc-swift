@@ -32,14 +32,14 @@ let package = Package(
             name: "NearJsonRpcTypesTests",
             dependencies: ["NearJsonRpcTypes"],
             resources: [
-                .copy("Mock")
+                .copy("Mock"),
             ]
         ),
         .testTarget(
             name: "NearJsonRpcClientTests",
             dependencies: ["NearJsonRpcClient", "NearJsonRpcTypes"],
             resources: [
-                .copy("Mock")
+                .copy("Mock"),
             ]
         ),
     ]
