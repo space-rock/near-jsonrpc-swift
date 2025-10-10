@@ -14609,6 +14609,8 @@ public struct VMConfigView: Codable, Sendable {
     public let growMemCost: Int
     public let implicitAccountCreation: Bool
     public let limitConfig: LimitConfig
+    public let linearOpBaseCost: UInt64
+    public let linearOpUnitCost: UInt64
     public let reftypesBulkMemory: Bool
     public let regularOpCost: Int
     public let saturatingFloatToInt: Bool
@@ -14625,6 +14627,8 @@ public struct VMConfigView: Codable, Sendable {
         growMemCost: Int,
         implicitAccountCreation: Bool,
         limitConfig: LimitConfig,
+        linearOpBaseCost: UInt64,
+        linearOpUnitCost: UInt64,
         reftypesBulkMemory: Bool,
         regularOpCost: Int,
         saturatingFloatToInt: Bool,
@@ -14640,6 +14644,8 @@ public struct VMConfigView: Codable, Sendable {
         self.growMemCost = growMemCost
         self.implicitAccountCreation = implicitAccountCreation
         self.limitConfig = limitConfig
+        self.linearOpBaseCost = linearOpBaseCost
+        self.linearOpUnitCost = linearOpUnitCost
         self.reftypesBulkMemory = reftypesBulkMemory
         self.regularOpCost = regularOpCost
         self.saturatingFloatToInt = saturatingFloatToInt
