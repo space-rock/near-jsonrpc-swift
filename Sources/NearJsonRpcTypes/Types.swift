@@ -13531,6 +13531,7 @@ public struct RpcClientConfigResponse: Codable, Sendable {
     public let cloudArchivalReader: CloudArchivalReaderConfig?
     public let cloudArchivalWriter: CloudArchivalWriterConfig?
     public let doomslugStepPeriod: [UInt64]
+    public let enableEarlyPrepareTransactions: Bool
     public let enableMultilineLogging: Bool
     public let enableStatisticsExport: Bool
     public let epochLength: UInt64
@@ -13599,6 +13600,7 @@ public struct RpcClientConfigResponse: Codable, Sendable {
         cloudArchivalReader: CloudArchivalReaderConfig?,
         cloudArchivalWriter: CloudArchivalWriterConfig?,
         doomslugStepPeriod: [UInt64],
+        enableEarlyPrepareTransactions: Bool,
         enableMultilineLogging: Bool,
         enableStatisticsExport: Bool,
         epochLength: UInt64,
@@ -13666,6 +13668,7 @@ public struct RpcClientConfigResponse: Codable, Sendable {
         self.cloudArchivalReader = cloudArchivalReader
         self.cloudArchivalWriter = cloudArchivalWriter
         self.doomslugStepPeriod = doomslugStepPeriod
+        self.enableEarlyPrepareTransactions = enableEarlyPrepareTransactions
         self.enableMultilineLogging = enableMultilineLogging
         self.enableStatisticsExport = enableStatisticsExport
         self.epochLength = epochLength
@@ -14609,6 +14612,8 @@ public struct VMConfigView: Codable, Sendable {
     public let growMemCost: Int
     public let implicitAccountCreation: Bool
     public let limitConfig: LimitConfig
+    public let linearOpBaseCost: UInt64
+    public let linearOpUnitCost: UInt64
     public let reftypesBulkMemory: Bool
     public let regularOpCost: Int
     public let saturatingFloatToInt: Bool
@@ -14625,6 +14630,8 @@ public struct VMConfigView: Codable, Sendable {
         growMemCost: Int,
         implicitAccountCreation: Bool,
         limitConfig: LimitConfig,
+        linearOpBaseCost: UInt64,
+        linearOpUnitCost: UInt64,
         reftypesBulkMemory: Bool,
         regularOpCost: Int,
         saturatingFloatToInt: Bool,
@@ -14640,6 +14647,8 @@ public struct VMConfigView: Codable, Sendable {
         self.growMemCost = growMemCost
         self.implicitAccountCreation = implicitAccountCreation
         self.limitConfig = limitConfig
+        self.linearOpBaseCost = linearOpBaseCost
+        self.linearOpUnitCost = linearOpUnitCost
         self.reftypesBulkMemory = reftypesBulkMemory
         self.regularOpCost = regularOpCost
         self.saturatingFloatToInt = saturatingFloatToInt
