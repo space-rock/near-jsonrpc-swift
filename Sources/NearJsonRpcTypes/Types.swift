@@ -11462,48 +11462,18 @@ public struct ChunkHeaderView: Codable, Sendable {
     }
 }
 
-// MARK: - CloudArchivalReaderConfig
-
-public struct CloudArchivalReaderConfig: Codable, Sendable {
-    public let cloudStorage: CloudStorageConfig
-
-    public init(
-        cloudStorage: CloudStorageConfig,
-    ) {
-        self.cloudStorage = cloudStorage
-    }
-}
-
 // MARK: - CloudArchivalWriterConfig
 
 public struct CloudArchivalWriterConfig: Codable, Sendable {
     public let archiveBlockData: Bool?
-    public let cloudStorage: CloudStorageConfig
     public let pollingInterval: DurationAsStdSchemaProvider?
 
     public init(
         archiveBlockData: Bool?,
-        cloudStorage: CloudStorageConfig,
         pollingInterval: DurationAsStdSchemaProvider?,
     ) {
         self.archiveBlockData = archiveBlockData
-        self.cloudStorage = cloudStorage
         self.pollingInterval = pollingInterval
-    }
-}
-
-// MARK: - CloudStorageConfig
-
-public struct CloudStorageConfig: Codable, Sendable {
-    public let credentialsFile: String?
-    public let storage: ExternalStorageLocation
-
-    public init(
-        credentialsFile: String?,
-        storage: ExternalStorageLocation,
-    ) {
-        self.credentialsFile = credentialsFile
-        self.storage = storage
     }
 }
 
@@ -13528,9 +13498,10 @@ public struct RpcClientConfigResponse: Codable, Sendable {
     public let chunkValidationThreads: Int
     public let chunkWaitMult: [Int32]
     public let clientBackgroundMigrationThreads: Int
-    public let cloudArchivalReader: CloudArchivalReaderConfig?
     public let cloudArchivalWriter: CloudArchivalWriterConfig?
     public let doomslugStepPeriod: [UInt64]
+    public let dynamicReshardingDryRun: Bool
+    public let enableEarlyPrepareTransactions: Bool
     public let enableMultilineLogging: Bool
     public let enableStatisticsExport: Bool
     public let epochLength: UInt64
@@ -13596,9 +13567,10 @@ public struct RpcClientConfigResponse: Codable, Sendable {
         chunkValidationThreads: Int,
         chunkWaitMult: [Int32],
         clientBackgroundMigrationThreads: Int,
-        cloudArchivalReader: CloudArchivalReaderConfig?,
         cloudArchivalWriter: CloudArchivalWriterConfig?,
         doomslugStepPeriod: [UInt64],
+        dynamicReshardingDryRun: Bool,
+        enableEarlyPrepareTransactions: Bool,
         enableMultilineLogging: Bool,
         enableStatisticsExport: Bool,
         epochLength: UInt64,
@@ -13663,9 +13635,10 @@ public struct RpcClientConfigResponse: Codable, Sendable {
         self.chunkValidationThreads = chunkValidationThreads
         self.chunkWaitMult = chunkWaitMult
         self.clientBackgroundMigrationThreads = clientBackgroundMigrationThreads
-        self.cloudArchivalReader = cloudArchivalReader
         self.cloudArchivalWriter = cloudArchivalWriter
         self.doomslugStepPeriod = doomslugStepPeriod
+        self.dynamicReshardingDryRun = dynamicReshardingDryRun
+        self.enableEarlyPrepareTransactions = enableEarlyPrepareTransactions
         self.enableMultilineLogging = enableMultilineLogging
         self.enableStatisticsExport = enableStatisticsExport
         self.epochLength = epochLength
@@ -14609,6 +14582,8 @@ public struct VMConfigView: Codable, Sendable {
     public let growMemCost: Int
     public let implicitAccountCreation: Bool
     public let limitConfig: LimitConfig
+    public let linearOpBaseCost: UInt64
+    public let linearOpUnitCost: UInt64
     public let reftypesBulkMemory: Bool
     public let regularOpCost: Int
     public let saturatingFloatToInt: Bool
@@ -14625,6 +14600,8 @@ public struct VMConfigView: Codable, Sendable {
         growMemCost: Int,
         implicitAccountCreation: Bool,
         limitConfig: LimitConfig,
+        linearOpBaseCost: UInt64,
+        linearOpUnitCost: UInt64,
         reftypesBulkMemory: Bool,
         regularOpCost: Int,
         saturatingFloatToInt: Bool,
@@ -14640,6 +14617,8 @@ public struct VMConfigView: Codable, Sendable {
         self.growMemCost = growMemCost
         self.implicitAccountCreation = implicitAccountCreation
         self.limitConfig = limitConfig
+        self.linearOpBaseCost = linearOpBaseCost
+        self.linearOpUnitCost = linearOpUnitCost
         self.reftypesBulkMemory = reftypesBulkMemory
         self.regularOpCost = regularOpCost
         self.saturatingFloatToInt = saturatingFloatToInt

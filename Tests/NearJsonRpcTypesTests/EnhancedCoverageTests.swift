@@ -1248,21 +1248,6 @@ struct EnhancedCoverageTests {
         #expect(!reencoded.isEmpty)
     }
 
-    @Test("CloudArchivalReaderConfig decoded instance is valid")
-    func cloudArchivalReaderConfigValidity() throws {
-        let data = try loadMockJSON("CloudArchivalReaderConfig.json")
-        let decoded = try decoder.decode(CloudArchivalReaderConfig.self, from: data)
-
-        // Verify the decoded instance is valid by re-encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Verify round-trip
-        let redecoded = try decoder.decode(CloudArchivalReaderConfig.self, from: encoded)
-        let reencoded = try encoder.encode(redecoded)
-        #expect(!reencoded.isEmpty)
-    }
-
     @Test("CloudArchivalWriterConfig decoded instance is valid")
     func cloudArchivalWriterConfigValidity() throws {
         let data = try loadMockJSON("CloudArchivalWriterConfig.json")
@@ -1274,21 +1259,6 @@ struct EnhancedCoverageTests {
 
         // Verify round-trip
         let redecoded = try decoder.decode(CloudArchivalWriterConfig.self, from: encoded)
-        let reencoded = try encoder.encode(redecoded)
-        #expect(!reencoded.isEmpty)
-    }
-
-    @Test("CloudStorageConfig decoded instance is valid")
-    func cloudStorageConfigValidity() throws {
-        let data = try loadMockJSON("CloudStorageConfig.json")
-        let decoded = try decoder.decode(CloudStorageConfig.self, from: data)
-
-        // Verify the decoded instance is valid by re-encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Verify round-trip
-        let redecoded = try decoder.decode(CloudStorageConfig.self, from: encoded)
         let reencoded = try encoder.encode(redecoded)
         #expect(!reencoded.isEmpty)
     }
