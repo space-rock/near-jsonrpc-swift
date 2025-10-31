@@ -1309,21 +1309,6 @@ struct StandaloneTypesTests {
         _ = try decoder.decode(ChunkHeaderView.self, from: encoded)
     }
 
-    @Test("CloudArchivalReaderConfig can be decoded from mock and re-encoded")
-    func cloudArchivalReaderConfigDecodingAndEncoding() throws {
-        let data = try loadMockJSON("CloudArchivalReaderConfig.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(CloudArchivalReaderConfig.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(CloudArchivalReaderConfig.self, from: encoded)
-    }
-
     @Test("CloudArchivalWriterConfig can be decoded from mock and re-encoded")
     func cloudArchivalWriterConfigDecodingAndEncoding() throws {
         let data = try loadMockJSON("CloudArchivalWriterConfig.json")
@@ -1337,21 +1322,6 @@ struct StandaloneTypesTests {
 
         // Test round-trip
         _ = try decoder.decode(CloudArchivalWriterConfig.self, from: encoded)
-    }
-
-    @Test("CloudStorageConfig can be decoded from mock and re-encoded")
-    func cloudStorageConfigDecodingAndEncoding() throws {
-        let data = try loadMockJSON("CloudStorageConfig.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(CloudStorageConfig.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(CloudStorageConfig.self, from: encoded)
     }
 
     @Test("CompilationError variant 0 can be decoded and re-encoded")
