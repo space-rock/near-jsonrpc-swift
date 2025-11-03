@@ -1,7 +1,7 @@
 # NEAR JSON-RPC Swift Client
 
 [![Swift 6.1+](https://img.shields.io/badge/Swift-6.1+-orange.svg)](https://swift.org)
-[![CI/CD](https://github.com/space-rock/near-jsonrpc-swift/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/space-rock/near-jsonrpc-swift/actions/workflows/ci-cd.yml) [![Coverage](https://codecov.io/gh/space-rock/near-jsonrpc-swift/branch/main/graph/badge.svg?token=SHQZTQA89C)](https://codecov.io/github/space-rock/near-jsonrpc-swift)[![Platforms](https://img.shields.io/badge/platforms-iOS%2013+%20%7C%20macOS%2010.15+-lightgrey.svg)](https://developer.apple.com)
+[![CI/CD](https://github.com/space-rock/near-jsonrpc-swift/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/space-rock/near-jsonrpc-swift/actions/workflows/ci-cd.yml) [![Coverage](https://codecov.io/gh/space-rock/near-jsonrpc-swift/branch/main/graph/badge.svg?token=SHQZTQA89C)](https://codecov.io/github/space-rock/near-jsonrpc-swift) [![Platforms](https://img.shields.io/badge/platforms-iOS%2013+%20%7C%20macOS%2010.15+-lightgrey.svg)](https://developer.apple.com)
 [![SPM Compatible](https://img.shields.io/badge/SPM-compatible-brightgreen.svg)](https://swift.org/package-manager)
 
 ## 🚀 Features
