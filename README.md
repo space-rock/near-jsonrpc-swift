@@ -188,24 +188,37 @@ swift run
 
 ## Error Handling
 
-The client provides structured error handling:
+The client uses typed throws for precise error handling. All RPC methods throw `NearJsonRpcError`, which encapsulates all possible error cases.
 
 ```swift
 do {
     let response = try await client.block(request)
     // Handle success
-} catch NearJsonRpcError.invalidURL(let url) {
-    print("Invalid URL: \(url)")
-} catch NearJsonRpcError.httpError(let code) {
-    print("HTTP error: \(code)")
-} catch NearJsonRpcError.rpcError(let error) {
-    print("RPC error: \(error.message)")
-} catch NearJsonRpcError.decodingError(let error) {
-    print("Decoding failed: \(error)")
 } catch {
-    print("Unknown error: \(error)")
+    switch error {
+    case .invalidURL(let url):
+        print("Invalid URL: \(url)")
+    case .httpError(let code):
+        print("HTTP error: \(code)")
+    case .rpcError(let rpcError):
+        print("RPC error: \(rpcError.message)")
+    case .decodingError(let decodingError):
+        print("Decoding failed: \(decodingError)")
+    case .invalidResponse:
+        print("Invalid response from server")
+    }
 }
 ```
+
+### Error Types
+
+The `NearJsonRpcError` enum provides comprehensive error cases:
+
+- **`invalidURL(String)`**: The provided URL string is malformed
+- **`invalidResponse`**: The server response is not a valid HTTP response
+- **`httpError(Int)`**: HTTP request failed with the given status code
+- **`rpcError(RpcError)`**: NEAR RPC returned an error response
+- **`decodingError(Error)`**: Failed to decode the response data
 
 ## Architecture
 

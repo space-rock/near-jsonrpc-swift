@@ -53,10 +53,20 @@ struct NearJsonRpcExample {
                 prettyPrint(response, label: "✓ Response")
                 successCount += 1
             } catch {
-                let errorMsg = error.localizedDescription
-                prettyPrint(["error": errorMsg], label: "✗ Error")
+                switch error {
+                case .invalidURL(let url):
+                    prettyPrint(["error": "Invalid URL: \(url)"], label: "✗ Error")
+                case .httpError(let code):
+                    prettyPrint(["error": "HTTP error: \(code)"], label: "✗ Error")
+                case .rpcError(let rpcError):
+                    prettyPrint(["error": "RPC error: \(rpcError)"], label: "✗ Error")
+                case .decodingError(let decodingError):
+                    prettyPrint(["error": "Decoding error: \(decodingError)"], label: "✗ Error")
+                case .invalidResponse:
+                    prettyPrint(["error": "Invalid response from server"], label: "✗ Error")
+                }
                 failureCount += 1
-                failures.append((method: "EXPERIMENTAL_changes", error: errorMsg))
+                failures.append((method: "EXPERIMENTAL_changes", error: error.localizedDescription))
             }
 
             // MARK: - 2. EXPERIMENTAL_changes_in_block
@@ -496,9 +506,18 @@ struct NearJsonRpcExample {
 
             print("\n" + String(repeating: "=", count: 80))
         } catch {
-            print("\n❌ Fatal Error: \(error)")
-            if let jsonError = error as? NearJsonRpcError {
-                prettyPrint(["rpcError": jsonError.localizedDescription], label: "Error Details")
+            print("\n❌ Fatal Error during client initialization")
+            switch error {
+            case .invalidURL(let url):
+                prettyPrint(["error": "Invalid URL: \(url)"], label: "Error Details")
+            case .httpError(let code):
+                prettyPrint(["error": "HTTP error: \(code)"], label: "Error Details")
+            case .rpcError(let rpcError):
+                prettyPrint(["rpcError": "\(rpcError)"], label: "Error Details")
+            case .decodingError(let decodingError):
+                prettyPrint(["error": "Decoding error: \(decodingError)"], label: "Error Details")
+            case .invalidResponse:
+                prettyPrint(["error": "Invalid response from server"], label: "Error Details")
             }
         }
     }
