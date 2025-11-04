@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0](https://github.com/space-rock/near-jsonrpc-swift/compare/v1.0.0...v2.0.0) (2025-11-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* use typed throws ([#6](https://github.com/space-rock/near-jsonrpc-swift/issues/6))
+
+### Features
+
+* use typed throws ([#6](https://github.com/space-rock/near-jsonrpc-swift/issues/6)) ([7126dd2](https://github.com/space-rock/near-jsonrpc-swift/commit/7126dd25b43de10eafa603d1ad4626a3e004383d))
+
 ## 1.0.0 (2025-10-04)
 
 
