@@ -7,6 +7,7 @@ on:
   pull_request:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -20,6 +21,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Select Xcode version
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: 'latest-stable'
 
       - name: Setup Swift
         uses: swift-actions/setup-swift@v2
@@ -51,45 +57,80 @@ jobs:
           cd Scripts
           bash codegen.sh
 
-      - name: Swift Package Resolve
-        run: swift package resolve
-
-      - name: Build Swift Package
-        run: swift build
-
-      - name: Run Swift Tests
-        run: swift test --enable-code-coverage
+      - name: Build and Test with Coverage
+        run: |
+          # Use swift test instead of xcodebuild to match the toolchain
+          swift test --enable-code-coverage
+        env:
+          TOOLCHAINS: swift
 
       - name: Generate coverage report
-        continue-on-error: true
         run: |
-          # Find the Swift toolchain path
+          # Find the Swift 6.1 toolchain llvm tools
           SWIFT_PATH=$(which swift)
-          TOOLCHAIN_PATH=$(dirname $(dirname "$SWIFT_PATH"))
-          LLVM_COV="$TOOLCHAIN_PATH/usr/bin/llvm-cov"
+          TOOLCHAIN_PATH=$(dirname $(dirname $SWIFT_PATH))
           
-          # Fallback to xcrun if direct path doesn't exist
-          if [ ! -f "$LLVM_COV" ]; then
+          echo "Swift path: $SWIFT_PATH"
+          echo "Toolchain path: $TOOLCHAIN_PATH"
+          
+          # Look for llvm tools in the toolchain
+          if [ -f "$TOOLCHAIN_PATH/usr/bin/llvm-profdata" ]; then
+            LLVM_PROFDATA="$TOOLCHAIN_PATH/usr/bin/llvm-profdata"
+            LLVM_COV="$TOOLCHAIN_PATH/usr/bin/llvm-cov"
+          elif [ -f "$TOOLCHAIN_PATH/bin/llvm-profdata" ]; then
+            LLVM_PROFDATA="$TOOLCHAIN_PATH/bin/llvm-profdata"
+            LLVM_COV="$TOOLCHAIN_PATH/bin/llvm-cov"
+          else
+            echo "Could not find llvm tools in toolchain, using xcrun"
+            LLVM_PROFDATA="xcrun llvm-profdata"
             LLVM_COV="xcrun llvm-cov"
           fi
           
-          # Find the test binary
-          TEST_BINARY=".build/debug/NearJsonRpcPackageTests.xctest/Contents/MacOS/NearJsonRpcPackageTests"
+          echo "Using llvm-profdata: $LLVM_PROFDATA"
+          echo "Using llvm-cov: $LLVM_COV"
           
-          # Generate coverage
+          # Find test binary
+          BINARY=$(find .build -name "*PackageTests.xctest" -type d | head -n 1)/Contents/MacOS/NearJsonRpcPackageTests
+          if [ ! -f "$BINARY" ]; then
+            BINARY=$(find .build -type f -name "*PackageTests" | grep -v ".build/checkouts" | head -n 1)
+          fi
+          
+          echo "Test binary: $BINARY"
+          
+          # Find and merge profraw files
+          if [ -f .build/arm64-apple-macosx/debug/codecov/default.profdata ]; then
+            echo "Using existing profdata file"
+            PROFDATA=".build/arm64-apple-macosx/debug/codecov/default.profdata"
+          else
+            echo "Merging profraw files..."
+            # Use find with -exec to handle spaces in filenames properly
+            find .build -name "*.profraw" -print0 | xargs -0 $LLVM_PROFDATA merge -sparse -o merged.profdata
+            PROFDATA="merged.profdata"
+          fi
+          
+          echo "Using profdata: $PROFDATA"
+          
+          # Export coverage to lcov format
           $LLVM_COV export \
             -format="lcov" \
-            "$TEST_BINARY" \
-            -instr-profile=.build/debug/codecov/default.profdata \
+            -instr-profile="$PROFDATA" \
+            "$BINARY" \
             -ignore-filename-regex=".build|Tests" \
             > coverage.lcov
+          
+          echo "Generated coverage report:"
+          ls -lh coverage.lcov
+        env:
+          TOOLCHAINS: swift
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.lcov
+          flags: swift
           fail_ci_if_error: false
+          verbose: true
 
   test-linux:
     name: Test & Build (Linux)

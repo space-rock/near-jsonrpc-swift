@@ -1,7 +1,7 @@
 # NEAR JSON-RPC Swift Client
 
 [![Swift 6.1+](https://img.shields.io/badge/Swift-6.1+-orange.svg)](https://swift.org)
-[![CI/CD](https://github.com/space-rock/near-jsonrpc-swift/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/space-rock/near-jsonrpc-swift/actions/workflows/ci-cd.yml) [![Coverage](https://codecov.io/gh/space-rock/near-jsonrpc-swift/branch/main/graph/badge.svg?token=SHQZTQA89C)](https://codecov.io/github/space-rock/near-jsonrpc-swift)[![Platforms](https://img.shields.io/badge/platforms-iOS%2013+%20%7C%20macOS%2010.15+-lightgrey.svg)](https://developer.apple.com)
+[![CI/CD](https://github.com/space-rock/near-jsonrpc-swift/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/space-rock/near-jsonrpc-swift/actions/workflows/ci-cd.yml) [![Coverage](https://codecov.io/gh/space-rock/near-jsonrpc-swift/branch/main/graph/badge.svg?token=SHQZTQA89C)](https://codecov.io/github/space-rock/near-jsonrpc-swift) [![Platforms](https://img.shields.io/badge/platforms-iOS%2013+%20%7C%20macOS%2010.15+-lightgrey.svg)](https://developer.apple.com)
 [![SPM Compatible](https://img.shields.io/badge/SPM-compatible-brightgreen.svg)](https://swift.org/package-manager)
 
 ## 🚀 Features
@@ -188,24 +188,37 @@ swift run
 
 ## Error Handling
 
-The client provides structured error handling:
+The client uses typed throws for precise error handling. All RPC methods throw `NearJsonRpcError`, which encapsulates all possible error cases.
 
 ```swift
 do {
     let response = try await client.block(request)
     // Handle success
-} catch NearJsonRpcError.invalidURL(let url) {
-    print("Invalid URL: \(url)")
-} catch NearJsonRpcError.httpError(let code) {
-    print("HTTP error: \(code)")
-} catch NearJsonRpcError.rpcError(let error) {
-    print("RPC error: \(error.message)")
-} catch NearJsonRpcError.decodingError(let error) {
-    print("Decoding failed: \(error)")
 } catch {
-    print("Unknown error: \(error)")
+    switch error {
+    case .invalidURL(let url):
+        print("Invalid URL: \(url)")
+    case .httpError(let code):
+        print("HTTP error: \(code)")
+    case .rpcError(let rpcError):
+        print("RPC error: \(rpcError.message)")
+    case .decodingError(let decodingError):
+        print("Decoding failed: \(decodingError)")
+    case .invalidResponse:
+        print("Invalid response from server")
+    }
 }
 ```
+
+### Error Types
+
+The `NearJsonRpcError` enum provides comprehensive error cases:
+
+- **`invalidURL(String)`**: The provided URL string is malformed
+- **`invalidResponse`**: The server response is not a valid HTTP response
+- **`httpError(Int)`**: HTTP request failed with the given status code
+- **`rpcError(RpcError)`**: NEAR RPC returned an error response
+- **`decodingError(Error)`**: Failed to decode the response data
 
 ## Architecture
 

@@ -1,5 +1,7 @@
 import Foundation
 
+// MARK: - Auto-generated Types
+
 // MARK: - AnyCodable Helper
 
 public struct AnyCodable: Codable, @unchecked Sendable {

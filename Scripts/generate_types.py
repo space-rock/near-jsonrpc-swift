@@ -1555,7 +1555,7 @@ extension NearJsonRpcClient {
         doc_comment = format_doc_comment(method["doc"], method["rpc_method"])
         method_block = f"""
 {doc_comment}
-    public func {method['swift_method']}(_ request: {method['request_type']}) async throws -> {method['result_type']} {{
+    public func {method['swift_method']}(_ request: {method['request_type']}) async throws(NearJsonRpcError) -> {method['result_type']} {{
         let response: {method['response_type']} = try await performRequest(
             method: "{method['rpc_method']}",
             params: request,
@@ -1669,11 +1669,9 @@ def main():
     print(f"Found {len(discriminators)} discriminator fields with enum values")
     
     # Generate Swift code
-    swift_code = "//\n"
-    swift_code += "// Types.swift\n"
-    swift_code += "// Generated from OpenAPI specification\n"
-    swift_code += "//\n\n"
-    swift_code += "import Foundation\n\n"
+    swift_code = "import Foundation\n\n"
+    swift_code += "// MARK: - Auto-generated Types\n\n"
+    
     
     # Add AnyCodable helper for arbitrary JSON objects
     swift_code += ANYCODABLE_HELPER_CODE

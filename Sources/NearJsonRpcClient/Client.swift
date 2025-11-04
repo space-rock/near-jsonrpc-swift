@@ -22,7 +22,7 @@ public actor NearJsonRpcClient {
     /// Initialize client with base URL string
     /// - Parameter baseURLString: The base URL string for the NEAR RPC endpoint
     /// - Throws: `NearJsonRpcError.invalidURL` if the URL string is invalid
-    public init(baseURLString: String, session: URLSession = .shared) throws {
+    public init(baseURLString: String, session: URLSession = .shared) throws(NearJsonRpcError) {
         guard let url = URL(string: baseURLString) else {
             throw NearJsonRpcError.invalidURL(baseURLString)
         }
@@ -38,7 +38,7 @@ extension NearJsonRpcClient {
         method: String,
         params: some Codable,
         responseType _: ResponseType.Type,
-    ) async throws -> ResponseType {
+    ) async throws(NearJsonRpcError) -> ResponseType {
         let request = JsonRpcRequest(
             id: UUID().uuidString,
             jsonrpc: "2.0",
@@ -48,14 +48,24 @@ extension NearJsonRpcClient {
 
         let encoder = JSONEncoder()
         encoder.keyEncodingStrategy = .convertToSnakeCase
-        let requestData = try encoder.encode(request)
+        let requestData: Data
+        do {
+            requestData = try encoder.encode(request)
+        } catch {
+            throw NearJsonRpcError.decodingError(error)
+        }
 
         var urlRequest = URLRequest(url: baseURL)
         urlRequest.httpMethod = "POST"
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
         urlRequest.httpBody = requestData
 
-        let (data, response) = try await session.data(for: urlRequest)
+        let (data, response): (Data, URLResponse)
+        do {
+            (data, response) = try await session.data(for: urlRequest)
+        } catch {
+            throw NearJsonRpcError.decodingError(error)
+        }
 
         guard let httpResponse = response as? HTTPURLResponse else {
             throw NearJsonRpcError.invalidResponse
