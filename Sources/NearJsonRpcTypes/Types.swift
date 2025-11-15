@@ -772,6 +772,32 @@ public struct ActionErrorKindOneOfGlobalContractDoesNotExistInline: Codable, Sen
     }
 }
 
+public struct ActionErrorKindOneOfGasKeyDoesNotExistInline: Codable, Sendable {
+    public let accountId: AccountId
+    public let publicKey: PublicKey
+
+    public init(
+        accountId: AccountId,
+        publicKey: PublicKey,
+    ) {
+        self.accountId = accountId
+        self.publicKey = publicKey
+    }
+}
+
+public struct ActionErrorKindOneOfGasKeyAlreadyExistsInline: Codable, Sendable {
+    public let accountId: AccountId
+    public let publicKey: PublicKey
+
+    public init(
+        accountId: AccountId,
+        publicKey: PublicKey,
+    ) {
+        self.accountId = accountId
+        self.publicKey = publicKey
+    }
+}
+
 public enum ActionErrorKind: Codable, Sendable {
     case accountAlreadyExists(ActionErrorKindOneOfAccountAlreadyExistsInline)
     case accountDoesNotExist(ActionErrorKindOneOfAccountDoesNotExistInline)
@@ -798,6 +824,8 @@ public enum ActionErrorKind: Codable, Sendable {
     case delegateActionInvalidNonce(ActionErrorKindOneOfDelegateActionInvalidNonceInline)
     case delegateActionNonceTooLarge(ActionErrorKindOneOfDelegateActionNonceTooLargeInline)
     case globalContractDoesNotExist(ActionErrorKindOneOfGlobalContractDoesNotExistInline)
+    case gasKeyDoesNotExist(ActionErrorKindOneOfGasKeyDoesNotExistInline)
+    case gasKeyAlreadyExists(ActionErrorKindOneOfGasKeyAlreadyExistsInline)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -1150,6 +1178,40 @@ public enum ActionErrorKind: Codable, Sendable {
         } catch {
             decodingErrors.append(".globalContractDoesNotExist: \(describeDecodingError(error))")
         }
+        do {
+            if let container = anyKeyContainer {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("GasKeyDoesNotExist") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfGasKeyDoesNotExistInline.self,
+                        forKey: matchingKey,
+                    )
+                    self = .gasKeyDoesNotExist(value)
+                    return
+                }
+            }
+        } catch {
+            decodingErrors.append(".gasKeyDoesNotExist: \(describeDecodingError(error))")
+        }
+        do {
+            if let container = anyKeyContainer {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("GasKeyAlreadyExists") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfGasKeyAlreadyExistsInline.self,
+                        forKey: matchingKey,
+                    )
+                    self = .gasKeyAlreadyExists(value)
+                    return
+                }
+            }
+        } catch {
+            decodingErrors.append(".gasKeyAlreadyExists: \(describeDecodingError(error))")
+        }
         let contextDescription: String
         if decodingErrors.isEmpty {
             let availableKeys: String
@@ -1189,6 +1251,8 @@ public enum ActionErrorKind: Codable, Sendable {
         case delegateActionInvalidNonce = "DelegateActionInvalidNonce"
         case delegateActionNonceTooLarge = "DelegateActionNonceTooLarge"
         case globalContractDoesNotExist = "GlobalContractDoesNotExist"
+        case gasKeyDoesNotExist = "GasKeyDoesNotExist"
+        case gasKeyAlreadyExists = "GasKeyAlreadyExists"
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -1256,6 +1320,12 @@ public enum ActionErrorKind: Codable, Sendable {
         case let .globalContractDoesNotExist(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .globalContractDoesNotExist)
+        case let .gasKeyDoesNotExist(value):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(value, forKey: .gasKeyDoesNotExist)
+        case let .gasKeyAlreadyExists(value):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(value, forKey: .gasKeyAlreadyExists)
         case .delegateActionInvalidSignature:
             var singleContainer = encoder.singleValueContainer()
             try singleContainer.encode("DelegateActionInvalidSignature")
@@ -1422,6 +1492,45 @@ public struct ActionViewOneOfDeterministicStateInitInline: Codable, Sendable {
     }
 }
 
+public struct ActionViewOneOfAddGasKeyInline: Codable, Sendable {
+    public let numNonces: Int
+    public let permission: AccessKeyPermissionView
+    public let publicKey: PublicKey
+
+    public init(
+        numNonces: Int,
+        permission: AccessKeyPermissionView,
+        publicKey: PublicKey,
+    ) {
+        self.numNonces = numNonces
+        self.permission = permission
+        self.publicKey = publicKey
+    }
+}
+
+public struct ActionViewOneOfDeleteGasKeyInline: Codable, Sendable {
+    public let publicKey: PublicKey
+
+    public init(
+        publicKey: PublicKey,
+    ) {
+        self.publicKey = publicKey
+    }
+}
+
+public struct ActionViewOneOfTransferToGasKeyInline: Codable, Sendable {
+    public let amount: NearToken
+    public let publicKey: PublicKey
+
+    public init(
+        amount: NearToken,
+        publicKey: PublicKey,
+    ) {
+        self.amount = amount
+        self.publicKey = publicKey
+    }
+}
+
 public enum ActionView: Codable, Sendable {
     case createAccount
     case deployContract(ActionViewOneOfDeployContractInline)
@@ -1437,6 +1546,9 @@ public enum ActionView: Codable, Sendable {
     case useGlobalContract(ActionViewOneOfUseGlobalContractInline)
     case useGlobalContractByAccountId(ActionViewOneOfUseGlobalContractByAccountIdInline)
     case deterministicStateInit(ActionViewOneOfDeterministicStateInitInline)
+    case addGasKey(ActionViewOneOfAddGasKeyInline)
+    case deleteGasKey(ActionViewOneOfDeleteGasKeyInline)
+    case transferToGasKey(ActionViewOneOfTransferToGasKeyInline)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -1623,6 +1735,44 @@ public enum ActionView: Codable, Sendable {
         } catch {
             decodingErrors.append(".deterministicStateInit: \(describeDecodingError(error))")
         }
+        do {
+            if let container = anyKeyContainer {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("AddGasKey") == .orderedSame }) {
+                    let value = try container.decode(ActionViewOneOfAddGasKeyInline.self, forKey: matchingKey)
+                    self = .addGasKey(value)
+                    return
+                }
+            }
+        } catch {
+            decodingErrors.append(".addGasKey: \(describeDecodingError(error))")
+        }
+        do {
+            if let container = anyKeyContainer {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("DeleteGasKey") == .orderedSame }) {
+                    let value = try container.decode(ActionViewOneOfDeleteGasKeyInline.self, forKey: matchingKey)
+                    self = .deleteGasKey(value)
+                    return
+                }
+            }
+        } catch {
+            decodingErrors.append(".deleteGasKey: \(describeDecodingError(error))")
+        }
+        do {
+            if let container = anyKeyContainer {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("TransferToGasKey") == .orderedSame
+                    }) {
+                    let value = try container.decode(ActionViewOneOfTransferToGasKeyInline.self, forKey: matchingKey)
+                    self = .transferToGasKey(value)
+                    return
+                }
+            }
+        } catch {
+            decodingErrors.append(".transferToGasKey: \(describeDecodingError(error))")
+        }
         let contextDescription: String
         if decodingErrors.isEmpty {
             let availableKeys: String
@@ -1654,6 +1804,9 @@ public enum ActionView: Codable, Sendable {
         case useGlobalContract = "UseGlobalContract"
         case useGlobalContractByAccountId = "UseGlobalContractByAccountId"
         case deterministicStateInit = "DeterministicStateInit"
+        case addGasKey = "AddGasKey"
+        case deleteGasKey = "DeleteGasKey"
+        case transferToGasKey = "TransferToGasKey"
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -1697,6 +1850,15 @@ public enum ActionView: Codable, Sendable {
         case let .deterministicStateInit(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deterministicStateInit)
+        case let .addGasKey(value):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(value, forKey: .addGasKey)
+        case let .deleteGasKey(value):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(value, forKey: .deleteGasKey)
+        case let .transferToGasKey(value):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(value, forKey: .transferToGasKey)
         case .createAccount:
             var singleContainer = encoder.singleValueContainer()
             try singleContainer.encode("CreateAccount")
@@ -1869,6 +2031,29 @@ public struct ActionsValidationErrorOneOfDeterministicStateInitValueLengthExceed
     }
 }
 
+public struct ActionsValidationErrorOneOfGasKeyPermissionInvalidInline: Codable, Sendable {
+    public let permission: AccessKeyPermission
+
+    public init(
+        permission: AccessKeyPermission,
+    ) {
+        self.permission = permission
+    }
+}
+
+public struct ActionsValidationErrorOneOfGasKeyTooManyNoncesRequestedInline: Codable, Sendable {
+    public let limit: Int
+    public let requestedNonces: Int
+
+    public init(
+        limit: Int,
+        requestedNonces: Int,
+    ) {
+        self.limit = limit
+        self.requestedNonces = requestedNonces
+    }
+}
+
 public enum ActionsValidationError: Codable, Sendable {
     case deleteActionMustBeFinal
     case totalPrepaidGasExceeded(ActionsValidationErrorOneOfTotalPrepaidGasExceededInline)
@@ -1891,6 +2076,8 @@ public enum ActionsValidationError: Codable, Sendable {
     case deterministicStateInitValueLengthExceeded(
         ActionsValidationErrorOneOfDeterministicStateInitValueLengthExceededInline,
     )
+    case gasKeyPermissionInvalid(ActionsValidationErrorOneOfGasKeyPermissionInvalidInline)
+    case gasKeyTooManyNoncesRequested(ActionsValidationErrorOneOfGasKeyTooManyNoncesRequestedInline)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -2134,6 +2321,40 @@ public enum ActionsValidationError: Codable, Sendable {
         } catch {
             decodingErrors.append(".deterministicStateInitValueLengthExceeded: \(describeDecodingError(error))")
         }
+        do {
+            if let container = anyKeyContainer {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("GasKeyPermissionInvalid") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionsValidationErrorOneOfGasKeyPermissionInvalidInline.self,
+                        forKey: matchingKey,
+                    )
+                    self = .gasKeyPermissionInvalid(value)
+                    return
+                }
+            }
+        } catch {
+            decodingErrors.append(".gasKeyPermissionInvalid: \(describeDecodingError(error))")
+        }
+        do {
+            if let container = anyKeyContainer {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("GasKeyTooManyNoncesRequested") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionsValidationErrorOneOfGasKeyTooManyNoncesRequestedInline.self,
+                        forKey: matchingKey,
+                    )
+                    self = .gasKeyTooManyNoncesRequested(value)
+                    return
+                }
+            }
+        } catch {
+            decodingErrors.append(".gasKeyTooManyNoncesRequested: \(describeDecodingError(error))")
+        }
         let contextDescription: String
         if decodingErrors.isEmpty {
             let availableKeys: String
@@ -2165,6 +2386,8 @@ public enum ActionsValidationError: Codable, Sendable {
         case invalidDeterministicStateInitReceiver = "InvalidDeterministicStateInitReceiver"
         case deterministicStateInitKeyLengthExceeded = "DeterministicStateInitKeyLengthExceeded"
         case deterministicStateInitValueLengthExceeded = "DeterministicStateInitValueLengthExceeded"
+        case gasKeyPermissionInvalid = "GasKeyPermissionInvalid"
+        case gasKeyTooManyNoncesRequested = "GasKeyTooManyNoncesRequested"
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -2208,6 +2431,12 @@ public enum ActionsValidationError: Codable, Sendable {
         case let .deterministicStateInitValueLengthExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deterministicStateInitValueLengthExceeded)
+        case let .gasKeyPermissionInvalid(value):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(value, forKey: .gasKeyPermissionInvalid)
+        case let .gasKeyTooManyNoncesRequested(value):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(value, forKey: .gasKeyTooManyNoncesRequested)
         case .deleteActionMustBeFinal:
             var singleContainer = encoder.singleValueContainer()
             try singleContainer.encode("DeleteActionMustBeFinal")
@@ -6149,6 +6378,9 @@ public enum NonDelegateAction: Codable, Sendable {
     case deployGlobalContract(DeployGlobalContractAction)
     case useGlobalContract(UseGlobalContractAction)
     case deterministicStateInit(DeterministicStateInitAction)
+    case addGasKey(AddGasKeyAction)
+    case deleteGasKey(DeleteGasKeyAction)
+    case transferToGasKey(TransferToGasKeyAction)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -6291,6 +6523,44 @@ public enum NonDelegateAction: Codable, Sendable {
         } catch {
             decodingErrors.append(".deterministicStateInit: \(describeDecodingError(error))")
         }
+        do {
+            if let container = anyKeyContainer {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("AddGasKey") == .orderedSame }) {
+                    let value = try container.decode(AddGasKeyAction.self, forKey: matchingKey)
+                    self = .addGasKey(value)
+                    return
+                }
+            }
+        } catch {
+            decodingErrors.append(".addGasKey: \(describeDecodingError(error))")
+        }
+        do {
+            if let container = anyKeyContainer {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("DeleteGasKey") == .orderedSame }) {
+                    let value = try container.decode(DeleteGasKeyAction.self, forKey: matchingKey)
+                    self = .deleteGasKey(value)
+                    return
+                }
+            }
+        } catch {
+            decodingErrors.append(".deleteGasKey: \(describeDecodingError(error))")
+        }
+        do {
+            if let container = anyKeyContainer {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("TransferToGasKey") == .orderedSame
+                    }) {
+                    let value = try container.decode(TransferToGasKeyAction.self, forKey: matchingKey)
+                    self = .transferToGasKey(value)
+                    return
+                }
+            }
+        } catch {
+            decodingErrors.append(".transferToGasKey: \(describeDecodingError(error))")
+        }
         let contextDescription: String
         if decodingErrors.isEmpty {
             let availableKeys: String
@@ -6320,6 +6590,9 @@ public enum NonDelegateAction: Codable, Sendable {
         case deployGlobalContract = "DeployGlobalContract"
         case useGlobalContract = "UseGlobalContract"
         case deterministicStateInit = "DeterministicStateInit"
+        case addGasKey = "AddGasKey"
+        case deleteGasKey = "DeleteGasKey"
+        case transferToGasKey = "TransferToGasKey"
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -6357,6 +6630,15 @@ public enum NonDelegateAction: Codable, Sendable {
         case let .deterministicStateInit(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deterministicStateInit)
+        case let .addGasKey(value):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(value, forKey: .addGasKey)
+        case let .deleteGasKey(value):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(value, forKey: .deleteGasKey)
+        case let .transferToGasKey(value):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(value, forKey: .transferToGasKey)
         }
     }
 }
@@ -6712,6 +6994,16 @@ public struct ReceiptValidationErrorOneOfReceiptSizeExceededInline: Codable, Sen
     }
 }
 
+public struct ReceiptValidationErrorOneOfInvalidRefundToInline: Codable, Sendable {
+    public let accountId: String
+
+    public init(
+        accountId: String,
+    ) {
+        self.accountId = accountId
+    }
+}
+
 public enum ReceiptValidationError: Codable, Sendable {
     case invalidPredecessorId(ReceiptValidationErrorOneOfInvalidPredecessorIdInline)
     case invalidReceiverId(ReceiptValidationErrorOneOfInvalidReceiverIdInline)
@@ -6721,6 +7013,7 @@ public enum ReceiptValidationError: Codable, Sendable {
     case numberInputDataDependenciesExceeded(ReceiptValidationErrorOneOfNumberInputDataDependenciesExceededInline)
     case actionsValidation(ActionsValidationError)
     case receiptSizeExceeded(ReceiptValidationErrorOneOfReceiptSizeExceededInline)
+    case invalidRefundTo(ReceiptValidationErrorOneOfInvalidRefundToInline)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -6858,6 +7151,23 @@ public enum ReceiptValidationError: Codable, Sendable {
         } catch {
             decodingErrors.append(".receiptSizeExceeded: \(describeDecodingError(error))")
         }
+        do {
+            if let container = anyKeyContainer {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("InvalidRefundTo") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ReceiptValidationErrorOneOfInvalidRefundToInline.self,
+                        forKey: matchingKey,
+                    )
+                    self = .invalidRefundTo(value)
+                    return
+                }
+            }
+        } catch {
+            decodingErrors.append(".invalidRefundTo: \(describeDecodingError(error))")
+        }
         let contextDescription: String
         if decodingErrors.isEmpty {
             let availableKeys: String
@@ -6884,6 +7194,7 @@ public enum ReceiptValidationError: Codable, Sendable {
         case numberInputDataDependenciesExceeded = "NumberInputDataDependenciesExceeded"
         case actionsValidation = "ActionsValidation"
         case receiptSizeExceeded = "ReceiptSizeExceeded"
+        case invalidRefundTo = "InvalidRefundTo"
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -6912,6 +7223,9 @@ public enum ReceiptValidationError: Codable, Sendable {
         case let .receiptSizeExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .receiptSizeExceeded)
+        case let .invalidRefundTo(value):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(value, forKey: .invalidRefundTo)
         }
     }
 }
@@ -11113,6 +11427,24 @@ public struct ActionError: Codable, Sendable {
     }
 }
 
+// MARK: - AddGasKeyAction
+
+public struct AddGasKeyAction: Codable, Sendable {
+    public let numNonces: Int
+    public let permission: AccessKeyPermission
+    public let publicKey: PublicKey
+
+    public init(
+        numNonces: Int,
+        permission: AccessKeyPermission,
+        publicKey: PublicKey,
+    ) {
+        self.numNonces = numNonces
+        self.permission = permission
+        self.publicKey = publicKey
+    }
+}
+
 // MARK: - AddKeyAction
 
 public struct AddKeyAction: Codable, Sendable {
@@ -11464,48 +11796,18 @@ public struct ChunkHeaderView: Codable, Sendable {
     }
 }
 
-// MARK: - CloudArchivalReaderConfig
-
-public struct CloudArchivalReaderConfig: Codable, Sendable {
-    public let cloudStorage: CloudStorageConfig
-
-    public init(
-        cloudStorage: CloudStorageConfig,
-    ) {
-        self.cloudStorage = cloudStorage
-    }
-}
-
 // MARK: - CloudArchivalWriterConfig
 
 public struct CloudArchivalWriterConfig: Codable, Sendable {
     public let archiveBlockData: Bool?
-    public let cloudStorage: CloudStorageConfig
     public let pollingInterval: DurationAsStdSchemaProvider?
 
     public init(
         archiveBlockData: Bool?,
-        cloudStorage: CloudStorageConfig,
         pollingInterval: DurationAsStdSchemaProvider?,
     ) {
         self.archiveBlockData = archiveBlockData
-        self.cloudStorage = cloudStorage
         self.pollingInterval = pollingInterval
-    }
-}
-
-// MARK: - CloudStorageConfig
-
-public struct CloudStorageConfig: Codable, Sendable {
-    public let credentialsFile: String?
-    public let storage: ExternalStorageLocation
-
-    public init(
-        credentialsFile: String?,
-        storage: ExternalStorageLocation,
-    ) {
-        self.credentialsFile = credentialsFile
-        self.storage = storage
     }
 }
 
@@ -11737,6 +12039,18 @@ public struct DeleteAccountAction: Codable, Sendable {
         beneficiaryId: AccountId,
     ) {
         self.beneficiaryId = beneficiaryId
+    }
+}
+
+// MARK: - DeleteGasKeyAction
+
+public struct DeleteGasKeyAction: Codable, Sendable {
+    public let publicKey: PublicKey
+
+    public init(
+        publicKey: PublicKey,
+    ) {
+        self.publicKey = publicKey
     }
 }
 
@@ -13530,9 +13844,10 @@ public struct RpcClientConfigResponse: Codable, Sendable {
     public let chunkValidationThreads: Int
     public let chunkWaitMult: [Int32]
     public let clientBackgroundMigrationThreads: Int
-    public let cloudArchivalReader: CloudArchivalReaderConfig?
     public let cloudArchivalWriter: CloudArchivalWriterConfig?
     public let doomslugStepPeriod: [UInt64]
+    public let dynamicReshardingDryRun: Bool
+    public let enableEarlyPrepareTransactions: Bool
     public let enableMultilineLogging: Bool
     public let enableStatisticsExport: Bool
     public let epochLength: UInt64
@@ -13598,9 +13913,10 @@ public struct RpcClientConfigResponse: Codable, Sendable {
         chunkValidationThreads: Int,
         chunkWaitMult: [Int32],
         clientBackgroundMigrationThreads: Int,
-        cloudArchivalReader: CloudArchivalReaderConfig?,
         cloudArchivalWriter: CloudArchivalWriterConfig?,
         doomslugStepPeriod: [UInt64],
+        dynamicReshardingDryRun: Bool,
+        enableEarlyPrepareTransactions: Bool,
         enableMultilineLogging: Bool,
         enableStatisticsExport: Bool,
         epochLength: UInt64,
@@ -13665,9 +13981,10 @@ public struct RpcClientConfigResponse: Codable, Sendable {
         self.chunkValidationThreads = chunkValidationThreads
         self.chunkWaitMult = chunkWaitMult
         self.clientBackgroundMigrationThreads = clientBackgroundMigrationThreads
-        self.cloudArchivalReader = cloudArchivalReader
         self.cloudArchivalWriter = cloudArchivalWriter
         self.doomslugStepPeriod = doomslugStepPeriod
+        self.dynamicReshardingDryRun = dynamicReshardingDryRun
+        self.enableEarlyPrepareTransactions = enableEarlyPrepareTransactions
         self.enableMultilineLogging = enableMultilineLogging
         self.enableStatisticsExport = enableStatisticsExport
         self.epochLength = epochLength
@@ -14587,6 +14904,21 @@ public struct TransferAction: Codable, Sendable {
     }
 }
 
+// MARK: - TransferToGasKeyAction
+
+public struct TransferToGasKeyAction: Codable, Sendable {
+    public let deposit: NearToken
+    public let publicKey: PublicKey
+
+    public init(
+        deposit: NearToken,
+        publicKey: PublicKey,
+    ) {
+        self.deposit = deposit
+        self.publicKey = publicKey
+    }
+}
+
 // MARK: - UseGlobalContractAction
 
 public struct UseGlobalContractAction: Codable, Sendable {
@@ -14611,6 +14943,8 @@ public struct VMConfigView: Codable, Sendable {
     public let growMemCost: Int
     public let implicitAccountCreation: Bool
     public let limitConfig: LimitConfig
+    public let linearOpBaseCost: UInt64
+    public let linearOpUnitCost: UInt64
     public let reftypesBulkMemory: Bool
     public let regularOpCost: Int
     public let saturatingFloatToInt: Bool
@@ -14627,6 +14961,8 @@ public struct VMConfigView: Codable, Sendable {
         growMemCost: Int,
         implicitAccountCreation: Bool,
         limitConfig: LimitConfig,
+        linearOpBaseCost: UInt64,
+        linearOpUnitCost: UInt64,
         reftypesBulkMemory: Bool,
         regularOpCost: Int,
         saturatingFloatToInt: Bool,
@@ -14642,6 +14978,8 @@ public struct VMConfigView: Codable, Sendable {
         self.growMemCost = growMemCost
         self.implicitAccountCreation = implicitAccountCreation
         self.limitConfig = limitConfig
+        self.linearOpBaseCost = linearOpBaseCost
+        self.linearOpUnitCost = linearOpUnitCost
         self.reftypesBulkMemory = reftypesBulkMemory
         self.regularOpCost = regularOpCost
         self.saturatingFloatToInt = saturatingFloatToInt
