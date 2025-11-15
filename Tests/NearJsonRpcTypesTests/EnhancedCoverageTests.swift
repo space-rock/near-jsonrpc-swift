@@ -494,6 +494,34 @@ struct EnhancedCoverageTests {
         #expect(!encoded2.isEmpty)
     }
 
+    @Test("ActionErrorKind variant 23 encoding stability")
+    func actionErrorKindVariant23EncodingStability() throws {
+        let data = try loadMockJSON("ActionErrorKind_Variant23.json")
+        let decoded = try decoder.decode(ActionErrorKind.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(ActionErrorKind.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("ActionErrorKind variant 24 encoding stability")
+    func actionErrorKindVariant24EncodingStability() throws {
+        let data = try loadMockJSON("ActionErrorKind_Variant24.json")
+        let decoded = try decoder.decode(ActionErrorKind.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(ActionErrorKind.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
     @Test("ActionErrorKind variant 3 encoding stability")
     func actionErrorKindVariant3EncodingStability() throws {
         let data = try loadMockJSON("ActionErrorKind_Variant3.json")
@@ -665,6 +693,48 @@ struct EnhancedCoverageTests {
     @Test("ActionView variant 13 encoding stability")
     func actionViewVariant13EncodingStability() throws {
         let data = try loadMockJSON("ActionView_Variant13.json")
+        let decoded = try decoder.decode(ActionView.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(ActionView.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("ActionView variant 14 encoding stability")
+    func actionViewVariant14EncodingStability() throws {
+        let data = try loadMockJSON("ActionView_Variant14.json")
+        let decoded = try decoder.decode(ActionView.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(ActionView.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("ActionView variant 15 encoding stability")
+    func actionViewVariant15EncodingStability() throws {
+        let data = try loadMockJSON("ActionView_Variant15.json")
+        let decoded = try decoder.decode(ActionView.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(ActionView.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("ActionView variant 16 encoding stability")
+    func actionViewVariant16EncodingStability() throws {
+        let data = try loadMockJSON("ActionView_Variant16.json")
         let decoded = try decoder.decode(ActionView.self, from: data)
 
         // Multiple encoding cycles should produce consistent results
@@ -914,6 +984,34 @@ struct EnhancedCoverageTests {
         #expect(!encoded2.isEmpty)
     }
 
+    @Test("ActionsValidationError variant 17 encoding stability")
+    func actionsValidationErrorVariant17EncodingStability() throws {
+        let data = try loadMockJSON("ActionsValidationError_Variant17.json")
+        let decoded = try decoder.decode(ActionsValidationError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(ActionsValidationError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("ActionsValidationError variant 18 encoding stability")
+    func actionsValidationErrorVariant18EncodingStability() throws {
+        let data = try loadMockJSON("ActionsValidationError_Variant18.json")
+        let decoded = try decoder.decode(ActionsValidationError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(ActionsValidationError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
     @Test("ActionsValidationError variant 2 encoding stability")
     func actionsValidationErrorVariant2EncodingStability() throws {
         let data = try loadMockJSON("ActionsValidationError_Variant2.json")
@@ -1024,6 +1122,21 @@ struct EnhancedCoverageTests {
 
         #expect(!encoded1.isEmpty)
         #expect(!encoded2.isEmpty)
+    }
+
+    @Test("AddGasKeyAction decoded instance is valid")
+    func addGasKeyActionValidity() throws {
+        let data = try loadMockJSON("AddGasKeyAction.json")
+        let decoded = try decoder.decode(AddGasKeyAction.self, from: data)
+
+        // Verify the decoded instance is valid by re-encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Verify round-trip
+        let redecoded = try decoder.decode(AddGasKeyAction.self, from: encoded)
+        let reencoded = try encoder.encode(redecoded)
+        #expect(!reencoded.isEmpty)
     }
 
     @Test("AddKeyAction decoded instance is valid")
@@ -1248,21 +1361,6 @@ struct EnhancedCoverageTests {
         #expect(!reencoded.isEmpty)
     }
 
-    @Test("CloudArchivalReaderConfig decoded instance is valid")
-    func cloudArchivalReaderConfigValidity() throws {
-        let data = try loadMockJSON("CloudArchivalReaderConfig.json")
-        let decoded = try decoder.decode(CloudArchivalReaderConfig.self, from: data)
-
-        // Verify the decoded instance is valid by re-encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Verify round-trip
-        let redecoded = try decoder.decode(CloudArchivalReaderConfig.self, from: encoded)
-        let reencoded = try encoder.encode(redecoded)
-        #expect(!reencoded.isEmpty)
-    }
-
     @Test("CloudArchivalWriterConfig decoded instance is valid")
     func cloudArchivalWriterConfigValidity() throws {
         let data = try loadMockJSON("CloudArchivalWriterConfig.json")
@@ -1274,21 +1372,6 @@ struct EnhancedCoverageTests {
 
         // Verify round-trip
         let redecoded = try decoder.decode(CloudArchivalWriterConfig.self, from: encoded)
-        let reencoded = try encoder.encode(redecoded)
-        #expect(!reencoded.isEmpty)
-    }
-
-    @Test("CloudStorageConfig decoded instance is valid")
-    func cloudStorageConfigValidity() throws {
-        let data = try loadMockJSON("CloudStorageConfig.json")
-        let decoded = try decoder.decode(CloudStorageConfig.self, from: data)
-
-        // Verify the decoded instance is valid by re-encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Verify round-trip
-        let redecoded = try decoder.decode(CloudStorageConfig.self, from: encoded)
         let reencoded = try encoder.encode(redecoded)
         #expect(!reencoded.isEmpty)
     }
@@ -1466,6 +1549,21 @@ struct EnhancedCoverageTests {
 
         // Verify round-trip
         let redecoded = try decoder.decode(DeleteAccountAction.self, from: encoded)
+        let reencoded = try encoder.encode(redecoded)
+        #expect(!reencoded.isEmpty)
+    }
+
+    @Test("DeleteGasKeyAction decoded instance is valid")
+    func deleteGasKeyActionValidity() throws {
+        let data = try loadMockJSON("DeleteGasKeyAction.json")
+        let decoded = try decoder.decode(DeleteGasKeyAction.self, from: data)
+
+        // Verify the decoded instance is valid by re-encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Verify round-trip
+        let redecoded = try decoder.decode(DeleteGasKeyAction.self, from: encoded)
         let reencoded = try encoder.encode(redecoded)
         #expect(!reencoded.isEmpty)
     }
@@ -3151,6 +3249,48 @@ struct EnhancedCoverageTests {
         #expect(!encoded2.isEmpty)
     }
 
+    @Test("NonDelegateAction variant 11 encoding stability")
+    func nonDelegateActionVariant11EncodingStability() throws {
+        let data = try loadMockJSON("NonDelegateAction_Variant11.json")
+        let decoded = try decoder.decode(NonDelegateAction.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(NonDelegateAction.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("NonDelegateAction variant 12 encoding stability")
+    func nonDelegateActionVariant12EncodingStability() throws {
+        let data = try loadMockJSON("NonDelegateAction_Variant12.json")
+        let decoded = try decoder.decode(NonDelegateAction.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(NonDelegateAction.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("NonDelegateAction variant 13 encoding stability")
+    func nonDelegateActionVariant13EncodingStability() throws {
+        let data = try loadMockJSON("NonDelegateAction_Variant13.json")
+        let decoded = try decoder.decode(NonDelegateAction.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(NonDelegateAction.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
     @Test("NonDelegateAction variant 2 encoding stability")
     func nonDelegateActionVariant2EncodingStability() throws {
         let data = try loadMockJSON("NonDelegateAction_Variant2.json")
@@ -3590,6 +3730,20 @@ struct EnhancedCoverageTests {
     @Test("ReceiptValidationError variant 7 encoding stability")
     func receiptValidationErrorVariant7EncodingStability() throws {
         let data = try loadMockJSON("ReceiptValidationError_Variant7.json")
+        let decoded = try decoder.decode(ReceiptValidationError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(ReceiptValidationError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("ReceiptValidationError variant 8 encoding stability")
+    func receiptValidationErrorVariant8EncodingStability() throws {
+        let data = try loadMockJSON("ReceiptValidationError_Variant8.json")
         let decoded = try decoder.decode(ReceiptValidationError.self, from: data)
 
         // Multiple encoding cycles should produce consistent results
@@ -5879,6 +6033,21 @@ struct EnhancedCoverageTests {
 
         // Verify round-trip
         let redecoded = try decoder.decode(TransferAction.self, from: encoded)
+        let reencoded = try encoder.encode(redecoded)
+        #expect(!reencoded.isEmpty)
+    }
+
+    @Test("TransferToGasKeyAction decoded instance is valid")
+    func transferToGasKeyActionValidity() throws {
+        let data = try loadMockJSON("TransferToGasKeyAction.json")
+        let decoded = try decoder.decode(TransferToGasKeyAction.self, from: data)
+
+        // Verify the decoded instance is valid by re-encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Verify round-trip
+        let redecoded = try decoder.decode(TransferToGasKeyAction.self, from: encoded)
         let reencoded = try encoder.encode(redecoded)
         #expect(!reencoded.isEmpty)
     }

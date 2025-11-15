@@ -514,6 +514,36 @@ struct StandaloneTypesTests {
         _ = try decoder.decode(ActionErrorKind.self, from: encoded)
     }
 
+    @Test("ActionErrorKind variant 23 can be decoded and re-encoded")
+    func actionErrorKindVariant23DecodingAndEncoding() throws {
+        let data = try loadMockJSON("ActionErrorKind_Variant23.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(ActionErrorKind.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(ActionErrorKind.self, from: encoded)
+    }
+
+    @Test("ActionErrorKind variant 24 can be decoded and re-encoded")
+    func actionErrorKindVariant24DecodingAndEncoding() throws {
+        let data = try loadMockJSON("ActionErrorKind_Variant24.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(ActionErrorKind.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(ActionErrorKind.self, from: encoded)
+    }
+
     @Test("ActionErrorKind variant 3 can be decoded and re-encoded")
     func actionErrorKindVariant3DecodingAndEncoding() throws {
         let data = try loadMockJSON("ActionErrorKind_Variant3.json")
@@ -697,6 +727,51 @@ struct StandaloneTypesTests {
     @Test("ActionView variant 13 can be decoded and re-encoded")
     func actionViewVariant13DecodingAndEncoding() throws {
         let data = try loadMockJSON("ActionView_Variant13.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(ActionView.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(ActionView.self, from: encoded)
+    }
+
+    @Test("ActionView variant 14 can be decoded and re-encoded")
+    func actionViewVariant14DecodingAndEncoding() throws {
+        let data = try loadMockJSON("ActionView_Variant14.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(ActionView.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(ActionView.self, from: encoded)
+    }
+
+    @Test("ActionView variant 15 can be decoded and re-encoded")
+    func actionViewVariant15DecodingAndEncoding() throws {
+        let data = try loadMockJSON("ActionView_Variant15.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(ActionView.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(ActionView.self, from: encoded)
+    }
+
+    @Test("ActionView variant 16 can be decoded and re-encoded")
+    func actionViewVariant16DecodingAndEncoding() throws {
+        let data = try loadMockJSON("ActionView_Variant16.json")
 
         // Test decoding
         let decoded = try decoder.decode(ActionView.self, from: data)
@@ -964,6 +1039,36 @@ struct StandaloneTypesTests {
         _ = try decoder.decode(ActionsValidationError.self, from: encoded)
     }
 
+    @Test("ActionsValidationError variant 17 can be decoded and re-encoded")
+    func actionsValidationErrorVariant17DecodingAndEncoding() throws {
+        let data = try loadMockJSON("ActionsValidationError_Variant17.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(ActionsValidationError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(ActionsValidationError.self, from: encoded)
+    }
+
+    @Test("ActionsValidationError variant 18 can be decoded and re-encoded")
+    func actionsValidationErrorVariant18DecodingAndEncoding() throws {
+        let data = try loadMockJSON("ActionsValidationError_Variant18.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(ActionsValidationError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(ActionsValidationError.self, from: encoded)
+    }
+
     @Test("ActionsValidationError variant 2 can be decoded and re-encoded")
     func actionsValidationErrorVariant2DecodingAndEncoding() throws {
         let data = try loadMockJSON("ActionsValidationError_Variant2.json")
@@ -1082,6 +1187,21 @@ struct StandaloneTypesTests {
 
         // Test round-trip
         _ = try decoder.decode(ActionsValidationError.self, from: encoded)
+    }
+
+    @Test("AddGasKeyAction can be decoded from mock and re-encoded")
+    func addGasKeyActionDecodingAndEncoding() throws {
+        let data = try loadMockJSON("AddGasKeyAction.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(AddGasKeyAction.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(AddGasKeyAction.self, from: encoded)
     }
 
     @Test("AddKeyAction can be decoded from mock and re-encoded")
@@ -1309,21 +1429,6 @@ struct StandaloneTypesTests {
         _ = try decoder.decode(ChunkHeaderView.self, from: encoded)
     }
 
-    @Test("CloudArchivalReaderConfig can be decoded from mock and re-encoded")
-    func cloudArchivalReaderConfigDecodingAndEncoding() throws {
-        let data = try loadMockJSON("CloudArchivalReaderConfig.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(CloudArchivalReaderConfig.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(CloudArchivalReaderConfig.self, from: encoded)
-    }
-
     @Test("CloudArchivalWriterConfig can be decoded from mock and re-encoded")
     func cloudArchivalWriterConfigDecodingAndEncoding() throws {
         let data = try loadMockJSON("CloudArchivalWriterConfig.json")
@@ -1337,21 +1442,6 @@ struct StandaloneTypesTests {
 
         // Test round-trip
         _ = try decoder.decode(CloudArchivalWriterConfig.self, from: encoded)
-    }
-
-    @Test("CloudStorageConfig can be decoded from mock and re-encoded")
-    func cloudStorageConfigDecodingAndEncoding() throws {
-        let data = try loadMockJSON("CloudStorageConfig.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(CloudStorageConfig.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(CloudStorageConfig.self, from: encoded)
     }
 
     @Test("CompilationError variant 0 can be decoded and re-encoded")
@@ -1532,6 +1622,21 @@ struct StandaloneTypesTests {
 
         // Test round-trip
         _ = try decoder.decode(DeleteAccountAction.self, from: encoded)
+    }
+
+    @Test("DeleteGasKeyAction can be decoded from mock and re-encoded")
+    func deleteGasKeyActionDecodingAndEncoding() throws {
+        let data = try loadMockJSON("DeleteGasKeyAction.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(DeleteGasKeyAction.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(DeleteGasKeyAction.self, from: encoded)
     }
 
     @Test("DeleteKeyAction can be decoded from mock and re-encoded")
@@ -3394,6 +3499,51 @@ struct StandaloneTypesTests {
         _ = try decoder.decode(NonDelegateAction.self, from: encoded)
     }
 
+    @Test("NonDelegateAction variant 11 can be decoded and re-encoded")
+    func nonDelegateActionVariant11DecodingAndEncoding() throws {
+        let data = try loadMockJSON("NonDelegateAction_Variant11.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(NonDelegateAction.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(NonDelegateAction.self, from: encoded)
+    }
+
+    @Test("NonDelegateAction variant 12 can be decoded and re-encoded")
+    func nonDelegateActionVariant12DecodingAndEncoding() throws {
+        let data = try loadMockJSON("NonDelegateAction_Variant12.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(NonDelegateAction.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(NonDelegateAction.self, from: encoded)
+    }
+
+    @Test("NonDelegateAction variant 13 can be decoded and re-encoded")
+    func nonDelegateActionVariant13DecodingAndEncoding() throws {
+        let data = try loadMockJSON("NonDelegateAction_Variant13.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(NonDelegateAction.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(NonDelegateAction.self, from: encoded)
+    }
+
     @Test("NonDelegateAction variant 2 can be decoded and re-encoded")
     func nonDelegateActionVariant2DecodingAndEncoding() throws {
         let data = try loadMockJSON("NonDelegateAction_Variant2.json")
@@ -3892,6 +4042,21 @@ struct StandaloneTypesTests {
     @Test("ReceiptValidationError variant 7 can be decoded and re-encoded")
     func receiptValidationErrorVariant7DecodingAndEncoding() throws {
         let data = try loadMockJSON("ReceiptValidationError_Variant7.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(ReceiptValidationError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(ReceiptValidationError.self, from: encoded)
+    }
+
+    @Test("ReceiptValidationError variant 8 can be decoded and re-encoded")
+    func receiptValidationErrorVariant8DecodingAndEncoding() throws {
+        let data = try loadMockJSON("ReceiptValidationError_Variant8.json")
 
         // Test decoding
         let decoded = try decoder.decode(ReceiptValidationError.self, from: data)
@@ -6467,6 +6632,21 @@ struct StandaloneTypesTests {
 
         // Test round-trip
         _ = try decoder.decode(TransferAction.self, from: encoded)
+    }
+
+    @Test("TransferToGasKeyAction can be decoded from mock and re-encoded")
+    func transferToGasKeyActionDecodingAndEncoding() throws {
+        let data = try loadMockJSON("TransferToGasKeyAction.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(TransferToGasKeyAction.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(TransferToGasKeyAction.self, from: encoded)
     }
 
     @Test("TxExecutionError variant 0 can be decoded and re-encoded")
