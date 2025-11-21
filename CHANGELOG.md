@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.1](https://github.com/near/near-jsonrpc-client-swift/compare/v2.0.0...v2.0.1) (2025-11-21)
+
+
+### Bug Fixes
+
+* refactor RPC error handling ([#8](https://github.com/near/near-jsonrpc-client-swift/issues/8)) ([39e2989](https://github.com/near/near-jsonrpc-client-swift/commit/39e29890da3c8fdbfeaf35d3e35cdf8e46870bf3))
+
 ## [2.0.0](https://github.com/space-rock/near-jsonrpc-swift/compare/v1.0.0...v2.0.0) (2025-11-04)
 
 
