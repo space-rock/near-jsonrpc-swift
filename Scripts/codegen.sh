@@ -7,23 +7,23 @@ echo ""
 
 cd "$(dirname "$0")"
 
-echo "🧹 Step 1/4: Cleaning up old mock files..."
+echo "🧹 Step 1/5: Cleaning up old mock files..."
 rm -rf ../Tests/NearJsonRpcTypesTests/Mock/*
 rm -rf ../Tests/NearJsonRpcClientTests/Mock/*
 echo "✅ Mock folders cleaned"
 echo ""
 
-echo "📝 Step 2/4: Generating Swift types and methods..."
+echo "📝 Step 2/5: Generating Swift types and methods..."
 python3 generate_types.py
 echo "✅ Types.swift and Methods.swift generated"
 echo ""
 
-echo "📝 Step 3/4: Generating mock JSON data..."
+echo "📝 Step 3/5: Generating mock JSON data..."
 python3 generate_mock.py
 echo "✅ Mock JSON files generated"
 echo ""
 
-echo "📝 Step 4/4: Generating test files..."
+echo "📝 Step 4/5: Generating test files..."
 python3 generate_tests.py
 echo "✅ All test files generated"
 echo ""

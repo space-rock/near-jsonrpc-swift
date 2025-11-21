@@ -1706,8 +1706,7 @@ def generate_rpc_error_enum(openapi: Dict[str, Any], components: Dict[str, Any])
     if not error_types:
         # Return empty implementation if no error types found
         return ""
-    
-    error_types_sorted = sorted(error_types)
+
     error_types_sorted = sorted(error_types)
     
     code = "// MARK: - RPC Errors\n\n"
