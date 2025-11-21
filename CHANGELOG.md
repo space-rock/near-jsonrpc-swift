@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/near/near-jsonrpc-client-swift/compare/v2.0.1...v2.1.0) (2025-11-21)
+
+
+### Features
+
+* update generated Swift files from latest OpenAPI spec ([#5](https://github.com/near/near-jsonrpc-client-swift/issues/5)) ([5e80c2d](https://github.com/near/near-jsonrpc-client-swift/commit/5e80c2da122656770e071b3c9dbb1ed83a3eaebb))
+
 ## [2.0.1](https://github.com/near/near-jsonrpc-client-swift/compare/v2.0.0...v2.0.1) (2025-11-21)
 
 
