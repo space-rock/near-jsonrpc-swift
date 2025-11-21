@@ -499,347 +499,15 @@ struct TypesDecodingTests {
         _ = try decoder.decode(JsonRpcRequestForValidators.self, from: encoded)
     }
 
-    @Test("JsonRpcResponseForArrayOfRangeOfUint64AndRpcError success response can be decoded and re-encoded")
-    func jsonRpcResponseForArrayOfRangeOfUint64AndRpcErrorSuccessDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForArrayOfRangeOfUint64AndRpcError_Success.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForArrayOfRangeOfUint64AndRpcError.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForArrayOfRangeOfUint64AndRpcError.self, from: encoded)
-    }
-
-    @Test("JsonRpcResponseForArrayOfRangeOfUint64AndRpcError error response can be decoded and re-encoded")
-    func jsonRpcResponseForArrayOfRangeOfUint64AndRpcErrorErrorDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForArrayOfRangeOfUint64AndRpcError_Error.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForArrayOfRangeOfUint64AndRpcError.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForArrayOfRangeOfUint64AndRpcError.self, from: encoded)
-    }
-
-    @Test("JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError success response can be decoded and re-encoded")
-    func jsonRpcResponseForArrayOfValidatorStakeViewAndRpcErrorSuccessDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError_Success.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError.self, from: encoded)
-    }
-
-    @Test("JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError error response can be decoded and re-encoded")
-    func jsonRpcResponseForArrayOfValidatorStakeViewAndRpcErrorErrorDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError_Error.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError.self, from: encoded)
-    }
-
-    @Test("JsonRpcResponseForCryptoHashAndRpcError success response can be decoded and re-encoded")
-    func jsonRpcResponseForCryptoHashAndRpcErrorSuccessDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForCryptoHashAndRpcError_Success.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForCryptoHashAndRpcError.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForCryptoHashAndRpcError.self, from: encoded)
-    }
-
-    @Test("JsonRpcResponseForCryptoHashAndRpcError error response can be decoded and re-encoded")
-    func jsonRpcResponseForCryptoHashAndRpcErrorErrorDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForCryptoHashAndRpcError_Error.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForCryptoHashAndRpcError.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForCryptoHashAndRpcError.self, from: encoded)
-    }
-
-    @Test("JsonRpcResponseForGenesisConfigAndRpcError success response can be decoded and re-encoded")
-    func jsonRpcResponseForGenesisConfigAndRpcErrorSuccessDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForGenesisConfigAndRpcError_Success.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForGenesisConfigAndRpcError.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForGenesisConfigAndRpcError.self, from: encoded)
-    }
-
-    @Test("JsonRpcResponseForGenesisConfigAndRpcError error response can be decoded and re-encoded")
-    func jsonRpcResponseForGenesisConfigAndRpcErrorErrorDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForGenesisConfigAndRpcError_Error.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForGenesisConfigAndRpcError.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForGenesisConfigAndRpcError.self, from: encoded)
-    }
-
-    @Test("JsonRpcResponseForNullableRpcHealthResponseAndRpcError success response can be decoded and re-encoded")
-    func jsonRpcResponseForNullableRpcHealthResponseAndRpcErrorSuccessDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForNullableRpcHealthResponseAndRpcError_Success.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForNullableRpcHealthResponseAndRpcError.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForNullableRpcHealthResponseAndRpcError.self, from: encoded)
-    }
-
-    @Test("JsonRpcResponseForNullableRpcHealthResponseAndRpcError error response can be decoded and re-encoded")
-    func jsonRpcResponseForNullableRpcHealthResponseAndRpcErrorErrorDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForNullableRpcHealthResponseAndRpcError_Error.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForNullableRpcHealthResponseAndRpcError.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForNullableRpcHealthResponseAndRpcError.self, from: encoded)
-    }
-
-    @Test("JsonRpcResponseForRpcBlockResponseAndRpcError success response can be decoded and re-encoded")
-    func jsonRpcResponseForRpcBlockResponseAndRpcErrorSuccessDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcBlockResponseAndRpcError_Success.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForRpcBlockResponseAndRpcError.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcBlockResponseAndRpcError.self, from: encoded)
-    }
-
-    @Test("JsonRpcResponseForRpcBlockResponseAndRpcError error response can be decoded and re-encoded")
-    func jsonRpcResponseForRpcBlockResponseAndRpcErrorErrorDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcBlockResponseAndRpcError_Error.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForRpcBlockResponseAndRpcError.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcBlockResponseAndRpcError.self, from: encoded)
-    }
-
-    @Test("JsonRpcResponseForRpcChunkResponseAndRpcError success response can be decoded and re-encoded")
-    func jsonRpcResponseForRpcChunkResponseAndRpcErrorSuccessDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcChunkResponseAndRpcError_Success.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForRpcChunkResponseAndRpcError.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcChunkResponseAndRpcError.self, from: encoded)
-    }
-
-    @Test("JsonRpcResponseForRpcChunkResponseAndRpcError error response can be decoded and re-encoded")
-    func jsonRpcResponseForRpcChunkResponseAndRpcErrorErrorDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcChunkResponseAndRpcError_Error.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForRpcChunkResponseAndRpcError.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcChunkResponseAndRpcError.self, from: encoded)
-    }
-
-    @Test("JsonRpcResponseForRpcClientConfigResponseAndRpcError success response can be decoded and re-encoded")
-    func jsonRpcResponseForRpcClientConfigResponseAndRpcErrorSuccessDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcClientConfigResponseAndRpcError_Success.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForRpcClientConfigResponseAndRpcError.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcClientConfigResponseAndRpcError.self, from: encoded)
-    }
-
-    @Test("JsonRpcResponseForRpcClientConfigResponseAndRpcError error response can be decoded and re-encoded")
-    func jsonRpcResponseForRpcClientConfigResponseAndRpcErrorErrorDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcClientConfigResponseAndRpcError_Error.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForRpcClientConfigResponseAndRpcError.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcClientConfigResponseAndRpcError.self, from: encoded)
-    }
-
-    @Test("JsonRpcResponseForRpcCongestionLevelResponseAndRpcError success response can be decoded and re-encoded")
-    func jsonRpcResponseForRpcCongestionLevelResponseAndRpcErrorSuccessDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcCongestionLevelResponseAndRpcError_Success.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForRpcCongestionLevelResponseAndRpcError.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcCongestionLevelResponseAndRpcError.self, from: encoded)
-    }
-
-    @Test("JsonRpcResponseForRpcCongestionLevelResponseAndRpcError error response can be decoded and re-encoded")
-    func jsonRpcResponseForRpcCongestionLevelResponseAndRpcErrorErrorDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcCongestionLevelResponseAndRpcError_Error.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForRpcCongestionLevelResponseAndRpcError.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcCongestionLevelResponseAndRpcError.self, from: encoded)
-    }
-
-    @Test("JsonRpcResponseForRpcGasPriceResponseAndRpcError success response can be decoded and re-encoded")
-    func jsonRpcResponseForRpcGasPriceResponseAndRpcErrorSuccessDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcGasPriceResponseAndRpcError_Success.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForRpcGasPriceResponseAndRpcError.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcGasPriceResponseAndRpcError.self, from: encoded)
-    }
-
-    @Test("JsonRpcResponseForRpcGasPriceResponseAndRpcError error response can be decoded and re-encoded")
-    func jsonRpcResponseForRpcGasPriceResponseAndRpcErrorErrorDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcGasPriceResponseAndRpcError_Error.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForRpcGasPriceResponseAndRpcError.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcGasPriceResponseAndRpcError.self, from: encoded)
-    }
-
     @Test(
-        "JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError success response can be decoded and re-encoded",
+        "JsonRpcResponseForArrayOfRangeOfUint64AndRpcMaintenanceWindowsError success response can be decoded and re-encoded",
     )
-    func jsonRpcResponseForRpcLightClientBlockProofResponseAndRpcErrorSuccessDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError_Success.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError.self, from: encoded)
-    }
-
-    @Test("JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError error response can be decoded and re-encoded")
-    func jsonRpcResponseForRpcLightClientBlockProofResponseAndRpcErrorErrorDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError_Error.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError.self, from: encoded)
-    }
-
-    @Test(
-        "JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError success response can be decoded and re-encoded",
-    )
-    func jsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcErrorSuccessDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError_Success.json")
+    func jsonRpcResponseForArrayOfRangeOfUint64AndRpcMaintenanceWindowsErrorSuccessDecodingAndEncoding() throws {
+        let data = try loadMockJSON("JsonRpcResponseForArrayOfRangeOfUint64AndRpcMaintenanceWindowsError_Success.json")
 
         // Test decoding
         let decoded = try decoder.decode(
-            JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError.self,
+            JsonRpcResponseForArrayOfRangeOfUint64AndRpcMaintenanceWindowsError.self,
             from: data,
         )
 
@@ -848,18 +516,18 @@ struct TypesDecodingTests {
         #expect(!encoded.isEmpty)
 
         // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError.self, from: encoded)
+        _ = try decoder.decode(JsonRpcResponseForArrayOfRangeOfUint64AndRpcMaintenanceWindowsError.self, from: encoded)
     }
 
     @Test(
-        "JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError error response can be decoded and re-encoded",
+        "JsonRpcResponseForArrayOfRangeOfUint64AndRpcMaintenanceWindowsError error response can be decoded and re-encoded",
     )
-    func jsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcErrorErrorDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError_Error.json")
+    func jsonRpcResponseForArrayOfRangeOfUint64AndRpcMaintenanceWindowsErrorErrorDecodingAndEncoding() throws {
+        let data = try loadMockJSON("JsonRpcResponseForArrayOfRangeOfUint64AndRpcMaintenanceWindowsError_Error.json")
 
         // Test decoding
         let decoded = try decoder.decode(
-            JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError.self,
+            JsonRpcResponseForArrayOfRangeOfUint64AndRpcMaintenanceWindowsError.self,
             from: data,
         )
 
@@ -868,198 +536,18 @@ struct TypesDecodingTests {
         #expect(!encoded.isEmpty)
 
         // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError.self, from: encoded)
-    }
-
-    @Test("JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError success response can be decoded and re-encoded")
-    func jsonRpcResponseForRpcLightClientNextBlockResponseAndRpcErrorSuccessDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError_Success.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError.self, from: encoded)
-    }
-
-    @Test("JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError error response can be decoded and re-encoded")
-    func jsonRpcResponseForRpcLightClientNextBlockResponseAndRpcErrorErrorDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError_Error.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError.self, from: encoded)
-    }
-
-    @Test("JsonRpcResponseForRpcNetworkInfoResponseAndRpcError success response can be decoded and re-encoded")
-    func jsonRpcResponseForRpcNetworkInfoResponseAndRpcErrorSuccessDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcNetworkInfoResponseAndRpcError_Success.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForRpcNetworkInfoResponseAndRpcError.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcNetworkInfoResponseAndRpcError.self, from: encoded)
-    }
-
-    @Test("JsonRpcResponseForRpcNetworkInfoResponseAndRpcError error response can be decoded and re-encoded")
-    func jsonRpcResponseForRpcNetworkInfoResponseAndRpcErrorErrorDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcNetworkInfoResponseAndRpcError_Error.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForRpcNetworkInfoResponseAndRpcError.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcNetworkInfoResponseAndRpcError.self, from: encoded)
-    }
-
-    @Test("JsonRpcResponseForRpcProtocolConfigResponseAndRpcError success response can be decoded and re-encoded")
-    func jsonRpcResponseForRpcProtocolConfigResponseAndRpcErrorSuccessDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcProtocolConfigResponseAndRpcError_Success.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForRpcProtocolConfigResponseAndRpcError.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcProtocolConfigResponseAndRpcError.self, from: encoded)
-    }
-
-    @Test("JsonRpcResponseForRpcProtocolConfigResponseAndRpcError error response can be decoded and re-encoded")
-    func jsonRpcResponseForRpcProtocolConfigResponseAndRpcErrorErrorDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcProtocolConfigResponseAndRpcError_Error.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForRpcProtocolConfigResponseAndRpcError.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcProtocolConfigResponseAndRpcError.self, from: encoded)
-    }
-
-    @Test("JsonRpcResponseForRpcQueryResponseAndRpcError success response can be decoded and re-encoded")
-    func jsonRpcResponseForRpcQueryResponseAndRpcErrorSuccessDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcQueryResponseAndRpcError_Success.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForRpcQueryResponseAndRpcError.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcQueryResponseAndRpcError.self, from: encoded)
-    }
-
-    @Test("JsonRpcResponseForRpcQueryResponseAndRpcError error response can be decoded and re-encoded")
-    func jsonRpcResponseForRpcQueryResponseAndRpcErrorErrorDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcQueryResponseAndRpcError_Error.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForRpcQueryResponseAndRpcError.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcQueryResponseAndRpcError.self, from: encoded)
-    }
-
-    @Test("JsonRpcResponseForRpcReceiptResponseAndRpcError success response can be decoded and re-encoded")
-    func jsonRpcResponseForRpcReceiptResponseAndRpcErrorSuccessDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcReceiptResponseAndRpcError_Success.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForRpcReceiptResponseAndRpcError.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcReceiptResponseAndRpcError.self, from: encoded)
-    }
-
-    @Test("JsonRpcResponseForRpcReceiptResponseAndRpcError error response can be decoded and re-encoded")
-    func jsonRpcResponseForRpcReceiptResponseAndRpcErrorErrorDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcReceiptResponseAndRpcError_Error.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForRpcReceiptResponseAndRpcError.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcReceiptResponseAndRpcError.self, from: encoded)
-    }
-
-    @Test("JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError success response can be decoded and re-encoded")
-    func jsonRpcResponseForRpcSplitStorageInfoResponseAndRpcErrorSuccessDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError_Success.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError.self, from: encoded)
-    }
-
-    @Test("JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError error response can be decoded and re-encoded")
-    func jsonRpcResponseForRpcSplitStorageInfoResponseAndRpcErrorErrorDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError_Error.json")
-
-        // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError.self, from: data)
-
-        // Test encoding
-        let encoded = try encoder.encode(decoded)
-        #expect(!encoded.isEmpty)
-
-        // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError.self, from: encoded)
+        _ = try decoder.decode(JsonRpcResponseForArrayOfRangeOfUint64AndRpcMaintenanceWindowsError.self, from: encoded)
     }
 
     @Test(
-        "JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError success response can be decoded and re-encoded",
+        "JsonRpcResponseForArrayOfValidatorStakeViewAndRpcValidatorError success response can be decoded and re-encoded",
     )
-    func jsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcErrorSuccessDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError_Success.json")
+    func jsonRpcResponseForArrayOfValidatorStakeViewAndRpcValidatorErrorSuccessDecodingAndEncoding() throws {
+        let data = try loadMockJSON("JsonRpcResponseForArrayOfValidatorStakeViewAndRpcValidatorError_Success.json")
 
         // Test decoding
         let decoded = try decoder.decode(
-            JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError.self,
+            JsonRpcResponseForArrayOfValidatorStakeViewAndRpcValidatorError.self,
             from: data,
         )
 
@@ -1068,18 +556,18 @@ struct TypesDecodingTests {
         #expect(!encoded.isEmpty)
 
         // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError.self, from: encoded)
+        _ = try decoder.decode(JsonRpcResponseForArrayOfValidatorStakeViewAndRpcValidatorError.self, from: encoded)
     }
 
     @Test(
-        "JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError error response can be decoded and re-encoded",
+        "JsonRpcResponseForArrayOfValidatorStakeViewAndRpcValidatorError error response can be decoded and re-encoded",
     )
-    func jsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcErrorErrorDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError_Error.json")
+    func jsonRpcResponseForArrayOfValidatorStakeViewAndRpcValidatorErrorErrorDecodingAndEncoding() throws {
+        let data = try loadMockJSON("JsonRpcResponseForArrayOfValidatorStakeViewAndRpcValidatorError_Error.json")
 
         // Test decoding
         let decoded = try decoder.decode(
-            JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError.self,
+            JsonRpcResponseForArrayOfValidatorStakeViewAndRpcValidatorError.self,
             from: data,
         )
 
@@ -1088,126 +576,798 @@ struct TypesDecodingTests {
         #expect(!encoded.isEmpty)
 
         // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError.self, from: encoded)
+        _ = try decoder.decode(JsonRpcResponseForArrayOfValidatorStakeViewAndRpcValidatorError.self, from: encoded)
     }
 
-    @Test("JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError success response can be decoded and re-encoded")
-    func jsonRpcResponseForRpcStateChangesInBlockResponseAndRpcErrorSuccessDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError_Success.json")
+    @Test("JsonRpcResponseForCryptoHashAndRpcTransactionError success response can be decoded and re-encoded")
+    func jsonRpcResponseForCryptoHashAndRpcTransactionErrorSuccessDecodingAndEncoding() throws {
+        let data = try loadMockJSON("JsonRpcResponseForCryptoHashAndRpcTransactionError_Success.json")
 
         // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError.self, from: data)
+        let decoded = try decoder.decode(JsonRpcResponseForCryptoHashAndRpcTransactionError.self, from: data)
 
         // Test encoding
         let encoded = try encoder.encode(decoded)
         #expect(!encoded.isEmpty)
 
         // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError.self, from: encoded)
+        _ = try decoder.decode(JsonRpcResponseForCryptoHashAndRpcTransactionError.self, from: encoded)
     }
 
-    @Test("JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError error response can be decoded and re-encoded")
-    func jsonRpcResponseForRpcStateChangesInBlockResponseAndRpcErrorErrorDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError_Error.json")
+    @Test("JsonRpcResponseForCryptoHashAndRpcTransactionError error response can be decoded and re-encoded")
+    func jsonRpcResponseForCryptoHashAndRpcTransactionErrorErrorDecodingAndEncoding() throws {
+        let data = try loadMockJSON("JsonRpcResponseForCryptoHashAndRpcTransactionError_Error.json")
 
         // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError.self, from: data)
+        let decoded = try decoder.decode(JsonRpcResponseForCryptoHashAndRpcTransactionError.self, from: data)
 
         // Test encoding
         let encoded = try encoder.encode(decoded)
         #expect(!encoded.isEmpty)
 
         // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError.self, from: encoded)
+        _ = try decoder.decode(JsonRpcResponseForCryptoHashAndRpcTransactionError.self, from: encoded)
     }
 
-    @Test("JsonRpcResponseForRpcStatusResponseAndRpcError success response can be decoded and re-encoded")
-    func jsonRpcResponseForRpcStatusResponseAndRpcErrorSuccessDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcStatusResponseAndRpcError_Success.json")
+    @Test("JsonRpcResponseForGenesisConfigAndGenesisConfigError success response can be decoded and re-encoded")
+    func jsonRpcResponseForGenesisConfigAndGenesisConfigErrorSuccessDecodingAndEncoding() throws {
+        let data = try loadMockJSON("JsonRpcResponseForGenesisConfigAndGenesisConfigError_Success.json")
 
         // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForRpcStatusResponseAndRpcError.self, from: data)
+        let decoded = try decoder.decode(JsonRpcResponseForGenesisConfigAndGenesisConfigError.self, from: data)
 
         // Test encoding
         let encoded = try encoder.encode(decoded)
         #expect(!encoded.isEmpty)
 
         // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcStatusResponseAndRpcError.self, from: encoded)
+        _ = try decoder.decode(JsonRpcResponseForGenesisConfigAndGenesisConfigError.self, from: encoded)
     }
 
-    @Test("JsonRpcResponseForRpcStatusResponseAndRpcError error response can be decoded and re-encoded")
-    func jsonRpcResponseForRpcStatusResponseAndRpcErrorErrorDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcStatusResponseAndRpcError_Error.json")
+    @Test("JsonRpcResponseForGenesisConfigAndGenesisConfigError error response can be decoded and re-encoded")
+    func jsonRpcResponseForGenesisConfigAndGenesisConfigErrorErrorDecodingAndEncoding() throws {
+        let data = try loadMockJSON("JsonRpcResponseForGenesisConfigAndGenesisConfigError_Error.json")
 
         // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForRpcStatusResponseAndRpcError.self, from: data)
+        let decoded = try decoder.decode(JsonRpcResponseForGenesisConfigAndGenesisConfigError.self, from: data)
 
         // Test encoding
         let encoded = try encoder.encode(decoded)
         #expect(!encoded.isEmpty)
 
         // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcStatusResponseAndRpcError.self, from: encoded)
+        _ = try decoder.decode(JsonRpcResponseForGenesisConfigAndGenesisConfigError.self, from: encoded)
     }
 
-    @Test("JsonRpcResponseForRpcTransactionResponseAndRpcError success response can be decoded and re-encoded")
-    func jsonRpcResponseForRpcTransactionResponseAndRpcErrorSuccessDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcError_Success.json")
+    @Test("JsonRpcResponseForNullableRpcHealthResponseAndRpcStatusError success response can be decoded and re-encoded")
+    func jsonRpcResponseForNullableRpcHealthResponseAndRpcStatusErrorSuccessDecodingAndEncoding() throws {
+        let data = try loadMockJSON("JsonRpcResponseForNullableRpcHealthResponseAndRpcStatusError_Success.json")
 
         // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForRpcTransactionResponseAndRpcError.self, from: data)
+        let decoded = try decoder.decode(JsonRpcResponseForNullableRpcHealthResponseAndRpcStatusError.self, from: data)
 
         // Test encoding
         let encoded = try encoder.encode(decoded)
         #expect(!encoded.isEmpty)
 
         // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcTransactionResponseAndRpcError.self, from: encoded)
+        _ = try decoder.decode(JsonRpcResponseForNullableRpcHealthResponseAndRpcStatusError.self, from: encoded)
     }
 
-    @Test("JsonRpcResponseForRpcTransactionResponseAndRpcError error response can be decoded and re-encoded")
-    func jsonRpcResponseForRpcTransactionResponseAndRpcErrorErrorDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcError_Error.json")
+    @Test("JsonRpcResponseForNullableRpcHealthResponseAndRpcStatusError error response can be decoded and re-encoded")
+    func jsonRpcResponseForNullableRpcHealthResponseAndRpcStatusErrorErrorDecodingAndEncoding() throws {
+        let data = try loadMockJSON("JsonRpcResponseForNullableRpcHealthResponseAndRpcStatusError_Error.json")
 
         // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForRpcTransactionResponseAndRpcError.self, from: data)
+        let decoded = try decoder.decode(JsonRpcResponseForNullableRpcHealthResponseAndRpcStatusError.self, from: data)
 
         // Test encoding
         let encoded = try encoder.encode(decoded)
         #expect(!encoded.isEmpty)
 
         // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcTransactionResponseAndRpcError.self, from: encoded)
+        _ = try decoder.decode(JsonRpcResponseForNullableRpcHealthResponseAndRpcStatusError.self, from: encoded)
     }
 
-    @Test("JsonRpcResponseForRpcValidatorResponseAndRpcError success response can be decoded and re-encoded")
-    func jsonRpcResponseForRpcValidatorResponseAndRpcErrorSuccessDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcValidatorResponseAndRpcError_Success.json")
+    @Test("JsonRpcResponseForRpcBlockResponseAndRpcBlockError success response can be decoded and re-encoded")
+    func jsonRpcResponseForRpcBlockResponseAndRpcBlockErrorSuccessDecodingAndEncoding() throws {
+        let data = try loadMockJSON("JsonRpcResponseForRpcBlockResponseAndRpcBlockError_Success.json")
 
         // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForRpcValidatorResponseAndRpcError.self, from: data)
+        let decoded = try decoder.decode(JsonRpcResponseForRpcBlockResponseAndRpcBlockError.self, from: data)
 
         // Test encoding
         let encoded = try encoder.encode(decoded)
         #expect(!encoded.isEmpty)
 
         // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcValidatorResponseAndRpcError.self, from: encoded)
+        _ = try decoder.decode(JsonRpcResponseForRpcBlockResponseAndRpcBlockError.self, from: encoded)
     }
 
-    @Test("JsonRpcResponseForRpcValidatorResponseAndRpcError error response can be decoded and re-encoded")
-    func jsonRpcResponseForRpcValidatorResponseAndRpcErrorErrorDecodingAndEncoding() throws {
-        let data = try loadMockJSON("JsonRpcResponseForRpcValidatorResponseAndRpcError_Error.json")
+    @Test("JsonRpcResponseForRpcBlockResponseAndRpcBlockError error response can be decoded and re-encoded")
+    func jsonRpcResponseForRpcBlockResponseAndRpcBlockErrorErrorDecodingAndEncoding() throws {
+        let data = try loadMockJSON("JsonRpcResponseForRpcBlockResponseAndRpcBlockError_Error.json")
 
         // Test decoding
-        let decoded = try decoder.decode(JsonRpcResponseForRpcValidatorResponseAndRpcError.self, from: data)
+        let decoded = try decoder.decode(JsonRpcResponseForRpcBlockResponseAndRpcBlockError.self, from: data)
 
         // Test encoding
         let encoded = try encoder.encode(decoded)
         #expect(!encoded.isEmpty)
 
         // Test round-trip
-        _ = try decoder.decode(JsonRpcResponseForRpcValidatorResponseAndRpcError.self, from: encoded)
+        _ = try decoder.decode(JsonRpcResponseForRpcBlockResponseAndRpcBlockError.self, from: encoded)
+    }
+
+    @Test("JsonRpcResponseForRpcChunkResponseAndRpcChunkError success response can be decoded and re-encoded")
+    func jsonRpcResponseForRpcChunkResponseAndRpcChunkErrorSuccessDecodingAndEncoding() throws {
+        let data = try loadMockJSON("JsonRpcResponseForRpcChunkResponseAndRpcChunkError_Success.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(JsonRpcResponseForRpcChunkResponseAndRpcChunkError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(JsonRpcResponseForRpcChunkResponseAndRpcChunkError.self, from: encoded)
+    }
+
+    @Test("JsonRpcResponseForRpcChunkResponseAndRpcChunkError error response can be decoded and re-encoded")
+    func jsonRpcResponseForRpcChunkResponseAndRpcChunkErrorErrorDecodingAndEncoding() throws {
+        let data = try loadMockJSON("JsonRpcResponseForRpcChunkResponseAndRpcChunkError_Error.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(JsonRpcResponseForRpcChunkResponseAndRpcChunkError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(JsonRpcResponseForRpcChunkResponseAndRpcChunkError.self, from: encoded)
+    }
+
+    @Test(
+        "JsonRpcResponseForRpcClientConfigResponseAndRpcClientConfigError success response can be decoded and re-encoded",
+    )
+    func jsonRpcResponseForRpcClientConfigResponseAndRpcClientConfigErrorSuccessDecodingAndEncoding() throws {
+        let data = try loadMockJSON("JsonRpcResponseForRpcClientConfigResponseAndRpcClientConfigError_Success.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(
+            JsonRpcResponseForRpcClientConfigResponseAndRpcClientConfigError.self,
+            from: data,
+        )
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(JsonRpcResponseForRpcClientConfigResponseAndRpcClientConfigError.self, from: encoded)
+    }
+
+    @Test(
+        "JsonRpcResponseForRpcClientConfigResponseAndRpcClientConfigError error response can be decoded and re-encoded",
+    )
+    func jsonRpcResponseForRpcClientConfigResponseAndRpcClientConfigErrorErrorDecodingAndEncoding() throws {
+        let data = try loadMockJSON("JsonRpcResponseForRpcClientConfigResponseAndRpcClientConfigError_Error.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(
+            JsonRpcResponseForRpcClientConfigResponseAndRpcClientConfigError.self,
+            from: data,
+        )
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(JsonRpcResponseForRpcClientConfigResponseAndRpcClientConfigError.self, from: encoded)
+    }
+
+    @Test("JsonRpcResponseForRpcCongestionLevelResponseAndRpcChunkError success response can be decoded and re-encoded")
+    func jsonRpcResponseForRpcCongestionLevelResponseAndRpcChunkErrorSuccessDecodingAndEncoding() throws {
+        let data = try loadMockJSON("JsonRpcResponseForRpcCongestionLevelResponseAndRpcChunkError_Success.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(JsonRpcResponseForRpcCongestionLevelResponseAndRpcChunkError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(JsonRpcResponseForRpcCongestionLevelResponseAndRpcChunkError.self, from: encoded)
+    }
+
+    @Test("JsonRpcResponseForRpcCongestionLevelResponseAndRpcChunkError error response can be decoded and re-encoded")
+    func jsonRpcResponseForRpcCongestionLevelResponseAndRpcChunkErrorErrorDecodingAndEncoding() throws {
+        let data = try loadMockJSON("JsonRpcResponseForRpcCongestionLevelResponseAndRpcChunkError_Error.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(JsonRpcResponseForRpcCongestionLevelResponseAndRpcChunkError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(JsonRpcResponseForRpcCongestionLevelResponseAndRpcChunkError.self, from: encoded)
+    }
+
+    @Test("JsonRpcResponseForRpcGasPriceResponseAndRpcGasPriceError success response can be decoded and re-encoded")
+    func jsonRpcResponseForRpcGasPriceResponseAndRpcGasPriceErrorSuccessDecodingAndEncoding() throws {
+        let data = try loadMockJSON("JsonRpcResponseForRpcGasPriceResponseAndRpcGasPriceError_Success.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(JsonRpcResponseForRpcGasPriceResponseAndRpcGasPriceError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(JsonRpcResponseForRpcGasPriceResponseAndRpcGasPriceError.self, from: encoded)
+    }
+
+    @Test("JsonRpcResponseForRpcGasPriceResponseAndRpcGasPriceError error response can be decoded and re-encoded")
+    func jsonRpcResponseForRpcGasPriceResponseAndRpcGasPriceErrorErrorDecodingAndEncoding() throws {
+        let data = try loadMockJSON("JsonRpcResponseForRpcGasPriceResponseAndRpcGasPriceError_Error.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(JsonRpcResponseForRpcGasPriceResponseAndRpcGasPriceError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(JsonRpcResponseForRpcGasPriceResponseAndRpcGasPriceError.self, from: encoded)
+    }
+
+    @Test(
+        "JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcLightClientProofError success response can be decoded and re-encoded",
+    )
+    func jsonRpcResponseForRpcLightClientBlockProofResponseAndRpcLightClientProofErrorSuccessDecodingAndEncoding(
+    ) throws {
+        let data =
+            try loadMockJSON(
+                "JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcLightClientProofError_Success.json",
+            )
+
+        // Test decoding
+        let decoded = try decoder.decode(
+            JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcLightClientProofError.self,
+            from: data,
+        )
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(
+            JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcLightClientProofError.self,
+            from: encoded,
+        )
+    }
+
+    @Test(
+        "JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcLightClientProofError error response can be decoded and re-encoded",
+    )
+    func jsonRpcResponseForRpcLightClientBlockProofResponseAndRpcLightClientProofErrorErrorDecodingAndEncoding() throws {
+        let data =
+            try loadMockJSON("JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcLightClientProofError_Error.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(
+            JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcLightClientProofError.self,
+            from: data,
+        )
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(
+            JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcLightClientProofError.self,
+            from: encoded,
+        )
+    }
+
+    @Test(
+        "JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcLightClientProofError success response can be decoded and re-encoded",
+    )
+    func jsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcLightClientProofErrorSuccessDecodingAndEncoding(
+    ) throws {
+        let data =
+            try loadMockJSON(
+                "JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcLightClientProofError_Success.json",
+            )
+
+        // Test decoding
+        let decoded = try decoder.decode(
+            JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcLightClientProofError.self,
+            from: data,
+        )
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(
+            JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcLightClientProofError.self,
+            from: encoded,
+        )
+    }
+
+    @Test(
+        "JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcLightClientProofError error response can be decoded and re-encoded",
+    )
+    func jsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcLightClientProofErrorErrorDecodingAndEncoding(
+    ) throws {
+        let data =
+            try loadMockJSON(
+                "JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcLightClientProofError_Error.json",
+            )
+
+        // Test decoding
+        let decoded = try decoder.decode(
+            JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcLightClientProofError.self,
+            from: data,
+        )
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(
+            JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcLightClientProofError.self,
+            from: encoded,
+        )
+    }
+
+    @Test(
+        "JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcLightClientNextBlockError success response can be decoded and re-encoded",
+    )
+    func jsonRpcResponseForRpcLightClientNextBlockResponseAndRpcLightClientNextBlockErrorSuccessDecodingAndEncoding(
+    ) throws {
+        let data =
+            try loadMockJSON(
+                "JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcLightClientNextBlockError_Success.json",
+            )
+
+        // Test decoding
+        let decoded = try decoder.decode(
+            JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcLightClientNextBlockError.self,
+            from: data,
+        )
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(
+            JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcLightClientNextBlockError.self,
+            from: encoded,
+        )
+    }
+
+    @Test(
+        "JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcLightClientNextBlockError error response can be decoded and re-encoded",
+    )
+    func jsonRpcResponseForRpcLightClientNextBlockResponseAndRpcLightClientNextBlockErrorErrorDecodingAndEncoding(
+    ) throws {
+        let data =
+            try loadMockJSON(
+                "JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcLightClientNextBlockError_Error.json",
+            )
+
+        // Test decoding
+        let decoded = try decoder.decode(
+            JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcLightClientNextBlockError.self,
+            from: data,
+        )
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(
+            JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcLightClientNextBlockError.self,
+            from: encoded,
+        )
+    }
+
+    @Test(
+        "JsonRpcResponseForRpcNetworkInfoResponseAndRpcNetworkInfoError success response can be decoded and re-encoded",
+    )
+    func jsonRpcResponseForRpcNetworkInfoResponseAndRpcNetworkInfoErrorSuccessDecodingAndEncoding() throws {
+        let data = try loadMockJSON("JsonRpcResponseForRpcNetworkInfoResponseAndRpcNetworkInfoError_Success.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(
+            JsonRpcResponseForRpcNetworkInfoResponseAndRpcNetworkInfoError.self,
+            from: data,
+        )
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(JsonRpcResponseForRpcNetworkInfoResponseAndRpcNetworkInfoError.self, from: encoded)
+    }
+
+    @Test("JsonRpcResponseForRpcNetworkInfoResponseAndRpcNetworkInfoError error response can be decoded and re-encoded")
+    func jsonRpcResponseForRpcNetworkInfoResponseAndRpcNetworkInfoErrorErrorDecodingAndEncoding() throws {
+        let data = try loadMockJSON("JsonRpcResponseForRpcNetworkInfoResponseAndRpcNetworkInfoError_Error.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(
+            JsonRpcResponseForRpcNetworkInfoResponseAndRpcNetworkInfoError.self,
+            from: data,
+        )
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(JsonRpcResponseForRpcNetworkInfoResponseAndRpcNetworkInfoError.self, from: encoded)
+    }
+
+    @Test(
+        "JsonRpcResponseForRpcProtocolConfigResponseAndRpcProtocolConfigError success response can be decoded and re-encoded",
+    )
+    func jsonRpcResponseForRpcProtocolConfigResponseAndRpcProtocolConfigErrorSuccessDecodingAndEncoding() throws {
+        let data = try loadMockJSON("JsonRpcResponseForRpcProtocolConfigResponseAndRpcProtocolConfigError_Success.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(
+            JsonRpcResponseForRpcProtocolConfigResponseAndRpcProtocolConfigError.self,
+            from: data,
+        )
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(JsonRpcResponseForRpcProtocolConfigResponseAndRpcProtocolConfigError.self, from: encoded)
+    }
+
+    @Test(
+        "JsonRpcResponseForRpcProtocolConfigResponseAndRpcProtocolConfigError error response can be decoded and re-encoded",
+    )
+    func jsonRpcResponseForRpcProtocolConfigResponseAndRpcProtocolConfigErrorErrorDecodingAndEncoding() throws {
+        let data = try loadMockJSON("JsonRpcResponseForRpcProtocolConfigResponseAndRpcProtocolConfigError_Error.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(
+            JsonRpcResponseForRpcProtocolConfigResponseAndRpcProtocolConfigError.self,
+            from: data,
+        )
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(JsonRpcResponseForRpcProtocolConfigResponseAndRpcProtocolConfigError.self, from: encoded)
+    }
+
+    @Test("JsonRpcResponseForRpcQueryResponseAndRpcQueryError success response can be decoded and re-encoded")
+    func jsonRpcResponseForRpcQueryResponseAndRpcQueryErrorSuccessDecodingAndEncoding() throws {
+        let data = try loadMockJSON("JsonRpcResponseForRpcQueryResponseAndRpcQueryError_Success.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(JsonRpcResponseForRpcQueryResponseAndRpcQueryError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(JsonRpcResponseForRpcQueryResponseAndRpcQueryError.self, from: encoded)
+    }
+
+    @Test("JsonRpcResponseForRpcQueryResponseAndRpcQueryError error response can be decoded and re-encoded")
+    func jsonRpcResponseForRpcQueryResponseAndRpcQueryErrorErrorDecodingAndEncoding() throws {
+        let data = try loadMockJSON("JsonRpcResponseForRpcQueryResponseAndRpcQueryError_Error.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(JsonRpcResponseForRpcQueryResponseAndRpcQueryError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(JsonRpcResponseForRpcQueryResponseAndRpcQueryError.self, from: encoded)
+    }
+
+    @Test("JsonRpcResponseForRpcReceiptResponseAndRpcReceiptError success response can be decoded and re-encoded")
+    func jsonRpcResponseForRpcReceiptResponseAndRpcReceiptErrorSuccessDecodingAndEncoding() throws {
+        let data = try loadMockJSON("JsonRpcResponseForRpcReceiptResponseAndRpcReceiptError_Success.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(JsonRpcResponseForRpcReceiptResponseAndRpcReceiptError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(JsonRpcResponseForRpcReceiptResponseAndRpcReceiptError.self, from: encoded)
+    }
+
+    @Test("JsonRpcResponseForRpcReceiptResponseAndRpcReceiptError error response can be decoded and re-encoded")
+    func jsonRpcResponseForRpcReceiptResponseAndRpcReceiptErrorErrorDecodingAndEncoding() throws {
+        let data = try loadMockJSON("JsonRpcResponseForRpcReceiptResponseAndRpcReceiptError_Error.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(JsonRpcResponseForRpcReceiptResponseAndRpcReceiptError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(JsonRpcResponseForRpcReceiptResponseAndRpcReceiptError.self, from: encoded)
+    }
+
+    @Test(
+        "JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcSplitStorageInfoError success response can be decoded and re-encoded",
+    )
+    func jsonRpcResponseForRpcSplitStorageInfoResponseAndRpcSplitStorageInfoErrorSuccessDecodingAndEncoding() throws {
+        let data =
+            try loadMockJSON("JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcSplitStorageInfoError_Success.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(
+            JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcSplitStorageInfoError.self,
+            from: data,
+        )
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(
+            JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcSplitStorageInfoError.self,
+            from: encoded,
+        )
+    }
+
+    @Test(
+        "JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcSplitStorageInfoError error response can be decoded and re-encoded",
+    )
+    func jsonRpcResponseForRpcSplitStorageInfoResponseAndRpcSplitStorageInfoErrorErrorDecodingAndEncoding() throws {
+        let data =
+            try loadMockJSON("JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcSplitStorageInfoError_Error.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(
+            JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcSplitStorageInfoError.self,
+            from: data,
+        )
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(
+            JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcSplitStorageInfoError.self,
+            from: encoded,
+        )
+    }
+
+    @Test(
+        "JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcStateChangesError success response can be decoded and re-encoded",
+    )
+    func jsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcStateChangesErrorSuccessDecodingAndEncoding(
+    ) throws {
+        let data =
+            try loadMockJSON(
+                "JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcStateChangesError_Success.json",
+            )
+
+        // Test decoding
+        let decoded = try decoder.decode(
+            JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcStateChangesError.self,
+            from: data,
+        )
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(
+            JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcStateChangesError.self,
+            from: encoded,
+        )
+    }
+
+    @Test(
+        "JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcStateChangesError error response can be decoded and re-encoded",
+    )
+    func jsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcStateChangesErrorErrorDecodingAndEncoding() throws {
+        let data =
+            try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcStateChangesError_Error.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(
+            JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcStateChangesError.self,
+            from: data,
+        )
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(
+            JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcStateChangesError.self,
+            from: encoded,
+        )
+    }
+
+    @Test(
+        "JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcStateChangesError success response can be decoded and re-encoded",
+    )
+    func jsonRpcResponseForRpcStateChangesInBlockResponseAndRpcStateChangesErrorSuccessDecodingAndEncoding() throws {
+        let data =
+            try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcStateChangesError_Success.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(
+            JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcStateChangesError.self,
+            from: data,
+        )
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(
+            JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcStateChangesError.self,
+            from: encoded,
+        )
+    }
+
+    @Test(
+        "JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcStateChangesError error response can be decoded and re-encoded",
+    )
+    func jsonRpcResponseForRpcStateChangesInBlockResponseAndRpcStateChangesErrorErrorDecodingAndEncoding() throws {
+        let data =
+            try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcStateChangesError_Error.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(
+            JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcStateChangesError.self,
+            from: data,
+        )
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(
+            JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcStateChangesError.self,
+            from: encoded,
+        )
+    }
+
+    @Test("JsonRpcResponseForRpcStatusResponseAndRpcStatusError success response can be decoded and re-encoded")
+    func jsonRpcResponseForRpcStatusResponseAndRpcStatusErrorSuccessDecodingAndEncoding() throws {
+        let data = try loadMockJSON("JsonRpcResponseForRpcStatusResponseAndRpcStatusError_Success.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(JsonRpcResponseForRpcStatusResponseAndRpcStatusError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(JsonRpcResponseForRpcStatusResponseAndRpcStatusError.self, from: encoded)
+    }
+
+    @Test("JsonRpcResponseForRpcStatusResponseAndRpcStatusError error response can be decoded and re-encoded")
+    func jsonRpcResponseForRpcStatusResponseAndRpcStatusErrorErrorDecodingAndEncoding() throws {
+        let data = try loadMockJSON("JsonRpcResponseForRpcStatusResponseAndRpcStatusError_Error.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(JsonRpcResponseForRpcStatusResponseAndRpcStatusError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(JsonRpcResponseForRpcStatusResponseAndRpcStatusError.self, from: encoded)
+    }
+
+    @Test(
+        "JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError success response can be decoded and re-encoded",
+    )
+    func jsonRpcResponseForRpcTransactionResponseAndRpcTransactionErrorSuccessDecodingAndEncoding() throws {
+        let data = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError_Success.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(
+            JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError.self,
+            from: data,
+        )
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError.self, from: encoded)
+    }
+
+    @Test("JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError error response can be decoded and re-encoded")
+    func jsonRpcResponseForRpcTransactionResponseAndRpcTransactionErrorErrorDecodingAndEncoding() throws {
+        let data = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError_Error.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(
+            JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError.self,
+            from: data,
+        )
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError.self, from: encoded)
+    }
+
+    @Test("JsonRpcResponseForRpcValidatorResponseAndRpcValidatorError success response can be decoded and re-encoded")
+    func jsonRpcResponseForRpcValidatorResponseAndRpcValidatorErrorSuccessDecodingAndEncoding() throws {
+        let data = try loadMockJSON("JsonRpcResponseForRpcValidatorResponseAndRpcValidatorError_Success.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(JsonRpcResponseForRpcValidatorResponseAndRpcValidatorError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(JsonRpcResponseForRpcValidatorResponseAndRpcValidatorError.self, from: encoded)
+    }
+
+    @Test("JsonRpcResponseForRpcValidatorResponseAndRpcValidatorError error response can be decoded and re-encoded")
+    func jsonRpcResponseForRpcValidatorResponseAndRpcValidatorErrorErrorDecodingAndEncoding() throws {
+        let data = try loadMockJSON("JsonRpcResponseForRpcValidatorResponseAndRpcValidatorError_Error.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(JsonRpcResponseForRpcValidatorResponseAndRpcValidatorError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(JsonRpcResponseForRpcValidatorResponseAndRpcValidatorError.self, from: encoded)
     }
 }

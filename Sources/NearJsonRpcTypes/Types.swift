@@ -143,6 +143,8 @@ public enum RequestType: String, Codable, Sendable {
     case viewAccessKeyList = "view_access_key_list"
     case viewAccount = "view_account"
     case viewCode = "view_code"
+    case viewGasKey = "view_gas_key"
+    case viewGasKeyList = "view_gas_key_list"
     case viewGlobalContractCode = "view_global_contract_code"
     case viewGlobalContractCodeByAccountId = "view_global_contract_code_by_account_id"
     case viewState = "view_state"
@@ -180,6 +182,10 @@ public enum Type: String, Codable, Sendable {
     case updatedDelayedReceipts = "updated_delayed_receipts"
     case validatorAccountsUpdate = "validator_accounts_update"
 }
+
+// MARK: - ChunkHash
+
+public typealias ChunkHash = CryptoHash
 
 // MARK: - AccountId
 
@@ -282,6 +288,27 @@ public typealias StoreValue = String
 public enum SyncCheckpoint: String, Codable, Sendable {
     case genesis
     case earliestAvailable = "earliest_available"
+}
+
+// MARK: - GenesisConfigError
+
+public struct GenesisConfigError: Codable, Sendable {
+    public init() {}
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if !container.decodeNil() {
+            throw DecodingError.typeMismatch(
+                GenesisConfigError.self,
+                DecodingError.Context(codingPath: [], debugDescription: "Expected null"),
+            )
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encodeNil()
+    }
 }
 
 // MARK: - GenesisConfigRequest
@@ -772,6 +799,32 @@ public struct ActionErrorKindOneOfGlobalContractDoesNotExistInline: Codable, Sen
     }
 }
 
+public struct ActionErrorKindOneOfGasKeyDoesNotExistInline: Codable, Sendable {
+    public let accountId: AccountId
+    public let publicKey: PublicKey
+
+    public init(
+        accountId: AccountId,
+        publicKey: PublicKey,
+    ) {
+        self.accountId = accountId
+        self.publicKey = publicKey
+    }
+}
+
+public struct ActionErrorKindOneOfGasKeyAlreadyExistsInline: Codable, Sendable {
+    public let accountId: AccountId
+    public let publicKey: PublicKey
+
+    public init(
+        accountId: AccountId,
+        publicKey: PublicKey,
+    ) {
+        self.accountId = accountId
+        self.publicKey = publicKey
+    }
+}
+
 public enum ActionErrorKind: Codable, Sendable {
     case accountAlreadyExists(ActionErrorKindOneOfAccountAlreadyExistsInline)
     case accountDoesNotExist(ActionErrorKindOneOfAccountDoesNotExistInline)
@@ -798,6 +851,8 @@ public enum ActionErrorKind: Codable, Sendable {
     case delegateActionInvalidNonce(ActionErrorKindOneOfDelegateActionInvalidNonceInline)
     case delegateActionNonceTooLarge(ActionErrorKindOneOfDelegateActionNonceTooLargeInline)
     case globalContractDoesNotExist(ActionErrorKindOneOfGlobalContractDoesNotExistInline)
+    case gasKeyDoesNotExist(ActionErrorKindOneOfGasKeyDoesNotExistInline)
+    case gasKeyAlreadyExists(ActionErrorKindOneOfGasKeyAlreadyExistsInline)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -1150,6 +1205,40 @@ public enum ActionErrorKind: Codable, Sendable {
         } catch {
             decodingErrors.append(".globalContractDoesNotExist: \(describeDecodingError(error))")
         }
+        do {
+            if let container = anyKeyContainer {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("GasKeyDoesNotExist") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfGasKeyDoesNotExistInline.self,
+                        forKey: matchingKey,
+                    )
+                    self = .gasKeyDoesNotExist(value)
+                    return
+                }
+            }
+        } catch {
+            decodingErrors.append(".gasKeyDoesNotExist: \(describeDecodingError(error))")
+        }
+        do {
+            if let container = anyKeyContainer {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("GasKeyAlreadyExists") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionErrorKindOneOfGasKeyAlreadyExistsInline.self,
+                        forKey: matchingKey,
+                    )
+                    self = .gasKeyAlreadyExists(value)
+                    return
+                }
+            }
+        } catch {
+            decodingErrors.append(".gasKeyAlreadyExists: \(describeDecodingError(error))")
+        }
         let contextDescription: String
         if decodingErrors.isEmpty {
             let availableKeys: String
@@ -1189,6 +1278,8 @@ public enum ActionErrorKind: Codable, Sendable {
         case delegateActionInvalidNonce = "DelegateActionInvalidNonce"
         case delegateActionNonceTooLarge = "DelegateActionNonceTooLarge"
         case globalContractDoesNotExist = "GlobalContractDoesNotExist"
+        case gasKeyDoesNotExist = "GasKeyDoesNotExist"
+        case gasKeyAlreadyExists = "GasKeyAlreadyExists"
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -1256,6 +1347,12 @@ public enum ActionErrorKind: Codable, Sendable {
         case let .globalContractDoesNotExist(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .globalContractDoesNotExist)
+        case let .gasKeyDoesNotExist(value):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(value, forKey: .gasKeyDoesNotExist)
+        case let .gasKeyAlreadyExists(value):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(value, forKey: .gasKeyAlreadyExists)
         case .delegateActionInvalidSignature:
             var singleContainer = encoder.singleValueContainer()
             try singleContainer.encode("DelegateActionInvalidSignature")
@@ -1422,6 +1519,45 @@ public struct ActionViewOneOfDeterministicStateInitInline: Codable, Sendable {
     }
 }
 
+public struct ActionViewOneOfAddGasKeyInline: Codable, Sendable {
+    public let numNonces: Int
+    public let permission: AccessKeyPermissionView
+    public let publicKey: PublicKey
+
+    public init(
+        numNonces: Int,
+        permission: AccessKeyPermissionView,
+        publicKey: PublicKey,
+    ) {
+        self.numNonces = numNonces
+        self.permission = permission
+        self.publicKey = publicKey
+    }
+}
+
+public struct ActionViewOneOfDeleteGasKeyInline: Codable, Sendable {
+    public let publicKey: PublicKey
+
+    public init(
+        publicKey: PublicKey,
+    ) {
+        self.publicKey = publicKey
+    }
+}
+
+public struct ActionViewOneOfTransferToGasKeyInline: Codable, Sendable {
+    public let amount: NearToken
+    public let publicKey: PublicKey
+
+    public init(
+        amount: NearToken,
+        publicKey: PublicKey,
+    ) {
+        self.amount = amount
+        self.publicKey = publicKey
+    }
+}
+
 public enum ActionView: Codable, Sendable {
     case createAccount
     case deployContract(ActionViewOneOfDeployContractInline)
@@ -1437,6 +1573,9 @@ public enum ActionView: Codable, Sendable {
     case useGlobalContract(ActionViewOneOfUseGlobalContractInline)
     case useGlobalContractByAccountId(ActionViewOneOfUseGlobalContractByAccountIdInline)
     case deterministicStateInit(ActionViewOneOfDeterministicStateInitInline)
+    case addGasKey(ActionViewOneOfAddGasKeyInline)
+    case deleteGasKey(ActionViewOneOfDeleteGasKeyInline)
+    case transferToGasKey(ActionViewOneOfTransferToGasKeyInline)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -1623,6 +1762,44 @@ public enum ActionView: Codable, Sendable {
         } catch {
             decodingErrors.append(".deterministicStateInit: \(describeDecodingError(error))")
         }
+        do {
+            if let container = anyKeyContainer {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("AddGasKey") == .orderedSame }) {
+                    let value = try container.decode(ActionViewOneOfAddGasKeyInline.self, forKey: matchingKey)
+                    self = .addGasKey(value)
+                    return
+                }
+            }
+        } catch {
+            decodingErrors.append(".addGasKey: \(describeDecodingError(error))")
+        }
+        do {
+            if let container = anyKeyContainer {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("DeleteGasKey") == .orderedSame }) {
+                    let value = try container.decode(ActionViewOneOfDeleteGasKeyInline.self, forKey: matchingKey)
+                    self = .deleteGasKey(value)
+                    return
+                }
+            }
+        } catch {
+            decodingErrors.append(".deleteGasKey: \(describeDecodingError(error))")
+        }
+        do {
+            if let container = anyKeyContainer {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("TransferToGasKey") == .orderedSame
+                    }) {
+                    let value = try container.decode(ActionViewOneOfTransferToGasKeyInline.self, forKey: matchingKey)
+                    self = .transferToGasKey(value)
+                    return
+                }
+            }
+        } catch {
+            decodingErrors.append(".transferToGasKey: \(describeDecodingError(error))")
+        }
         let contextDescription: String
         if decodingErrors.isEmpty {
             let availableKeys: String
@@ -1654,6 +1831,9 @@ public enum ActionView: Codable, Sendable {
         case useGlobalContract = "UseGlobalContract"
         case useGlobalContractByAccountId = "UseGlobalContractByAccountId"
         case deterministicStateInit = "DeterministicStateInit"
+        case addGasKey = "AddGasKey"
+        case deleteGasKey = "DeleteGasKey"
+        case transferToGasKey = "TransferToGasKey"
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -1697,6 +1877,15 @@ public enum ActionView: Codable, Sendable {
         case let .deterministicStateInit(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deterministicStateInit)
+        case let .addGasKey(value):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(value, forKey: .addGasKey)
+        case let .deleteGasKey(value):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(value, forKey: .deleteGasKey)
+        case let .transferToGasKey(value):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(value, forKey: .transferToGasKey)
         case .createAccount:
             var singleContainer = encoder.singleValueContainer()
             try singleContainer.encode("CreateAccount")
@@ -1869,6 +2058,29 @@ public struct ActionsValidationErrorOneOfDeterministicStateInitValueLengthExceed
     }
 }
 
+public struct ActionsValidationErrorOneOfGasKeyPermissionInvalidInline: Codable, Sendable {
+    public let permission: AccessKeyPermission
+
+    public init(
+        permission: AccessKeyPermission,
+    ) {
+        self.permission = permission
+    }
+}
+
+public struct ActionsValidationErrorOneOfGasKeyTooManyNoncesRequestedInline: Codable, Sendable {
+    public let limit: Int
+    public let requestedNonces: Int
+
+    public init(
+        limit: Int,
+        requestedNonces: Int,
+    ) {
+        self.limit = limit
+        self.requestedNonces = requestedNonces
+    }
+}
+
 public enum ActionsValidationError: Codable, Sendable {
     case deleteActionMustBeFinal
     case totalPrepaidGasExceeded(ActionsValidationErrorOneOfTotalPrepaidGasExceededInline)
@@ -1891,6 +2103,8 @@ public enum ActionsValidationError: Codable, Sendable {
     case deterministicStateInitValueLengthExceeded(
         ActionsValidationErrorOneOfDeterministicStateInitValueLengthExceededInline,
     )
+    case gasKeyPermissionInvalid(ActionsValidationErrorOneOfGasKeyPermissionInvalidInline)
+    case gasKeyTooManyNoncesRequested(ActionsValidationErrorOneOfGasKeyTooManyNoncesRequestedInline)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -2134,6 +2348,40 @@ public enum ActionsValidationError: Codable, Sendable {
         } catch {
             decodingErrors.append(".deterministicStateInitValueLengthExceeded: \(describeDecodingError(error))")
         }
+        do {
+            if let container = anyKeyContainer {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("GasKeyPermissionInvalid") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionsValidationErrorOneOfGasKeyPermissionInvalidInline.self,
+                        forKey: matchingKey,
+                    )
+                    self = .gasKeyPermissionInvalid(value)
+                    return
+                }
+            }
+        } catch {
+            decodingErrors.append(".gasKeyPermissionInvalid: \(describeDecodingError(error))")
+        }
+        do {
+            if let container = anyKeyContainer {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("GasKeyTooManyNoncesRequested") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ActionsValidationErrorOneOfGasKeyTooManyNoncesRequestedInline.self,
+                        forKey: matchingKey,
+                    )
+                    self = .gasKeyTooManyNoncesRequested(value)
+                    return
+                }
+            }
+        } catch {
+            decodingErrors.append(".gasKeyTooManyNoncesRequested: \(describeDecodingError(error))")
+        }
         let contextDescription: String
         if decodingErrors.isEmpty {
             let availableKeys: String
@@ -2165,6 +2413,8 @@ public enum ActionsValidationError: Codable, Sendable {
         case invalidDeterministicStateInitReceiver = "InvalidDeterministicStateInitReceiver"
         case deterministicStateInitKeyLengthExceeded = "DeterministicStateInitKeyLengthExceeded"
         case deterministicStateInitValueLengthExceeded = "DeterministicStateInitValueLengthExceeded"
+        case gasKeyPermissionInvalid = "GasKeyPermissionInvalid"
+        case gasKeyTooManyNoncesRequested = "GasKeyTooManyNoncesRequested"
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -2208,6 +2458,12 @@ public enum ActionsValidationError: Codable, Sendable {
         case let .deterministicStateInitValueLengthExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deterministicStateInitValueLengthExceeded)
+        case let .gasKeyPermissionInvalid(value):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(value, forKey: .gasKeyPermissionInvalid)
+        case let .gasKeyTooManyNoncesRequested(value):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(value, forKey: .gasKeyTooManyNoncesRequested)
         case .deleteActionMustBeFinal:
             var singleContainer = encoder.singleValueContainer()
             try singleContainer.encode("DeleteActionMustBeFinal")
@@ -2322,6 +2578,94 @@ public enum BlockId: Codable, Sendable {
         case let .cryptoHash(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
+        }
+    }
+}
+
+// MARK: - BlockReference
+
+public enum BlockReference: Codable, Sendable {
+    case blockId(BlockId)
+    case finality(Finality)
+    case syncCheckpoint(SyncCheckpoint)
+
+    public init(from decoder: Decoder) throws {
+        var decodingErrors: [String] = []
+        let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
+        do {
+            if let container = anyKeyContainer {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("block_id") == .orderedSame || key.stringValue
+                            .caseInsensitiveCompare("blockId") == .orderedSame
+                    }) {
+                    let value = try container.decode(BlockId.self, forKey: matchingKey)
+                    self = .blockId(value)
+                    return
+                }
+            }
+        } catch {
+            decodingErrors.append(".blockId: \(describeDecodingError(error))")
+        }
+        do {
+            if let container = anyKeyContainer {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("finality") == .orderedSame }) {
+                    let value = try container.decode(Finality.self, forKey: matchingKey)
+                    self = .finality(value)
+                    return
+                }
+            }
+        } catch {
+            decodingErrors.append(".finality: \(describeDecodingError(error))")
+        }
+        do {
+            if let container = anyKeyContainer {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("sync_checkpoint") == .orderedSame || key.stringValue
+                            .caseInsensitiveCompare("syncCheckpoint") == .orderedSame
+                    }) {
+                    let value = try container.decode(SyncCheckpoint.self, forKey: matchingKey)
+                    self = .syncCheckpoint(value)
+                    return
+                }
+            }
+        } catch {
+            decodingErrors.append(".syncCheckpoint: \(describeDecodingError(error))")
+        }
+        let contextDescription: String
+        if decodingErrors.isEmpty {
+            let availableKeys: String
+            if let keys = anyKeyContainer?.allKeys, !keys.isEmpty {
+                let joined = keys.map { "\($0.stringValue)" }.joined(separator: ", ")
+                availableKeys = " Available keys: [\(joined)]"
+            } else {
+                availableKeys = ""
+            }
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for BlockReference\(availableKeys)"
+        } else {
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for BlockReference:\n" +
+                decodingErrors.joined(separator: "\n")
+        }
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case finality
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .blockId(value):
+            var container = encoder.container(keyedBy: AnyCodingKey.self)
+            try container.encode(value, forKey: AnyCodingKey(stringValue: "block_id"))
+        case let .finality(value):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(value, forKey: .finality)
+        case let .syncCheckpoint(value):
+            var container = encoder.container(keyedBy: AnyCodingKey.self)
+            try container.encode(value, forKey: AnyCodingKey(stringValue: "sync_checkpoint"))
         }
     }
 }
@@ -2487,6 +2831,1792 @@ public enum DeterministicAccountStateInit: Codable, Sendable {
         case let .v1(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .v1)
+        }
+    }
+}
+
+// MARK: - ErrorWrapperForGenesisConfigError
+
+public struct ErrorWrapperForGenesisConfigErrorOneOfCauseName: Codable, Sendable {
+    public let cause: RpcRequestValidationErrorKind
+    public let name: String
+
+    public init(
+        cause: RpcRequestValidationErrorKind,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public struct ErrorWrapperForGenesisConfigErrorOneOfCauseName1: Codable, Sendable {
+    public let cause: GenesisConfigError
+    public let name: String
+
+    public init(
+        cause: GenesisConfigError,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public struct ErrorWrapperForGenesisConfigErrorOneOfCauseName2: Codable, Sendable {
+    public let cause: InternalError
+    public let name: String
+
+    public init(
+        cause: InternalError,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public enum ErrorWrapperForGenesisConfigError: Codable, Sendable {
+    case errorWrapperForGenesisConfigErrorCauseName(ErrorWrapperForGenesisConfigErrorOneOfCauseName)
+    case errorWrapperForGenesisConfigErrorCauseName1(ErrorWrapperForGenesisConfigErrorOneOfCauseName1)
+    case errorWrapperForGenesisConfigErrorCauseName2(ErrorWrapperForGenesisConfigErrorOneOfCauseName2)
+
+    public init(from decoder: Decoder) throws {
+        var decodingErrors: [String] = []
+        let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
+        do {
+            let value = try decoder.singleValueContainer().decode(ErrorWrapperForGenesisConfigErrorOneOfCauseName.self)
+            self = .errorWrapperForGenesisConfigErrorCauseName(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForGenesisConfigErrorCauseName: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(ErrorWrapperForGenesisConfigErrorOneOfCauseName1.self)
+            self = .errorWrapperForGenesisConfigErrorCauseName1(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForGenesisConfigErrorCauseName1: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(ErrorWrapperForGenesisConfigErrorOneOfCauseName2.self)
+            self = .errorWrapperForGenesisConfigErrorCauseName2(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForGenesisConfigErrorCauseName2: \(describeDecodingError(error))")
+        }
+        let contextDescription: String
+        if decodingErrors.isEmpty {
+            let availableKeys: String
+            if let keys = anyKeyContainer?.allKeys, !keys.isEmpty {
+                let joined = keys.map { "\($0.stringValue)" }.joined(separator: ", ")
+                availableKeys = " Available keys: [\(joined)]"
+            } else {
+                availableKeys = ""
+            }
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ErrorWrapperForGenesisConfigError\(availableKeys)"
+        } else {
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for ErrorWrapperForGenesisConfigError:\n" +
+                decodingErrors.joined(separator: "\n")
+        }
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .errorWrapperForGenesisConfigErrorCauseName(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .errorWrapperForGenesisConfigErrorCauseName1(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .errorWrapperForGenesisConfigErrorCauseName2(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        }
+    }
+}
+
+// MARK: - ErrorWrapperForRpcBlockError
+
+public struct ErrorWrapperForRpcBlockErrorOneOfCauseName: Codable, Sendable {
+    public let cause: RpcRequestValidationErrorKind
+    public let name: String
+
+    public init(
+        cause: RpcRequestValidationErrorKind,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public struct ErrorWrapperForRpcBlockErrorOneOfCauseName1: Codable, Sendable {
+    public let cause: RpcBlockError
+    public let name: String
+
+    public init(
+        cause: RpcBlockError,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public struct ErrorWrapperForRpcBlockErrorOneOfCauseName2: Codable, Sendable {
+    public let cause: InternalError
+    public let name: String
+
+    public init(
+        cause: InternalError,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public enum ErrorWrapperForRpcBlockError: Codable, Sendable {
+    case errorWrapperForRpcBlockErrorCauseName(ErrorWrapperForRpcBlockErrorOneOfCauseName)
+    case errorWrapperForRpcBlockErrorCauseName1(ErrorWrapperForRpcBlockErrorOneOfCauseName1)
+    case errorWrapperForRpcBlockErrorCauseName2(ErrorWrapperForRpcBlockErrorOneOfCauseName2)
+
+    public init(from decoder: Decoder) throws {
+        var decodingErrors: [String] = []
+        let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
+        do {
+            let value = try decoder.singleValueContainer().decode(ErrorWrapperForRpcBlockErrorOneOfCauseName.self)
+            self = .errorWrapperForRpcBlockErrorCauseName(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcBlockErrorCauseName: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(ErrorWrapperForRpcBlockErrorOneOfCauseName1.self)
+            self = .errorWrapperForRpcBlockErrorCauseName1(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcBlockErrorCauseName1: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(ErrorWrapperForRpcBlockErrorOneOfCauseName2.self)
+            self = .errorWrapperForRpcBlockErrorCauseName2(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcBlockErrorCauseName2: \(describeDecodingError(error))")
+        }
+        let contextDescription: String
+        if decodingErrors.isEmpty {
+            let availableKeys: String
+            if let keys = anyKeyContainer?.allKeys, !keys.isEmpty {
+                let joined = keys.map { "\($0.stringValue)" }.joined(separator: ", ")
+                availableKeys = " Available keys: [\(joined)]"
+            } else {
+                availableKeys = ""
+            }
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ErrorWrapperForRpcBlockError\(availableKeys)"
+        } else {
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for ErrorWrapperForRpcBlockError:\n" +
+                decodingErrors.joined(separator: "\n")
+        }
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .errorWrapperForRpcBlockErrorCauseName(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .errorWrapperForRpcBlockErrorCauseName1(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .errorWrapperForRpcBlockErrorCauseName2(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        }
+    }
+}
+
+// MARK: - ErrorWrapperForRpcChunkError
+
+public struct ErrorWrapperForRpcChunkErrorOneOfCauseName: Codable, Sendable {
+    public let cause: RpcRequestValidationErrorKind
+    public let name: String
+
+    public init(
+        cause: RpcRequestValidationErrorKind,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public struct ErrorWrapperForRpcChunkErrorOneOfCauseName1: Codable, Sendable {
+    public let cause: RpcChunkError
+    public let name: String
+
+    public init(
+        cause: RpcChunkError,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public struct ErrorWrapperForRpcChunkErrorOneOfCauseName2: Codable, Sendable {
+    public let cause: InternalError
+    public let name: String
+
+    public init(
+        cause: InternalError,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public enum ErrorWrapperForRpcChunkError: Codable, Sendable {
+    case errorWrapperForRpcChunkErrorCauseName(ErrorWrapperForRpcChunkErrorOneOfCauseName)
+    case errorWrapperForRpcChunkErrorCauseName1(ErrorWrapperForRpcChunkErrorOneOfCauseName1)
+    case errorWrapperForRpcChunkErrorCauseName2(ErrorWrapperForRpcChunkErrorOneOfCauseName2)
+
+    public init(from decoder: Decoder) throws {
+        var decodingErrors: [String] = []
+        let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
+        do {
+            let value = try decoder.singleValueContainer().decode(ErrorWrapperForRpcChunkErrorOneOfCauseName.self)
+            self = .errorWrapperForRpcChunkErrorCauseName(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcChunkErrorCauseName: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(ErrorWrapperForRpcChunkErrorOneOfCauseName1.self)
+            self = .errorWrapperForRpcChunkErrorCauseName1(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcChunkErrorCauseName1: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(ErrorWrapperForRpcChunkErrorOneOfCauseName2.self)
+            self = .errorWrapperForRpcChunkErrorCauseName2(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcChunkErrorCauseName2: \(describeDecodingError(error))")
+        }
+        let contextDescription: String
+        if decodingErrors.isEmpty {
+            let availableKeys: String
+            if let keys = anyKeyContainer?.allKeys, !keys.isEmpty {
+                let joined = keys.map { "\($0.stringValue)" }.joined(separator: ", ")
+                availableKeys = " Available keys: [\(joined)]"
+            } else {
+                availableKeys = ""
+            }
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ErrorWrapperForRpcChunkError\(availableKeys)"
+        } else {
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for ErrorWrapperForRpcChunkError:\n" +
+                decodingErrors.joined(separator: "\n")
+        }
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .errorWrapperForRpcChunkErrorCauseName(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .errorWrapperForRpcChunkErrorCauseName1(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .errorWrapperForRpcChunkErrorCauseName2(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        }
+    }
+}
+
+// MARK: - ErrorWrapperForRpcClientConfigError
+
+public struct ErrorWrapperForRpcClientConfigErrorOneOfCauseName: Codable, Sendable {
+    public let cause: RpcRequestValidationErrorKind
+    public let name: String
+
+    public init(
+        cause: RpcRequestValidationErrorKind,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public struct ErrorWrapperForRpcClientConfigErrorOneOfCauseName1: Codable, Sendable {
+    public let cause: RpcClientConfigError
+    public let name: String
+
+    public init(
+        cause: RpcClientConfigError,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public struct ErrorWrapperForRpcClientConfigErrorOneOfCauseName2: Codable, Sendable {
+    public let cause: InternalError
+    public let name: String
+
+    public init(
+        cause: InternalError,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public enum ErrorWrapperForRpcClientConfigError: Codable, Sendable {
+    case errorWrapperForRpcClientConfigErrorCauseName(ErrorWrapperForRpcClientConfigErrorOneOfCauseName)
+    case errorWrapperForRpcClientConfigErrorCauseName1(ErrorWrapperForRpcClientConfigErrorOneOfCauseName1)
+    case errorWrapperForRpcClientConfigErrorCauseName2(ErrorWrapperForRpcClientConfigErrorOneOfCauseName2)
+
+    public init(from decoder: Decoder) throws {
+        var decodingErrors: [String] = []
+        let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
+        do {
+            let value = try decoder.singleValueContainer()
+                .decode(ErrorWrapperForRpcClientConfigErrorOneOfCauseName.self)
+            self = .errorWrapperForRpcClientConfigErrorCauseName(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcClientConfigErrorCauseName: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer()
+                .decode(ErrorWrapperForRpcClientConfigErrorOneOfCauseName1.self)
+            self = .errorWrapperForRpcClientConfigErrorCauseName1(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcClientConfigErrorCauseName1: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer()
+                .decode(ErrorWrapperForRpcClientConfigErrorOneOfCauseName2.self)
+            self = .errorWrapperForRpcClientConfigErrorCauseName2(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcClientConfigErrorCauseName2: \(describeDecodingError(error))")
+        }
+        let contextDescription: String
+        if decodingErrors.isEmpty {
+            let availableKeys: String
+            if let keys = anyKeyContainer?.allKeys, !keys.isEmpty {
+                let joined = keys.map { "\($0.stringValue)" }.joined(separator: ", ")
+                availableKeys = " Available keys: [\(joined)]"
+            } else {
+                availableKeys = ""
+            }
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ErrorWrapperForRpcClientConfigError\(availableKeys)"
+        } else {
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for ErrorWrapperForRpcClientConfigError:\n" +
+                decodingErrors.joined(separator: "\n")
+        }
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .errorWrapperForRpcClientConfigErrorCauseName(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .errorWrapperForRpcClientConfigErrorCauseName1(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .errorWrapperForRpcClientConfigErrorCauseName2(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        }
+    }
+}
+
+// MARK: - ErrorWrapperForRpcGasPriceError
+
+public struct ErrorWrapperForRpcGasPriceErrorOneOfCauseName: Codable, Sendable {
+    public let cause: RpcRequestValidationErrorKind
+    public let name: String
+
+    public init(
+        cause: RpcRequestValidationErrorKind,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public struct ErrorWrapperForRpcGasPriceErrorOneOfCauseName1: Codable, Sendable {
+    public let cause: RpcGasPriceError
+    public let name: String
+
+    public init(
+        cause: RpcGasPriceError,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public struct ErrorWrapperForRpcGasPriceErrorOneOfCauseName2: Codable, Sendable {
+    public let cause: InternalError
+    public let name: String
+
+    public init(
+        cause: InternalError,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public enum ErrorWrapperForRpcGasPriceError: Codable, Sendable {
+    case errorWrapperForRpcGasPriceErrorCauseName(ErrorWrapperForRpcGasPriceErrorOneOfCauseName)
+    case errorWrapperForRpcGasPriceErrorCauseName1(ErrorWrapperForRpcGasPriceErrorOneOfCauseName1)
+    case errorWrapperForRpcGasPriceErrorCauseName2(ErrorWrapperForRpcGasPriceErrorOneOfCauseName2)
+
+    public init(from decoder: Decoder) throws {
+        var decodingErrors: [String] = []
+        let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
+        do {
+            let value = try decoder.singleValueContainer().decode(ErrorWrapperForRpcGasPriceErrorOneOfCauseName.self)
+            self = .errorWrapperForRpcGasPriceErrorCauseName(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcGasPriceErrorCauseName: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(ErrorWrapperForRpcGasPriceErrorOneOfCauseName1.self)
+            self = .errorWrapperForRpcGasPriceErrorCauseName1(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcGasPriceErrorCauseName1: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(ErrorWrapperForRpcGasPriceErrorOneOfCauseName2.self)
+            self = .errorWrapperForRpcGasPriceErrorCauseName2(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcGasPriceErrorCauseName2: \(describeDecodingError(error))")
+        }
+        let contextDescription: String
+        if decodingErrors.isEmpty {
+            let availableKeys: String
+            if let keys = anyKeyContainer?.allKeys, !keys.isEmpty {
+                let joined = keys.map { "\($0.stringValue)" }.joined(separator: ", ")
+                availableKeys = " Available keys: [\(joined)]"
+            } else {
+                availableKeys = ""
+            }
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ErrorWrapperForRpcGasPriceError\(availableKeys)"
+        } else {
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for ErrorWrapperForRpcGasPriceError:\n" +
+                decodingErrors.joined(separator: "\n")
+        }
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .errorWrapperForRpcGasPriceErrorCauseName(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .errorWrapperForRpcGasPriceErrorCauseName1(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .errorWrapperForRpcGasPriceErrorCauseName2(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        }
+    }
+}
+
+// MARK: - ErrorWrapperForRpcLightClientNextBlockError
+
+public struct ErrorWrapperForRpcLightClientNextBlockErrorOneOfCauseName: Codable, Sendable {
+    public let cause: RpcRequestValidationErrorKind
+    public let name: String
+
+    public init(
+        cause: RpcRequestValidationErrorKind,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public struct ErrorWrapperForRpcLightClientNextBlockErrorOneOfCauseName1: Codable, Sendable {
+    public let cause: RpcLightClientNextBlockError
+    public let name: String
+
+    public init(
+        cause: RpcLightClientNextBlockError,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public struct ErrorWrapperForRpcLightClientNextBlockErrorOneOfCauseName2: Codable, Sendable {
+    public let cause: InternalError
+    public let name: String
+
+    public init(
+        cause: InternalError,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public enum ErrorWrapperForRpcLightClientNextBlockError: Codable, Sendable {
+    case errorWrapperForRpcLightClientNextBlockErrorCauseName(ErrorWrapperForRpcLightClientNextBlockErrorOneOfCauseName)
+    case errorWrapperForRpcLightClientNextBlockErrorCauseName1(
+        ErrorWrapperForRpcLightClientNextBlockErrorOneOfCauseName1,
+    )
+    case errorWrapperForRpcLightClientNextBlockErrorCauseName2(
+        ErrorWrapperForRpcLightClientNextBlockErrorOneOfCauseName2,
+    )
+
+    public init(from decoder: Decoder) throws {
+        var decodingErrors: [String] = []
+        let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
+        do {
+            let value = try decoder.singleValueContainer()
+                .decode(ErrorWrapperForRpcLightClientNextBlockErrorOneOfCauseName.self)
+            self = .errorWrapperForRpcLightClientNextBlockErrorCauseName(value)
+            return
+        } catch {
+            decodingErrors
+                .append(".errorWrapperForRpcLightClientNextBlockErrorCauseName: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer()
+                .decode(ErrorWrapperForRpcLightClientNextBlockErrorOneOfCauseName1.self)
+            self = .errorWrapperForRpcLightClientNextBlockErrorCauseName1(value)
+            return
+        } catch {
+            decodingErrors
+                .append(".errorWrapperForRpcLightClientNextBlockErrorCauseName1: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer()
+                .decode(ErrorWrapperForRpcLightClientNextBlockErrorOneOfCauseName2.self)
+            self = .errorWrapperForRpcLightClientNextBlockErrorCauseName2(value)
+            return
+        } catch {
+            decodingErrors
+                .append(".errorWrapperForRpcLightClientNextBlockErrorCauseName2: \(describeDecodingError(error))")
+        }
+        let contextDescription: String
+        if decodingErrors.isEmpty {
+            let availableKeys: String
+            if let keys = anyKeyContainer?.allKeys, !keys.isEmpty {
+                let joined = keys.map { "\($0.stringValue)" }.joined(separator: ", ")
+                availableKeys = " Available keys: [\(joined)]"
+            } else {
+                availableKeys = ""
+            }
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ErrorWrapperForRpcLightClientNextBlockError\(availableKeys)"
+        } else {
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for ErrorWrapperForRpcLightClientNextBlockError:\n" +
+                decodingErrors.joined(separator: "\n")
+        }
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .errorWrapperForRpcLightClientNextBlockErrorCauseName(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .errorWrapperForRpcLightClientNextBlockErrorCauseName1(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .errorWrapperForRpcLightClientNextBlockErrorCauseName2(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        }
+    }
+}
+
+// MARK: - ErrorWrapperForRpcLightClientProofError
+
+public struct ErrorWrapperForRpcLightClientProofErrorOneOfCauseName: Codable, Sendable {
+    public let cause: RpcRequestValidationErrorKind
+    public let name: String
+
+    public init(
+        cause: RpcRequestValidationErrorKind,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public struct ErrorWrapperForRpcLightClientProofErrorOneOfCauseName1: Codable, Sendable {
+    public let cause: RpcLightClientProofError
+    public let name: String
+
+    public init(
+        cause: RpcLightClientProofError,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public struct ErrorWrapperForRpcLightClientProofErrorOneOfCauseName2: Codable, Sendable {
+    public let cause: InternalError
+    public let name: String
+
+    public init(
+        cause: InternalError,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public enum ErrorWrapperForRpcLightClientProofError: Codable, Sendable {
+    case errorWrapperForRpcLightClientProofErrorCauseName(ErrorWrapperForRpcLightClientProofErrorOneOfCauseName)
+    case errorWrapperForRpcLightClientProofErrorCauseName1(ErrorWrapperForRpcLightClientProofErrorOneOfCauseName1)
+    case errorWrapperForRpcLightClientProofErrorCauseName2(ErrorWrapperForRpcLightClientProofErrorOneOfCauseName2)
+
+    public init(from decoder: Decoder) throws {
+        var decodingErrors: [String] = []
+        let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
+        do {
+            let value = try decoder.singleValueContainer()
+                .decode(ErrorWrapperForRpcLightClientProofErrorOneOfCauseName.self)
+            self = .errorWrapperForRpcLightClientProofErrorCauseName(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcLightClientProofErrorCauseName: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer()
+                .decode(ErrorWrapperForRpcLightClientProofErrorOneOfCauseName1.self)
+            self = .errorWrapperForRpcLightClientProofErrorCauseName1(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcLightClientProofErrorCauseName1: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer()
+                .decode(ErrorWrapperForRpcLightClientProofErrorOneOfCauseName2.self)
+            self = .errorWrapperForRpcLightClientProofErrorCauseName2(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcLightClientProofErrorCauseName2: \(describeDecodingError(error))")
+        }
+        let contextDescription: String
+        if decodingErrors.isEmpty {
+            let availableKeys: String
+            if let keys = anyKeyContainer?.allKeys, !keys.isEmpty {
+                let joined = keys.map { "\($0.stringValue)" }.joined(separator: ", ")
+                availableKeys = " Available keys: [\(joined)]"
+            } else {
+                availableKeys = ""
+            }
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ErrorWrapperForRpcLightClientProofError\(availableKeys)"
+        } else {
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for ErrorWrapperForRpcLightClientProofError:\n" +
+                decodingErrors.joined(separator: "\n")
+        }
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .errorWrapperForRpcLightClientProofErrorCauseName(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .errorWrapperForRpcLightClientProofErrorCauseName1(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .errorWrapperForRpcLightClientProofErrorCauseName2(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        }
+    }
+}
+
+// MARK: - ErrorWrapperForRpcMaintenanceWindowsError
+
+public struct ErrorWrapperForRpcMaintenanceWindowsErrorOneOfCauseName: Codable, Sendable {
+    public let cause: RpcRequestValidationErrorKind
+    public let name: String
+
+    public init(
+        cause: RpcRequestValidationErrorKind,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public struct ErrorWrapperForRpcMaintenanceWindowsErrorOneOfCauseName1: Codable, Sendable {
+    public let cause: RpcMaintenanceWindowsError
+    public let name: String
+
+    public init(
+        cause: RpcMaintenanceWindowsError,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public struct ErrorWrapperForRpcMaintenanceWindowsErrorOneOfCauseName2: Codable, Sendable {
+    public let cause: InternalError
+    public let name: String
+
+    public init(
+        cause: InternalError,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public enum ErrorWrapperForRpcMaintenanceWindowsError: Codable, Sendable {
+    case errorWrapperForRpcMaintenanceWindowsErrorCauseName(ErrorWrapperForRpcMaintenanceWindowsErrorOneOfCauseName)
+    case errorWrapperForRpcMaintenanceWindowsErrorCauseName1(ErrorWrapperForRpcMaintenanceWindowsErrorOneOfCauseName1)
+    case errorWrapperForRpcMaintenanceWindowsErrorCauseName2(ErrorWrapperForRpcMaintenanceWindowsErrorOneOfCauseName2)
+
+    public init(from decoder: Decoder) throws {
+        var decodingErrors: [String] = []
+        let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
+        do {
+            let value = try decoder.singleValueContainer()
+                .decode(ErrorWrapperForRpcMaintenanceWindowsErrorOneOfCauseName.self)
+            self = .errorWrapperForRpcMaintenanceWindowsErrorCauseName(value)
+            return
+        } catch {
+            decodingErrors
+                .append(".errorWrapperForRpcMaintenanceWindowsErrorCauseName: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer()
+                .decode(ErrorWrapperForRpcMaintenanceWindowsErrorOneOfCauseName1.self)
+            self = .errorWrapperForRpcMaintenanceWindowsErrorCauseName1(value)
+            return
+        } catch {
+            decodingErrors
+                .append(".errorWrapperForRpcMaintenanceWindowsErrorCauseName1: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer()
+                .decode(ErrorWrapperForRpcMaintenanceWindowsErrorOneOfCauseName2.self)
+            self = .errorWrapperForRpcMaintenanceWindowsErrorCauseName2(value)
+            return
+        } catch {
+            decodingErrors
+                .append(".errorWrapperForRpcMaintenanceWindowsErrorCauseName2: \(describeDecodingError(error))")
+        }
+        let contextDescription: String
+        if decodingErrors.isEmpty {
+            let availableKeys: String
+            if let keys = anyKeyContainer?.allKeys, !keys.isEmpty {
+                let joined = keys.map { "\($0.stringValue)" }.joined(separator: ", ")
+                availableKeys = " Available keys: [\(joined)]"
+            } else {
+                availableKeys = ""
+            }
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ErrorWrapperForRpcMaintenanceWindowsError\(availableKeys)"
+        } else {
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for ErrorWrapperForRpcMaintenanceWindowsError:\n" +
+                decodingErrors.joined(separator: "\n")
+        }
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .errorWrapperForRpcMaintenanceWindowsErrorCauseName(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .errorWrapperForRpcMaintenanceWindowsErrorCauseName1(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .errorWrapperForRpcMaintenanceWindowsErrorCauseName2(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        }
+    }
+}
+
+// MARK: - ErrorWrapperForRpcNetworkInfoError
+
+public struct ErrorWrapperForRpcNetworkInfoErrorOneOfCauseName: Codable, Sendable {
+    public let cause: RpcRequestValidationErrorKind
+    public let name: String
+
+    public init(
+        cause: RpcRequestValidationErrorKind,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public struct ErrorWrapperForRpcNetworkInfoErrorOneOfCauseName1: Codable, Sendable {
+    public let cause: RpcNetworkInfoError
+    public let name: String
+
+    public init(
+        cause: RpcNetworkInfoError,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public struct ErrorWrapperForRpcNetworkInfoErrorOneOfCauseName2: Codable, Sendable {
+    public let cause: InternalError
+    public let name: String
+
+    public init(
+        cause: InternalError,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public enum ErrorWrapperForRpcNetworkInfoError: Codable, Sendable {
+    case errorWrapperForRpcNetworkInfoErrorCauseName(ErrorWrapperForRpcNetworkInfoErrorOneOfCauseName)
+    case errorWrapperForRpcNetworkInfoErrorCauseName1(ErrorWrapperForRpcNetworkInfoErrorOneOfCauseName1)
+    case errorWrapperForRpcNetworkInfoErrorCauseName2(ErrorWrapperForRpcNetworkInfoErrorOneOfCauseName2)
+
+    public init(from decoder: Decoder) throws {
+        var decodingErrors: [String] = []
+        let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
+        do {
+            let value = try decoder.singleValueContainer().decode(ErrorWrapperForRpcNetworkInfoErrorOneOfCauseName.self)
+            self = .errorWrapperForRpcNetworkInfoErrorCauseName(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcNetworkInfoErrorCauseName: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer()
+                .decode(ErrorWrapperForRpcNetworkInfoErrorOneOfCauseName1.self)
+            self = .errorWrapperForRpcNetworkInfoErrorCauseName1(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcNetworkInfoErrorCauseName1: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer()
+                .decode(ErrorWrapperForRpcNetworkInfoErrorOneOfCauseName2.self)
+            self = .errorWrapperForRpcNetworkInfoErrorCauseName2(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcNetworkInfoErrorCauseName2: \(describeDecodingError(error))")
+        }
+        let contextDescription: String
+        if decodingErrors.isEmpty {
+            let availableKeys: String
+            if let keys = anyKeyContainer?.allKeys, !keys.isEmpty {
+                let joined = keys.map { "\($0.stringValue)" }.joined(separator: ", ")
+                availableKeys = " Available keys: [\(joined)]"
+            } else {
+                availableKeys = ""
+            }
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ErrorWrapperForRpcNetworkInfoError\(availableKeys)"
+        } else {
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for ErrorWrapperForRpcNetworkInfoError:\n" +
+                decodingErrors.joined(separator: "\n")
+        }
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .errorWrapperForRpcNetworkInfoErrorCauseName(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .errorWrapperForRpcNetworkInfoErrorCauseName1(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .errorWrapperForRpcNetworkInfoErrorCauseName2(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        }
+    }
+}
+
+// MARK: - ErrorWrapperForRpcProtocolConfigError
+
+public struct ErrorWrapperForRpcProtocolConfigErrorOneOfCauseName: Codable, Sendable {
+    public let cause: RpcRequestValidationErrorKind
+    public let name: String
+
+    public init(
+        cause: RpcRequestValidationErrorKind,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public struct ErrorWrapperForRpcProtocolConfigErrorOneOfCauseName1: Codable, Sendable {
+    public let cause: RpcProtocolConfigError
+    public let name: String
+
+    public init(
+        cause: RpcProtocolConfigError,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public struct ErrorWrapperForRpcProtocolConfigErrorOneOfCauseName2: Codable, Sendable {
+    public let cause: InternalError
+    public let name: String
+
+    public init(
+        cause: InternalError,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public enum ErrorWrapperForRpcProtocolConfigError: Codable, Sendable {
+    case errorWrapperForRpcProtocolConfigErrorCauseName(ErrorWrapperForRpcProtocolConfigErrorOneOfCauseName)
+    case errorWrapperForRpcProtocolConfigErrorCauseName1(ErrorWrapperForRpcProtocolConfigErrorOneOfCauseName1)
+    case errorWrapperForRpcProtocolConfigErrorCauseName2(ErrorWrapperForRpcProtocolConfigErrorOneOfCauseName2)
+
+    public init(from decoder: Decoder) throws {
+        var decodingErrors: [String] = []
+        let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
+        do {
+            let value = try decoder.singleValueContainer()
+                .decode(ErrorWrapperForRpcProtocolConfigErrorOneOfCauseName.self)
+            self = .errorWrapperForRpcProtocolConfigErrorCauseName(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcProtocolConfigErrorCauseName: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer()
+                .decode(ErrorWrapperForRpcProtocolConfigErrorOneOfCauseName1.self)
+            self = .errorWrapperForRpcProtocolConfigErrorCauseName1(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcProtocolConfigErrorCauseName1: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer()
+                .decode(ErrorWrapperForRpcProtocolConfigErrorOneOfCauseName2.self)
+            self = .errorWrapperForRpcProtocolConfigErrorCauseName2(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcProtocolConfigErrorCauseName2: \(describeDecodingError(error))")
+        }
+        let contextDescription: String
+        if decodingErrors.isEmpty {
+            let availableKeys: String
+            if let keys = anyKeyContainer?.allKeys, !keys.isEmpty {
+                let joined = keys.map { "\($0.stringValue)" }.joined(separator: ", ")
+                availableKeys = " Available keys: [\(joined)]"
+            } else {
+                availableKeys = ""
+            }
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ErrorWrapperForRpcProtocolConfigError\(availableKeys)"
+        } else {
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for ErrorWrapperForRpcProtocolConfigError:\n" +
+                decodingErrors.joined(separator: "\n")
+        }
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .errorWrapperForRpcProtocolConfigErrorCauseName(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .errorWrapperForRpcProtocolConfigErrorCauseName1(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .errorWrapperForRpcProtocolConfigErrorCauseName2(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        }
+    }
+}
+
+// MARK: - ErrorWrapperForRpcQueryError
+
+public struct ErrorWrapperForRpcQueryErrorOneOfCauseName: Codable, Sendable {
+    public let cause: RpcRequestValidationErrorKind
+    public let name: String
+
+    public init(
+        cause: RpcRequestValidationErrorKind,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public struct ErrorWrapperForRpcQueryErrorOneOfCauseName1: Codable, Sendable {
+    public let cause: RpcQueryError
+    public let name: String
+
+    public init(
+        cause: RpcQueryError,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public struct ErrorWrapperForRpcQueryErrorOneOfCauseName2: Codable, Sendable {
+    public let cause: InternalError
+    public let name: String
+
+    public init(
+        cause: InternalError,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public enum ErrorWrapperForRpcQueryError: Codable, Sendable {
+    case errorWrapperForRpcQueryErrorCauseName(ErrorWrapperForRpcQueryErrorOneOfCauseName)
+    case errorWrapperForRpcQueryErrorCauseName1(ErrorWrapperForRpcQueryErrorOneOfCauseName1)
+    case errorWrapperForRpcQueryErrorCauseName2(ErrorWrapperForRpcQueryErrorOneOfCauseName2)
+
+    public init(from decoder: Decoder) throws {
+        var decodingErrors: [String] = []
+        let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
+        do {
+            let value = try decoder.singleValueContainer().decode(ErrorWrapperForRpcQueryErrorOneOfCauseName.self)
+            self = .errorWrapperForRpcQueryErrorCauseName(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcQueryErrorCauseName: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(ErrorWrapperForRpcQueryErrorOneOfCauseName1.self)
+            self = .errorWrapperForRpcQueryErrorCauseName1(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcQueryErrorCauseName1: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(ErrorWrapperForRpcQueryErrorOneOfCauseName2.self)
+            self = .errorWrapperForRpcQueryErrorCauseName2(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcQueryErrorCauseName2: \(describeDecodingError(error))")
+        }
+        let contextDescription: String
+        if decodingErrors.isEmpty {
+            let availableKeys: String
+            if let keys = anyKeyContainer?.allKeys, !keys.isEmpty {
+                let joined = keys.map { "\($0.stringValue)" }.joined(separator: ", ")
+                availableKeys = " Available keys: [\(joined)]"
+            } else {
+                availableKeys = ""
+            }
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ErrorWrapperForRpcQueryError\(availableKeys)"
+        } else {
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for ErrorWrapperForRpcQueryError:\n" +
+                decodingErrors.joined(separator: "\n")
+        }
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .errorWrapperForRpcQueryErrorCauseName(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .errorWrapperForRpcQueryErrorCauseName1(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .errorWrapperForRpcQueryErrorCauseName2(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        }
+    }
+}
+
+// MARK: - ErrorWrapperForRpcReceiptError
+
+public struct ErrorWrapperForRpcReceiptErrorOneOfCauseName: Codable, Sendable {
+    public let cause: RpcRequestValidationErrorKind
+    public let name: String
+
+    public init(
+        cause: RpcRequestValidationErrorKind,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public struct ErrorWrapperForRpcReceiptErrorOneOfCauseName1: Codable, Sendable {
+    public let cause: RpcReceiptError
+    public let name: String
+
+    public init(
+        cause: RpcReceiptError,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public struct ErrorWrapperForRpcReceiptErrorOneOfCauseName2: Codable, Sendable {
+    public let cause: InternalError
+    public let name: String
+
+    public init(
+        cause: InternalError,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public enum ErrorWrapperForRpcReceiptError: Codable, Sendable {
+    case errorWrapperForRpcReceiptErrorCauseName(ErrorWrapperForRpcReceiptErrorOneOfCauseName)
+    case errorWrapperForRpcReceiptErrorCauseName1(ErrorWrapperForRpcReceiptErrorOneOfCauseName1)
+    case errorWrapperForRpcReceiptErrorCauseName2(ErrorWrapperForRpcReceiptErrorOneOfCauseName2)
+
+    public init(from decoder: Decoder) throws {
+        var decodingErrors: [String] = []
+        let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
+        do {
+            let value = try decoder.singleValueContainer().decode(ErrorWrapperForRpcReceiptErrorOneOfCauseName.self)
+            self = .errorWrapperForRpcReceiptErrorCauseName(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcReceiptErrorCauseName: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(ErrorWrapperForRpcReceiptErrorOneOfCauseName1.self)
+            self = .errorWrapperForRpcReceiptErrorCauseName1(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcReceiptErrorCauseName1: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(ErrorWrapperForRpcReceiptErrorOneOfCauseName2.self)
+            self = .errorWrapperForRpcReceiptErrorCauseName2(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcReceiptErrorCauseName2: \(describeDecodingError(error))")
+        }
+        let contextDescription: String
+        if decodingErrors.isEmpty {
+            let availableKeys: String
+            if let keys = anyKeyContainer?.allKeys, !keys.isEmpty {
+                let joined = keys.map { "\($0.stringValue)" }.joined(separator: ", ")
+                availableKeys = " Available keys: [\(joined)]"
+            } else {
+                availableKeys = ""
+            }
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ErrorWrapperForRpcReceiptError\(availableKeys)"
+        } else {
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for ErrorWrapperForRpcReceiptError:\n" +
+                decodingErrors.joined(separator: "\n")
+        }
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .errorWrapperForRpcReceiptErrorCauseName(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .errorWrapperForRpcReceiptErrorCauseName1(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .errorWrapperForRpcReceiptErrorCauseName2(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        }
+    }
+}
+
+// MARK: - ErrorWrapperForRpcSplitStorageInfoError
+
+public struct ErrorWrapperForRpcSplitStorageInfoErrorOneOfCauseName: Codable, Sendable {
+    public let cause: RpcRequestValidationErrorKind
+    public let name: String
+
+    public init(
+        cause: RpcRequestValidationErrorKind,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public struct ErrorWrapperForRpcSplitStorageInfoErrorOneOfCauseName1: Codable, Sendable {
+    public let cause: RpcSplitStorageInfoError
+    public let name: String
+
+    public init(
+        cause: RpcSplitStorageInfoError,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public struct ErrorWrapperForRpcSplitStorageInfoErrorOneOfCauseName2: Codable, Sendable {
+    public let cause: InternalError
+    public let name: String
+
+    public init(
+        cause: InternalError,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public enum ErrorWrapperForRpcSplitStorageInfoError: Codable, Sendable {
+    case errorWrapperForRpcSplitStorageInfoErrorCauseName(ErrorWrapperForRpcSplitStorageInfoErrorOneOfCauseName)
+    case errorWrapperForRpcSplitStorageInfoErrorCauseName1(ErrorWrapperForRpcSplitStorageInfoErrorOneOfCauseName1)
+    case errorWrapperForRpcSplitStorageInfoErrorCauseName2(ErrorWrapperForRpcSplitStorageInfoErrorOneOfCauseName2)
+
+    public init(from decoder: Decoder) throws {
+        var decodingErrors: [String] = []
+        let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
+        do {
+            let value = try decoder.singleValueContainer()
+                .decode(ErrorWrapperForRpcSplitStorageInfoErrorOneOfCauseName.self)
+            self = .errorWrapperForRpcSplitStorageInfoErrorCauseName(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcSplitStorageInfoErrorCauseName: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer()
+                .decode(ErrorWrapperForRpcSplitStorageInfoErrorOneOfCauseName1.self)
+            self = .errorWrapperForRpcSplitStorageInfoErrorCauseName1(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcSplitStorageInfoErrorCauseName1: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer()
+                .decode(ErrorWrapperForRpcSplitStorageInfoErrorOneOfCauseName2.self)
+            self = .errorWrapperForRpcSplitStorageInfoErrorCauseName2(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcSplitStorageInfoErrorCauseName2: \(describeDecodingError(error))")
+        }
+        let contextDescription: String
+        if decodingErrors.isEmpty {
+            let availableKeys: String
+            if let keys = anyKeyContainer?.allKeys, !keys.isEmpty {
+                let joined = keys.map { "\($0.stringValue)" }.joined(separator: ", ")
+                availableKeys = " Available keys: [\(joined)]"
+            } else {
+                availableKeys = ""
+            }
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ErrorWrapperForRpcSplitStorageInfoError\(availableKeys)"
+        } else {
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for ErrorWrapperForRpcSplitStorageInfoError:\n" +
+                decodingErrors.joined(separator: "\n")
+        }
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .errorWrapperForRpcSplitStorageInfoErrorCauseName(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .errorWrapperForRpcSplitStorageInfoErrorCauseName1(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .errorWrapperForRpcSplitStorageInfoErrorCauseName2(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        }
+    }
+}
+
+// MARK: - ErrorWrapperForRpcStateChangesError
+
+public struct ErrorWrapperForRpcStateChangesErrorOneOfCauseName: Codable, Sendable {
+    public let cause: RpcRequestValidationErrorKind
+    public let name: String
+
+    public init(
+        cause: RpcRequestValidationErrorKind,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public struct ErrorWrapperForRpcStateChangesErrorOneOfCauseName1: Codable, Sendable {
+    public let cause: RpcStateChangesError
+    public let name: String
+
+    public init(
+        cause: RpcStateChangesError,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public struct ErrorWrapperForRpcStateChangesErrorOneOfCauseName2: Codable, Sendable {
+    public let cause: InternalError
+    public let name: String
+
+    public init(
+        cause: InternalError,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public enum ErrorWrapperForRpcStateChangesError: Codable, Sendable {
+    case errorWrapperForRpcStateChangesErrorCauseName(ErrorWrapperForRpcStateChangesErrorOneOfCauseName)
+    case errorWrapperForRpcStateChangesErrorCauseName1(ErrorWrapperForRpcStateChangesErrorOneOfCauseName1)
+    case errorWrapperForRpcStateChangesErrorCauseName2(ErrorWrapperForRpcStateChangesErrorOneOfCauseName2)
+
+    public init(from decoder: Decoder) throws {
+        var decodingErrors: [String] = []
+        let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
+        do {
+            let value = try decoder.singleValueContainer()
+                .decode(ErrorWrapperForRpcStateChangesErrorOneOfCauseName.self)
+            self = .errorWrapperForRpcStateChangesErrorCauseName(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcStateChangesErrorCauseName: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer()
+                .decode(ErrorWrapperForRpcStateChangesErrorOneOfCauseName1.self)
+            self = .errorWrapperForRpcStateChangesErrorCauseName1(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcStateChangesErrorCauseName1: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer()
+                .decode(ErrorWrapperForRpcStateChangesErrorOneOfCauseName2.self)
+            self = .errorWrapperForRpcStateChangesErrorCauseName2(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcStateChangesErrorCauseName2: \(describeDecodingError(error))")
+        }
+        let contextDescription: String
+        if decodingErrors.isEmpty {
+            let availableKeys: String
+            if let keys = anyKeyContainer?.allKeys, !keys.isEmpty {
+                let joined = keys.map { "\($0.stringValue)" }.joined(separator: ", ")
+                availableKeys = " Available keys: [\(joined)]"
+            } else {
+                availableKeys = ""
+            }
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ErrorWrapperForRpcStateChangesError\(availableKeys)"
+        } else {
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for ErrorWrapperForRpcStateChangesError:\n" +
+                decodingErrors.joined(separator: "\n")
+        }
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .errorWrapperForRpcStateChangesErrorCauseName(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .errorWrapperForRpcStateChangesErrorCauseName1(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .errorWrapperForRpcStateChangesErrorCauseName2(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        }
+    }
+}
+
+// MARK: - ErrorWrapperForRpcStatusError
+
+public struct ErrorWrapperForRpcStatusErrorOneOfCauseName: Codable, Sendable {
+    public let cause: RpcRequestValidationErrorKind
+    public let name: String
+
+    public init(
+        cause: RpcRequestValidationErrorKind,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public struct ErrorWrapperForRpcStatusErrorOneOfCauseName1: Codable, Sendable {
+    public let cause: RpcStatusError
+    public let name: String
+
+    public init(
+        cause: RpcStatusError,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public struct ErrorWrapperForRpcStatusErrorOneOfCauseName2: Codable, Sendable {
+    public let cause: InternalError
+    public let name: String
+
+    public init(
+        cause: InternalError,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public enum ErrorWrapperForRpcStatusError: Codable, Sendable {
+    case errorWrapperForRpcStatusErrorCauseName(ErrorWrapperForRpcStatusErrorOneOfCauseName)
+    case errorWrapperForRpcStatusErrorCauseName1(ErrorWrapperForRpcStatusErrorOneOfCauseName1)
+    case errorWrapperForRpcStatusErrorCauseName2(ErrorWrapperForRpcStatusErrorOneOfCauseName2)
+
+    public init(from decoder: Decoder) throws {
+        var decodingErrors: [String] = []
+        let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
+        do {
+            let value = try decoder.singleValueContainer().decode(ErrorWrapperForRpcStatusErrorOneOfCauseName.self)
+            self = .errorWrapperForRpcStatusErrorCauseName(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcStatusErrorCauseName: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(ErrorWrapperForRpcStatusErrorOneOfCauseName1.self)
+            self = .errorWrapperForRpcStatusErrorCauseName1(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcStatusErrorCauseName1: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(ErrorWrapperForRpcStatusErrorOneOfCauseName2.self)
+            self = .errorWrapperForRpcStatusErrorCauseName2(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcStatusErrorCauseName2: \(describeDecodingError(error))")
+        }
+        let contextDescription: String
+        if decodingErrors.isEmpty {
+            let availableKeys: String
+            if let keys = anyKeyContainer?.allKeys, !keys.isEmpty {
+                let joined = keys.map { "\($0.stringValue)" }.joined(separator: ", ")
+                availableKeys = " Available keys: [\(joined)]"
+            } else {
+                availableKeys = ""
+            }
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ErrorWrapperForRpcStatusError\(availableKeys)"
+        } else {
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for ErrorWrapperForRpcStatusError:\n" + decodingErrors
+                    .joined(separator: "\n")
+        }
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .errorWrapperForRpcStatusErrorCauseName(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .errorWrapperForRpcStatusErrorCauseName1(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .errorWrapperForRpcStatusErrorCauseName2(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        }
+    }
+}
+
+// MARK: - ErrorWrapperForRpcTransactionError
+
+public struct ErrorWrapperForRpcTransactionErrorOneOfCauseName: Codable, Sendable {
+    public let cause: RpcRequestValidationErrorKind
+    public let name: String
+
+    public init(
+        cause: RpcRequestValidationErrorKind,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public struct ErrorWrapperForRpcTransactionErrorOneOfCauseName1: Codable, Sendable {
+    public let cause: RpcTransactionError
+    public let name: String
+
+    public init(
+        cause: RpcTransactionError,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public struct ErrorWrapperForRpcTransactionErrorOneOfCauseName2: Codable, Sendable {
+    public let cause: InternalError
+    public let name: String
+
+    public init(
+        cause: InternalError,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public enum ErrorWrapperForRpcTransactionError: Codable, Sendable {
+    case errorWrapperForRpcTransactionErrorCauseName(ErrorWrapperForRpcTransactionErrorOneOfCauseName)
+    case errorWrapperForRpcTransactionErrorCauseName1(ErrorWrapperForRpcTransactionErrorOneOfCauseName1)
+    case errorWrapperForRpcTransactionErrorCauseName2(ErrorWrapperForRpcTransactionErrorOneOfCauseName2)
+
+    public init(from decoder: Decoder) throws {
+        var decodingErrors: [String] = []
+        let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
+        do {
+            let value = try decoder.singleValueContainer().decode(ErrorWrapperForRpcTransactionErrorOneOfCauseName.self)
+            self = .errorWrapperForRpcTransactionErrorCauseName(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcTransactionErrorCauseName: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer()
+                .decode(ErrorWrapperForRpcTransactionErrorOneOfCauseName1.self)
+            self = .errorWrapperForRpcTransactionErrorCauseName1(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcTransactionErrorCauseName1: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer()
+                .decode(ErrorWrapperForRpcTransactionErrorOneOfCauseName2.self)
+            self = .errorWrapperForRpcTransactionErrorCauseName2(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcTransactionErrorCauseName2: \(describeDecodingError(error))")
+        }
+        let contextDescription: String
+        if decodingErrors.isEmpty {
+            let availableKeys: String
+            if let keys = anyKeyContainer?.allKeys, !keys.isEmpty {
+                let joined = keys.map { "\($0.stringValue)" }.joined(separator: ", ")
+                availableKeys = " Available keys: [\(joined)]"
+            } else {
+                availableKeys = ""
+            }
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ErrorWrapperForRpcTransactionError\(availableKeys)"
+        } else {
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for ErrorWrapperForRpcTransactionError:\n" +
+                decodingErrors.joined(separator: "\n")
+        }
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .errorWrapperForRpcTransactionErrorCauseName(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .errorWrapperForRpcTransactionErrorCauseName1(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .errorWrapperForRpcTransactionErrorCauseName2(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        }
+    }
+}
+
+// MARK: - ErrorWrapperForRpcValidatorError
+
+public struct ErrorWrapperForRpcValidatorErrorOneOfCauseName: Codable, Sendable {
+    public let cause: RpcRequestValidationErrorKind
+    public let name: String
+
+    public init(
+        cause: RpcRequestValidationErrorKind,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public struct ErrorWrapperForRpcValidatorErrorOneOfCauseName1: Codable, Sendable {
+    public let cause: RpcValidatorError
+    public let name: String
+
+    public init(
+        cause: RpcValidatorError,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public struct ErrorWrapperForRpcValidatorErrorOneOfCauseName2: Codable, Sendable {
+    public let cause: InternalError
+    public let name: String
+
+    public init(
+        cause: InternalError,
+        name: String,
+    ) {
+        self.cause = cause
+        self.name = name
+    }
+}
+
+public enum ErrorWrapperForRpcValidatorError: Codable, Sendable {
+    case errorWrapperForRpcValidatorErrorCauseName(ErrorWrapperForRpcValidatorErrorOneOfCauseName)
+    case errorWrapperForRpcValidatorErrorCauseName1(ErrorWrapperForRpcValidatorErrorOneOfCauseName1)
+    case errorWrapperForRpcValidatorErrorCauseName2(ErrorWrapperForRpcValidatorErrorOneOfCauseName2)
+
+    public init(from decoder: Decoder) throws {
+        var decodingErrors: [String] = []
+        let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
+        do {
+            let value = try decoder.singleValueContainer().decode(ErrorWrapperForRpcValidatorErrorOneOfCauseName.self)
+            self = .errorWrapperForRpcValidatorErrorCauseName(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcValidatorErrorCauseName: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(ErrorWrapperForRpcValidatorErrorOneOfCauseName1.self)
+            self = .errorWrapperForRpcValidatorErrorCauseName1(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcValidatorErrorCauseName1: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(ErrorWrapperForRpcValidatorErrorOneOfCauseName2.self)
+            self = .errorWrapperForRpcValidatorErrorCauseName2(value)
+            return
+        } catch {
+            decodingErrors.append(".errorWrapperForRpcValidatorErrorCauseName2: \(describeDecodingError(error))")
+        }
+        let contextDescription: String
+        if decodingErrors.isEmpty {
+            let availableKeys: String
+            if let keys = anyKeyContainer?.allKeys, !keys.isEmpty {
+                let joined = keys.map { "\($0.stringValue)" }.joined(separator: ", ")
+                availableKeys = " Available keys: [\(joined)]"
+            } else {
+                availableKeys = ""
+            }
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for ErrorWrapperForRpcValidatorError\(availableKeys)"
+        } else {
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for ErrorWrapperForRpcValidatorError:\n" +
+                decodingErrors.joined(separator: "\n")
+        }
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .errorWrapperForRpcValidatorErrorCauseName(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .errorWrapperForRpcValidatorErrorCauseName1(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .errorWrapperForRpcValidatorErrorCauseName2(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
         }
     }
 }
@@ -3868,6 +5998,60 @@ public enum HostError: Codable, Sendable {
     }
 }
 
+// MARK: - InternalError
+
+public struct InternalErrorOneOfInfoName: Codable, Sendable {
+    public let info: AnyCodable
+    public let name: String
+
+    public init(
+        info: AnyCodable,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public enum InternalError: Codable, Sendable {
+    case internalErrorInfoName(InternalErrorOneOfInfoName)
+
+    public init(from decoder: Decoder) throws {
+        var decodingErrors: [String] = []
+        let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
+        do {
+            let value = try decoder.singleValueContainer().decode(InternalErrorOneOfInfoName.self)
+            self = .internalErrorInfoName(value)
+            return
+        } catch {
+            decodingErrors.append(".internalErrorInfoName: \(describeDecodingError(error))")
+        }
+        let contextDescription: String
+        if decodingErrors.isEmpty {
+            let availableKeys: String
+            if let keys = anyKeyContainer?.allKeys, !keys.isEmpty {
+                let joined = keys.map { "\($0.stringValue)" }.joined(separator: ", ")
+                availableKeys = " Available keys: [\(joined)]"
+            } else {
+                availableKeys = ""
+            }
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for InternalError\(availableKeys)"
+        } else {
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for InternalError:\n" +
+                decodingErrors.joined(separator: "\n")
+        }
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .internalErrorInfoName(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        }
+    }
+}
+
 // MARK: - InvalidAccessKeyError
 
 public struct InvalidAccessKeyErrorOneOfAccessKeyNotFoundInline: Codable, Sendable {
@@ -4509,11 +6693,11 @@ public enum InvalidTxError: Codable, Sendable {
     }
 }
 
-// MARK: - JsonRpcResponseForArrayOfRangeOfUint64AndRpcError
+// MARK: - JsonRpcResponseForArrayOfRangeOfUint64AndRpcMaintenanceWindowsError
 
-public enum JsonRpcResponseForArrayOfRangeOfUint64AndRpcError: Codable, Sendable {
+public enum JsonRpcResponseForArrayOfRangeOfUint64AndRpcMaintenanceWindowsError: Codable, Sendable {
     case result([RangeOfUint64])
-    case error(RpcError)
+    case error(ErrorWrapperForRpcMaintenanceWindowsError)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -4534,7 +6718,10 @@ public enum JsonRpcResponseForArrayOfRangeOfUint64AndRpcError: Codable, Sendable
             if let container = anyKeyContainer {
                 if let matchingKey = container.allKeys
                     .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
-                    let value = try container.decode(RpcError.self, forKey: matchingKey)
+                    let value = try container.decode(
+                        ErrorWrapperForRpcMaintenanceWindowsError.self,
+                        forKey: matchingKey,
+                    )
                     self = .error(value)
                     return
                 }
@@ -4551,10 +6738,10 @@ public enum JsonRpcResponseForArrayOfRangeOfUint64AndRpcError: Codable, Sendable
             } else {
                 availableKeys = ""
             }
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForArrayOfRangeOfUint64AndRpcError\(availableKeys)"
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForArrayOfRangeOfUint64AndRpcMaintenanceWindowsError\(availableKeys)"
         } else {
             contextDescription =
-                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForArrayOfRangeOfUint64AndRpcError:\n" +
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForArrayOfRangeOfUint64AndRpcMaintenanceWindowsError:\n" +
                 decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
@@ -4577,11 +6764,11 @@ public enum JsonRpcResponseForArrayOfRangeOfUint64AndRpcError: Codable, Sendable
     }
 }
 
-// MARK: - JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError
+// MARK: - JsonRpcResponseForArrayOfValidatorStakeViewAndRpcValidatorError
 
-public enum JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError: Codable, Sendable {
+public enum JsonRpcResponseForArrayOfValidatorStakeViewAndRpcValidatorError: Codable, Sendable {
     case result([ValidatorStakeView])
-    case error(RpcError)
+    case error(ErrorWrapperForRpcValidatorError)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -4602,7 +6789,7 @@ public enum JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError: Codable, Sen
             if let container = anyKeyContainer {
                 if let matchingKey = container.allKeys
                     .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
-                    let value = try container.decode(RpcError.self, forKey: matchingKey)
+                    let value = try container.decode(ErrorWrapperForRpcValidatorError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
@@ -4619,10 +6806,10 @@ public enum JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError: Codable, Sen
             } else {
                 availableKeys = ""
             }
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError\(availableKeys)"
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForArrayOfValidatorStakeViewAndRpcValidatorError\(availableKeys)"
         } else {
             contextDescription =
-                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError:\n" +
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForArrayOfValidatorStakeViewAndRpcValidatorError:\n" +
                 decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
@@ -4645,11 +6832,11 @@ public enum JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError: Codable, Sen
     }
 }
 
-// MARK: - JsonRpcResponseForCryptoHashAndRpcError
+// MARK: - JsonRpcResponseForCryptoHashAndRpcTransactionError
 
-public enum JsonRpcResponseForCryptoHashAndRpcError: Codable, Sendable {
+public enum JsonRpcResponseForCryptoHashAndRpcTransactionError: Codable, Sendable {
     case result(CryptoHash)
-    case error(RpcError)
+    case error(ErrorWrapperForRpcTransactionError)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -4670,7 +6857,7 @@ public enum JsonRpcResponseForCryptoHashAndRpcError: Codable, Sendable {
             if let container = anyKeyContainer {
                 if let matchingKey = container.allKeys
                     .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
-                    let value = try container.decode(RpcError.self, forKey: matchingKey)
+                    let value = try container.decode(ErrorWrapperForRpcTransactionError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
@@ -4687,10 +6874,10 @@ public enum JsonRpcResponseForCryptoHashAndRpcError: Codable, Sendable {
             } else {
                 availableKeys = ""
             }
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForCryptoHashAndRpcError\(availableKeys)"
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForCryptoHashAndRpcTransactionError\(availableKeys)"
         } else {
             contextDescription =
-                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForCryptoHashAndRpcError:\n" +
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForCryptoHashAndRpcTransactionError:\n" +
                 decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
@@ -4713,11 +6900,11 @@ public enum JsonRpcResponseForCryptoHashAndRpcError: Codable, Sendable {
     }
 }
 
-// MARK: - JsonRpcResponseForGenesisConfigAndRpcError
+// MARK: - JsonRpcResponseForGenesisConfigAndGenesisConfigError
 
-public enum JsonRpcResponseForGenesisConfigAndRpcError: Codable, Sendable {
+public enum JsonRpcResponseForGenesisConfigAndGenesisConfigError: Codable, Sendable {
     case result(GenesisConfig)
-    case error(RpcError)
+    case error(ErrorWrapperForGenesisConfigError)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -4738,7 +6925,7 @@ public enum JsonRpcResponseForGenesisConfigAndRpcError: Codable, Sendable {
             if let container = anyKeyContainer {
                 if let matchingKey = container.allKeys
                     .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
-                    let value = try container.decode(RpcError.self, forKey: matchingKey)
+                    let value = try container.decode(ErrorWrapperForGenesisConfigError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
@@ -4755,10 +6942,10 @@ public enum JsonRpcResponseForGenesisConfigAndRpcError: Codable, Sendable {
             } else {
                 availableKeys = ""
             }
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForGenesisConfigAndRpcError\(availableKeys)"
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForGenesisConfigAndGenesisConfigError\(availableKeys)"
         } else {
             contextDescription =
-                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForGenesisConfigAndRpcError:\n" +
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForGenesisConfigAndGenesisConfigError:\n" +
                 decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
@@ -4781,11 +6968,11 @@ public enum JsonRpcResponseForGenesisConfigAndRpcError: Codable, Sendable {
     }
 }
 
-// MARK: - JsonRpcResponseForNullableRpcHealthResponseAndRpcError
+// MARK: - JsonRpcResponseForNullableRpcHealthResponseAndRpcStatusError
 
-public enum JsonRpcResponseForNullableRpcHealthResponseAndRpcError: Codable, Sendable {
+public enum JsonRpcResponseForNullableRpcHealthResponseAndRpcStatusError: Codable, Sendable {
     case result(RpcHealthResponse)
-    case error(RpcError)
+    case error(ErrorWrapperForRpcStatusError)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -4806,7 +6993,7 @@ public enum JsonRpcResponseForNullableRpcHealthResponseAndRpcError: Codable, Sen
             if let container = anyKeyContainer {
                 if let matchingKey = container.allKeys
                     .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
-                    let value = try container.decode(RpcError.self, forKey: matchingKey)
+                    let value = try container.decode(ErrorWrapperForRpcStatusError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
@@ -4823,10 +7010,10 @@ public enum JsonRpcResponseForNullableRpcHealthResponseAndRpcError: Codable, Sen
             } else {
                 availableKeys = ""
             }
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForNullableRpcHealthResponseAndRpcError\(availableKeys)"
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForNullableRpcHealthResponseAndRpcStatusError\(availableKeys)"
         } else {
             contextDescription =
-                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForNullableRpcHealthResponseAndRpcError:\n" +
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForNullableRpcHealthResponseAndRpcStatusError:\n" +
                 decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
@@ -4849,11 +7036,11 @@ public enum JsonRpcResponseForNullableRpcHealthResponseAndRpcError: Codable, Sen
     }
 }
 
-// MARK: - JsonRpcResponseForRpcBlockResponseAndRpcError
+// MARK: - JsonRpcResponseForRpcBlockResponseAndRpcBlockError
 
-public enum JsonRpcResponseForRpcBlockResponseAndRpcError: Codable, Sendable {
+public enum JsonRpcResponseForRpcBlockResponseAndRpcBlockError: Codable, Sendable {
     case result(RpcBlockResponse)
-    case error(RpcError)
+    case error(ErrorWrapperForRpcBlockError)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -4874,7 +7061,7 @@ public enum JsonRpcResponseForRpcBlockResponseAndRpcError: Codable, Sendable {
             if let container = anyKeyContainer {
                 if let matchingKey = container.allKeys
                     .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
-                    let value = try container.decode(RpcError.self, forKey: matchingKey)
+                    let value = try container.decode(ErrorWrapperForRpcBlockError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
@@ -4891,10 +7078,10 @@ public enum JsonRpcResponseForRpcBlockResponseAndRpcError: Codable, Sendable {
             } else {
                 availableKeys = ""
             }
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcBlockResponseAndRpcError\(availableKeys)"
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcBlockResponseAndRpcBlockError\(availableKeys)"
         } else {
             contextDescription =
-                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcBlockResponseAndRpcError:\n" +
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcBlockResponseAndRpcBlockError:\n" +
                 decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
@@ -4917,11 +7104,11 @@ public enum JsonRpcResponseForRpcBlockResponseAndRpcError: Codable, Sendable {
     }
 }
 
-// MARK: - JsonRpcResponseForRpcChunkResponseAndRpcError
+// MARK: - JsonRpcResponseForRpcChunkResponseAndRpcChunkError
 
-public enum JsonRpcResponseForRpcChunkResponseAndRpcError: Codable, Sendable {
+public enum JsonRpcResponseForRpcChunkResponseAndRpcChunkError: Codable, Sendable {
     case result(RpcChunkResponse)
-    case error(RpcError)
+    case error(ErrorWrapperForRpcChunkError)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -4942,7 +7129,7 @@ public enum JsonRpcResponseForRpcChunkResponseAndRpcError: Codable, Sendable {
             if let container = anyKeyContainer {
                 if let matchingKey = container.allKeys
                     .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
-                    let value = try container.decode(RpcError.self, forKey: matchingKey)
+                    let value = try container.decode(ErrorWrapperForRpcChunkError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
@@ -4959,10 +7146,10 @@ public enum JsonRpcResponseForRpcChunkResponseAndRpcError: Codable, Sendable {
             } else {
                 availableKeys = ""
             }
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcChunkResponseAndRpcError\(availableKeys)"
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcChunkResponseAndRpcChunkError\(availableKeys)"
         } else {
             contextDescription =
-                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcChunkResponseAndRpcError:\n" +
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcChunkResponseAndRpcChunkError:\n" +
                 decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
@@ -4985,11 +7172,11 @@ public enum JsonRpcResponseForRpcChunkResponseAndRpcError: Codable, Sendable {
     }
 }
 
-// MARK: - JsonRpcResponseForRpcClientConfigResponseAndRpcError
+// MARK: - JsonRpcResponseForRpcClientConfigResponseAndRpcClientConfigError
 
-public enum JsonRpcResponseForRpcClientConfigResponseAndRpcError: Codable, Sendable {
+public enum JsonRpcResponseForRpcClientConfigResponseAndRpcClientConfigError: Codable, Sendable {
     case result(RpcClientConfigResponse)
-    case error(RpcError)
+    case error(ErrorWrapperForRpcClientConfigError)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -5010,7 +7197,7 @@ public enum JsonRpcResponseForRpcClientConfigResponseAndRpcError: Codable, Senda
             if let container = anyKeyContainer {
                 if let matchingKey = container.allKeys
                     .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
-                    let value = try container.decode(RpcError.self, forKey: matchingKey)
+                    let value = try container.decode(ErrorWrapperForRpcClientConfigError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
@@ -5027,10 +7214,10 @@ public enum JsonRpcResponseForRpcClientConfigResponseAndRpcError: Codable, Senda
             } else {
                 availableKeys = ""
             }
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcClientConfigResponseAndRpcError\(availableKeys)"
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcClientConfigResponseAndRpcClientConfigError\(availableKeys)"
         } else {
             contextDescription =
-                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcClientConfigResponseAndRpcError:\n" +
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcClientConfigResponseAndRpcClientConfigError:\n" +
                 decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
@@ -5053,11 +7240,11 @@ public enum JsonRpcResponseForRpcClientConfigResponseAndRpcError: Codable, Senda
     }
 }
 
-// MARK: - JsonRpcResponseForRpcCongestionLevelResponseAndRpcError
+// MARK: - JsonRpcResponseForRpcCongestionLevelResponseAndRpcChunkError
 
-public enum JsonRpcResponseForRpcCongestionLevelResponseAndRpcError: Codable, Sendable {
+public enum JsonRpcResponseForRpcCongestionLevelResponseAndRpcChunkError: Codable, Sendable {
     case result(RpcCongestionLevelResponse)
-    case error(RpcError)
+    case error(ErrorWrapperForRpcChunkError)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -5078,7 +7265,7 @@ public enum JsonRpcResponseForRpcCongestionLevelResponseAndRpcError: Codable, Se
             if let container = anyKeyContainer {
                 if let matchingKey = container.allKeys
                     .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
-                    let value = try container.decode(RpcError.self, forKey: matchingKey)
+                    let value = try container.decode(ErrorWrapperForRpcChunkError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
@@ -5095,10 +7282,10 @@ public enum JsonRpcResponseForRpcCongestionLevelResponseAndRpcError: Codable, Se
             } else {
                 availableKeys = ""
             }
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcCongestionLevelResponseAndRpcError\(availableKeys)"
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcCongestionLevelResponseAndRpcChunkError\(availableKeys)"
         } else {
             contextDescription =
-                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcCongestionLevelResponseAndRpcError:\n" +
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcCongestionLevelResponseAndRpcChunkError:\n" +
                 decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
@@ -5121,11 +7308,11 @@ public enum JsonRpcResponseForRpcCongestionLevelResponseAndRpcError: Codable, Se
     }
 }
 
-// MARK: - JsonRpcResponseForRpcGasPriceResponseAndRpcError
+// MARK: - JsonRpcResponseForRpcGasPriceResponseAndRpcGasPriceError
 
-public enum JsonRpcResponseForRpcGasPriceResponseAndRpcError: Codable, Sendable {
+public enum JsonRpcResponseForRpcGasPriceResponseAndRpcGasPriceError: Codable, Sendable {
     case result(RpcGasPriceResponse)
-    case error(RpcError)
+    case error(ErrorWrapperForRpcGasPriceError)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -5146,7 +7333,7 @@ public enum JsonRpcResponseForRpcGasPriceResponseAndRpcError: Codable, Sendable 
             if let container = anyKeyContainer {
                 if let matchingKey = container.allKeys
                     .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
-                    let value = try container.decode(RpcError.self, forKey: matchingKey)
+                    let value = try container.decode(ErrorWrapperForRpcGasPriceError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
@@ -5163,10 +7350,10 @@ public enum JsonRpcResponseForRpcGasPriceResponseAndRpcError: Codable, Sendable 
             } else {
                 availableKeys = ""
             }
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcGasPriceResponseAndRpcError\(availableKeys)"
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcGasPriceResponseAndRpcGasPriceError\(availableKeys)"
         } else {
             contextDescription =
-                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcGasPriceResponseAndRpcError:\n" +
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcGasPriceResponseAndRpcGasPriceError:\n" +
                 decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
@@ -5189,11 +7376,11 @@ public enum JsonRpcResponseForRpcGasPriceResponseAndRpcError: Codable, Sendable 
     }
 }
 
-// MARK: - JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError
+// MARK: - JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcLightClientProofError
 
-public enum JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError: Codable, Sendable {
+public enum JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcLightClientProofError: Codable, Sendable {
     case result(RpcLightClientBlockProofResponse)
-    case error(RpcError)
+    case error(ErrorWrapperForRpcLightClientProofError)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -5214,7 +7401,7 @@ public enum JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError: Codab
             if let container = anyKeyContainer {
                 if let matchingKey = container.allKeys
                     .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
-                    let value = try container.decode(RpcError.self, forKey: matchingKey)
+                    let value = try container.decode(ErrorWrapperForRpcLightClientProofError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
@@ -5231,10 +7418,10 @@ public enum JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError: Codab
             } else {
                 availableKeys = ""
             }
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError\(availableKeys)"
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcLightClientProofError\(availableKeys)"
         } else {
             contextDescription =
-                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError:\n" +
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcLightClientProofError:\n" +
                 decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
@@ -5257,11 +7444,11 @@ public enum JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError: Codab
     }
 }
 
-// MARK: - JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError
+// MARK: - JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcLightClientProofError
 
-public enum JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError: Codable, Sendable {
+public enum JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcLightClientProofError: Codable, Sendable {
     case result(RpcLightClientExecutionProofResponse)
-    case error(RpcError)
+    case error(ErrorWrapperForRpcLightClientProofError)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -5282,7 +7469,7 @@ public enum JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError: C
             if let container = anyKeyContainer {
                 if let matchingKey = container.allKeys
                     .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
-                    let value = try container.decode(RpcError.self, forKey: matchingKey)
+                    let value = try container.decode(ErrorWrapperForRpcLightClientProofError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
@@ -5299,10 +7486,10 @@ public enum JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError: C
             } else {
                 availableKeys = ""
             }
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError\(availableKeys)"
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcLightClientProofError\(availableKeys)"
         } else {
             contextDescription =
-                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError:\n" +
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcLightClientProofError:\n" +
                 decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
@@ -5325,11 +7512,11 @@ public enum JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError: C
     }
 }
 
-// MARK: - JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError
+// MARK: - JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcLightClientNextBlockError
 
-public enum JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError: Codable, Sendable {
+public enum JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcLightClientNextBlockError: Codable, Sendable {
     case result(RpcLightClientNextBlockResponse)
-    case error(RpcError)
+    case error(ErrorWrapperForRpcLightClientNextBlockError)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -5350,7 +7537,10 @@ public enum JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError: Codabl
             if let container = anyKeyContainer {
                 if let matchingKey = container.allKeys
                     .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
-                    let value = try container.decode(RpcError.self, forKey: matchingKey)
+                    let value = try container.decode(
+                        ErrorWrapperForRpcLightClientNextBlockError.self,
+                        forKey: matchingKey,
+                    )
                     self = .error(value)
                     return
                 }
@@ -5367,10 +7557,10 @@ public enum JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError: Codabl
             } else {
                 availableKeys = ""
             }
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError\(availableKeys)"
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcLightClientNextBlockError\(availableKeys)"
         } else {
             contextDescription =
-                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError:\n" +
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcLightClientNextBlockError:\n" +
                 decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
@@ -5393,11 +7583,11 @@ public enum JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError: Codabl
     }
 }
 
-// MARK: - JsonRpcResponseForRpcNetworkInfoResponseAndRpcError
+// MARK: - JsonRpcResponseForRpcNetworkInfoResponseAndRpcNetworkInfoError
 
-public enum JsonRpcResponseForRpcNetworkInfoResponseAndRpcError: Codable, Sendable {
+public enum JsonRpcResponseForRpcNetworkInfoResponseAndRpcNetworkInfoError: Codable, Sendable {
     case result(RpcNetworkInfoResponse)
-    case error(RpcError)
+    case error(ErrorWrapperForRpcNetworkInfoError)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -5418,7 +7608,7 @@ public enum JsonRpcResponseForRpcNetworkInfoResponseAndRpcError: Codable, Sendab
             if let container = anyKeyContainer {
                 if let matchingKey = container.allKeys
                     .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
-                    let value = try container.decode(RpcError.self, forKey: matchingKey)
+                    let value = try container.decode(ErrorWrapperForRpcNetworkInfoError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
@@ -5435,10 +7625,10 @@ public enum JsonRpcResponseForRpcNetworkInfoResponseAndRpcError: Codable, Sendab
             } else {
                 availableKeys = ""
             }
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcNetworkInfoResponseAndRpcError\(availableKeys)"
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcNetworkInfoResponseAndRpcNetworkInfoError\(availableKeys)"
         } else {
             contextDescription =
-                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcNetworkInfoResponseAndRpcError:\n" +
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcNetworkInfoResponseAndRpcNetworkInfoError:\n" +
                 decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
@@ -5461,11 +7651,11 @@ public enum JsonRpcResponseForRpcNetworkInfoResponseAndRpcError: Codable, Sendab
     }
 }
 
-// MARK: - JsonRpcResponseForRpcProtocolConfigResponseAndRpcError
+// MARK: - JsonRpcResponseForRpcProtocolConfigResponseAndRpcProtocolConfigError
 
-public enum JsonRpcResponseForRpcProtocolConfigResponseAndRpcError: Codable, Sendable {
+public enum JsonRpcResponseForRpcProtocolConfigResponseAndRpcProtocolConfigError: Codable, Sendable {
     case result(RpcProtocolConfigResponse)
-    case error(RpcError)
+    case error(ErrorWrapperForRpcProtocolConfigError)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -5486,7 +7676,7 @@ public enum JsonRpcResponseForRpcProtocolConfigResponseAndRpcError: Codable, Sen
             if let container = anyKeyContainer {
                 if let matchingKey = container.allKeys
                     .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
-                    let value = try container.decode(RpcError.self, forKey: matchingKey)
+                    let value = try container.decode(ErrorWrapperForRpcProtocolConfigError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
@@ -5503,10 +7693,10 @@ public enum JsonRpcResponseForRpcProtocolConfigResponseAndRpcError: Codable, Sen
             } else {
                 availableKeys = ""
             }
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcProtocolConfigResponseAndRpcError\(availableKeys)"
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcProtocolConfigResponseAndRpcProtocolConfigError\(availableKeys)"
         } else {
             contextDescription =
-                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcProtocolConfigResponseAndRpcError:\n" +
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcProtocolConfigResponseAndRpcProtocolConfigError:\n" +
                 decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
@@ -5529,11 +7719,11 @@ public enum JsonRpcResponseForRpcProtocolConfigResponseAndRpcError: Codable, Sen
     }
 }
 
-// MARK: - JsonRpcResponseForRpcQueryResponseAndRpcError
+// MARK: - JsonRpcResponseForRpcQueryResponseAndRpcQueryError
 
-public enum JsonRpcResponseForRpcQueryResponseAndRpcError: Codable, Sendable {
+public enum JsonRpcResponseForRpcQueryResponseAndRpcQueryError: Codable, Sendable {
     case result(RpcQueryResponse)
-    case error(RpcError)
+    case error(ErrorWrapperForRpcQueryError)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -5554,7 +7744,7 @@ public enum JsonRpcResponseForRpcQueryResponseAndRpcError: Codable, Sendable {
             if let container = anyKeyContainer {
                 if let matchingKey = container.allKeys
                     .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
-                    let value = try container.decode(RpcError.self, forKey: matchingKey)
+                    let value = try container.decode(ErrorWrapperForRpcQueryError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
@@ -5571,10 +7761,10 @@ public enum JsonRpcResponseForRpcQueryResponseAndRpcError: Codable, Sendable {
             } else {
                 availableKeys = ""
             }
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcQueryResponseAndRpcError\(availableKeys)"
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcQueryResponseAndRpcQueryError\(availableKeys)"
         } else {
             contextDescription =
-                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcQueryResponseAndRpcError:\n" +
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcQueryResponseAndRpcQueryError:\n" +
                 decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
@@ -5597,11 +7787,11 @@ public enum JsonRpcResponseForRpcQueryResponseAndRpcError: Codable, Sendable {
     }
 }
 
-// MARK: - JsonRpcResponseForRpcReceiptResponseAndRpcError
+// MARK: - JsonRpcResponseForRpcReceiptResponseAndRpcReceiptError
 
-public enum JsonRpcResponseForRpcReceiptResponseAndRpcError: Codable, Sendable {
+public enum JsonRpcResponseForRpcReceiptResponseAndRpcReceiptError: Codable, Sendable {
     case result(RpcReceiptResponse)
-    case error(RpcError)
+    case error(ErrorWrapperForRpcReceiptError)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -5622,7 +7812,7 @@ public enum JsonRpcResponseForRpcReceiptResponseAndRpcError: Codable, Sendable {
             if let container = anyKeyContainer {
                 if let matchingKey = container.allKeys
                     .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
-                    let value = try container.decode(RpcError.self, forKey: matchingKey)
+                    let value = try container.decode(ErrorWrapperForRpcReceiptError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
@@ -5639,10 +7829,10 @@ public enum JsonRpcResponseForRpcReceiptResponseAndRpcError: Codable, Sendable {
             } else {
                 availableKeys = ""
             }
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcReceiptResponseAndRpcError\(availableKeys)"
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcReceiptResponseAndRpcReceiptError\(availableKeys)"
         } else {
             contextDescription =
-                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcReceiptResponseAndRpcError:\n" +
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcReceiptResponseAndRpcReceiptError:\n" +
                 decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
@@ -5665,11 +7855,11 @@ public enum JsonRpcResponseForRpcReceiptResponseAndRpcError: Codable, Sendable {
     }
 }
 
-// MARK: - JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError
+// MARK: - JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcSplitStorageInfoError
 
-public enum JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError: Codable, Sendable {
+public enum JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcSplitStorageInfoError: Codable, Sendable {
     case result(RpcSplitStorageInfoResponse)
-    case error(RpcError)
+    case error(ErrorWrapperForRpcSplitStorageInfoError)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -5690,7 +7880,7 @@ public enum JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError: Codable, S
             if let container = anyKeyContainer {
                 if let matchingKey = container.allKeys
                     .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
-                    let value = try container.decode(RpcError.self, forKey: matchingKey)
+                    let value = try container.decode(ErrorWrapperForRpcSplitStorageInfoError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
@@ -5707,10 +7897,10 @@ public enum JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError: Codable, S
             } else {
                 availableKeys = ""
             }
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError\(availableKeys)"
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcSplitStorageInfoError\(availableKeys)"
         } else {
             contextDescription =
-                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError:\n" +
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcSplitStorageInfoError:\n" +
                 decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
@@ -5733,11 +7923,11 @@ public enum JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError: Codable, S
     }
 }
 
-// MARK: - JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError
+// MARK: - JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcStateChangesError
 
-public enum JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError: Codable, Sendable {
+public enum JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcStateChangesError: Codable, Sendable {
     case result(RpcStateChangesInBlockByTypeResponse)
-    case error(RpcError)
+    case error(ErrorWrapperForRpcStateChangesError)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -5758,7 +7948,7 @@ public enum JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError: C
             if let container = anyKeyContainer {
                 if let matchingKey = container.allKeys
                     .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
-                    let value = try container.decode(RpcError.self, forKey: matchingKey)
+                    let value = try container.decode(ErrorWrapperForRpcStateChangesError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
@@ -5775,10 +7965,10 @@ public enum JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError: C
             } else {
                 availableKeys = ""
             }
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError\(availableKeys)"
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcStateChangesError\(availableKeys)"
         } else {
             contextDescription =
-                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError:\n" +
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcStateChangesError:\n" +
                 decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
@@ -5801,11 +7991,11 @@ public enum JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError: C
     }
 }
 
-// MARK: - JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError
+// MARK: - JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcStateChangesError
 
-public enum JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError: Codable, Sendable {
+public enum JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcStateChangesError: Codable, Sendable {
     case result(RpcStateChangesInBlockResponse)
-    case error(RpcError)
+    case error(ErrorWrapperForRpcStateChangesError)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -5826,7 +8016,7 @@ public enum JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError: Codable
             if let container = anyKeyContainer {
                 if let matchingKey = container.allKeys
                     .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
-                    let value = try container.decode(RpcError.self, forKey: matchingKey)
+                    let value = try container.decode(ErrorWrapperForRpcStateChangesError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
@@ -5843,10 +8033,10 @@ public enum JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError: Codable
             } else {
                 availableKeys = ""
             }
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError\(availableKeys)"
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcStateChangesError\(availableKeys)"
         } else {
             contextDescription =
-                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError:\n" +
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcStateChangesError:\n" +
                 decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
@@ -5869,11 +8059,11 @@ public enum JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError: Codable
     }
 }
 
-// MARK: - JsonRpcResponseForRpcStatusResponseAndRpcError
+// MARK: - JsonRpcResponseForRpcStatusResponseAndRpcStatusError
 
-public enum JsonRpcResponseForRpcStatusResponseAndRpcError: Codable, Sendable {
+public enum JsonRpcResponseForRpcStatusResponseAndRpcStatusError: Codable, Sendable {
     case result(RpcStatusResponse)
-    case error(RpcError)
+    case error(ErrorWrapperForRpcStatusError)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -5894,7 +8084,7 @@ public enum JsonRpcResponseForRpcStatusResponseAndRpcError: Codable, Sendable {
             if let container = anyKeyContainer {
                 if let matchingKey = container.allKeys
                     .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
-                    let value = try container.decode(RpcError.self, forKey: matchingKey)
+                    let value = try container.decode(ErrorWrapperForRpcStatusError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
@@ -5911,10 +8101,10 @@ public enum JsonRpcResponseForRpcStatusResponseAndRpcError: Codable, Sendable {
             } else {
                 availableKeys = ""
             }
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcStatusResponseAndRpcError\(availableKeys)"
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcStatusResponseAndRpcStatusError\(availableKeys)"
         } else {
             contextDescription =
-                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcStatusResponseAndRpcError:\n" +
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcStatusResponseAndRpcStatusError:\n" +
                 decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
@@ -5937,11 +8127,11 @@ public enum JsonRpcResponseForRpcStatusResponseAndRpcError: Codable, Sendable {
     }
 }
 
-// MARK: - JsonRpcResponseForRpcTransactionResponseAndRpcError
+// MARK: - JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError
 
-public enum JsonRpcResponseForRpcTransactionResponseAndRpcError: Codable, Sendable {
+public enum JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError: Codable, Sendable {
     case result(RpcTransactionResponse)
-    case error(RpcError)
+    case error(ErrorWrapperForRpcTransactionError)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -5962,7 +8152,7 @@ public enum JsonRpcResponseForRpcTransactionResponseAndRpcError: Codable, Sendab
             if let container = anyKeyContainer {
                 if let matchingKey = container.allKeys
                     .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
-                    let value = try container.decode(RpcError.self, forKey: matchingKey)
+                    let value = try container.decode(ErrorWrapperForRpcTransactionError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
@@ -5979,10 +8169,10 @@ public enum JsonRpcResponseForRpcTransactionResponseAndRpcError: Codable, Sendab
             } else {
                 availableKeys = ""
             }
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcTransactionResponseAndRpcError\(availableKeys)"
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError\(availableKeys)"
         } else {
             contextDescription =
-                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcTransactionResponseAndRpcError:\n" +
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError:\n" +
                 decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
@@ -6005,11 +8195,11 @@ public enum JsonRpcResponseForRpcTransactionResponseAndRpcError: Codable, Sendab
     }
 }
 
-// MARK: - JsonRpcResponseForRpcValidatorResponseAndRpcError
+// MARK: - JsonRpcResponseForRpcValidatorResponseAndRpcValidatorError
 
-public enum JsonRpcResponseForRpcValidatorResponseAndRpcError: Codable, Sendable {
+public enum JsonRpcResponseForRpcValidatorResponseAndRpcValidatorError: Codable, Sendable {
     case result(RpcValidatorResponse)
-    case error(RpcError)
+    case error(ErrorWrapperForRpcValidatorError)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -6030,7 +8220,7 @@ public enum JsonRpcResponseForRpcValidatorResponseAndRpcError: Codable, Sendable
             if let container = anyKeyContainer {
                 if let matchingKey = container.allKeys
                     .first(where: { key in key.stringValue.caseInsensitiveCompare("error") == .orderedSame }) {
-                    let value = try container.decode(RpcError.self, forKey: matchingKey)
+                    let value = try container.decode(ErrorWrapperForRpcValidatorError.self, forKey: matchingKey)
                     self = .error(value)
                     return
                 }
@@ -6047,10 +8237,10 @@ public enum JsonRpcResponseForRpcValidatorResponseAndRpcError: Codable, Sendable
             } else {
                 availableKeys = ""
             }
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcValidatorResponseAndRpcError\(availableKeys)"
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcValidatorResponseAndRpcValidatorError\(availableKeys)"
         } else {
             contextDescription =
-                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcValidatorResponseAndRpcError:\n" +
+                "Could not decode any of the oneOf/anyOf variants for JsonRpcResponseForRpcValidatorResponseAndRpcValidatorError:\n" +
                 decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
@@ -6149,6 +8339,9 @@ public enum NonDelegateAction: Codable, Sendable {
     case deployGlobalContract(DeployGlobalContractAction)
     case useGlobalContract(UseGlobalContractAction)
     case deterministicStateInit(DeterministicStateInitAction)
+    case addGasKey(AddGasKeyAction)
+    case deleteGasKey(DeleteGasKeyAction)
+    case transferToGasKey(TransferToGasKeyAction)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -6291,6 +8484,44 @@ public enum NonDelegateAction: Codable, Sendable {
         } catch {
             decodingErrors.append(".deterministicStateInit: \(describeDecodingError(error))")
         }
+        do {
+            if let container = anyKeyContainer {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("AddGasKey") == .orderedSame }) {
+                    let value = try container.decode(AddGasKeyAction.self, forKey: matchingKey)
+                    self = .addGasKey(value)
+                    return
+                }
+            }
+        } catch {
+            decodingErrors.append(".addGasKey: \(describeDecodingError(error))")
+        }
+        do {
+            if let container = anyKeyContainer {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("DeleteGasKey") == .orderedSame }) {
+                    let value = try container.decode(DeleteGasKeyAction.self, forKey: matchingKey)
+                    self = .deleteGasKey(value)
+                    return
+                }
+            }
+        } catch {
+            decodingErrors.append(".deleteGasKey: \(describeDecodingError(error))")
+        }
+        do {
+            if let container = anyKeyContainer {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("TransferToGasKey") == .orderedSame
+                    }) {
+                    let value = try container.decode(TransferToGasKeyAction.self, forKey: matchingKey)
+                    self = .transferToGasKey(value)
+                    return
+                }
+            }
+        } catch {
+            decodingErrors.append(".transferToGasKey: \(describeDecodingError(error))")
+        }
         let contextDescription: String
         if decodingErrors.isEmpty {
             let availableKeys: String
@@ -6320,6 +8551,9 @@ public enum NonDelegateAction: Codable, Sendable {
         case deployGlobalContract = "DeployGlobalContract"
         case useGlobalContract = "UseGlobalContract"
         case deterministicStateInit = "DeterministicStateInit"
+        case addGasKey = "AddGasKey"
+        case deleteGasKey = "DeleteGasKey"
+        case transferToGasKey = "TransferToGasKey"
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -6357,6 +8591,15 @@ public enum NonDelegateAction: Codable, Sendable {
         case let .deterministicStateInit(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .deterministicStateInit)
+        case let .addGasKey(value):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(value, forKey: .addGasKey)
+        case let .deleteGasKey(value):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(value, forKey: .deleteGasKey)
+        case let .transferToGasKey(value):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(value, forKey: .transferToGasKey)
         }
     }
 }
@@ -6712,6 +8955,16 @@ public struct ReceiptValidationErrorOneOfReceiptSizeExceededInline: Codable, Sen
     }
 }
 
+public struct ReceiptValidationErrorOneOfInvalidRefundToInline: Codable, Sendable {
+    public let accountId: String
+
+    public init(
+        accountId: String,
+    ) {
+        self.accountId = accountId
+    }
+}
+
 public enum ReceiptValidationError: Codable, Sendable {
     case invalidPredecessorId(ReceiptValidationErrorOneOfInvalidPredecessorIdInline)
     case invalidReceiverId(ReceiptValidationErrorOneOfInvalidReceiverIdInline)
@@ -6721,6 +8974,7 @@ public enum ReceiptValidationError: Codable, Sendable {
     case numberInputDataDependenciesExceeded(ReceiptValidationErrorOneOfNumberInputDataDependenciesExceededInline)
     case actionsValidation(ActionsValidationError)
     case receiptSizeExceeded(ReceiptValidationErrorOneOfReceiptSizeExceededInline)
+    case invalidRefundTo(ReceiptValidationErrorOneOfInvalidRefundToInline)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -6858,6 +9112,23 @@ public enum ReceiptValidationError: Codable, Sendable {
         } catch {
             decodingErrors.append(".receiptSizeExceeded: \(describeDecodingError(error))")
         }
+        do {
+            if let container = anyKeyContainer {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in
+                        key.stringValue.caseInsensitiveCompare("InvalidRefundTo") == .orderedSame
+                    }) {
+                    let value = try container.decode(
+                        ReceiptValidationErrorOneOfInvalidRefundToInline.self,
+                        forKey: matchingKey,
+                    )
+                    self = .invalidRefundTo(value)
+                    return
+                }
+            }
+        } catch {
+            decodingErrors.append(".invalidRefundTo: \(describeDecodingError(error))")
+        }
         let contextDescription: String
         if decodingErrors.isEmpty {
             let availableKeys: String
@@ -6884,6 +9155,7 @@ public enum ReceiptValidationError: Codable, Sendable {
         case numberInputDataDependenciesExceeded = "NumberInputDataDependenciesExceeded"
         case actionsValidation = "ActionsValidation"
         case receiptSizeExceeded = "ReceiptSizeExceeded"
+        case invalidRefundTo = "InvalidRefundTo"
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -6912,6 +9184,107 @@ public enum ReceiptValidationError: Codable, Sendable {
         case let .receiptSizeExceeded(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .receiptSizeExceeded)
+        case let .invalidRefundTo(value):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(value, forKey: .invalidRefundTo)
+        }
+    }
+}
+
+// MARK: - RpcBlockError
+
+public struct RpcBlockErrorOneOfInfoName: Codable, Sendable {
+    public let info: AnyCodable
+    public let name: String
+
+    public init(
+        info: AnyCodable,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public struct RpcBlockErrorOneOfInfoName1: Codable, Sendable {
+    public let info: AnyCodable
+    public let name: String
+
+    public init(
+        info: AnyCodable,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public enum RpcBlockError: Codable, Sendable {
+    case rpcBlockErrorInfoName(RpcBlockErrorOneOfInfoName)
+    case name(String)
+    case rpcBlockErrorInfoName1(RpcBlockErrorOneOfInfoName1)
+
+    public init(from decoder: Decoder) throws {
+        var decodingErrors: [String] = []
+        let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcBlockErrorOneOfInfoName.self)
+            self = .rpcBlockErrorInfoName(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcBlockErrorInfoName: \(describeDecodingError(error))")
+        }
+        do {
+            if let container = anyKeyContainer {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("name") == .orderedSame }) {
+                    let value = try container.decode(String.self, forKey: matchingKey)
+                    self = .name(value)
+                    return
+                }
+            }
+        } catch {
+            decodingErrors.append(".name: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcBlockErrorOneOfInfoName1.self)
+            self = .rpcBlockErrorInfoName1(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcBlockErrorInfoName1: \(describeDecodingError(error))")
+        }
+        let contextDescription: String
+        if decodingErrors.isEmpty {
+            let availableKeys: String
+            if let keys = anyKeyContainer?.allKeys, !keys.isEmpty {
+                let joined = keys.map { "\($0.stringValue)" }.joined(separator: ", ")
+                availableKeys = " Available keys: [\(joined)]"
+            } else {
+                availableKeys = ""
+            }
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcBlockError\(availableKeys)"
+        } else {
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcBlockError:\n" +
+                decodingErrors.joined(separator: "\n")
+        }
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case name
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .name(value):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(value, forKey: .name)
+        case let .rpcBlockErrorInfoName(value):
+            var singleContainer = encoder.singleValueContainer()
+            try singleContainer.encode(value)
+        case let .rpcBlockErrorInfoName1(value):
+            var singleContainer = encoder.singleValueContainer()
+            try singleContainer.encode(value)
         }
     }
 }
@@ -7004,6 +9377,132 @@ public enum RpcBlockRequest: Codable, Sendable {
     }
 }
 
+// MARK: - RpcChunkError
+
+public struct RpcChunkErrorOneOfInfoName: Codable, Sendable {
+    public let info: AnyCodable
+    public let name: String
+
+    public init(
+        info: AnyCodable,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public struct RpcChunkErrorOneOfInfoName1: Codable, Sendable {
+    public let info: AnyCodable
+    public let name: String
+
+    public init(
+        info: AnyCodable,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public struct RpcChunkErrorOneOfInfoName2: Codable, Sendable {
+    public let info: InlineObject
+    public let name: String
+
+    public init(
+        info: InlineObject,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public struct RpcChunkErrorOneOfInfoName3: Codable, Sendable {
+    public let info: InlineObject
+    public let name: String
+
+    public init(
+        info: InlineObject,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public enum RpcChunkError: Codable, Sendable {
+    case rpcChunkErrorInfoName(RpcChunkErrorOneOfInfoName)
+    case rpcChunkErrorInfoName1(RpcChunkErrorOneOfInfoName1)
+    case rpcChunkErrorInfoName2(RpcChunkErrorOneOfInfoName2)
+    case rpcChunkErrorInfoName3(RpcChunkErrorOneOfInfoName3)
+
+    public init(from decoder: Decoder) throws {
+        var decodingErrors: [String] = []
+        let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcChunkErrorOneOfInfoName.self)
+            self = .rpcChunkErrorInfoName(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcChunkErrorInfoName: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcChunkErrorOneOfInfoName1.self)
+            self = .rpcChunkErrorInfoName1(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcChunkErrorInfoName1: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcChunkErrorOneOfInfoName2.self)
+            self = .rpcChunkErrorInfoName2(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcChunkErrorInfoName2: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcChunkErrorOneOfInfoName3.self)
+            self = .rpcChunkErrorInfoName3(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcChunkErrorInfoName3: \(describeDecodingError(error))")
+        }
+        let contextDescription: String
+        if decodingErrors.isEmpty {
+            let availableKeys: String
+            if let keys = anyKeyContainer?.allKeys, !keys.isEmpty {
+                let joined = keys.map { "\($0.stringValue)" }.joined(separator: ", ")
+                availableKeys = " Available keys: [\(joined)]"
+            } else {
+                availableKeys = ""
+            }
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcChunkError\(availableKeys)"
+        } else {
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcChunkError:\n" +
+                decodingErrors.joined(separator: "\n")
+        }
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .rpcChunkErrorInfoName(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .rpcChunkErrorInfoName1(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .rpcChunkErrorInfoName2(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .rpcChunkErrorInfoName3(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        }
+    }
+}
+
 // MARK: - RpcChunkRequest
 
 public struct BlockShardId: Codable, Sendable {
@@ -7077,6 +9576,60 @@ public enum RpcChunkRequest: Codable, Sendable {
     }
 }
 
+// MARK: - RpcClientConfigError
+
+public struct RpcClientConfigErrorOneOfInfoName: Codable, Sendable {
+    public let info: AnyCodable
+    public let name: String
+
+    public init(
+        info: AnyCodable,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public enum RpcClientConfigError: Codable, Sendable {
+    case rpcClientConfigErrorInfoName(RpcClientConfigErrorOneOfInfoName)
+
+    public init(from decoder: Decoder) throws {
+        var decodingErrors: [String] = []
+        let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcClientConfigErrorOneOfInfoName.self)
+            self = .rpcClientConfigErrorInfoName(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcClientConfigErrorInfoName: \(describeDecodingError(error))")
+        }
+        let contextDescription: String
+        if decodingErrors.isEmpty {
+            let availableKeys: String
+            if let keys = anyKeyContainer?.allKeys, !keys.isEmpty {
+                let joined = keys.map { "\($0.stringValue)" }.joined(separator: ", ")
+                availableKeys = " Available keys: [\(joined)]"
+            } else {
+                availableKeys = ""
+            }
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcClientConfigError\(availableKeys)"
+        } else {
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcClientConfigError:\n" +
+                decodingErrors.joined(separator: "\n")
+        }
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .rpcClientConfigErrorInfoName(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        }
+    }
+}
+
 // MARK: - RpcCongestionLevelRequest
 
 public enum RpcCongestionLevelRequest: Codable, Sendable {
@@ -7137,75 +9690,54 @@ public enum RpcCongestionLevelRequest: Codable, Sendable {
     }
 }
 
-// MARK: - RpcError
+// MARK: - RpcGasPriceError
 
-public struct RpcErrorOneOfCauseName: Codable, Sendable {
-    public let cause: RpcRequestValidationErrorKind
+public struct RpcGasPriceErrorOneOfInfoName: Codable, Sendable {
+    public let info: AnyCodable
     public let name: String
 
     public init(
-        cause: RpcRequestValidationErrorKind,
+        info: AnyCodable,
         name: String,
     ) {
-        self.cause = cause
+        self.info = info
         self.name = name
     }
 }
 
-public struct RpcErrorOneOfCauseName1: Codable, Sendable {
-    public let cause: AnyCodable
+public struct RpcGasPriceErrorOneOfInfoName1: Codable, Sendable {
+    public let info: AnyCodable
     public let name: String
 
     public init(
-        cause: AnyCodable,
+        info: AnyCodable,
         name: String,
     ) {
-        self.cause = cause
+        self.info = info
         self.name = name
     }
 }
 
-public struct RpcErrorOneOfCauseName2: Codable, Sendable {
-    public let cause: AnyCodable
-    public let name: String
-
-    public init(
-        cause: AnyCodable,
-        name: String,
-    ) {
-        self.cause = cause
-        self.name = name
-    }
-}
-
-public enum RpcError: Codable, Sendable {
-    case rpcErrorCauseName(RpcErrorOneOfCauseName)
-    case rpcErrorCauseName1(RpcErrorOneOfCauseName1)
-    case rpcErrorCauseName2(RpcErrorOneOfCauseName2)
+public enum RpcGasPriceError: Codable, Sendable {
+    case rpcGasPriceErrorInfoName(RpcGasPriceErrorOneOfInfoName)
+    case rpcGasPriceErrorInfoName1(RpcGasPriceErrorOneOfInfoName1)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
         let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
         do {
-            let value = try decoder.singleValueContainer().decode(RpcErrorOneOfCauseName.self)
-            self = .rpcErrorCauseName(value)
+            let value = try decoder.singleValueContainer().decode(RpcGasPriceErrorOneOfInfoName.self)
+            self = .rpcGasPriceErrorInfoName(value)
             return
         } catch {
-            decodingErrors.append(".rpcErrorCauseName: \(describeDecodingError(error))")
+            decodingErrors.append(".rpcGasPriceErrorInfoName: \(describeDecodingError(error))")
         }
         do {
-            let value = try decoder.singleValueContainer().decode(RpcErrorOneOfCauseName1.self)
-            self = .rpcErrorCauseName1(value)
+            let value = try decoder.singleValueContainer().decode(RpcGasPriceErrorOneOfInfoName1.self)
+            self = .rpcGasPriceErrorInfoName1(value)
             return
         } catch {
-            decodingErrors.append(".rpcErrorCauseName1: \(describeDecodingError(error))")
-        }
-        do {
-            let value = try decoder.singleValueContainer().decode(RpcErrorOneOfCauseName2.self)
-            self = .rpcErrorCauseName2(value)
-            return
-        } catch {
-            decodingErrors.append(".rpcErrorCauseName2: \(describeDecodingError(error))")
+            decodingErrors.append(".rpcGasPriceErrorInfoName1: \(describeDecodingError(error))")
         }
         let contextDescription: String
         if decodingErrors.isEmpty {
@@ -7216,23 +9748,20 @@ public enum RpcError: Codable, Sendable {
             } else {
                 availableKeys = ""
             }
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcError\(availableKeys)"
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcGasPriceError\(availableKeys)"
         } else {
-            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcError:\n" + decodingErrors
-                .joined(separator: "\n")
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcGasPriceError:\n" +
+                decodingErrors.joined(separator: "\n")
         }
         throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
     }
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case let .rpcErrorCauseName(value):
+        case let .rpcGasPriceErrorInfoName(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case let .rpcErrorCauseName1(value):
-            var container = encoder.singleValueContainer()
-            try container.encode(value)
-        case let .rpcErrorCauseName2(value):
+        case let .rpcGasPriceErrorInfoName1(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
         }
@@ -7334,6 +9863,469 @@ public enum RpcLightClientExecutionProofRequest: Codable, Sendable {
     }
 }
 
+// MARK: - RpcLightClientNextBlockError
+
+public struct RpcLightClientNextBlockErrorOneOfInfoName: Codable, Sendable {
+    public let info: AnyCodable
+    public let name: String
+
+    public init(
+        info: AnyCodable,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public struct RpcLightClientNextBlockErrorOneOfInfoName1: Codable, Sendable {
+    public let info: AnyCodable
+    public let name: String
+
+    public init(
+        info: AnyCodable,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public struct RpcLightClientNextBlockErrorOneOfInfoName2: Codable, Sendable {
+    public let info: InlineObject
+    public let name: String
+
+    public init(
+        info: InlineObject,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public enum RpcLightClientNextBlockError: Codable, Sendable {
+    case rpcLightClientNextBlockErrorInfoName(RpcLightClientNextBlockErrorOneOfInfoName)
+    case rpcLightClientNextBlockErrorInfoName1(RpcLightClientNextBlockErrorOneOfInfoName1)
+    case rpcLightClientNextBlockErrorInfoName2(RpcLightClientNextBlockErrorOneOfInfoName2)
+
+    public init(from decoder: Decoder) throws {
+        var decodingErrors: [String] = []
+        let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcLightClientNextBlockErrorOneOfInfoName.self)
+            self = .rpcLightClientNextBlockErrorInfoName(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcLightClientNextBlockErrorInfoName: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcLightClientNextBlockErrorOneOfInfoName1.self)
+            self = .rpcLightClientNextBlockErrorInfoName1(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcLightClientNextBlockErrorInfoName1: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcLightClientNextBlockErrorOneOfInfoName2.self)
+            self = .rpcLightClientNextBlockErrorInfoName2(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcLightClientNextBlockErrorInfoName2: \(describeDecodingError(error))")
+        }
+        let contextDescription: String
+        if decodingErrors.isEmpty {
+            let availableKeys: String
+            if let keys = anyKeyContainer?.allKeys, !keys.isEmpty {
+                let joined = keys.map { "\($0.stringValue)" }.joined(separator: ", ")
+                availableKeys = " Available keys: [\(joined)]"
+            } else {
+                availableKeys = ""
+            }
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcLightClientNextBlockError\(availableKeys)"
+        } else {
+            contextDescription =
+                "Could not decode any of the oneOf/anyOf variants for RpcLightClientNextBlockError:\n" +
+                decodingErrors.joined(separator: "\n")
+        }
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .rpcLightClientNextBlockErrorInfoName(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .rpcLightClientNextBlockErrorInfoName1(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .rpcLightClientNextBlockErrorInfoName2(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        }
+    }
+}
+
+// MARK: - RpcLightClientProofError
+
+public struct RpcLightClientProofErrorOneOfInfoName: Codable, Sendable {
+    public let info: AnyCodable
+    public let name: String
+
+    public init(
+        info: AnyCodable,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public struct RpcLightClientProofErrorOneOfInfoName1: Codable, Sendable {
+    public let info: InlineObject
+    public let name: String
+
+    public init(
+        info: InlineObject,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public struct RpcLightClientProofErrorOneOfInfoName2: Codable, Sendable {
+    public let info: InlineObject
+    public let name: String
+
+    public init(
+        info: InlineObject,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public struct RpcLightClientProofErrorOneOfInfoName3: Codable, Sendable {
+    public let info: InlineObject
+    public let name: String
+
+    public init(
+        info: InlineObject,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public struct RpcLightClientProofErrorOneOfInfoName4: Codable, Sendable {
+    public let info: InlineObject
+    public let name: String
+
+    public init(
+        info: InlineObject,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public struct RpcLightClientProofErrorOneOfInfoName5: Codable, Sendable {
+    public let info: AnyCodable
+    public let name: String
+
+    public init(
+        info: AnyCodable,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public enum RpcLightClientProofError: Codable, Sendable {
+    case rpcLightClientProofErrorInfoName(RpcLightClientProofErrorOneOfInfoName)
+    case rpcLightClientProofErrorInfoName1(RpcLightClientProofErrorOneOfInfoName1)
+    case rpcLightClientProofErrorInfoName2(RpcLightClientProofErrorOneOfInfoName2)
+    case rpcLightClientProofErrorInfoName3(RpcLightClientProofErrorOneOfInfoName3)
+    case rpcLightClientProofErrorInfoName4(RpcLightClientProofErrorOneOfInfoName4)
+    case rpcLightClientProofErrorInfoName5(RpcLightClientProofErrorOneOfInfoName5)
+
+    public init(from decoder: Decoder) throws {
+        var decodingErrors: [String] = []
+        let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcLightClientProofErrorOneOfInfoName.self)
+            self = .rpcLightClientProofErrorInfoName(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcLightClientProofErrorInfoName: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcLightClientProofErrorOneOfInfoName1.self)
+            self = .rpcLightClientProofErrorInfoName1(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcLightClientProofErrorInfoName1: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcLightClientProofErrorOneOfInfoName2.self)
+            self = .rpcLightClientProofErrorInfoName2(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcLightClientProofErrorInfoName2: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcLightClientProofErrorOneOfInfoName3.self)
+            self = .rpcLightClientProofErrorInfoName3(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcLightClientProofErrorInfoName3: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcLightClientProofErrorOneOfInfoName4.self)
+            self = .rpcLightClientProofErrorInfoName4(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcLightClientProofErrorInfoName4: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcLightClientProofErrorOneOfInfoName5.self)
+            self = .rpcLightClientProofErrorInfoName5(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcLightClientProofErrorInfoName5: \(describeDecodingError(error))")
+        }
+        let contextDescription: String
+        if decodingErrors.isEmpty {
+            let availableKeys: String
+            if let keys = anyKeyContainer?.allKeys, !keys.isEmpty {
+                let joined = keys.map { "\($0.stringValue)" }.joined(separator: ", ")
+                availableKeys = " Available keys: [\(joined)]"
+            } else {
+                availableKeys = ""
+            }
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcLightClientProofError\(availableKeys)"
+        } else {
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcLightClientProofError:\n" +
+                decodingErrors.joined(separator: "\n")
+        }
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .rpcLightClientProofErrorInfoName(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .rpcLightClientProofErrorInfoName1(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .rpcLightClientProofErrorInfoName2(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .rpcLightClientProofErrorInfoName3(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .rpcLightClientProofErrorInfoName4(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .rpcLightClientProofErrorInfoName5(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        }
+    }
+}
+
+// MARK: - RpcMaintenanceWindowsError
+
+public struct RpcMaintenanceWindowsErrorOneOfInfoName: Codable, Sendable {
+    public let info: AnyCodable
+    public let name: String
+
+    public init(
+        info: AnyCodable,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public enum RpcMaintenanceWindowsError: Codable, Sendable {
+    case rpcMaintenanceWindowsErrorInfoName(RpcMaintenanceWindowsErrorOneOfInfoName)
+
+    public init(from decoder: Decoder) throws {
+        var decodingErrors: [String] = []
+        let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcMaintenanceWindowsErrorOneOfInfoName.self)
+            self = .rpcMaintenanceWindowsErrorInfoName(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcMaintenanceWindowsErrorInfoName: \(describeDecodingError(error))")
+        }
+        let contextDescription: String
+        if decodingErrors.isEmpty {
+            let availableKeys: String
+            if let keys = anyKeyContainer?.allKeys, !keys.isEmpty {
+                let joined = keys.map { "\($0.stringValue)" }.joined(separator: ", ")
+                availableKeys = " Available keys: [\(joined)]"
+            } else {
+                availableKeys = ""
+            }
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcMaintenanceWindowsError\(availableKeys)"
+        } else {
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcMaintenanceWindowsError:\n" +
+                decodingErrors.joined(separator: "\n")
+        }
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .rpcMaintenanceWindowsErrorInfoName(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        }
+    }
+}
+
+// MARK: - RpcNetworkInfoError
+
+public struct RpcNetworkInfoErrorOneOfInfoName: Codable, Sendable {
+    public let info: AnyCodable
+    public let name: String
+
+    public init(
+        info: AnyCodable,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public enum RpcNetworkInfoError: Codable, Sendable {
+    case rpcNetworkInfoErrorInfoName(RpcNetworkInfoErrorOneOfInfoName)
+
+    public init(from decoder: Decoder) throws {
+        var decodingErrors: [String] = []
+        let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcNetworkInfoErrorOneOfInfoName.self)
+            self = .rpcNetworkInfoErrorInfoName(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcNetworkInfoErrorInfoName: \(describeDecodingError(error))")
+        }
+        let contextDescription: String
+        if decodingErrors.isEmpty {
+            let availableKeys: String
+            if let keys = anyKeyContainer?.allKeys, !keys.isEmpty {
+                let joined = keys.map { "\($0.stringValue)" }.joined(separator: ", ")
+                availableKeys = " Available keys: [\(joined)]"
+            } else {
+                availableKeys = ""
+            }
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcNetworkInfoError\(availableKeys)"
+        } else {
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcNetworkInfoError:\n" +
+                decodingErrors.joined(separator: "\n")
+        }
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .rpcNetworkInfoErrorInfoName(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        }
+    }
+}
+
+// MARK: - RpcProtocolConfigError
+
+public struct RpcProtocolConfigErrorOneOfInfoName: Codable, Sendable {
+    public let info: AnyCodable
+    public let name: String
+
+    public init(
+        info: AnyCodable,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public struct RpcProtocolConfigErrorOneOfInfoName1: Codable, Sendable {
+    public let info: AnyCodable
+    public let name: String
+
+    public init(
+        info: AnyCodable,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public enum RpcProtocolConfigError: Codable, Sendable {
+    case rpcProtocolConfigErrorInfoName(RpcProtocolConfigErrorOneOfInfoName)
+    case rpcProtocolConfigErrorInfoName1(RpcProtocolConfigErrorOneOfInfoName1)
+
+    public init(from decoder: Decoder) throws {
+        var decodingErrors: [String] = []
+        let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcProtocolConfigErrorOneOfInfoName.self)
+            self = .rpcProtocolConfigErrorInfoName(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcProtocolConfigErrorInfoName: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcProtocolConfigErrorOneOfInfoName1.self)
+            self = .rpcProtocolConfigErrorInfoName1(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcProtocolConfigErrorInfoName1: \(describeDecodingError(error))")
+        }
+        let contextDescription: String
+        if decodingErrors.isEmpty {
+            let availableKeys: String
+            if let keys = anyKeyContainer?.allKeys, !keys.isEmpty {
+                let joined = keys.map { "\($0.stringValue)" }.joined(separator: ", ")
+                availableKeys = " Available keys: [\(joined)]"
+            } else {
+                availableKeys = ""
+            }
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcProtocolConfigError\(availableKeys)"
+        } else {
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcProtocolConfigError:\n" +
+                decodingErrors.joined(separator: "\n")
+        }
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .rpcProtocolConfigErrorInfoName(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .rpcProtocolConfigErrorInfoName1(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        }
+    }
+}
+
 // MARK: - RpcProtocolConfigRequest
 
 public enum RpcProtocolConfigRequest: Codable, Sendable {
@@ -7422,6 +10414,344 @@ public enum RpcProtocolConfigRequest: Codable, Sendable {
     }
 }
 
+// MARK: - RpcQueryError
+
+public struct RpcQueryErrorOneOfInfoName: Codable, Sendable {
+    public let info: InlineObject
+    public let name: String
+
+    public init(
+        info: InlineObject,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public struct RpcQueryErrorOneOfInfoName1: Codable, Sendable {
+    public let info: InlineObject
+    public let name: String
+
+    public init(
+        info: InlineObject,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public struct RpcQueryErrorOneOfInfoName2: Codable, Sendable {
+    public let info: InlineObject
+    public let name: String
+
+    public init(
+        info: InlineObject,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public struct RpcQueryErrorOneOfInfoName3: Codable, Sendable {
+    public let info: InlineObject
+    public let name: String
+
+    public init(
+        info: InlineObject,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public struct RpcQueryErrorOneOfInfoName4: Codable, Sendable {
+    public let info: InlineObject
+    public let name: String
+
+    public init(
+        info: InlineObject,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public struct RpcQueryErrorOneOfInfoName5: Codable, Sendable {
+    public let info: InlineObject
+    public let name: String
+
+    public init(
+        info: InlineObject,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public struct RpcQueryErrorOneOfInfoName6: Codable, Sendable {
+    public let info: InlineObject
+    public let name: String
+
+    public init(
+        info: InlineObject,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public struct RpcQueryErrorOneOfInfoName7: Codable, Sendable {
+    public let info: InlineObject
+    public let name: String
+
+    public init(
+        info: InlineObject,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public struct RpcQueryErrorOneOfInfoName8: Codable, Sendable {
+    public let info: InlineObject
+    public let name: String
+
+    public init(
+        info: InlineObject,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public struct RpcQueryErrorOneOfInfoName9: Codable, Sendable {
+    public let info: InlineObject
+    public let name: String
+
+    public init(
+        info: InlineObject,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public struct RpcQueryErrorOneOfInfoName10: Codable, Sendable {
+    public let info: InlineObject
+    public let name: String
+
+    public init(
+        info: InlineObject,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public struct RpcQueryErrorOneOfInfoName11: Codable, Sendable {
+    public let info: AnyCodable
+    public let name: String
+
+    public init(
+        info: AnyCodable,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public enum RpcQueryError: Codable, Sendable {
+    case name(String)
+    case rpcQueryErrorInfoName(RpcQueryErrorOneOfInfoName)
+    case rpcQueryErrorInfoName1(RpcQueryErrorOneOfInfoName1)
+    case rpcQueryErrorInfoName2(RpcQueryErrorOneOfInfoName2)
+    case rpcQueryErrorInfoName3(RpcQueryErrorOneOfInfoName3)
+    case rpcQueryErrorInfoName4(RpcQueryErrorOneOfInfoName4)
+    case rpcQueryErrorInfoName5(RpcQueryErrorOneOfInfoName5)
+    case rpcQueryErrorInfoName6(RpcQueryErrorOneOfInfoName6)
+    case rpcQueryErrorInfoName7(RpcQueryErrorOneOfInfoName7)
+    case rpcQueryErrorInfoName8(RpcQueryErrorOneOfInfoName8)
+    case rpcQueryErrorInfoName9(RpcQueryErrorOneOfInfoName9)
+    case rpcQueryErrorInfoName10(RpcQueryErrorOneOfInfoName10)
+    case rpcQueryErrorInfoName11(RpcQueryErrorOneOfInfoName11)
+
+    public init(from decoder: Decoder) throws {
+        var decodingErrors: [String] = []
+        let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
+        do {
+            if let container = anyKeyContainer {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("name") == .orderedSame }) {
+                    let value = try container.decode(String.self, forKey: matchingKey)
+                    self = .name(value)
+                    return
+                }
+            }
+        } catch {
+            decodingErrors.append(".name: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcQueryErrorOneOfInfoName.self)
+            self = .rpcQueryErrorInfoName(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcQueryErrorInfoName: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcQueryErrorOneOfInfoName1.self)
+            self = .rpcQueryErrorInfoName1(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcQueryErrorInfoName1: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcQueryErrorOneOfInfoName2.self)
+            self = .rpcQueryErrorInfoName2(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcQueryErrorInfoName2: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcQueryErrorOneOfInfoName3.self)
+            self = .rpcQueryErrorInfoName3(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcQueryErrorInfoName3: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcQueryErrorOneOfInfoName4.self)
+            self = .rpcQueryErrorInfoName4(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcQueryErrorInfoName4: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcQueryErrorOneOfInfoName5.self)
+            self = .rpcQueryErrorInfoName5(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcQueryErrorInfoName5: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcQueryErrorOneOfInfoName6.self)
+            self = .rpcQueryErrorInfoName6(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcQueryErrorInfoName6: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcQueryErrorOneOfInfoName7.self)
+            self = .rpcQueryErrorInfoName7(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcQueryErrorInfoName7: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcQueryErrorOneOfInfoName8.self)
+            self = .rpcQueryErrorInfoName8(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcQueryErrorInfoName8: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcQueryErrorOneOfInfoName9.self)
+            self = .rpcQueryErrorInfoName9(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcQueryErrorInfoName9: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcQueryErrorOneOfInfoName10.self)
+            self = .rpcQueryErrorInfoName10(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcQueryErrorInfoName10: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcQueryErrorOneOfInfoName11.self)
+            self = .rpcQueryErrorInfoName11(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcQueryErrorInfoName11: \(describeDecodingError(error))")
+        }
+        let contextDescription: String
+        if decodingErrors.isEmpty {
+            let availableKeys: String
+            if let keys = anyKeyContainer?.allKeys, !keys.isEmpty {
+                let joined = keys.map { "\($0.stringValue)" }.joined(separator: ", ")
+                availableKeys = " Available keys: [\(joined)]"
+            } else {
+                availableKeys = ""
+            }
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcQueryError\(availableKeys)"
+        } else {
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcQueryError:\n" +
+                decodingErrors.joined(separator: "\n")
+        }
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case name
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .name(value):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(value, forKey: .name)
+        case let .rpcQueryErrorInfoName(value):
+            var singleContainer = encoder.singleValueContainer()
+            try singleContainer.encode(value)
+        case let .rpcQueryErrorInfoName1(value):
+            var singleContainer = encoder.singleValueContainer()
+            try singleContainer.encode(value)
+        case let .rpcQueryErrorInfoName2(value):
+            var singleContainer = encoder.singleValueContainer()
+            try singleContainer.encode(value)
+        case let .rpcQueryErrorInfoName3(value):
+            var singleContainer = encoder.singleValueContainer()
+            try singleContainer.encode(value)
+        case let .rpcQueryErrorInfoName4(value):
+            var singleContainer = encoder.singleValueContainer()
+            try singleContainer.encode(value)
+        case let .rpcQueryErrorInfoName5(value):
+            var singleContainer = encoder.singleValueContainer()
+            try singleContainer.encode(value)
+        case let .rpcQueryErrorInfoName6(value):
+            var singleContainer = encoder.singleValueContainer()
+            try singleContainer.encode(value)
+        case let .rpcQueryErrorInfoName7(value):
+            var singleContainer = encoder.singleValueContainer()
+            try singleContainer.encode(value)
+        case let .rpcQueryErrorInfoName8(value):
+            var singleContainer = encoder.singleValueContainer()
+            try singleContainer.encode(value)
+        case let .rpcQueryErrorInfoName9(value):
+            var singleContainer = encoder.singleValueContainer()
+            try singleContainer.encode(value)
+        case let .rpcQueryErrorInfoName10(value):
+            var singleContainer = encoder.singleValueContainer()
+            try singleContainer.encode(value)
+        case let .rpcQueryErrorInfoName11(value):
+            var singleContainer = encoder.singleValueContainer()
+            try singleContainer.encode(value)
+        }
+    }
+}
+
 // MARK: - RpcQueryRequest
 
 public struct ViewAccountByBlockId: Codable, Sendable {
@@ -7498,6 +10828,41 @@ public struct ViewAccessKeyByBlockId: Codable, Sendable {
 }
 
 public struct ViewAccessKeyListByBlockId: Codable, Sendable {
+    public let blockId: BlockId
+    public let accountId: AccountId
+    public let requestType: RequestType
+
+    public init(
+        blockId: BlockId,
+        accountId: AccountId,
+        requestType: RequestType,
+    ) {
+        self.blockId = blockId
+        self.accountId = accountId
+        self.requestType = requestType
+    }
+}
+
+public struct ViewGasKeyByBlockId: Codable, Sendable {
+    public let blockId: BlockId
+    public let accountId: AccountId
+    public let publicKey: PublicKey
+    public let requestType: RequestType
+
+    public init(
+        blockId: BlockId,
+        accountId: AccountId,
+        publicKey: PublicKey,
+        requestType: RequestType,
+    ) {
+        self.blockId = blockId
+        self.accountId = accountId
+        self.publicKey = publicKey
+        self.requestType = requestType
+    }
+}
+
+public struct ViewGasKeyListByBlockId: Codable, Sendable {
     public let blockId: BlockId
     public let accountId: AccountId
     public let requestType: RequestType
@@ -7656,6 +11021,41 @@ public struct ViewAccessKeyListByFinality: Codable, Sendable {
     }
 }
 
+public struct ViewGasKeyByFinality: Codable, Sendable {
+    public let finality: Finality
+    public let accountId: AccountId
+    public let publicKey: PublicKey
+    public let requestType: RequestType
+
+    public init(
+        finality: Finality,
+        accountId: AccountId,
+        publicKey: PublicKey,
+        requestType: RequestType,
+    ) {
+        self.finality = finality
+        self.accountId = accountId
+        self.publicKey = publicKey
+        self.requestType = requestType
+    }
+}
+
+public struct ViewGasKeyListByFinality: Codable, Sendable {
+    public let finality: Finality
+    public let accountId: AccountId
+    public let requestType: RequestType
+
+    public init(
+        finality: Finality,
+        accountId: AccountId,
+        requestType: RequestType,
+    ) {
+        self.finality = finality
+        self.accountId = accountId
+        self.requestType = requestType
+    }
+}
+
 public struct CallFunctionByFinality: Codable, Sendable {
     public let finality: Finality
     public let accountId: AccountId
@@ -7799,6 +11199,41 @@ public struct ViewAccessKeyListBySyncCheckpoint: Codable, Sendable {
     }
 }
 
+public struct ViewGasKeyBySyncCheckpoint: Codable, Sendable {
+    public let syncCheckpoint: SyncCheckpoint
+    public let accountId: AccountId
+    public let publicKey: PublicKey
+    public let requestType: RequestType
+
+    public init(
+        syncCheckpoint: SyncCheckpoint,
+        accountId: AccountId,
+        publicKey: PublicKey,
+        requestType: RequestType,
+    ) {
+        self.syncCheckpoint = syncCheckpoint
+        self.accountId = accountId
+        self.publicKey = publicKey
+        self.requestType = requestType
+    }
+}
+
+public struct ViewGasKeyListBySyncCheckpoint: Codable, Sendable {
+    public let syncCheckpoint: SyncCheckpoint
+    public let accountId: AccountId
+    public let requestType: RequestType
+
+    public init(
+        syncCheckpoint: SyncCheckpoint,
+        accountId: AccountId,
+        requestType: RequestType,
+    ) {
+        self.syncCheckpoint = syncCheckpoint
+        self.accountId = accountId
+        self.requestType = requestType
+    }
+}
+
 public struct CallFunctionBySyncCheckpoint: Codable, Sendable {
     public let syncCheckpoint: SyncCheckpoint
     public let accountId: AccountId
@@ -7859,6 +11294,8 @@ public enum RpcQueryRequest: Codable, Sendable {
     case viewStateByBlockId(ViewStateByBlockId)
     case viewAccessKeyByBlockId(ViewAccessKeyByBlockId)
     case viewAccessKeyListByBlockId(ViewAccessKeyListByBlockId)
+    case viewGasKeyByBlockId(ViewGasKeyByBlockId)
+    case viewGasKeyListByBlockId(ViewGasKeyListByBlockId)
     case callFunctionByBlockId(CallFunctionByBlockId)
     case viewGlobalContractCodeByBlockId(ViewGlobalContractCodeByBlockId)
     case viewGlobalContractCodeByAccountIdByBlockId(ViewGlobalContractCodeByAccountIdByBlockId)
@@ -7867,6 +11304,8 @@ public enum RpcQueryRequest: Codable, Sendable {
     case viewStateByFinality(ViewStateByFinality)
     case viewAccessKeyByFinality(ViewAccessKeyByFinality)
     case viewAccessKeyListByFinality(ViewAccessKeyListByFinality)
+    case viewGasKeyByFinality(ViewGasKeyByFinality)
+    case viewGasKeyListByFinality(ViewGasKeyListByFinality)
     case callFunctionByFinality(CallFunctionByFinality)
     case viewGlobalContractCodeByFinality(ViewGlobalContractCodeByFinality)
     case viewGlobalContractCodeByAccountIdByFinality(ViewGlobalContractCodeByAccountIdByFinality)
@@ -7875,6 +11314,8 @@ public enum RpcQueryRequest: Codable, Sendable {
     case viewStateBySyncCheckpoint(ViewStateBySyncCheckpoint)
     case viewAccessKeyBySyncCheckpoint(ViewAccessKeyBySyncCheckpoint)
     case viewAccessKeyListBySyncCheckpoint(ViewAccessKeyListBySyncCheckpoint)
+    case viewGasKeyBySyncCheckpoint(ViewGasKeyBySyncCheckpoint)
+    case viewGasKeyListBySyncCheckpoint(ViewGasKeyListBySyncCheckpoint)
     case callFunctionBySyncCheckpoint(CallFunctionBySyncCheckpoint)
     case viewGlobalContractCodeBySyncCheckpoint(ViewGlobalContractCodeBySyncCheckpoint)
     case viewGlobalContractCodeByAccountIdBySyncCheckpoint(ViewGlobalContractCodeByAccountIdBySyncCheckpoint)
@@ -7916,6 +11357,20 @@ public enum RpcQueryRequest: Codable, Sendable {
             return
         } catch {
             decodingErrors.append(".viewAccessKeyListByBlockId: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(ViewGasKeyByBlockId.self)
+            self = .viewGasKeyByBlockId(value)
+            return
+        } catch {
+            decodingErrors.append(".viewGasKeyByBlockId: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(ViewGasKeyListByBlockId.self)
+            self = .viewGasKeyListByBlockId(value)
+            return
+        } catch {
+            decodingErrors.append(".viewGasKeyListByBlockId: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(CallFunctionByBlockId.self)
@@ -7974,6 +11429,20 @@ public enum RpcQueryRequest: Codable, Sendable {
             decodingErrors.append(".viewAccessKeyListByFinality: \(describeDecodingError(error))")
         }
         do {
+            let value = try decoder.singleValueContainer().decode(ViewGasKeyByFinality.self)
+            self = .viewGasKeyByFinality(value)
+            return
+        } catch {
+            decodingErrors.append(".viewGasKeyByFinality: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(ViewGasKeyListByFinality.self)
+            self = .viewGasKeyListByFinality(value)
+            return
+        } catch {
+            decodingErrors.append(".viewGasKeyListByFinality: \(describeDecodingError(error))")
+        }
+        do {
             let value = try decoder.singleValueContainer().decode(CallFunctionByFinality.self)
             self = .callFunctionByFinality(value)
             return
@@ -8028,6 +11497,20 @@ public enum RpcQueryRequest: Codable, Sendable {
             return
         } catch {
             decodingErrors.append(".viewAccessKeyListBySyncCheckpoint: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(ViewGasKeyBySyncCheckpoint.self)
+            self = .viewGasKeyBySyncCheckpoint(value)
+            return
+        } catch {
+            decodingErrors.append(".viewGasKeyBySyncCheckpoint: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(ViewGasKeyListBySyncCheckpoint.self)
+            self = .viewGasKeyListBySyncCheckpoint(value)
+            return
+        } catch {
+            decodingErrors.append(".viewGasKeyListBySyncCheckpoint: \(describeDecodingError(error))")
         }
         do {
             let value = try decoder.singleValueContainer().decode(CallFunctionBySyncCheckpoint.self)
@@ -8085,6 +11568,12 @@ public enum RpcQueryRequest: Codable, Sendable {
         case let .viewAccessKeyListByBlockId(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
+        case let .viewGasKeyByBlockId(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .viewGasKeyListByBlockId(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
         case let .callFunctionByBlockId(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
@@ -8107,6 +11596,12 @@ public enum RpcQueryRequest: Codable, Sendable {
             var container = encoder.singleValueContainer()
             try container.encode(value)
         case let .viewAccessKeyListByFinality(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .viewGasKeyByFinality(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .viewGasKeyListByFinality(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
         case let .callFunctionByFinality(value):
@@ -8133,6 +11628,12 @@ public enum RpcQueryRequest: Codable, Sendable {
         case let .viewAccessKeyListBySyncCheckpoint(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
+        case let .viewGasKeyBySyncCheckpoint(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .viewGasKeyListBySyncCheckpoint(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
         case let .callFunctionBySyncCheckpoint(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
@@ -8155,6 +11656,8 @@ public enum RpcQueryResponse: Codable, Sendable {
     case callResult(CallResult)
     case accessKeyView(AccessKeyView)
     case accessKeyList(AccessKeyList)
+    case gasKeyView(GasKeyView)
+    case gasKeyList(GasKeyList)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -8201,6 +11704,20 @@ public enum RpcQueryResponse: Codable, Sendable {
         } catch {
             decodingErrors.append(".accessKeyList: \(describeDecodingError(error))")
         }
+        do {
+            let value = try decoder.singleValueContainer().decode(GasKeyView.self)
+            self = .gasKeyView(value)
+            return
+        } catch {
+            decodingErrors.append(".gasKeyView: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(GasKeyList.self)
+            self = .gasKeyList(value)
+            return
+        } catch {
+            decodingErrors.append(".gasKeyList: \(describeDecodingError(error))")
+        }
         let contextDescription: String
         if decodingErrors.isEmpty {
             let availableKeys: String
@@ -8236,6 +11753,90 @@ public enum RpcQueryResponse: Codable, Sendable {
             var container = encoder.singleValueContainer()
             try container.encode(value)
         case let .accessKeyList(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .gasKeyView(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .gasKeyList(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        }
+    }
+}
+
+// MARK: - RpcReceiptError
+
+public struct RpcReceiptErrorOneOfInfoName: Codable, Sendable {
+    public let info: AnyCodable
+    public let name: String
+
+    public init(
+        info: AnyCodable,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public struct RpcReceiptErrorOneOfInfoName1: Codable, Sendable {
+    public let info: InlineObject
+    public let name: String
+
+    public init(
+        info: InlineObject,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public enum RpcReceiptError: Codable, Sendable {
+    case rpcReceiptErrorInfoName(RpcReceiptErrorOneOfInfoName)
+    case rpcReceiptErrorInfoName1(RpcReceiptErrorOneOfInfoName1)
+
+    public init(from decoder: Decoder) throws {
+        var decodingErrors: [String] = []
+        let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcReceiptErrorOneOfInfoName.self)
+            self = .rpcReceiptErrorInfoName(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcReceiptErrorInfoName: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcReceiptErrorOneOfInfoName1.self)
+            self = .rpcReceiptErrorInfoName1(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcReceiptErrorInfoName1: \(describeDecodingError(error))")
+        }
+        let contextDescription: String
+        if decodingErrors.isEmpty {
+            let availableKeys: String
+            if let keys = anyKeyContainer?.allKeys, !keys.isEmpty {
+                let joined = keys.map { "\($0.stringValue)" }.joined(separator: ", ")
+                availableKeys = " Available keys: [\(joined)]"
+            } else {
+                availableKeys = ""
+            }
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcReceiptError\(availableKeys)"
+        } else {
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcReceiptError:\n" +
+                decodingErrors.joined(separator: "\n")
+        }
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .rpcReceiptErrorInfoName(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .rpcReceiptErrorInfoName1(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
         }
@@ -8317,6 +11918,158 @@ public enum RpcRequestValidationErrorKind: Codable, Sendable {
         case let .rpcRequestValidationErrorKindInfoName1(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
+        }
+    }
+}
+
+// MARK: - RpcSplitStorageInfoError
+
+public struct RpcSplitStorageInfoErrorOneOfInfoName: Codable, Sendable {
+    public let info: AnyCodable
+    public let name: String
+
+    public init(
+        info: AnyCodable,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public enum RpcSplitStorageInfoError: Codable, Sendable {
+    case rpcSplitStorageInfoErrorInfoName(RpcSplitStorageInfoErrorOneOfInfoName)
+
+    public init(from decoder: Decoder) throws {
+        var decodingErrors: [String] = []
+        let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcSplitStorageInfoErrorOneOfInfoName.self)
+            self = .rpcSplitStorageInfoErrorInfoName(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcSplitStorageInfoErrorInfoName: \(describeDecodingError(error))")
+        }
+        let contextDescription: String
+        if decodingErrors.isEmpty {
+            let availableKeys: String
+            if let keys = anyKeyContainer?.allKeys, !keys.isEmpty {
+                let joined = keys.map { "\($0.stringValue)" }.joined(separator: ", ")
+                availableKeys = " Available keys: [\(joined)]"
+            } else {
+                availableKeys = ""
+            }
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcSplitStorageInfoError\(availableKeys)"
+        } else {
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcSplitStorageInfoError:\n" +
+                decodingErrors.joined(separator: "\n")
+        }
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .rpcSplitStorageInfoErrorInfoName(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        }
+    }
+}
+
+// MARK: - RpcStateChangesError
+
+public struct RpcStateChangesErrorOneOfInfoName: Codable, Sendable {
+    public let info: AnyCodable
+    public let name: String
+
+    public init(
+        info: AnyCodable,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public struct RpcStateChangesErrorOneOfInfoName1: Codable, Sendable {
+    public let info: AnyCodable
+    public let name: String
+
+    public init(
+        info: AnyCodable,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public enum RpcStateChangesError: Codable, Sendable {
+    case rpcStateChangesErrorInfoName(RpcStateChangesErrorOneOfInfoName)
+    case name(String)
+    case rpcStateChangesErrorInfoName1(RpcStateChangesErrorOneOfInfoName1)
+
+    public init(from decoder: Decoder) throws {
+        var decodingErrors: [String] = []
+        let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcStateChangesErrorOneOfInfoName.self)
+            self = .rpcStateChangesErrorInfoName(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcStateChangesErrorInfoName: \(describeDecodingError(error))")
+        }
+        do {
+            if let container = anyKeyContainer {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("name") == .orderedSame }) {
+                    let value = try container.decode(String.self, forKey: matchingKey)
+                    self = .name(value)
+                    return
+                }
+            }
+        } catch {
+            decodingErrors.append(".name: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcStateChangesErrorOneOfInfoName1.self)
+            self = .rpcStateChangesErrorInfoName1(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcStateChangesErrorInfoName1: \(describeDecodingError(error))")
+        }
+        let contextDescription: String
+        if decodingErrors.isEmpty {
+            let availableKeys: String
+            if let keys = anyKeyContainer?.allKeys, !keys.isEmpty {
+                let joined = keys.map { "\($0.stringValue)" }.joined(separator: ", ")
+                availableKeys = " Available keys: [\(joined)]"
+            } else {
+                availableKeys = ""
+            }
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcStateChangesError\(availableKeys)"
+        } else {
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcStateChangesError:\n" +
+                decodingErrors.joined(separator: "\n")
+        }
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case name
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .name(value):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(value, forKey: .name)
+        case let .rpcStateChangesErrorInfoName(value):
+            var singleContainer = encoder.singleValueContainer()
+            try singleContainer.encode(value)
+        case let .rpcStateChangesErrorInfoName1(value):
+            var singleContainer = encoder.singleValueContainer()
+            try singleContainer.encode(value)
         }
     }
 }
@@ -9017,6 +12770,290 @@ public enum RpcStateChangesInBlockRequest: Codable, Sendable {
     }
 }
 
+// MARK: - RpcStatusError
+
+public struct RpcStatusErrorOneOfInfoName: Codable, Sendable {
+    public let info: AnyCodable
+    public let name: String
+
+    public init(
+        info: AnyCodable,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public struct RpcStatusErrorOneOfInfoName1: Codable, Sendable {
+    public let info: InlineObject
+    public let name: String
+
+    public init(
+        info: InlineObject,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public struct RpcStatusErrorOneOfInfoName2: Codable, Sendable {
+    public let info: AnyCodable
+    public let name: String
+
+    public init(
+        info: AnyCodable,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public enum RpcStatusError: Codable, Sendable {
+    case name(String)
+    case rpcStatusErrorInfoName(RpcStatusErrorOneOfInfoName)
+    case rpcStatusErrorInfoName1(RpcStatusErrorOneOfInfoName1)
+    case rpcStatusErrorInfoName2(RpcStatusErrorOneOfInfoName2)
+
+    public init(from decoder: Decoder) throws {
+        var decodingErrors: [String] = []
+        let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
+        do {
+            if let container = anyKeyContainer {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("name") == .orderedSame }) {
+                    let value = try container.decode(String.self, forKey: matchingKey)
+                    self = .name(value)
+                    return
+                }
+            }
+        } catch {
+            decodingErrors.append(".name: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcStatusErrorOneOfInfoName.self)
+            self = .rpcStatusErrorInfoName(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcStatusErrorInfoName: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcStatusErrorOneOfInfoName1.self)
+            self = .rpcStatusErrorInfoName1(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcStatusErrorInfoName1: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcStatusErrorOneOfInfoName2.self)
+            self = .rpcStatusErrorInfoName2(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcStatusErrorInfoName2: \(describeDecodingError(error))")
+        }
+        let contextDescription: String
+        if decodingErrors.isEmpty {
+            let availableKeys: String
+            if let keys = anyKeyContainer?.allKeys, !keys.isEmpty {
+                let joined = keys.map { "\($0.stringValue)" }.joined(separator: ", ")
+                availableKeys = " Available keys: [\(joined)]"
+            } else {
+                availableKeys = ""
+            }
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcStatusError\(availableKeys)"
+        } else {
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcStatusError:\n" +
+                decodingErrors.joined(separator: "\n")
+        }
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case name
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .name(value):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(value, forKey: .name)
+        case let .rpcStatusErrorInfoName(value):
+            var singleContainer = encoder.singleValueContainer()
+            try singleContainer.encode(value)
+        case let .rpcStatusErrorInfoName1(value):
+            var singleContainer = encoder.singleValueContainer()
+            try singleContainer.encode(value)
+        case let .rpcStatusErrorInfoName2(value):
+            var singleContainer = encoder.singleValueContainer()
+            try singleContainer.encode(value)
+        }
+    }
+}
+
+// MARK: - RpcTransactionError
+
+public struct RpcTransactionErrorOneOfInfoName: Codable, Sendable {
+    public let info: AnyCodable
+    public let name: String
+
+    public init(
+        info: AnyCodable,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public struct RpcTransactionErrorOneOfInfoName1: Codable, Sendable {
+    public let info: InlineObject
+    public let name: String
+
+    public init(
+        info: InlineObject,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public struct RpcTransactionErrorOneOfInfoName2: Codable, Sendable {
+    public let info: InlineObject
+    public let name: String
+
+    public init(
+        info: InlineObject,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public struct RpcTransactionErrorOneOfInfoName3: Codable, Sendable {
+    public let info: AnyCodable
+    public let name: String
+
+    public init(
+        info: AnyCodable,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public enum RpcTransactionError: Codable, Sendable {
+    case rpcTransactionErrorInfoName(RpcTransactionErrorOneOfInfoName)
+    case name(String)
+    case rpcTransactionErrorInfoName1(RpcTransactionErrorOneOfInfoName1)
+    case rpcTransactionErrorInfoName2(RpcTransactionErrorOneOfInfoName2)
+    case rpcTransactionErrorInfoName3(RpcTransactionErrorOneOfInfoName3)
+    case name1(String)
+
+    public init(from decoder: Decoder) throws {
+        var decodingErrors: [String] = []
+        let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcTransactionErrorOneOfInfoName.self)
+            self = .rpcTransactionErrorInfoName(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcTransactionErrorInfoName: \(describeDecodingError(error))")
+        }
+        do {
+            if let container = anyKeyContainer {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("name") == .orderedSame }) {
+                    let value = try container.decode(String.self, forKey: matchingKey)
+                    self = .name(value)
+                    return
+                }
+            }
+        } catch {
+            decodingErrors.append(".name: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcTransactionErrorOneOfInfoName1.self)
+            self = .rpcTransactionErrorInfoName1(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcTransactionErrorInfoName1: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcTransactionErrorOneOfInfoName2.self)
+            self = .rpcTransactionErrorInfoName2(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcTransactionErrorInfoName2: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcTransactionErrorOneOfInfoName3.self)
+            self = .rpcTransactionErrorInfoName3(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcTransactionErrorInfoName3: \(describeDecodingError(error))")
+        }
+        do {
+            if let container = anyKeyContainer {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("name") == .orderedSame }) {
+                    let value = try container.decode(String.self, forKey: matchingKey)
+                    self = .name1(value)
+                    return
+                }
+            }
+        } catch {
+            decodingErrors.append(".name1: \(describeDecodingError(error))")
+        }
+        let contextDescription: String
+        if decodingErrors.isEmpty {
+            let availableKeys: String
+            if let keys = anyKeyContainer?.allKeys, !keys.isEmpty {
+                let joined = keys.map { "\($0.stringValue)" }.joined(separator: ", ")
+                availableKeys = " Available keys: [\(joined)]"
+            } else {
+                availableKeys = ""
+            }
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcTransactionError\(availableKeys)"
+        } else {
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcTransactionError:\n" +
+                decodingErrors.joined(separator: "\n")
+        }
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case name
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .name(value):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(value, forKey: .name)
+        case let .name1(value):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(value, forKey: .name)
+        case let .rpcTransactionErrorInfoName(value):
+            var singleContainer = encoder.singleValueContainer()
+            try singleContainer.encode(value)
+        case let .rpcTransactionErrorInfoName1(value):
+            var singleContainer = encoder.singleValueContainer()
+            try singleContainer.encode(value)
+        case let .rpcTransactionErrorInfoName2(value):
+            var singleContainer = encoder.singleValueContainer()
+            try singleContainer.encode(value)
+        case let .rpcTransactionErrorInfoName3(value):
+            var singleContainer = encoder.singleValueContainer()
+            try singleContainer.encode(value)
+        }
+    }
+}
+
 // MARK: - RpcTransactionResponse
 
 public enum RpcTransactionResponse: Codable, Sendable {
@@ -9137,6 +13174,96 @@ public enum RpcTransactionStatusRequest: Codable, Sendable {
             var container = encoder.container(keyedBy: AnyCodingKey.self)
             try container.encode(value, forKey: AnyCodingKey(stringValue: "signed_tx_base64"))
         case let .rpcTransactionStatusRequestSenderAccountIdTxHash(value):
+            var singleContainer = encoder.singleValueContainer()
+            try singleContainer.encode(value)
+        }
+    }
+}
+
+// MARK: - RpcValidatorError
+
+public struct RpcValidatorErrorOneOfInfoName: Codable, Sendable {
+    public let info: AnyCodable
+    public let name: String
+
+    public init(
+        info: AnyCodable,
+        name: String,
+    ) {
+        self.info = info
+        self.name = name
+    }
+}
+
+public enum RpcValidatorError: Codable, Sendable {
+    case name(String)
+    case name1(String)
+    case rpcValidatorErrorInfoName(RpcValidatorErrorOneOfInfoName)
+
+    public init(from decoder: Decoder) throws {
+        var decodingErrors: [String] = []
+        let anyKeyContainer = try? decoder.container(keyedBy: AnyCodingKey.self)
+        do {
+            if let container = anyKeyContainer {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("name") == .orderedSame }) {
+                    let value = try container.decode(String.self, forKey: matchingKey)
+                    self = .name(value)
+                    return
+                }
+            }
+        } catch {
+            decodingErrors.append(".name: \(describeDecodingError(error))")
+        }
+        do {
+            if let container = anyKeyContainer {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("name") == .orderedSame }) {
+                    let value = try container.decode(String.self, forKey: matchingKey)
+                    self = .name1(value)
+                    return
+                }
+            }
+        } catch {
+            decodingErrors.append(".name1: \(describeDecodingError(error))")
+        }
+        do {
+            let value = try decoder.singleValueContainer().decode(RpcValidatorErrorOneOfInfoName.self)
+            self = .rpcValidatorErrorInfoName(value)
+            return
+        } catch {
+            decodingErrors.append(".rpcValidatorErrorInfoName: \(describeDecodingError(error))")
+        }
+        let contextDescription: String
+        if decodingErrors.isEmpty {
+            let availableKeys: String
+            if let keys = anyKeyContainer?.allKeys, !keys.isEmpty {
+                let joined = keys.map { "\($0.stringValue)" }.joined(separator: ", ")
+                availableKeys = " Available keys: [\(joined)]"
+            } else {
+                availableKeys = ""
+            }
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcValidatorError\(availableKeys)"
+        } else {
+            contextDescription = "Could not decode any of the oneOf/anyOf variants for RpcValidatorError:\n" +
+                decodingErrors.joined(separator: "\n")
+        }
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: contextDescription))
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case name
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .name(value):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(value, forKey: .name)
+        case let .name1(value):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(value, forKey: .name)
+        case let .rpcValidatorErrorInfoName(value):
             var singleContainer = encoder.singleValueContainer()
             try singleContainer.encode(value)
         }
@@ -10960,12 +15087,12 @@ public struct AccessKeyView: Codable, Sendable {
 // MARK: - AccountCreationConfigView
 
 public struct AccountCreationConfigView: Codable, Sendable {
-    public let minAllowedTopLevelAccountLength: Int
-    public let registrarAccountId: AccountId
+    public let minAllowedTopLevelAccountLength: Int?
+    public let registrarAccountId: AccountId?
 
     public init(
-        minAllowedTopLevelAccountLength: Int,
-        registrarAccountId: AccountId,
+        minAllowedTopLevelAccountLength: Int?,
+        registrarAccountId: AccountId?,
     ) {
         self.minAllowedTopLevelAccountLength = minAllowedTopLevelAccountLength
         self.registrarAccountId = registrarAccountId
@@ -11059,30 +15186,30 @@ public struct AccountWithPublicKey: Codable, Sendable {
 // MARK: - ActionCreationConfigView
 
 public struct ActionCreationConfigView: Codable, Sendable {
-    public let addKeyCost: AccessKeyCreationConfigView
-    public let createAccountCost: Fee
-    public let delegateCost: Fee
-    public let deleteAccountCost: Fee
-    public let deleteKeyCost: Fee
-    public let deployContractCost: Fee
-    public let deployContractCostPerByte: Fee
-    public let functionCallCost: Fee
-    public let functionCallCostPerByte: Fee
-    public let stakeCost: Fee
-    public let transferCost: Fee
+    public let addKeyCost: AccessKeyCreationConfigView?
+    public let createAccountCost: Fee?
+    public let delegateCost: Fee?
+    public let deleteAccountCost: Fee?
+    public let deleteKeyCost: Fee?
+    public let deployContractCost: Fee?
+    public let deployContractCostPerByte: Fee?
+    public let functionCallCost: Fee?
+    public let functionCallCostPerByte: Fee?
+    public let stakeCost: Fee?
+    public let transferCost: Fee?
 
     public init(
-        addKeyCost: AccessKeyCreationConfigView,
-        createAccountCost: Fee,
-        delegateCost: Fee,
-        deleteAccountCost: Fee,
-        deleteKeyCost: Fee,
-        deployContractCost: Fee,
-        deployContractCostPerByte: Fee,
-        functionCallCost: Fee,
-        functionCallCostPerByte: Fee,
-        stakeCost: Fee,
-        transferCost: Fee,
+        addKeyCost: AccessKeyCreationConfigView?,
+        createAccountCost: Fee?,
+        delegateCost: Fee?,
+        deleteAccountCost: Fee?,
+        deleteKeyCost: Fee?,
+        deployContractCost: Fee?,
+        deployContractCostPerByte: Fee?,
+        functionCallCost: Fee?,
+        functionCallCostPerByte: Fee?,
+        stakeCost: Fee?,
+        transferCost: Fee?,
     ) {
         self.addKeyCost = addKeyCost
         self.createAccountCost = createAccountCost
@@ -11110,6 +15237,24 @@ public struct ActionError: Codable, Sendable {
     ) {
         self.index = index
         self.kind = kind
+    }
+}
+
+// MARK: - AddGasKeyAction
+
+public struct AddGasKeyAction: Codable, Sendable {
+    public let numNonces: Int
+    public let permission: AccessKeyPermission
+    public let publicKey: PublicKey
+
+    public init(
+        numNonces: Int,
+        permission: AccessKeyPermission,
+        publicKey: PublicKey,
+    ) {
+        self.numNonces = numNonces
+        self.permission = permission
+        self.publicKey = publicKey
     }
 }
 
@@ -11368,12 +15513,12 @@ public struct CatchupStatusView: Codable, Sendable {
 // MARK: - ChunkDistributionNetworkConfig
 
 public struct ChunkDistributionNetworkConfig: Codable, Sendable {
-    public let enabled: Bool
-    public let uris: ChunkDistributionUris
+    public let enabled: Bool?
+    public let uris: ChunkDistributionUris?
 
     public init(
-        enabled: Bool,
-        uris: ChunkDistributionUris,
+        enabled: Bool?,
+        uris: ChunkDistributionUris?,
     ) {
         self.enabled = enabled
         self.uris = uris
@@ -11383,12 +15528,12 @@ public struct ChunkDistributionNetworkConfig: Codable, Sendable {
 // MARK: - ChunkDistributionUris
 
 public struct ChunkDistributionUris: Codable, Sendable {
-    public let get: String
-    public let set: String
+    public let get: String?
+    public let set: String?
 
     public init(
-        get: String,
-        set: String,
+        get: String?,
+        set: String?,
     ) {
         self.get = get
         self.set = set
@@ -11464,80 +15609,50 @@ public struct ChunkHeaderView: Codable, Sendable {
     }
 }
 
-// MARK: - CloudArchivalReaderConfig
-
-public struct CloudArchivalReaderConfig: Codable, Sendable {
-    public let cloudStorage: CloudStorageConfig
-
-    public init(
-        cloudStorage: CloudStorageConfig,
-    ) {
-        self.cloudStorage = cloudStorage
-    }
-}
-
 // MARK: - CloudArchivalWriterConfig
 
 public struct CloudArchivalWriterConfig: Codable, Sendable {
     public let archiveBlockData: Bool?
-    public let cloudStorage: CloudStorageConfig
     public let pollingInterval: DurationAsStdSchemaProvider?
 
     public init(
         archiveBlockData: Bool?,
-        cloudStorage: CloudStorageConfig,
         pollingInterval: DurationAsStdSchemaProvider?,
     ) {
         self.archiveBlockData = archiveBlockData
-        self.cloudStorage = cloudStorage
         self.pollingInterval = pollingInterval
-    }
-}
-
-// MARK: - CloudStorageConfig
-
-public struct CloudStorageConfig: Codable, Sendable {
-    public let credentialsFile: String?
-    public let storage: ExternalStorageLocation
-
-    public init(
-        credentialsFile: String?,
-        storage: ExternalStorageLocation,
-    ) {
-        self.credentialsFile = credentialsFile
-        self.storage = storage
     }
 }
 
 // MARK: - CongestionControlConfigView
 
 public struct CongestionControlConfigView: Codable, Sendable {
-    public let allowedShardOutgoingGas: NearGas
-    public let maxCongestionIncomingGas: NearGas
-    public let maxCongestionMemoryConsumption: UInt64
-    public let maxCongestionMissedChunks: UInt64
-    public let maxCongestionOutgoingGas: NearGas
-    public let maxOutgoingGas: NearGas
-    public let maxTxGas: NearGas
-    public let minOutgoingGas: NearGas
-    public let minTxGas: NearGas
-    public let outgoingReceiptsBigSizeLimit: UInt64
-    public let outgoingReceiptsUsualSizeLimit: UInt64
-    public let rejectTxCongestionThreshold: Double
+    public let allowedShardOutgoingGas: NearGas?
+    public let maxCongestionIncomingGas: NearGas?
+    public let maxCongestionMemoryConsumption: UInt64?
+    public let maxCongestionMissedChunks: UInt64?
+    public let maxCongestionOutgoingGas: NearGas?
+    public let maxOutgoingGas: NearGas?
+    public let maxTxGas: NearGas?
+    public let minOutgoingGas: NearGas?
+    public let minTxGas: NearGas?
+    public let outgoingReceiptsBigSizeLimit: UInt64?
+    public let outgoingReceiptsUsualSizeLimit: UInt64?
+    public let rejectTxCongestionThreshold: Double?
 
     public init(
-        allowedShardOutgoingGas: NearGas,
-        maxCongestionIncomingGas: NearGas,
-        maxCongestionMemoryConsumption: UInt64,
-        maxCongestionMissedChunks: UInt64,
-        maxCongestionOutgoingGas: NearGas,
-        maxOutgoingGas: NearGas,
-        maxTxGas: NearGas,
-        minOutgoingGas: NearGas,
-        minTxGas: NearGas,
-        outgoingReceiptsBigSizeLimit: UInt64,
-        outgoingReceiptsUsualSizeLimit: UInt64,
-        rejectTxCongestionThreshold: Double,
+        allowedShardOutgoingGas: NearGas?,
+        maxCongestionIncomingGas: NearGas?,
+        maxCongestionMemoryConsumption: UInt64?,
+        maxCongestionMissedChunks: UInt64?,
+        maxCongestionOutgoingGas: NearGas?,
+        maxOutgoingGas: NearGas?,
+        maxTxGas: NearGas?,
+        minOutgoingGas: NearGas?,
+        minTxGas: NearGas?,
+        outgoingReceiptsBigSizeLimit: UInt64?,
+        outgoingReceiptsUsualSizeLimit: UInt64?,
+        rejectTxCongestionThreshold: Double?,
     ) {
         self.allowedShardOutgoingGas = allowedShardOutgoingGas
         self.maxCongestionIncomingGas = maxCongestionIncomingGas
@@ -11674,12 +15789,12 @@ public struct CurrentEpochValidatorInfo: Codable, Sendable {
 // MARK: - DataReceiptCreationConfigView
 
 public struct DataReceiptCreationConfigView: Codable, Sendable {
-    public let baseCost: Fee
-    public let costPerByte: Fee
+    public let baseCost: Fee?
+    public let costPerByte: Fee?
 
     public init(
-        baseCost: Fee,
-        costPerByte: Fee,
+        baseCost: Fee?,
+        costPerByte: Fee?,
     ) {
         self.baseCost = baseCost
         self.costPerByte = costPerByte
@@ -11737,6 +15852,18 @@ public struct DeleteAccountAction: Codable, Sendable {
         beneficiaryId: AccountId,
     ) {
         self.beneficiaryId = beneficiaryId
+    }
+}
+
+// MARK: - DeleteGasKeyAction
+
+public struct DeleteGasKeyAction: Codable, Sendable {
+    public let publicKey: PublicKey
+
+    public init(
+        publicKey: PublicKey,
+    ) {
+        self.publicKey = publicKey
     }
 }
 
@@ -11841,13 +15968,13 @@ public struct DeterministicStateInitAction: Codable, Sendable {
 public struct DumpConfig: Codable, Sendable {
     public let credentialsFile: String?
     public let iterationDelay: DurationAsStdSchemaProvider?
-    public let location: ExternalStorageLocation
+    public let location: ExternalStorageLocation?
     public let restartDumpForShards: [ShardId]?
 
     public init(
         credentialsFile: String?,
         iterationDelay: DurationAsStdSchemaProvider?,
-        location: ExternalStorageLocation,
+        location: ExternalStorageLocation?,
         restartDumpForShards: [ShardId]?,
     ) {
         self.credentialsFile = credentialsFile
@@ -11876,15 +16003,15 @@ public struct DurationAsStdSchemaProvider: Codable, Sendable {
 
 public struct EpochSyncConfig: Codable, Sendable {
     public let disableEpochSyncForBootstrapping: Bool?
-    public let epochSyncHorizon: UInt64
+    public let epochSyncHorizon: UInt64?
     public let ignoreEpochSyncNetworkRequests: Bool?
-    public let timeoutForEpochSync: DurationAsStdSchemaProvider
+    public let timeoutForEpochSync: DurationAsStdSchemaProvider?
 
     public init(
         disableEpochSyncForBootstrapping: Bool?,
-        epochSyncHorizon: UInt64,
+        epochSyncHorizon: UInt64?,
         ignoreEpochSyncNetworkRequests: Bool?,
-        timeoutForEpochSync: DurationAsStdSchemaProvider,
+        timeoutForEpochSync: DurationAsStdSchemaProvider?,
     ) {
         self.disableEpochSyncForBootstrapping = disableEpochSyncForBootstrapping
         self.epochSyncHorizon = epochSyncHorizon
@@ -11962,182 +16089,182 @@ public struct ExecutionOutcomeWithIdView: Codable, Sendable {
 // MARK: - ExtCostsConfigView
 
 public struct ExtCostsConfigView: Codable, Sendable {
-    public let altBn128G1MultiexpBase: NearGas
-    public let altBn128G1MultiexpElement: NearGas
-    public let altBn128G1SumBase: NearGas
-    public let altBn128G1SumElement: NearGas
-    public let altBn128PairingCheckBase: NearGas
-    public let altBn128PairingCheckElement: NearGas
-    public let base: NearGas
-    public let bls12381G1MultiexpBase: NearGas
-    public let bls12381G1MultiexpElement: NearGas
-    public let bls12381G2MultiexpBase: NearGas
-    public let bls12381G2MultiexpElement: NearGas
-    public let bls12381MapFp2ToG2Base: NearGas
-    public let bls12381MapFp2ToG2Element: NearGas
-    public let bls12381MapFpToG1Base: NearGas
-    public let bls12381MapFpToG1Element: NearGas
-    public let bls12381P1DecompressBase: NearGas
-    public let bls12381P1DecompressElement: NearGas
-    public let bls12381P1SumBase: NearGas
-    public let bls12381P1SumElement: NearGas
-    public let bls12381P2DecompressBase: NearGas
-    public let bls12381P2DecompressElement: NearGas
-    public let bls12381P2SumBase: NearGas
-    public let bls12381P2SumElement: NearGas
-    public let bls12381PairingBase: NearGas
-    public let bls12381PairingElement: NearGas
-    public let contractCompileBase: NearGas
-    public let contractCompileBytes: NearGas
-    public let contractLoadingBase: NearGas
-    public let contractLoadingBytes: NearGas
-    public let ecrecoverBase: NearGas
-    public let ed25519VerifyBase: NearGas
-    public let ed25519VerifyByte: NearGas
-    public let keccak256Base: NearGas
-    public let keccak256Byte: NearGas
-    public let keccak512Base: NearGas
-    public let keccak512Byte: NearGas
-    public let logBase: NearGas
-    public let logByte: NearGas
-    public let promiseAndBase: NearGas
-    public let promiseAndPerPromise: NearGas
-    public let promiseReturn: NearGas
-    public let readCachedTrieNode: NearGas
-    public let readMemoryBase: NearGas
-    public let readMemoryByte: NearGas
-    public let readRegisterBase: NearGas
-    public let readRegisterByte: NearGas
-    public let ripemd160Base: NearGas
-    public let ripemd160Block: NearGas
-    public let sha256Base: NearGas
-    public let sha256Byte: NearGas
-    public let storageHasKeyBase: NearGas
-    public let storageHasKeyByte: NearGas
-    public let storageIterCreateFromByte: NearGas
-    public let storageIterCreatePrefixBase: NearGas
-    public let storageIterCreatePrefixByte: NearGas
-    public let storageIterCreateRangeBase: NearGas
-    public let storageIterCreateToByte: NearGas
-    public let storageIterNextBase: NearGas
-    public let storageIterNextKeyByte: NearGas
-    public let storageIterNextValueByte: NearGas
-    public let storageLargeReadOverheadBase: NearGas
-    public let storageLargeReadOverheadByte: NearGas
-    public let storageReadBase: NearGas
-    public let storageReadKeyByte: NearGas
-    public let storageReadValueByte: NearGas
-    public let storageRemoveBase: NearGas
-    public let storageRemoveKeyByte: NearGas
-    public let storageRemoveRetValueByte: NearGas
-    public let storageWriteBase: NearGas
-    public let storageWriteEvictedByte: NearGas
-    public let storageWriteKeyByte: NearGas
-    public let storageWriteValueByte: NearGas
-    public let touchingTrieNode: NearGas
-    public let utf16DecodingBase: NearGas
-    public let utf16DecodingByte: NearGas
-    public let utf8DecodingBase: NearGas
-    public let utf8DecodingByte: NearGas
-    public let validatorStakeBase: NearGas
-    public let validatorTotalStakeBase: NearGas
-    public let writeMemoryBase: NearGas
-    public let writeMemoryByte: NearGas
-    public let writeRegisterBase: NearGas
-    public let writeRegisterByte: NearGas
-    public let yieldCreateBase: NearGas
-    public let yieldCreateByte: NearGas
-    public let yieldResumeBase: NearGas
-    public let yieldResumeByte: NearGas
+    public let altBn128G1MultiexpBase: NearGas?
+    public let altBn128G1MultiexpElement: NearGas?
+    public let altBn128G1SumBase: NearGas?
+    public let altBn128G1SumElement: NearGas?
+    public let altBn128PairingCheckBase: NearGas?
+    public let altBn128PairingCheckElement: NearGas?
+    public let base: NearGas?
+    public let bls12381G1MultiexpBase: NearGas?
+    public let bls12381G1MultiexpElement: NearGas?
+    public let bls12381G2MultiexpBase: NearGas?
+    public let bls12381G2MultiexpElement: NearGas?
+    public let bls12381MapFp2ToG2Base: NearGas?
+    public let bls12381MapFp2ToG2Element: NearGas?
+    public let bls12381MapFpToG1Base: NearGas?
+    public let bls12381MapFpToG1Element: NearGas?
+    public let bls12381P1DecompressBase: NearGas?
+    public let bls12381P1DecompressElement: NearGas?
+    public let bls12381P1SumBase: NearGas?
+    public let bls12381P1SumElement: NearGas?
+    public let bls12381P2DecompressBase: NearGas?
+    public let bls12381P2DecompressElement: NearGas?
+    public let bls12381P2SumBase: NearGas?
+    public let bls12381P2SumElement: NearGas?
+    public let bls12381PairingBase: NearGas?
+    public let bls12381PairingElement: NearGas?
+    public let contractCompileBase: NearGas?
+    public let contractCompileBytes: NearGas?
+    public let contractLoadingBase: NearGas?
+    public let contractLoadingBytes: NearGas?
+    public let ecrecoverBase: NearGas?
+    public let ed25519VerifyBase: NearGas?
+    public let ed25519VerifyByte: NearGas?
+    public let keccak256Base: NearGas?
+    public let keccak256Byte: NearGas?
+    public let keccak512Base: NearGas?
+    public let keccak512Byte: NearGas?
+    public let logBase: NearGas?
+    public let logByte: NearGas?
+    public let promiseAndBase: NearGas?
+    public let promiseAndPerPromise: NearGas?
+    public let promiseReturn: NearGas?
+    public let readCachedTrieNode: NearGas?
+    public let readMemoryBase: NearGas?
+    public let readMemoryByte: NearGas?
+    public let readRegisterBase: NearGas?
+    public let readRegisterByte: NearGas?
+    public let ripemd160Base: NearGas?
+    public let ripemd160Block: NearGas?
+    public let sha256Base: NearGas?
+    public let sha256Byte: NearGas?
+    public let storageHasKeyBase: NearGas?
+    public let storageHasKeyByte: NearGas?
+    public let storageIterCreateFromByte: NearGas?
+    public let storageIterCreatePrefixBase: NearGas?
+    public let storageIterCreatePrefixByte: NearGas?
+    public let storageIterCreateRangeBase: NearGas?
+    public let storageIterCreateToByte: NearGas?
+    public let storageIterNextBase: NearGas?
+    public let storageIterNextKeyByte: NearGas?
+    public let storageIterNextValueByte: NearGas?
+    public let storageLargeReadOverheadBase: NearGas?
+    public let storageLargeReadOverheadByte: NearGas?
+    public let storageReadBase: NearGas?
+    public let storageReadKeyByte: NearGas?
+    public let storageReadValueByte: NearGas?
+    public let storageRemoveBase: NearGas?
+    public let storageRemoveKeyByte: NearGas?
+    public let storageRemoveRetValueByte: NearGas?
+    public let storageWriteBase: NearGas?
+    public let storageWriteEvictedByte: NearGas?
+    public let storageWriteKeyByte: NearGas?
+    public let storageWriteValueByte: NearGas?
+    public let touchingTrieNode: NearGas?
+    public let utf16DecodingBase: NearGas?
+    public let utf16DecodingByte: NearGas?
+    public let utf8DecodingBase: NearGas?
+    public let utf8DecodingByte: NearGas?
+    public let validatorStakeBase: NearGas?
+    public let validatorTotalStakeBase: NearGas?
+    public let writeMemoryBase: NearGas?
+    public let writeMemoryByte: NearGas?
+    public let writeRegisterBase: NearGas?
+    public let writeRegisterByte: NearGas?
+    public let yieldCreateBase: NearGas?
+    public let yieldCreateByte: NearGas?
+    public let yieldResumeBase: NearGas?
+    public let yieldResumeByte: NearGas?
 
     public init(
-        altBn128G1MultiexpBase: NearGas,
-        altBn128G1MultiexpElement: NearGas,
-        altBn128G1SumBase: NearGas,
-        altBn128G1SumElement: NearGas,
-        altBn128PairingCheckBase: NearGas,
-        altBn128PairingCheckElement: NearGas,
-        base: NearGas,
-        bls12381G1MultiexpBase: NearGas,
-        bls12381G1MultiexpElement: NearGas,
-        bls12381G2MultiexpBase: NearGas,
-        bls12381G2MultiexpElement: NearGas,
-        bls12381MapFp2ToG2Base: NearGas,
-        bls12381MapFp2ToG2Element: NearGas,
-        bls12381MapFpToG1Base: NearGas,
-        bls12381MapFpToG1Element: NearGas,
-        bls12381P1DecompressBase: NearGas,
-        bls12381P1DecompressElement: NearGas,
-        bls12381P1SumBase: NearGas,
-        bls12381P1SumElement: NearGas,
-        bls12381P2DecompressBase: NearGas,
-        bls12381P2DecompressElement: NearGas,
-        bls12381P2SumBase: NearGas,
-        bls12381P2SumElement: NearGas,
-        bls12381PairingBase: NearGas,
-        bls12381PairingElement: NearGas,
-        contractCompileBase: NearGas,
-        contractCompileBytes: NearGas,
-        contractLoadingBase: NearGas,
-        contractLoadingBytes: NearGas,
-        ecrecoverBase: NearGas,
-        ed25519VerifyBase: NearGas,
-        ed25519VerifyByte: NearGas,
-        keccak256Base: NearGas,
-        keccak256Byte: NearGas,
-        keccak512Base: NearGas,
-        keccak512Byte: NearGas,
-        logBase: NearGas,
-        logByte: NearGas,
-        promiseAndBase: NearGas,
-        promiseAndPerPromise: NearGas,
-        promiseReturn: NearGas,
-        readCachedTrieNode: NearGas,
-        readMemoryBase: NearGas,
-        readMemoryByte: NearGas,
-        readRegisterBase: NearGas,
-        readRegisterByte: NearGas,
-        ripemd160Base: NearGas,
-        ripemd160Block: NearGas,
-        sha256Base: NearGas,
-        sha256Byte: NearGas,
-        storageHasKeyBase: NearGas,
-        storageHasKeyByte: NearGas,
-        storageIterCreateFromByte: NearGas,
-        storageIterCreatePrefixBase: NearGas,
-        storageIterCreatePrefixByte: NearGas,
-        storageIterCreateRangeBase: NearGas,
-        storageIterCreateToByte: NearGas,
-        storageIterNextBase: NearGas,
-        storageIterNextKeyByte: NearGas,
-        storageIterNextValueByte: NearGas,
-        storageLargeReadOverheadBase: NearGas,
-        storageLargeReadOverheadByte: NearGas,
-        storageReadBase: NearGas,
-        storageReadKeyByte: NearGas,
-        storageReadValueByte: NearGas,
-        storageRemoveBase: NearGas,
-        storageRemoveKeyByte: NearGas,
-        storageRemoveRetValueByte: NearGas,
-        storageWriteBase: NearGas,
-        storageWriteEvictedByte: NearGas,
-        storageWriteKeyByte: NearGas,
-        storageWriteValueByte: NearGas,
-        touchingTrieNode: NearGas,
-        utf16DecodingBase: NearGas,
-        utf16DecodingByte: NearGas,
-        utf8DecodingBase: NearGas,
-        utf8DecodingByte: NearGas,
-        validatorStakeBase: NearGas,
-        validatorTotalStakeBase: NearGas,
-        writeMemoryBase: NearGas,
-        writeMemoryByte: NearGas,
-        writeRegisterBase: NearGas,
-        writeRegisterByte: NearGas,
-        yieldCreateBase: NearGas,
-        yieldCreateByte: NearGas,
-        yieldResumeBase: NearGas,
-        yieldResumeByte: NearGas,
+        altBn128G1MultiexpBase: NearGas?,
+        altBn128G1MultiexpElement: NearGas?,
+        altBn128G1SumBase: NearGas?,
+        altBn128G1SumElement: NearGas?,
+        altBn128PairingCheckBase: NearGas?,
+        altBn128PairingCheckElement: NearGas?,
+        base: NearGas?,
+        bls12381G1MultiexpBase: NearGas?,
+        bls12381G1MultiexpElement: NearGas?,
+        bls12381G2MultiexpBase: NearGas?,
+        bls12381G2MultiexpElement: NearGas?,
+        bls12381MapFp2ToG2Base: NearGas?,
+        bls12381MapFp2ToG2Element: NearGas?,
+        bls12381MapFpToG1Base: NearGas?,
+        bls12381MapFpToG1Element: NearGas?,
+        bls12381P1DecompressBase: NearGas?,
+        bls12381P1DecompressElement: NearGas?,
+        bls12381P1SumBase: NearGas?,
+        bls12381P1SumElement: NearGas?,
+        bls12381P2DecompressBase: NearGas?,
+        bls12381P2DecompressElement: NearGas?,
+        bls12381P2SumBase: NearGas?,
+        bls12381P2SumElement: NearGas?,
+        bls12381PairingBase: NearGas?,
+        bls12381PairingElement: NearGas?,
+        contractCompileBase: NearGas?,
+        contractCompileBytes: NearGas?,
+        contractLoadingBase: NearGas?,
+        contractLoadingBytes: NearGas?,
+        ecrecoverBase: NearGas?,
+        ed25519VerifyBase: NearGas?,
+        ed25519VerifyByte: NearGas?,
+        keccak256Base: NearGas?,
+        keccak256Byte: NearGas?,
+        keccak512Base: NearGas?,
+        keccak512Byte: NearGas?,
+        logBase: NearGas?,
+        logByte: NearGas?,
+        promiseAndBase: NearGas?,
+        promiseAndPerPromise: NearGas?,
+        promiseReturn: NearGas?,
+        readCachedTrieNode: NearGas?,
+        readMemoryBase: NearGas?,
+        readMemoryByte: NearGas?,
+        readRegisterBase: NearGas?,
+        readRegisterByte: NearGas?,
+        ripemd160Base: NearGas?,
+        ripemd160Block: NearGas?,
+        sha256Base: NearGas?,
+        sha256Byte: NearGas?,
+        storageHasKeyBase: NearGas?,
+        storageHasKeyByte: NearGas?,
+        storageIterCreateFromByte: NearGas?,
+        storageIterCreatePrefixBase: NearGas?,
+        storageIterCreatePrefixByte: NearGas?,
+        storageIterCreateRangeBase: NearGas?,
+        storageIterCreateToByte: NearGas?,
+        storageIterNextBase: NearGas?,
+        storageIterNextKeyByte: NearGas?,
+        storageIterNextValueByte: NearGas?,
+        storageLargeReadOverheadBase: NearGas?,
+        storageLargeReadOverheadByte: NearGas?,
+        storageReadBase: NearGas?,
+        storageReadKeyByte: NearGas?,
+        storageReadValueByte: NearGas?,
+        storageRemoveBase: NearGas?,
+        storageRemoveKeyByte: NearGas?,
+        storageRemoveRetValueByte: NearGas?,
+        storageWriteBase: NearGas?,
+        storageWriteEvictedByte: NearGas?,
+        storageWriteKeyByte: NearGas?,
+        storageWriteValueByte: NearGas?,
+        touchingTrieNode: NearGas?,
+        utf16DecodingBase: NearGas?,
+        utf16DecodingByte: NearGas?,
+        utf8DecodingBase: NearGas?,
+        utf8DecodingByte: NearGas?,
+        validatorStakeBase: NearGas?,
+        validatorTotalStakeBase: NearGas?,
+        writeMemoryBase: NearGas?,
+        writeMemoryByte: NearGas?,
+        writeRegisterBase: NearGas?,
+        writeRegisterByte: NearGas?,
+        yieldCreateBase: NearGas?,
+        yieldCreateByte: NearGas?,
+        yieldResumeBase: NearGas?,
+        yieldResumeByte: NearGas?,
     ) {
         self.altBn128G1MultiexpBase = altBn128G1MultiexpBase
         self.altBn128G1MultiexpElement = altBn128G1MultiexpElement
@@ -12233,13 +16360,13 @@ public struct ExtCostsConfigView: Codable, Sendable {
 
 public struct ExternalStorageConfig: Codable, Sendable {
     public let externalStorageFallbackThreshold: UInt64?
-    public let location: ExternalStorageLocation
+    public let location: ExternalStorageLocation?
     public let numConcurrentRequests: Int?
     public let numConcurrentRequestsDuringCatchup: Int?
 
     public init(
         externalStorageFallbackThreshold: UInt64?,
-        location: ExternalStorageLocation,
+        location: ExternalStorageLocation?,
         numConcurrentRequests: Int?,
         numConcurrentRequestsDuringCatchup: Int?,
     ) {
@@ -12373,19 +16500,67 @@ public struct GCConfig: Codable, Sendable {
     }
 }
 
+// MARK: - GasKey
+
+public struct GasKey: Codable, Sendable {
+    public let balance: NearToken
+    public let numNonces: Int
+    public let permission: AccessKeyPermission
+
+    public init(
+        balance: NearToken,
+        numNonces: Int,
+        permission: AccessKeyPermission,
+    ) {
+        self.balance = balance
+        self.numNonces = numNonces
+        self.permission = permission
+    }
+}
+
+// MARK: - GasKeyInfoView
+
+public struct GasKeyInfoView: Codable, Sendable {
+    public let gasKey: GasKeyView
+    public let publicKey: PublicKey
+
+    public init(
+        gasKey: GasKeyView,
+        publicKey: PublicKey,
+    ) {
+        self.gasKey = gasKey
+        self.publicKey = publicKey
+    }
+}
+
+// MARK: - GasKeyList
+
+public struct GasKeyList: Codable, Sendable {
+    public let keys: [GasKeyInfoView]
+
+    public init(
+        keys: [GasKeyInfoView],
+    ) {
+        self.keys = keys
+    }
+}
+
 // MARK: - GasKeyView
 
 public struct GasKeyView: Codable, Sendable {
     public let balance: NearToken
+    public let nonces: [UInt64]
     public let numNonces: Int
     public let permission: AccessKeyPermissionView
 
     public init(
         balance: NearToken,
+        nonces: [UInt64],
         numNonces: Int,
         permission: AccessKeyPermissionView,
     ) {
         self.balance = balance
+        self.nonces = nonces
         self.numNonces = numNonces
         self.permission = permission
     }
@@ -13208,67 +17383,67 @@ public struct LightClientBlockLiteView: Codable, Sendable {
 
 public struct LimitConfig: Codable, Sendable {
     public let accountIdValidityRulesVersion: AccountIdValidityRulesVersion?
-    public let initialMemoryPages: Int
-    public let maxActionsPerReceipt: UInt64
-    public let maxArgumentsLength: UInt64
-    public let maxContractSize: UInt64
+    public let initialMemoryPages: Int?
+    public let maxActionsPerReceipt: UInt64?
+    public let maxArgumentsLength: UInt64?
+    public let maxContractSize: UInt64?
     public let maxElementsPerContractTable: Int?
     public let maxFunctionsNumberPerContract: UInt64?
-    public let maxGasBurnt: NearGas
-    public let maxLengthMethodName: UInt64
-    public let maxLengthReturnedData: UInt64
-    public let maxLengthStorageKey: UInt64
-    public let maxLengthStorageValue: UInt64
+    public let maxGasBurnt: NearGas?
+    public let maxLengthMethodName: UInt64?
+    public let maxLengthReturnedData: UInt64?
+    public let maxLengthStorageKey: UInt64?
+    public let maxLengthStorageValue: UInt64?
     public let maxLocalsPerContract: UInt64?
-    public let maxMemoryPages: Int
-    public let maxNumberBytesMethodNames: UInt64
-    public let maxNumberInputDataDependencies: UInt64
-    public let maxNumberLogs: UInt64
-    public let maxNumberRegisters: UInt64
-    public let maxPromisesPerFunctionCallAction: UInt64
-    public let maxReceiptSize: UInt64
-    public let maxRegisterSize: UInt64
-    public let maxStackHeight: Int
+    public let maxMemoryPages: Int?
+    public let maxNumberBytesMethodNames: UInt64?
+    public let maxNumberInputDataDependencies: UInt64?
+    public let maxNumberLogs: UInt64?
+    public let maxNumberRegisters: UInt64?
+    public let maxPromisesPerFunctionCallAction: UInt64?
+    public let maxReceiptSize: UInt64?
+    public let maxRegisterSize: UInt64?
+    public let maxStackHeight: Int?
     public let maxTablesPerContract: Int?
-    public let maxTotalLogLength: UInt64
-    public let maxTotalPrepaidGas: NearGas
-    public let maxTransactionSize: UInt64
-    public let maxYieldPayloadSize: UInt64
-    public let perReceiptStorageProofSizeLimit: Int
-    public let registersMemoryLimit: UInt64
-    public let yieldTimeoutLengthInBlocks: UInt64
+    public let maxTotalLogLength: UInt64?
+    public let maxTotalPrepaidGas: NearGas?
+    public let maxTransactionSize: UInt64?
+    public let maxYieldPayloadSize: UInt64?
+    public let perReceiptStorageProofSizeLimit: Int?
+    public let registersMemoryLimit: UInt64?
+    public let yieldTimeoutLengthInBlocks: UInt64?
 
     public init(
         accountIdValidityRulesVersion: AccountIdValidityRulesVersion?,
-        initialMemoryPages: Int,
-        maxActionsPerReceipt: UInt64,
-        maxArgumentsLength: UInt64,
-        maxContractSize: UInt64,
+        initialMemoryPages: Int?,
+        maxActionsPerReceipt: UInt64?,
+        maxArgumentsLength: UInt64?,
+        maxContractSize: UInt64?,
         maxElementsPerContractTable: Int?,
         maxFunctionsNumberPerContract: UInt64?,
-        maxGasBurnt: NearGas,
-        maxLengthMethodName: UInt64,
-        maxLengthReturnedData: UInt64,
-        maxLengthStorageKey: UInt64,
-        maxLengthStorageValue: UInt64,
+        maxGasBurnt: NearGas?,
+        maxLengthMethodName: UInt64?,
+        maxLengthReturnedData: UInt64?,
+        maxLengthStorageKey: UInt64?,
+        maxLengthStorageValue: UInt64?,
         maxLocalsPerContract: UInt64?,
-        maxMemoryPages: Int,
-        maxNumberBytesMethodNames: UInt64,
-        maxNumberInputDataDependencies: UInt64,
-        maxNumberLogs: UInt64,
-        maxNumberRegisters: UInt64,
-        maxPromisesPerFunctionCallAction: UInt64,
-        maxReceiptSize: UInt64,
-        maxRegisterSize: UInt64,
-        maxStackHeight: Int,
+        maxMemoryPages: Int?,
+        maxNumberBytesMethodNames: UInt64?,
+        maxNumberInputDataDependencies: UInt64?,
+        maxNumberLogs: UInt64?,
+        maxNumberRegisters: UInt64?,
+        maxPromisesPerFunctionCallAction: UInt64?,
+        maxReceiptSize: UInt64?,
+        maxRegisterSize: UInt64?,
+        maxStackHeight: Int?,
         maxTablesPerContract: Int?,
-        maxTotalLogLength: UInt64,
-        maxTotalPrepaidGas: NearGas,
-        maxTransactionSize: UInt64,
-        maxYieldPayloadSize: UInt64,
-        perReceiptStorageProofSizeLimit: Int,
-        registersMemoryLimit: UInt64,
-        yieldTimeoutLengthInBlocks: UInt64,
+        maxTotalLogLength: UInt64?,
+        maxTotalPrepaidGas: NearGas?,
+        maxTransactionSize: UInt64?,
+        maxYieldPayloadSize: UInt64?,
+        perReceiptStorageProofSizeLimit: Int?,
+        registersMemoryLimit: UInt64?,
+        yieldTimeoutLengthInBlocks: UInt64?,
     ) {
         self.accountIdValidityRulesVersion = accountIdValidityRulesVersion
         self.initialMemoryPages = initialMemoryPages
@@ -13519,140 +17694,146 @@ public struct RpcChunkResponse: Codable, Sendable {
 // MARK: - RpcClientConfigResponse
 
 public struct RpcClientConfigResponse: Codable, Sendable {
-    public let archive: Bool
-    public let blockFetchHorizon: UInt64
-    public let blockHeaderFetchHorizon: UInt64
-    public let blockProductionTrackingDelay: [UInt64]
-    public let catchupStepPeriod: [UInt64]
-    public let chainId: String
+    public let archive: Bool?
+    public let blockFetchHorizon: UInt64?
+    public let blockHeaderFetchHorizon: UInt64?
+    public let blockProductionTrackingDelay: [UInt64]?
+    public let catchupStepPeriod: [UInt64]?
+    public let chainId: String?
     public let chunkDistributionNetwork: ChunkDistributionNetworkConfig?
-    public let chunkRequestRetryPeriod: [UInt64]
-    public let chunkValidationThreads: Int
-    public let chunkWaitMult: [Int32]
-    public let clientBackgroundMigrationThreads: Int
-    public let cloudArchivalReader: CloudArchivalReaderConfig?
+    public let chunkRequestRetryPeriod: [UInt64]?
+    public let chunkValidationThreads: Int?
+    public let chunkWaitMult: [Int32]?
+    public let clientBackgroundMigrationThreads: Int?
     public let cloudArchivalWriter: CloudArchivalWriterConfig?
-    public let doomslugStepPeriod: [UInt64]
-    public let enableMultilineLogging: Bool
-    public let enableStatisticsExport: Bool
-    public let epochLength: UInt64
-    public let epochSync: EpochSyncConfig
-    public let expectedShutdown: MutableConfigValue
-    public let gc: GCConfig
-    public let headerSyncExpectedHeightPerSecond: UInt64
-    public let headerSyncInitialTimeout: [UInt64]
-    public let headerSyncProgressTimeout: [UInt64]
-    public let headerSyncStallBanTimeout: [UInt64]
-    public let logSummaryPeriod: [UInt64]
-    public let logSummaryStyle: LogSummaryStyle
-    public let maxBlockProductionDelay: [UInt64]
-    public let maxBlockWaitDelay: [UInt64]
+    public let disableTxRouting: Bool?
+    public let doomslugStepPeriod: [UInt64]?
+    public let dynamicReshardingDryRun: Bool?
+    public let enableEarlyPrepareTransactions: Bool?
+    public let enableMultilineLogging: Bool?
+    public let enableStatisticsExport: Bool?
+    public let epochLength: UInt64?
+    public let epochSync: EpochSyncConfig?
+    public let expectedShutdown: MutableConfigValue?
+    public let gc: GCConfig?
+    public let headerSyncExpectedHeightPerSecond: UInt64?
+    public let headerSyncInitialTimeout: [UInt64]?
+    public let headerSyncProgressTimeout: [UInt64]?
+    public let headerSyncStallBanTimeout: [UInt64]?
+    public let logSummaryPeriod: [UInt64]?
+    public let logSummaryStyle: LogSummaryStyle?
+    public let maxBlockProductionDelay: [UInt64]?
+    public let maxBlockWaitDelay: [UInt64]?
     public let maxGasBurntView: NearGas?
-    public let minBlockProductionDelay: [UInt64]
-    public let minNumPeers: Int
-    public let numBlockProducerSeats: UInt64
-    public let orphanStateWitnessMaxSize: UInt64
-    public let orphanStateWitnessPoolSize: Int
-    public let produceChunkAddTransactionsTimeLimit: String
-    public let produceEmptyBlocks: Bool
-    public let protocolVersionCheck: ProtocolVersionCheckConfig
-    public let reshardingConfig: MutableConfigValue
+    public let minBlockProductionDelay: [UInt64]?
+    public let minNumPeers: Int?
+    public let numBlockProducerSeats: UInt64?
+    public let orphanStateWitnessMaxSize: UInt64?
+    public let orphanStateWitnessPoolSize: Int?
+    public let produceChunkAddTransactionsTimeLimit: String?
+    public let produceEmptyBlocks: Bool?
+    public let protocolVersionCheck: ProtocolVersionCheckConfig?
+    public let reshardingConfig: MutableConfigValue?
     public let rpcAddr: String?
-    public let saveInvalidWitnesses: Bool
-    public let saveLatestWitnesses: Bool
-    public let saveTrieChanges: Bool
-    public let saveTxOutcomes: Bool
-    public let saveUntrackedPartialChunksParts: Bool
-    public let skipSyncWait: Bool
-    public let stateRequestServerThreads: Int
-    public let stateRequestThrottlePeriod: [UInt64]
-    public let stateRequestsPerThrottlePeriod: Int
-    public let stateSync: StateSyncConfig
-    public let stateSyncEnabled: Bool
-    public let stateSyncExternalBackoff: [UInt64]
-    public let stateSyncExternalTimeout: [UInt64]
-    public let stateSyncP2PTimeout: [UInt64]
-    public let stateSyncRetryBackoff: [UInt64]
-    public let syncCheckPeriod: [UInt64]
-    public let syncHeightThreshold: UInt64
-    public let syncMaxBlockRequests: Int
-    public let syncStepPeriod: [UInt64]
-    public let trackedShardsConfig: TrackedShardsConfig
+    public let saveInvalidWitnesses: Bool?
+    public let saveLatestWitnesses: Bool?
+    public let saveStateChanges: Bool?
+    public let saveTrieChanges: Bool?
+    public let saveTxOutcomes: Bool?
+    public let saveUntrackedPartialChunksParts: Bool?
+    public let skipSyncWait: Bool?
+    public let stateRequestServerThreads: Int?
+    public let stateRequestThrottlePeriod: [UInt64]?
+    public let stateRequestsPerThrottlePeriod: Int?
+    public let stateSync: StateSyncConfig?
+    public let stateSyncEnabled: Bool?
+    public let stateSyncExternalBackoff: [UInt64]?
+    public let stateSyncExternalTimeout: [UInt64]?
+    public let stateSyncP2PTimeout: [UInt64]?
+    public let stateSyncRetryBackoff: [UInt64]?
+    public let syncCheckPeriod: [UInt64]?
+    public let syncHeightThreshold: UInt64?
+    public let syncMaxBlockRequests: Int?
+    public let syncStepPeriod: [UInt64]?
+    public let trackedShardsConfig: TrackedShardsConfig?
     public let transactionPoolSizeLimit: UInt64?
-    public let transactionRequestHandlerThreads: Int
+    public let transactionRequestHandlerThreads: Int?
     public let trieViewerStateSizeLimit: UInt64?
-    public let ttlAccountIdRouter: [UInt64]
-    public let txRoutingHeightHorizon: UInt64
-    public let version: Version
-    public let viewClientThreads: Int
+    public let ttlAccountIdRouter: [UInt64]?
+    public let txRoutingHeightHorizon: UInt64?
+    public let version: Version?
+    public let viewClientThreads: Int?
 
     public init(
-        archive: Bool,
-        blockFetchHorizon: UInt64,
-        blockHeaderFetchHorizon: UInt64,
-        blockProductionTrackingDelay: [UInt64],
-        catchupStepPeriod: [UInt64],
-        chainId: String,
+        archive: Bool?,
+        blockFetchHorizon: UInt64?,
+        blockHeaderFetchHorizon: UInt64?,
+        blockProductionTrackingDelay: [UInt64]?,
+        catchupStepPeriod: [UInt64]?,
+        chainId: String?,
         chunkDistributionNetwork: ChunkDistributionNetworkConfig?,
-        chunkRequestRetryPeriod: [UInt64],
-        chunkValidationThreads: Int,
-        chunkWaitMult: [Int32],
-        clientBackgroundMigrationThreads: Int,
-        cloudArchivalReader: CloudArchivalReaderConfig?,
+        chunkRequestRetryPeriod: [UInt64]?,
+        chunkValidationThreads: Int?,
+        chunkWaitMult: [Int32]?,
+        clientBackgroundMigrationThreads: Int?,
         cloudArchivalWriter: CloudArchivalWriterConfig?,
-        doomslugStepPeriod: [UInt64],
-        enableMultilineLogging: Bool,
-        enableStatisticsExport: Bool,
-        epochLength: UInt64,
-        epochSync: EpochSyncConfig,
-        expectedShutdown: MutableConfigValue,
-        gc: GCConfig,
-        headerSyncExpectedHeightPerSecond: UInt64,
-        headerSyncInitialTimeout: [UInt64],
-        headerSyncProgressTimeout: [UInt64],
-        headerSyncStallBanTimeout: [UInt64],
-        logSummaryPeriod: [UInt64],
-        logSummaryStyle: LogSummaryStyle,
-        maxBlockProductionDelay: [UInt64],
-        maxBlockWaitDelay: [UInt64],
+        disableTxRouting: Bool?,
+        doomslugStepPeriod: [UInt64]?,
+        dynamicReshardingDryRun: Bool?,
+        enableEarlyPrepareTransactions: Bool?,
+        enableMultilineLogging: Bool?,
+        enableStatisticsExport: Bool?,
+        epochLength: UInt64?,
+        epochSync: EpochSyncConfig?,
+        expectedShutdown: MutableConfigValue?,
+        gc: GCConfig?,
+        headerSyncExpectedHeightPerSecond: UInt64?,
+        headerSyncInitialTimeout: [UInt64]?,
+        headerSyncProgressTimeout: [UInt64]?,
+        headerSyncStallBanTimeout: [UInt64]?,
+        logSummaryPeriod: [UInt64]?,
+        logSummaryStyle: LogSummaryStyle?,
+        maxBlockProductionDelay: [UInt64]?,
+        maxBlockWaitDelay: [UInt64]?,
         maxGasBurntView: NearGas?,
-        minBlockProductionDelay: [UInt64],
-        minNumPeers: Int,
-        numBlockProducerSeats: UInt64,
-        orphanStateWitnessMaxSize: UInt64,
-        orphanStateWitnessPoolSize: Int,
-        produceChunkAddTransactionsTimeLimit: String,
-        produceEmptyBlocks: Bool,
-        protocolVersionCheck: ProtocolVersionCheckConfig,
-        reshardingConfig: MutableConfigValue,
+        minBlockProductionDelay: [UInt64]?,
+        minNumPeers: Int?,
+        numBlockProducerSeats: UInt64?,
+        orphanStateWitnessMaxSize: UInt64?,
+        orphanStateWitnessPoolSize: Int?,
+        produceChunkAddTransactionsTimeLimit: String?,
+        produceEmptyBlocks: Bool?,
+        protocolVersionCheck: ProtocolVersionCheckConfig?,
+        reshardingConfig: MutableConfigValue?,
         rpcAddr: String?,
-        saveInvalidWitnesses: Bool,
-        saveLatestWitnesses: Bool,
-        saveTrieChanges: Bool,
-        saveTxOutcomes: Bool,
-        saveUntrackedPartialChunksParts: Bool,
-        skipSyncWait: Bool,
-        stateRequestServerThreads: Int,
-        stateRequestThrottlePeriod: [UInt64],
-        stateRequestsPerThrottlePeriod: Int,
-        stateSync: StateSyncConfig,
-        stateSyncEnabled: Bool,
-        stateSyncExternalBackoff: [UInt64],
-        stateSyncExternalTimeout: [UInt64],
-        stateSyncP2PTimeout: [UInt64],
-        stateSyncRetryBackoff: [UInt64],
-        syncCheckPeriod: [UInt64],
-        syncHeightThreshold: UInt64,
-        syncMaxBlockRequests: Int,
-        syncStepPeriod: [UInt64],
-        trackedShardsConfig: TrackedShardsConfig,
+        saveInvalidWitnesses: Bool?,
+        saveLatestWitnesses: Bool?,
+        saveStateChanges: Bool?,
+        saveTrieChanges: Bool?,
+        saveTxOutcomes: Bool?,
+        saveUntrackedPartialChunksParts: Bool?,
+        skipSyncWait: Bool?,
+        stateRequestServerThreads: Int?,
+        stateRequestThrottlePeriod: [UInt64]?,
+        stateRequestsPerThrottlePeriod: Int?,
+        stateSync: StateSyncConfig?,
+        stateSyncEnabled: Bool?,
+        stateSyncExternalBackoff: [UInt64]?,
+        stateSyncExternalTimeout: [UInt64]?,
+        stateSyncP2PTimeout: [UInt64]?,
+        stateSyncRetryBackoff: [UInt64]?,
+        syncCheckPeriod: [UInt64]?,
+        syncHeightThreshold: UInt64?,
+        syncMaxBlockRequests: Int?,
+        syncStepPeriod: [UInt64]?,
+        trackedShardsConfig: TrackedShardsConfig?,
         transactionPoolSizeLimit: UInt64?,
-        transactionRequestHandlerThreads: Int,
+        transactionRequestHandlerThreads: Int?,
         trieViewerStateSizeLimit: UInt64?,
-        ttlAccountIdRouter: [UInt64],
-        txRoutingHeightHorizon: UInt64,
-        version: Version,
-        viewClientThreads: Int,
+        ttlAccountIdRouter: [UInt64]?,
+        txRoutingHeightHorizon: UInt64?,
+        version: Version?,
+        viewClientThreads: Int?,
     ) {
         self.archive = archive
         self.blockFetchHorizon = blockFetchHorizon
@@ -13665,9 +17846,11 @@ public struct RpcClientConfigResponse: Codable, Sendable {
         self.chunkValidationThreads = chunkValidationThreads
         self.chunkWaitMult = chunkWaitMult
         self.clientBackgroundMigrationThreads = clientBackgroundMigrationThreads
-        self.cloudArchivalReader = cloudArchivalReader
         self.cloudArchivalWriter = cloudArchivalWriter
+        self.disableTxRouting = disableTxRouting
         self.doomslugStepPeriod = doomslugStepPeriod
+        self.dynamicReshardingDryRun = dynamicReshardingDryRun
+        self.enableEarlyPrepareTransactions = enableEarlyPrepareTransactions
         self.enableMultilineLogging = enableMultilineLogging
         self.enableStatisticsExport = enableStatisticsExport
         self.epochLength = epochLength
@@ -13695,6 +17878,7 @@ public struct RpcClientConfigResponse: Codable, Sendable {
         self.rpcAddr = rpcAddr
         self.saveInvalidWitnesses = saveInvalidWitnesses
         self.saveLatestWitnesses = saveLatestWitnesses
+        self.saveStateChanges = saveStateChanges
         self.saveTrieChanges = saveTrieChanges
         self.saveTxOutcomes = saveTxOutcomes
         self.saveUntrackedPartialChunksParts = saveUntrackedPartialChunksParts
@@ -13927,74 +18111,74 @@ public struct RpcPeerInfo: Codable, Sendable {
 // MARK: - RpcProtocolConfigResponse
 
 public struct RpcProtocolConfigResponse: Codable, Sendable {
-    public let avgHiddenValidatorSeatsPerShard: [UInt64]
-    public let blockProducerKickoutThreshold: Int
-    public let chainId: String
-    public let chunkProducerKickoutThreshold: Int
-    public let chunkValidatorOnlyKickoutThreshold: Int
-    public let dynamicResharding: Bool
-    public let epochLength: UInt64
-    public let fishermenThreshold: NearToken
-    public let gasLimit: NearGas
-    public let gasPriceAdjustmentRate: [Int32]
-    public let genesisHeight: UInt64
-    public let genesisTime: String
-    public let maxGasPrice: NearToken
-    public let maxInflationRate: [Int32]
-    public let maxKickoutStakePerc: Int
-    public let minGasPrice: NearToken
-    public let minimumStakeDivisor: UInt64
-    public let minimumStakeRatio: [Int32]
-    public let minimumValidatorsPerShard: UInt64
-    public let numBlockProducerSeats: UInt64
-    public let numBlockProducerSeatsPerShard: [UInt64]
-    public let numBlocksPerYear: UInt64
-    public let onlineMaxThreshold: [Int32]
-    public let onlineMinThreshold: [Int32]
-    public let protocolRewardRate: [Int32]
-    public let protocolTreasuryAccount: AccountId
-    public let protocolUpgradeStakeThreshold: [Int32]
-    public let protocolVersion: Int
-    public let runtimeConfig: RuntimeConfigView
-    public let shardLayout: ShardLayout
-    public let shuffleShardAssignmentForChunkProducers: Bool
-    public let targetValidatorMandatesPerShard: UInt64
-    public let transactionValidityPeriod: UInt64
+    public let avgHiddenValidatorSeatsPerShard: [UInt64]?
+    public let blockProducerKickoutThreshold: Int?
+    public let chainId: String?
+    public let chunkProducerKickoutThreshold: Int?
+    public let chunkValidatorOnlyKickoutThreshold: Int?
+    public let dynamicResharding: Bool?
+    public let epochLength: UInt64?
+    public let fishermenThreshold: NearToken?
+    public let gasLimit: NearGas?
+    public let gasPriceAdjustmentRate: [Int32]?
+    public let genesisHeight: UInt64?
+    public let genesisTime: String?
+    public let maxGasPrice: NearToken?
+    public let maxInflationRate: [Int32]?
+    public let maxKickoutStakePerc: Int?
+    public let minGasPrice: NearToken?
+    public let minimumStakeDivisor: UInt64?
+    public let minimumStakeRatio: [Int32]?
+    public let minimumValidatorsPerShard: UInt64?
+    public let numBlockProducerSeats: UInt64?
+    public let numBlockProducerSeatsPerShard: [UInt64]?
+    public let numBlocksPerYear: UInt64?
+    public let onlineMaxThreshold: [Int32]?
+    public let onlineMinThreshold: [Int32]?
+    public let protocolRewardRate: [Int32]?
+    public let protocolTreasuryAccount: AccountId?
+    public let protocolUpgradeStakeThreshold: [Int32]?
+    public let protocolVersion: Int?
+    public let runtimeConfig: RuntimeConfigView?
+    public let shardLayout: ShardLayout?
+    public let shuffleShardAssignmentForChunkProducers: Bool?
+    public let targetValidatorMandatesPerShard: UInt64?
+    public let transactionValidityPeriod: UInt64?
 
     public init(
-        avgHiddenValidatorSeatsPerShard: [UInt64],
-        blockProducerKickoutThreshold: Int,
-        chainId: String,
-        chunkProducerKickoutThreshold: Int,
-        chunkValidatorOnlyKickoutThreshold: Int,
-        dynamicResharding: Bool,
-        epochLength: UInt64,
-        fishermenThreshold: NearToken,
-        gasLimit: NearGas,
-        gasPriceAdjustmentRate: [Int32],
-        genesisHeight: UInt64,
-        genesisTime: String,
-        maxGasPrice: NearToken,
-        maxInflationRate: [Int32],
-        maxKickoutStakePerc: Int,
-        minGasPrice: NearToken,
-        minimumStakeDivisor: UInt64,
-        minimumStakeRatio: [Int32],
-        minimumValidatorsPerShard: UInt64,
-        numBlockProducerSeats: UInt64,
-        numBlockProducerSeatsPerShard: [UInt64],
-        numBlocksPerYear: UInt64,
-        onlineMaxThreshold: [Int32],
-        onlineMinThreshold: [Int32],
-        protocolRewardRate: [Int32],
-        protocolTreasuryAccount: AccountId,
-        protocolUpgradeStakeThreshold: [Int32],
-        protocolVersion: Int,
-        runtimeConfig: RuntimeConfigView,
-        shardLayout: ShardLayout,
-        shuffleShardAssignmentForChunkProducers: Bool,
-        targetValidatorMandatesPerShard: UInt64,
-        transactionValidityPeriod: UInt64,
+        avgHiddenValidatorSeatsPerShard: [UInt64]?,
+        blockProducerKickoutThreshold: Int?,
+        chainId: String?,
+        chunkProducerKickoutThreshold: Int?,
+        chunkValidatorOnlyKickoutThreshold: Int?,
+        dynamicResharding: Bool?,
+        epochLength: UInt64?,
+        fishermenThreshold: NearToken?,
+        gasLimit: NearGas?,
+        gasPriceAdjustmentRate: [Int32]?,
+        genesisHeight: UInt64?,
+        genesisTime: String?,
+        maxGasPrice: NearToken?,
+        maxInflationRate: [Int32]?,
+        maxKickoutStakePerc: Int?,
+        minGasPrice: NearToken?,
+        minimumStakeDivisor: UInt64?,
+        minimumStakeRatio: [Int32]?,
+        minimumValidatorsPerShard: UInt64?,
+        numBlockProducerSeats: UInt64?,
+        numBlockProducerSeatsPerShard: [UInt64]?,
+        numBlocksPerYear: UInt64?,
+        onlineMaxThreshold: [Int32]?,
+        onlineMinThreshold: [Int32]?,
+        protocolRewardRate: [Int32]?,
+        protocolTreasuryAccount: AccountId?,
+        protocolUpgradeStakeThreshold: [Int32]?,
+        protocolVersion: Int?,
+        runtimeConfig: RuntimeConfigView?,
+        shardLayout: ShardLayout?,
+        shuffleShardAssignmentForChunkProducers: Bool?,
+        targetValidatorMandatesPerShard: UInt64?,
+        transactionValidityPeriod: UInt64?,
     ) {
         self.avgHiddenValidatorSeatsPerShard = avgHiddenValidatorSeatsPerShard
         self.blockProducerKickoutThreshold = blockProducerKickoutThreshold
@@ -14239,20 +18423,20 @@ public struct RpcValidatorsOrderedRequest: Codable, Sendable {
 // MARK: - RuntimeConfigView
 
 public struct RuntimeConfigView: Codable, Sendable {
-    public let accountCreationConfig: AccountCreationConfigView
-    public let congestionControlConfig: CongestionControlConfigView
-    public let storageAmountPerByte: NearToken
-    public let transactionCosts: RuntimeFeesConfigView
-    public let wasmConfig: VMConfigView
-    public let witnessConfig: WitnessConfigView
+    public let accountCreationConfig: AccountCreationConfigView?
+    public let congestionControlConfig: CongestionControlConfigView?
+    public let storageAmountPerByte: NearToken?
+    public let transactionCosts: RuntimeFeesConfigView?
+    public let wasmConfig: VMConfigView?
+    public let witnessConfig: WitnessConfigView?
 
     public init(
-        accountCreationConfig: AccountCreationConfigView,
-        congestionControlConfig: CongestionControlConfigView,
-        storageAmountPerByte: NearToken,
-        transactionCosts: RuntimeFeesConfigView,
-        wasmConfig: VMConfigView,
-        witnessConfig: WitnessConfigView,
+        accountCreationConfig: AccountCreationConfigView?,
+        congestionControlConfig: CongestionControlConfigView?,
+        storageAmountPerByte: NearToken?,
+        transactionCosts: RuntimeFeesConfigView?,
+        wasmConfig: VMConfigView?,
+        witnessConfig: WitnessConfigView?,
     ) {
         self.accountCreationConfig = accountCreationConfig
         self.congestionControlConfig = congestionControlConfig
@@ -14266,20 +18450,20 @@ public struct RuntimeConfigView: Codable, Sendable {
 // MARK: - RuntimeFeesConfigView
 
 public struct RuntimeFeesConfigView: Codable, Sendable {
-    public let actionCreationConfig: ActionCreationConfigView
-    public let actionReceiptCreationConfig: Fee
-    public let burntGasReward: [Int32]
-    public let dataReceiptCreationConfig: DataReceiptCreationConfigView
-    public let pessimisticGasPriceInflationRatio: [Int32]
-    public let storageUsageConfig: StorageUsageConfigView
+    public let actionCreationConfig: ActionCreationConfigView?
+    public let actionReceiptCreationConfig: Fee?
+    public let burntGasReward: [Int32]?
+    public let dataReceiptCreationConfig: DataReceiptCreationConfigView?
+    public let pessimisticGasPriceInflationRatio: [Int32]?
+    public let storageUsageConfig: StorageUsageConfigView?
 
     public init(
-        actionCreationConfig: ActionCreationConfigView,
-        actionReceiptCreationConfig: Fee,
-        burntGasReward: [Int32],
-        dataReceiptCreationConfig: DataReceiptCreationConfigView,
-        pessimisticGasPriceInflationRatio: [Int32],
-        storageUsageConfig: StorageUsageConfigView,
+        actionCreationConfig: ActionCreationConfigView?,
+        actionReceiptCreationConfig: Fee?,
+        burntGasReward: [Int32]?,
+        dataReceiptCreationConfig: DataReceiptCreationConfigView?,
+        pessimisticGasPriceInflationRatio: [Int32]?,
+        storageUsageConfig: StorageUsageConfigView?,
     ) {
         self.actionCreationConfig = actionCreationConfig
         self.actionReceiptCreationConfig = actionReceiptCreationConfig
@@ -14527,12 +18711,12 @@ public struct StatusSyncInfo: Codable, Sendable {
 // MARK: - StorageUsageConfigView
 
 public struct StorageUsageConfigView: Codable, Sendable {
-    public let numBytesAccount: UInt64
-    public let numExtraBytesRecord: UInt64
+    public let numBytesAccount: UInt64?
+    public let numExtraBytesRecord: UInt64?
 
     public init(
-        numBytesAccount: UInt64,
-        numExtraBytesRecord: UInt64,
+        numBytesAccount: UInt64?,
+        numExtraBytesRecord: UInt64?,
     ) {
         self.numBytesAccount = numBytesAccount
         self.numExtraBytesRecord = numExtraBytesRecord
@@ -14542,16 +18726,16 @@ public struct StorageUsageConfigView: Codable, Sendable {
 // MARK: - SyncConcurrency
 
 public struct SyncConcurrency: Codable, Sendable {
-    public let apply: Int
-    public let applyDuringCatchup: Int
-    public let peerDownloads: Int
-    public let perShard: Int
+    public let apply: Int?
+    public let applyDuringCatchup: Int?
+    public let peerDownloads: Int?
+    public let perShard: Int?
 
     public init(
-        apply: Int,
-        applyDuringCatchup: Int,
-        peerDownloads: Int,
-        perShard: Int,
+        apply: Int?,
+        applyDuringCatchup: Int?,
+        peerDownloads: Int?,
+        perShard: Int?,
     ) {
         self.apply = apply
         self.applyDuringCatchup = applyDuringCatchup
@@ -14587,6 +18771,21 @@ public struct TransferAction: Codable, Sendable {
     }
 }
 
+// MARK: - TransferToGasKeyAction
+
+public struct TransferToGasKeyAction: Codable, Sendable {
+    public let deposit: NearToken
+    public let publicKey: PublicKey
+
+    public init(
+        deposit: NearToken,
+        publicKey: PublicKey,
+    ) {
+        self.deposit = deposit
+        self.publicKey = publicKey
+    }
+}
+
 // MARK: - UseGlobalContractAction
 
 public struct UseGlobalContractAction: Codable, Sendable {
@@ -14602,36 +18801,40 @@ public struct UseGlobalContractAction: Codable, Sendable {
 // MARK: - VMConfigView
 
 public struct VMConfigView: Codable, Sendable {
-    public let deterministicAccountIds: Bool
-    public let discardCustomSections: Bool
-    public let ethImplicitAccounts: Bool
-    public let extCosts: ExtCostsConfigView
-    public let fixContractLoadingCost: Bool
-    public let globalContractHostFns: Bool
-    public let growMemCost: Int
-    public let implicitAccountCreation: Bool
-    public let limitConfig: LimitConfig
-    public let reftypesBulkMemory: Bool
-    public let regularOpCost: Int
-    public let saturatingFloatToInt: Bool
-    public let storageGetMode: StorageGetMode
-    public let vmKind: VMKind
+    public let deterministicAccountIds: Bool?
+    public let discardCustomSections: Bool?
+    public let ethImplicitAccounts: Bool?
+    public let extCosts: ExtCostsConfigView?
+    public let fixContractLoadingCost: Bool?
+    public let globalContractHostFns: Bool?
+    public let growMemCost: Int?
+    public let implicitAccountCreation: Bool?
+    public let limitConfig: LimitConfig?
+    public let linearOpBaseCost: UInt64?
+    public let linearOpUnitCost: UInt64?
+    public let reftypesBulkMemory: Bool?
+    public let regularOpCost: Int?
+    public let saturatingFloatToInt: Bool?
+    public let storageGetMode: StorageGetMode?
+    public let vmKind: VMKind?
 
     public init(
-        deterministicAccountIds: Bool,
-        discardCustomSections: Bool,
-        ethImplicitAccounts: Bool,
-        extCosts: ExtCostsConfigView,
-        fixContractLoadingCost: Bool,
-        globalContractHostFns: Bool,
-        growMemCost: Int,
-        implicitAccountCreation: Bool,
-        limitConfig: LimitConfig,
-        reftypesBulkMemory: Bool,
-        regularOpCost: Int,
-        saturatingFloatToInt: Bool,
-        storageGetMode: StorageGetMode,
-        vmKind: VMKind,
+        deterministicAccountIds: Bool?,
+        discardCustomSections: Bool?,
+        ethImplicitAccounts: Bool?,
+        extCosts: ExtCostsConfigView?,
+        fixContractLoadingCost: Bool?,
+        globalContractHostFns: Bool?,
+        growMemCost: Int?,
+        implicitAccountCreation: Bool?,
+        limitConfig: LimitConfig?,
+        linearOpBaseCost: UInt64?,
+        linearOpUnitCost: UInt64?,
+        reftypesBulkMemory: Bool?,
+        regularOpCost: Int?,
+        saturatingFloatToInt: Bool?,
+        storageGetMode: StorageGetMode?,
+        vmKind: VMKind?,
     ) {
         self.deterministicAccountIds = deterministicAccountIds
         self.discardCustomSections = discardCustomSections
@@ -14642,6 +18845,8 @@ public struct VMConfigView: Codable, Sendable {
         self.growMemCost = growMemCost
         self.implicitAccountCreation = implicitAccountCreation
         self.limitConfig = limitConfig
+        self.linearOpBaseCost = linearOpBaseCost
+        self.linearOpUnitCost = linearOpUnitCost
         self.reftypesBulkMemory = reftypesBulkMemory
         self.regularOpCost = regularOpCost
         self.saturatingFloatToInt = saturatingFloatToInt
@@ -14734,14 +18939,14 @@ public struct ViewStateResult: Codable, Sendable {
 // MARK: - WitnessConfigView
 
 public struct WitnessConfigView: Codable, Sendable {
-    public let combinedTransactionsSizeLimit: Int
-    public let mainStorageProofSizeSoftLimit: UInt64
-    public let newTransactionsValidationStateSizeSoftLimit: UInt64
+    public let combinedTransactionsSizeLimit: Int?
+    public let mainStorageProofSizeSoftLimit: UInt64?
+    public let newTransactionsValidationStateSizeSoftLimit: UInt64?
 
     public init(
-        combinedTransactionsSizeLimit: Int,
-        mainStorageProofSizeSoftLimit: UInt64,
-        newTransactionsValidationStateSizeSoftLimit: UInt64,
+        combinedTransactionsSizeLimit: Int?,
+        mainStorageProofSizeSoftLimit: UInt64?,
+        newTransactionsValidationStateSizeSoftLimit: UInt64?,
     ) {
         self.combinedTransactionsSizeLimit = combinedTransactionsSizeLimit
         self.mainStorageProofSizeSoftLimit = mainStorageProofSizeSoftLimit
@@ -14765,12 +18970,60 @@ public struct InlineObject: Codable, Sendable {
 
 /// Enum wrapping all possible RPC error types
 public enum RpcErrorDetails: Codable, Sendable {
-    case rpcError(RpcError)
+    case errorwrapperForGenesisConfigError(ErrorWrapperForGenesisConfigError)
+    case errorwrapperForRpcBlockError(ErrorWrapperForRpcBlockError)
+    case errorwrapperForRpcChunkError(ErrorWrapperForRpcChunkError)
+    case errorwrapperForRpcClientConfigError(ErrorWrapperForRpcClientConfigError)
+    case errorwrapperForRpcGasPriceError(ErrorWrapperForRpcGasPriceError)
+    case errorwrapperForRpcLightClientNextBlockError(ErrorWrapperForRpcLightClientNextBlockError)
+    case errorwrapperForRpcLightClientProofError(ErrorWrapperForRpcLightClientProofError)
+    case errorwrapperForRpcMaintenanceWindowsError(ErrorWrapperForRpcMaintenanceWindowsError)
+    case errorwrapperForRpcNetworkInfoError(ErrorWrapperForRpcNetworkInfoError)
+    case errorwrapperForRpcProtocolConfigError(ErrorWrapperForRpcProtocolConfigError)
+    case errorwrapperForRpcQueryError(ErrorWrapperForRpcQueryError)
+    case errorwrapperForRpcReceiptError(ErrorWrapperForRpcReceiptError)
+    case errorwrapperForRpcSplitStorageInfoError(ErrorWrapperForRpcSplitStorageInfoError)
+    case errorwrapperForRpcStateChangesError(ErrorWrapperForRpcStateChangesError)
+    case errorwrapperForRpcStatusError(ErrorWrapperForRpcStatusError)
+    case errorwrapperForRpcTransactionError(ErrorWrapperForRpcTransactionError)
+    case errorwrapperForRpcValidatorError(ErrorWrapperForRpcValidatorError)
 
     public init(from decoder: Decoder) throws {
         // Try to decode as each error type
-        if let error = try? RpcError(from: decoder) {
-            self = .rpcError(error)
+        if let error = try? ErrorWrapperForGenesisConfigError(from: decoder) {
+            self = .errorwrapperForGenesisConfigError(error)
+        } else if let error = try? ErrorWrapperForRpcBlockError(from: decoder) {
+            self = .errorwrapperForRpcBlockError(error)
+        } else if let error = try? ErrorWrapperForRpcChunkError(from: decoder) {
+            self = .errorwrapperForRpcChunkError(error)
+        } else if let error = try? ErrorWrapperForRpcClientConfigError(from: decoder) {
+            self = .errorwrapperForRpcClientConfigError(error)
+        } else if let error = try? ErrorWrapperForRpcGasPriceError(from: decoder) {
+            self = .errorwrapperForRpcGasPriceError(error)
+        } else if let error = try? ErrorWrapperForRpcLightClientNextBlockError(from: decoder) {
+            self = .errorwrapperForRpcLightClientNextBlockError(error)
+        } else if let error = try? ErrorWrapperForRpcLightClientProofError(from: decoder) {
+            self = .errorwrapperForRpcLightClientProofError(error)
+        } else if let error = try? ErrorWrapperForRpcMaintenanceWindowsError(from: decoder) {
+            self = .errorwrapperForRpcMaintenanceWindowsError(error)
+        } else if let error = try? ErrorWrapperForRpcNetworkInfoError(from: decoder) {
+            self = .errorwrapperForRpcNetworkInfoError(error)
+        } else if let error = try? ErrorWrapperForRpcProtocolConfigError(from: decoder) {
+            self = .errorwrapperForRpcProtocolConfigError(error)
+        } else if let error = try? ErrorWrapperForRpcQueryError(from: decoder) {
+            self = .errorwrapperForRpcQueryError(error)
+        } else if let error = try? ErrorWrapperForRpcReceiptError(from: decoder) {
+            self = .errorwrapperForRpcReceiptError(error)
+        } else if let error = try? ErrorWrapperForRpcSplitStorageInfoError(from: decoder) {
+            self = .errorwrapperForRpcSplitStorageInfoError(error)
+        } else if let error = try? ErrorWrapperForRpcStateChangesError(from: decoder) {
+            self = .errorwrapperForRpcStateChangesError(error)
+        } else if let error = try? ErrorWrapperForRpcStatusError(from: decoder) {
+            self = .errorwrapperForRpcStatusError(error)
+        } else if let error = try? ErrorWrapperForRpcTransactionError(from: decoder) {
+            self = .errorwrapperForRpcTransactionError(error)
+        } else if let error = try? ErrorWrapperForRpcValidatorError(from: decoder) {
+            self = .errorwrapperForRpcValidatorError(error)
         } else {
             throw DecodingError.dataCorrupted(
                 DecodingError.Context(
@@ -14783,7 +19036,39 @@ public enum RpcErrorDetails: Codable, Sendable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
-        case let .rpcError(error):
+        case let .errorwrapperForGenesisConfigError(error):
+            try error.encode(to: encoder)
+        case let .errorwrapperForRpcBlockError(error):
+            try error.encode(to: encoder)
+        case let .errorwrapperForRpcChunkError(error):
+            try error.encode(to: encoder)
+        case let .errorwrapperForRpcClientConfigError(error):
+            try error.encode(to: encoder)
+        case let .errorwrapperForRpcGasPriceError(error):
+            try error.encode(to: encoder)
+        case let .errorwrapperForRpcLightClientNextBlockError(error):
+            try error.encode(to: encoder)
+        case let .errorwrapperForRpcLightClientProofError(error):
+            try error.encode(to: encoder)
+        case let .errorwrapperForRpcMaintenanceWindowsError(error):
+            try error.encode(to: encoder)
+        case let .errorwrapperForRpcNetworkInfoError(error):
+            try error.encode(to: encoder)
+        case let .errorwrapperForRpcProtocolConfigError(error):
+            try error.encode(to: encoder)
+        case let .errorwrapperForRpcQueryError(error):
+            try error.encode(to: encoder)
+        case let .errorwrapperForRpcReceiptError(error):
+            try error.encode(to: encoder)
+        case let .errorwrapperForRpcSplitStorageInfoError(error):
+            try error.encode(to: encoder)
+        case let .errorwrapperForRpcStateChangesError(error):
+            try error.encode(to: encoder)
+        case let .errorwrapperForRpcStatusError(error):
+            try error.encode(to: encoder)
+        case let .errorwrapperForRpcTransactionError(error):
+            try error.encode(to: encoder)
+        case let .errorwrapperForRpcValidatorError(error):
             try error.encode(to: encoder)
         }
     }

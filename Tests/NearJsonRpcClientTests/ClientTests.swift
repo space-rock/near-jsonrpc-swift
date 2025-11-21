@@ -40,8 +40,12 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALChanges.self, from: requestData)
 
         // Test success response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError_Success.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError.self, from: responseData)
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcStateChangesError_Success.json")
+        _ = try decoder.decode(
+            JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcStateChangesError.self,
+            from: responseData,
+        )
     }
 
     @Test("EXPERIMENTAL_changes request and error response types are valid")
@@ -51,8 +55,12 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALChanges.self, from: requestData)
 
         // Test error response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError_Error.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError.self, from: responseData)
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcStateChangesError_Error.json")
+        _ = try decoder.decode(
+            JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcStateChangesError.self,
+            from: responseData,
+        )
     }
 
     @Test("EXPERIMENTAL_changes_in_block request and success response types are valid")
@@ -63,9 +71,11 @@ struct ClientTests {
 
         // Test success response type decoding
         let responseData =
-            try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError_Success.json")
+            try loadMockJSON(
+                "JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcStateChangesError_Success.json",
+            )
         _ = try decoder.decode(
-            JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError.self,
+            JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcStateChangesError.self,
             from: responseData,
         )
     }
@@ -78,9 +88,9 @@ struct ClientTests {
 
         // Test error response type decoding
         let responseData =
-            try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError_Error.json")
+            try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcStateChangesError_Error.json")
         _ = try decoder.decode(
-            JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError.self,
+            JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcStateChangesError.self,
             from: responseData,
         )
     }
@@ -92,8 +102,8 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALCongestionLevel.self, from: requestData)
 
         // Test success response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcCongestionLevelResponseAndRpcError_Success.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcCongestionLevelResponseAndRpcError.self, from: responseData)
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcCongestionLevelResponseAndRpcChunkError_Success.json")
+        _ = try decoder.decode(JsonRpcResponseForRpcCongestionLevelResponseAndRpcChunkError.self, from: responseData)
     }
 
     @Test("EXPERIMENTAL_congestion_level request and error response types are valid")
@@ -103,8 +113,8 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALCongestionLevel.self, from: requestData)
 
         // Test error response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcCongestionLevelResponseAndRpcError_Error.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcCongestionLevelResponseAndRpcError.self, from: responseData)
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcCongestionLevelResponseAndRpcChunkError_Error.json")
+        _ = try decoder.decode(JsonRpcResponseForRpcCongestionLevelResponseAndRpcChunkError.self, from: responseData)
     }
 
     @Test("EXPERIMENTAL_genesis_config request and success response types are valid")
@@ -114,8 +124,8 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALGenesisConfig.self, from: requestData)
 
         // Test success response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForGenesisConfigAndRpcError_Success.json")
-        _ = try decoder.decode(JsonRpcResponseForGenesisConfigAndRpcError.self, from: responseData)
+        let responseData = try loadMockJSON("JsonRpcResponseForGenesisConfigAndGenesisConfigError_Success.json")
+        _ = try decoder.decode(JsonRpcResponseForGenesisConfigAndGenesisConfigError.self, from: responseData)
     }
 
     @Test("EXPERIMENTAL_genesis_config request and error response types are valid")
@@ -125,8 +135,8 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALGenesisConfig.self, from: requestData)
 
         // Test error response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForGenesisConfigAndRpcError_Error.json")
-        _ = try decoder.decode(JsonRpcResponseForGenesisConfigAndRpcError.self, from: responseData)
+        let responseData = try loadMockJSON("JsonRpcResponseForGenesisConfigAndGenesisConfigError_Error.json")
+        _ = try decoder.decode(JsonRpcResponseForGenesisConfigAndGenesisConfigError.self, from: responseData)
     }
 
     @Test("EXPERIMENTAL_light_client_block_proof request and success response types are valid")
@@ -137,8 +147,13 @@ struct ClientTests {
 
         // Test success response type decoding
         let responseData =
-            try loadMockJSON("JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError_Success.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError.self, from: responseData)
+            try loadMockJSON(
+                "JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcLightClientProofError_Success.json",
+            )
+        _ = try decoder.decode(
+            JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcLightClientProofError.self,
+            from: responseData,
+        )
     }
 
     @Test("EXPERIMENTAL_light_client_block_proof request and error response types are valid")
@@ -148,8 +163,12 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALLightClientBlockProof.self, from: requestData)
 
         // Test error response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError_Error.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError.self, from: responseData)
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcLightClientProofError_Error.json")
+        _ = try decoder.decode(
+            JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcLightClientProofError.self,
+            from: responseData,
+        )
     }
 
     @Test("EXPERIMENTAL_light_client_proof request and success response types are valid")
@@ -160,9 +179,11 @@ struct ClientTests {
 
         // Test success response type decoding
         let responseData =
-            try loadMockJSON("JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError_Success.json")
+            try loadMockJSON(
+                "JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcLightClientProofError_Success.json",
+            )
         _ = try decoder.decode(
-            JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError.self,
+            JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcLightClientProofError.self,
             from: responseData,
         )
     }
@@ -175,9 +196,11 @@ struct ClientTests {
 
         // Test error response type decoding
         let responseData =
-            try loadMockJSON("JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError_Error.json")
+            try loadMockJSON(
+                "JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcLightClientProofError_Error.json",
+            )
         _ = try decoder.decode(
-            JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError.self,
+            JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcLightClientProofError.self,
             from: responseData,
         )
     }
@@ -189,8 +212,12 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALMaintenanceWindows.self, from: requestData)
 
         // Test success response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForArrayOfRangeOfUint64AndRpcError_Success.json")
-        _ = try decoder.decode(JsonRpcResponseForArrayOfRangeOfUint64AndRpcError.self, from: responseData)
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForArrayOfRangeOfUint64AndRpcMaintenanceWindowsError_Success.json")
+        _ = try decoder.decode(
+            JsonRpcResponseForArrayOfRangeOfUint64AndRpcMaintenanceWindowsError.self,
+            from: responseData,
+        )
     }
 
     @Test("EXPERIMENTAL_maintenance_windows request and error response types are valid")
@@ -200,8 +227,12 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALMaintenanceWindows.self, from: requestData)
 
         // Test error response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForArrayOfRangeOfUint64AndRpcError_Error.json")
-        _ = try decoder.decode(JsonRpcResponseForArrayOfRangeOfUint64AndRpcError.self, from: responseData)
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForArrayOfRangeOfUint64AndRpcMaintenanceWindowsError_Error.json")
+        _ = try decoder.decode(
+            JsonRpcResponseForArrayOfRangeOfUint64AndRpcMaintenanceWindowsError.self,
+            from: responseData,
+        )
     }
 
     @Test("EXPERIMENTAL_protocol_config request and success response types are valid")
@@ -211,8 +242,12 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALProtocolConfig.self, from: requestData)
 
         // Test success response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcProtocolConfigResponseAndRpcError_Success.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcProtocolConfigResponseAndRpcError.self, from: responseData)
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcProtocolConfigResponseAndRpcProtocolConfigError_Success.json")
+        _ = try decoder.decode(
+            JsonRpcResponseForRpcProtocolConfigResponseAndRpcProtocolConfigError.self,
+            from: responseData,
+        )
     }
 
     @Test("EXPERIMENTAL_protocol_config request and error response types are valid")
@@ -222,8 +257,12 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALProtocolConfig.self, from: requestData)
 
         // Test error response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcProtocolConfigResponseAndRpcError_Error.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcProtocolConfigResponseAndRpcError.self, from: responseData)
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcProtocolConfigResponseAndRpcProtocolConfigError_Error.json")
+        _ = try decoder.decode(
+            JsonRpcResponseForRpcProtocolConfigResponseAndRpcProtocolConfigError.self,
+            from: responseData,
+        )
     }
 
     @Test("EXPERIMENTAL_receipt request and success response types are valid")
@@ -233,8 +272,8 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALReceipt.self, from: requestData)
 
         // Test success response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcReceiptResponseAndRpcError_Success.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcReceiptResponseAndRpcError.self, from: responseData)
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcReceiptResponseAndRpcReceiptError_Success.json")
+        _ = try decoder.decode(JsonRpcResponseForRpcReceiptResponseAndRpcReceiptError.self, from: responseData)
     }
 
     @Test("EXPERIMENTAL_receipt request and error response types are valid")
@@ -244,8 +283,8 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALReceipt.self, from: requestData)
 
         // Test error response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcReceiptResponseAndRpcError_Error.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcReceiptResponseAndRpcError.self, from: responseData)
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcReceiptResponseAndRpcReceiptError_Error.json")
+        _ = try decoder.decode(JsonRpcResponseForRpcReceiptResponseAndRpcReceiptError.self, from: responseData)
     }
 
     @Test("EXPERIMENTAL_split_storage_info request and success response types are valid")
@@ -255,8 +294,12 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALSplitStorageInfo.self, from: requestData)
 
         // Test success response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError_Success.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError.self, from: responseData)
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcSplitStorageInfoError_Success.json")
+        _ = try decoder.decode(
+            JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcSplitStorageInfoError.self,
+            from: responseData,
+        )
     }
 
     @Test("EXPERIMENTAL_split_storage_info request and error response types are valid")
@@ -266,8 +309,12 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALSplitStorageInfo.self, from: requestData)
 
         // Test error response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError_Error.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError.self, from: responseData)
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcSplitStorageInfoError_Error.json")
+        _ = try decoder.decode(
+            JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcSplitStorageInfoError.self,
+            from: responseData,
+        )
     }
 
     @Test("EXPERIMENTAL_tx_status request and success response types are valid")
@@ -277,8 +324,9 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALTxStatus.self, from: requestData)
 
         // Test success response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcError_Success.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcTransactionResponseAndRpcError.self, from: responseData)
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError_Success.json")
+        _ = try decoder.decode(JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError.self, from: responseData)
     }
 
     @Test("EXPERIMENTAL_tx_status request and error response types are valid")
@@ -288,8 +336,8 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALTxStatus.self, from: requestData)
 
         // Test error response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcError_Error.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcTransactionResponseAndRpcError.self, from: responseData)
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError_Error.json")
+        _ = try decoder.decode(JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError.self, from: responseData)
     }
 
     @Test("EXPERIMENTAL_validators_ordered request and success response types are valid")
@@ -299,8 +347,9 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALValidatorsOrdered.self, from: requestData)
 
         // Test success response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError_Success.json")
-        _ = try decoder.decode(JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError.self, from: responseData)
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForArrayOfValidatorStakeViewAndRpcValidatorError_Success.json")
+        _ = try decoder.decode(JsonRpcResponseForArrayOfValidatorStakeViewAndRpcValidatorError.self, from: responseData)
     }
 
     @Test("EXPERIMENTAL_validators_ordered request and error response types are valid")
@@ -310,8 +359,9 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALValidatorsOrdered.self, from: requestData)
 
         // Test error response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError_Error.json")
-        _ = try decoder.decode(JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError.self, from: responseData)
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForArrayOfValidatorStakeViewAndRpcValidatorError_Error.json")
+        _ = try decoder.decode(JsonRpcResponseForArrayOfValidatorStakeViewAndRpcValidatorError.self, from: responseData)
     }
 
     @Test("block request and success response types are valid")
@@ -321,8 +371,8 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForBlock.self, from: requestData)
 
         // Test success response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcBlockResponseAndRpcError_Success.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcBlockResponseAndRpcError.self, from: responseData)
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcBlockResponseAndRpcBlockError_Success.json")
+        _ = try decoder.decode(JsonRpcResponseForRpcBlockResponseAndRpcBlockError.self, from: responseData)
     }
 
     @Test("block request and error response types are valid")
@@ -332,8 +382,8 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForBlock.self, from: requestData)
 
         // Test error response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcBlockResponseAndRpcError_Error.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcBlockResponseAndRpcError.self, from: responseData)
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcBlockResponseAndRpcBlockError_Error.json")
+        _ = try decoder.decode(JsonRpcResponseForRpcBlockResponseAndRpcBlockError.self, from: responseData)
     }
 
     @Test("block_effects request and success response types are valid")
@@ -344,9 +394,11 @@ struct ClientTests {
 
         // Test success response type decoding
         let responseData =
-            try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError_Success.json")
+            try loadMockJSON(
+                "JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcStateChangesError_Success.json",
+            )
         _ = try decoder.decode(
-            JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError.self,
+            JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcStateChangesError.self,
             from: responseData,
         )
     }
@@ -359,9 +411,9 @@ struct ClientTests {
 
         // Test error response type decoding
         let responseData =
-            try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError_Error.json")
+            try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcStateChangesError_Error.json")
         _ = try decoder.decode(
-            JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError.self,
+            JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcStateChangesError.self,
             from: responseData,
         )
     }
@@ -373,8 +425,8 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForBroadcastTxAsync.self, from: requestData)
 
         // Test success response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForCryptoHashAndRpcError_Success.json")
-        _ = try decoder.decode(JsonRpcResponseForCryptoHashAndRpcError.self, from: responseData)
+        let responseData = try loadMockJSON("JsonRpcResponseForCryptoHashAndRpcTransactionError_Success.json")
+        _ = try decoder.decode(JsonRpcResponseForCryptoHashAndRpcTransactionError.self, from: responseData)
     }
 
     @Test("broadcast_tx_async request and error response types are valid")
@@ -384,8 +436,8 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForBroadcastTxAsync.self, from: requestData)
 
         // Test error response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForCryptoHashAndRpcError_Error.json")
-        _ = try decoder.decode(JsonRpcResponseForCryptoHashAndRpcError.self, from: responseData)
+        let responseData = try loadMockJSON("JsonRpcResponseForCryptoHashAndRpcTransactionError_Error.json")
+        _ = try decoder.decode(JsonRpcResponseForCryptoHashAndRpcTransactionError.self, from: responseData)
     }
 
     @Test("broadcast_tx_commit request and success response types are valid")
@@ -395,8 +447,9 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForBroadcastTxCommit.self, from: requestData)
 
         // Test success response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcError_Success.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcTransactionResponseAndRpcError.self, from: responseData)
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError_Success.json")
+        _ = try decoder.decode(JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError.self, from: responseData)
     }
 
     @Test("broadcast_tx_commit request and error response types are valid")
@@ -406,8 +459,8 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForBroadcastTxCommit.self, from: requestData)
 
         // Test error response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcError_Error.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcTransactionResponseAndRpcError.self, from: responseData)
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError_Error.json")
+        _ = try decoder.decode(JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError.self, from: responseData)
     }
 
     @Test("changes request and success response types are valid")
@@ -417,8 +470,12 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForChanges.self, from: requestData)
 
         // Test success response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError_Success.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError.self, from: responseData)
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcStateChangesError_Success.json")
+        _ = try decoder.decode(
+            JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcStateChangesError.self,
+            from: responseData,
+        )
     }
 
     @Test("changes request and error response types are valid")
@@ -428,8 +485,12 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForChanges.self, from: requestData)
 
         // Test error response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError_Error.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError.self, from: responseData)
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcStateChangesError_Error.json")
+        _ = try decoder.decode(
+            JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcStateChangesError.self,
+            from: responseData,
+        )
     }
 
     @Test("chunk request and success response types are valid")
@@ -439,8 +500,8 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForChunk.self, from: requestData)
 
         // Test success response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcChunkResponseAndRpcError_Success.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcChunkResponseAndRpcError.self, from: responseData)
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcChunkResponseAndRpcChunkError_Success.json")
+        _ = try decoder.decode(JsonRpcResponseForRpcChunkResponseAndRpcChunkError.self, from: responseData)
     }
 
     @Test("chunk request and error response types are valid")
@@ -450,8 +511,8 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForChunk.self, from: requestData)
 
         // Test error response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcChunkResponseAndRpcError_Error.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcChunkResponseAndRpcError.self, from: responseData)
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcChunkResponseAndRpcChunkError_Error.json")
+        _ = try decoder.decode(JsonRpcResponseForRpcChunkResponseAndRpcChunkError.self, from: responseData)
     }
 
     @Test("client_config request and success response types are valid")
@@ -461,8 +522,12 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForClientConfig.self, from: requestData)
 
         // Test success response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcClientConfigResponseAndRpcError_Success.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcClientConfigResponseAndRpcError.self, from: responseData)
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcClientConfigResponseAndRpcClientConfigError_Success.json")
+        _ = try decoder.decode(
+            JsonRpcResponseForRpcClientConfigResponseAndRpcClientConfigError.self,
+            from: responseData,
+        )
     }
 
     @Test("client_config request and error response types are valid")
@@ -472,8 +537,12 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForClientConfig.self, from: requestData)
 
         // Test error response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcClientConfigResponseAndRpcError_Error.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcClientConfigResponseAndRpcError.self, from: responseData)
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcClientConfigResponseAndRpcClientConfigError_Error.json")
+        _ = try decoder.decode(
+            JsonRpcResponseForRpcClientConfigResponseAndRpcClientConfigError.self,
+            from: responseData,
+        )
     }
 
     @Test("gas_price request and success response types are valid")
@@ -483,8 +552,8 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForGasPrice.self, from: requestData)
 
         // Test success response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcGasPriceResponseAndRpcError_Success.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcGasPriceResponseAndRpcError.self, from: responseData)
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcGasPriceResponseAndRpcGasPriceError_Success.json")
+        _ = try decoder.decode(JsonRpcResponseForRpcGasPriceResponseAndRpcGasPriceError.self, from: responseData)
     }
 
     @Test("gas_price request and error response types are valid")
@@ -494,8 +563,8 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForGasPrice.self, from: requestData)
 
         // Test error response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcGasPriceResponseAndRpcError_Error.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcGasPriceResponseAndRpcError.self, from: responseData)
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcGasPriceResponseAndRpcGasPriceError_Error.json")
+        _ = try decoder.decode(JsonRpcResponseForRpcGasPriceResponseAndRpcGasPriceError.self, from: responseData)
     }
 
     @Test("genesis_config request and success response types are valid")
@@ -505,8 +574,8 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForGenesisConfig.self, from: requestData)
 
         // Test success response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForGenesisConfigAndRpcError_Success.json")
-        _ = try decoder.decode(JsonRpcResponseForGenesisConfigAndRpcError.self, from: responseData)
+        let responseData = try loadMockJSON("JsonRpcResponseForGenesisConfigAndGenesisConfigError_Success.json")
+        _ = try decoder.decode(JsonRpcResponseForGenesisConfigAndGenesisConfigError.self, from: responseData)
     }
 
     @Test("genesis_config request and error response types are valid")
@@ -516,8 +585,8 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForGenesisConfig.self, from: requestData)
 
         // Test error response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForGenesisConfigAndRpcError_Error.json")
-        _ = try decoder.decode(JsonRpcResponseForGenesisConfigAndRpcError.self, from: responseData)
+        let responseData = try loadMockJSON("JsonRpcResponseForGenesisConfigAndGenesisConfigError_Error.json")
+        _ = try decoder.decode(JsonRpcResponseForGenesisConfigAndGenesisConfigError.self, from: responseData)
     }
 
     @Test("health request and success response types are valid")
@@ -527,8 +596,8 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForHealth.self, from: requestData)
 
         // Test success response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForNullableRpcHealthResponseAndRpcError_Success.json")
-        _ = try decoder.decode(JsonRpcResponseForNullableRpcHealthResponseAndRpcError.self, from: responseData)
+        let responseData = try loadMockJSON("JsonRpcResponseForNullableRpcHealthResponseAndRpcStatusError_Success.json")
+        _ = try decoder.decode(JsonRpcResponseForNullableRpcHealthResponseAndRpcStatusError.self, from: responseData)
     }
 
     @Test("health request and error response types are valid")
@@ -538,8 +607,8 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForHealth.self, from: requestData)
 
         // Test error response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForNullableRpcHealthResponseAndRpcError_Error.json")
-        _ = try decoder.decode(JsonRpcResponseForNullableRpcHealthResponseAndRpcError.self, from: responseData)
+        let responseData = try loadMockJSON("JsonRpcResponseForNullableRpcHealthResponseAndRpcStatusError_Error.json")
+        _ = try decoder.decode(JsonRpcResponseForNullableRpcHealthResponseAndRpcStatusError.self, from: responseData)
     }
 
     @Test("light_client_proof request and success response types are valid")
@@ -550,9 +619,11 @@ struct ClientTests {
 
         // Test success response type decoding
         let responseData =
-            try loadMockJSON("JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError_Success.json")
+            try loadMockJSON(
+                "JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcLightClientProofError_Success.json",
+            )
         _ = try decoder.decode(
-            JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError.self,
+            JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcLightClientProofError.self,
             from: responseData,
         )
     }
@@ -565,9 +636,11 @@ struct ClientTests {
 
         // Test error response type decoding
         let responseData =
-            try loadMockJSON("JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError_Error.json")
+            try loadMockJSON(
+                "JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcLightClientProofError_Error.json",
+            )
         _ = try decoder.decode(
-            JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError.self,
+            JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcLightClientProofError.self,
             from: responseData,
         )
     }
@@ -579,8 +652,12 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForMaintenanceWindows.self, from: requestData)
 
         // Test success response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForArrayOfRangeOfUint64AndRpcError_Success.json")
-        _ = try decoder.decode(JsonRpcResponseForArrayOfRangeOfUint64AndRpcError.self, from: responseData)
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForArrayOfRangeOfUint64AndRpcMaintenanceWindowsError_Success.json")
+        _ = try decoder.decode(
+            JsonRpcResponseForArrayOfRangeOfUint64AndRpcMaintenanceWindowsError.self,
+            from: responseData,
+        )
     }
 
     @Test("maintenance_windows request and error response types are valid")
@@ -590,8 +667,12 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForMaintenanceWindows.self, from: requestData)
 
         // Test error response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForArrayOfRangeOfUint64AndRpcError_Error.json")
-        _ = try decoder.decode(JsonRpcResponseForArrayOfRangeOfUint64AndRpcError.self, from: responseData)
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForArrayOfRangeOfUint64AndRpcMaintenanceWindowsError_Error.json")
+        _ = try decoder.decode(
+            JsonRpcResponseForArrayOfRangeOfUint64AndRpcMaintenanceWindowsError.self,
+            from: responseData,
+        )
     }
 
     @Test("network_info request and success response types are valid")
@@ -601,8 +682,9 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForNetworkInfo.self, from: requestData)
 
         // Test success response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcNetworkInfoResponseAndRpcError_Success.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcNetworkInfoResponseAndRpcError.self, from: responseData)
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcNetworkInfoResponseAndRpcNetworkInfoError_Success.json")
+        _ = try decoder.decode(JsonRpcResponseForRpcNetworkInfoResponseAndRpcNetworkInfoError.self, from: responseData)
     }
 
     @Test("network_info request and error response types are valid")
@@ -612,8 +694,8 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForNetworkInfo.self, from: requestData)
 
         // Test error response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcNetworkInfoResponseAndRpcError_Error.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcNetworkInfoResponseAndRpcError.self, from: responseData)
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcNetworkInfoResponseAndRpcNetworkInfoError_Error.json")
+        _ = try decoder.decode(JsonRpcResponseForRpcNetworkInfoResponseAndRpcNetworkInfoError.self, from: responseData)
     }
 
     @Test("next_light_client_block request and success response types are valid")
@@ -623,8 +705,14 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForNextLightClientBlock.self, from: requestData)
 
         // Test success response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError_Success.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError.self, from: responseData)
+        let responseData =
+            try loadMockJSON(
+                "JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcLightClientNextBlockError_Success.json",
+            )
+        _ = try decoder.decode(
+            JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcLightClientNextBlockError.self,
+            from: responseData,
+        )
     }
 
     @Test("next_light_client_block request and error response types are valid")
@@ -634,8 +722,14 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForNextLightClientBlock.self, from: requestData)
 
         // Test error response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError_Error.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError.self, from: responseData)
+        let responseData =
+            try loadMockJSON(
+                "JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcLightClientNextBlockError_Error.json",
+            )
+        _ = try decoder.decode(
+            JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcLightClientNextBlockError.self,
+            from: responseData,
+        )
     }
 
     @Test("query request and success response types are valid")
@@ -645,8 +739,8 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForQuery.self, from: requestData)
 
         // Test success response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcQueryResponseAndRpcError_Success.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcQueryResponseAndRpcError.self, from: responseData)
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcQueryResponseAndRpcQueryError_Success.json")
+        _ = try decoder.decode(JsonRpcResponseForRpcQueryResponseAndRpcQueryError.self, from: responseData)
     }
 
     @Test("query request and error response types are valid")
@@ -656,8 +750,8 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForQuery.self, from: requestData)
 
         // Test error response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcQueryResponseAndRpcError_Error.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcQueryResponseAndRpcError.self, from: responseData)
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcQueryResponseAndRpcQueryError_Error.json")
+        _ = try decoder.decode(JsonRpcResponseForRpcQueryResponseAndRpcQueryError.self, from: responseData)
     }
 
     @Test("send_tx request and success response types are valid")
@@ -667,8 +761,9 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForSendTx.self, from: requestData)
 
         // Test success response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcError_Success.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcTransactionResponseAndRpcError.self, from: responseData)
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError_Success.json")
+        _ = try decoder.decode(JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError.self, from: responseData)
     }
 
     @Test("send_tx request and error response types are valid")
@@ -678,8 +773,8 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForSendTx.self, from: requestData)
 
         // Test error response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcError_Error.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcTransactionResponseAndRpcError.self, from: responseData)
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError_Error.json")
+        _ = try decoder.decode(JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError.self, from: responseData)
     }
 
     @Test("status request and success response types are valid")
@@ -689,8 +784,8 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForStatus.self, from: requestData)
 
         // Test success response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcStatusResponseAndRpcError_Success.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcStatusResponseAndRpcError.self, from: responseData)
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcStatusResponseAndRpcStatusError_Success.json")
+        _ = try decoder.decode(JsonRpcResponseForRpcStatusResponseAndRpcStatusError.self, from: responseData)
     }
 
     @Test("status request and error response types are valid")
@@ -700,8 +795,8 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForStatus.self, from: requestData)
 
         // Test error response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcStatusResponseAndRpcError_Error.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcStatusResponseAndRpcError.self, from: responseData)
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcStatusResponseAndRpcStatusError_Error.json")
+        _ = try decoder.decode(JsonRpcResponseForRpcStatusResponseAndRpcStatusError.self, from: responseData)
     }
 
     @Test("tx request and success response types are valid")
@@ -711,8 +806,9 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForTx.self, from: requestData)
 
         // Test success response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcError_Success.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcTransactionResponseAndRpcError.self, from: responseData)
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError_Success.json")
+        _ = try decoder.decode(JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError.self, from: responseData)
     }
 
     @Test("tx request and error response types are valid")
@@ -722,8 +818,8 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForTx.self, from: requestData)
 
         // Test error response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcError_Error.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcTransactionResponseAndRpcError.self, from: responseData)
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError_Error.json")
+        _ = try decoder.decode(JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError.self, from: responseData)
     }
 
     @Test("validators request and success response types are valid")
@@ -733,8 +829,8 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForValidators.self, from: requestData)
 
         // Test success response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcValidatorResponseAndRpcError_Success.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcValidatorResponseAndRpcError.self, from: responseData)
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcValidatorResponseAndRpcValidatorError_Success.json")
+        _ = try decoder.decode(JsonRpcResponseForRpcValidatorResponseAndRpcValidatorError.self, from: responseData)
     }
 
     @Test("validators request and error response types are valid")
@@ -744,7 +840,7 @@ struct ClientTests {
         _ = try decoder.decode(JsonRpcRequestForValidators.self, from: requestData)
 
         // Test error response type decoding
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcValidatorResponseAndRpcError_Error.json")
-        _ = try decoder.decode(JsonRpcResponseForRpcValidatorResponseAndRpcError.self, from: responseData)
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcValidatorResponseAndRpcValidatorError_Error.json")
+        _ = try decoder.decode(JsonRpcResponseForRpcValidatorResponseAndRpcValidatorError.self, from: responseData)
     }
 }
