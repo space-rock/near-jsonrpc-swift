@@ -7,22 +7,28 @@ echo ""
 
 cd "$(dirname "$0")"
 
-echo "📝 Step 1/3: Generating Swift types and methods..."
+echo "🧹 Step 1/4: Cleaning up old mock files..."
+rm -rf ../Tests/NearJsonRpcTypesTests/Mock/*
+rm -rf ../Tests/NearJsonRpcClientTests/Mock/*
+echo "✅ Mock folders cleaned"
+echo ""
+
+echo "📝 Step 2/4: Generating Swift types and methods..."
 python3 generate_types.py
 echo "✅ Types.swift and Methods.swift generated"
 echo ""
 
-echo "📝 Step 2/3: Generating mock JSON data..."
+echo "📝 Step 3/4: Generating mock JSON data..."
 python3 generate_mock.py
 echo "✅ Mock JSON files generated"
 echo ""
 
-echo "📝 Step 3/3: Generating test files..."
+echo "📝 Step 4/4: Generating test files..."
 python3 generate_tests.py
 echo "✅ All test files generated"
 echo ""
 
-echo "📝 Step 4/4: Formatting Swift code..."
+echo "📝 Step 5/5: Formatting Swift code..."
 cd ..
 if command -v swiftformat &> /dev/null; then
     swiftformat Sources/ Tests/ Examples/

@@ -54,13 +54,13 @@ struct NearJsonRpcExample {
                 successCount += 1
             } catch {
                 switch error {
-                case .invalidURL(let url):
+                case let .invalidURL(url):
                     prettyPrint(["error": "Invalid URL: \(url)"], label: "✗ Error")
-                case .httpError(let code):
+                case let .httpError(code):
                     prettyPrint(["error": "HTTP error: \(code)"], label: "✗ Error")
-                case .rpcError(let rpcError):
+                case let .rpcError(rpcError):
                     prettyPrint(["error": "RPC error: \(rpcError)"], label: "✗ Error")
-                case .decodingError(let decodingError):
+                case let .decodingError(decodingError):
                     prettyPrint(["error": "Decoding error: \(decodingError)"], label: "✗ Error")
                 case .invalidResponse:
                     prettyPrint(["error": "Invalid response from server"], label: "✗ Error")
@@ -508,13 +508,13 @@ struct NearJsonRpcExample {
         } catch {
             print("\n❌ Fatal Error during client initialization")
             switch error {
-            case .invalidURL(let url):
+            case let .invalidURL(url):
                 prettyPrint(["error": "Invalid URL: \(url)"], label: "Error Details")
-            case .httpError(let code):
+            case let .httpError(code):
                 prettyPrint(["error": "HTTP error: \(code)"], label: "Error Details")
-            case .rpcError(let rpcError):
+            case let .rpcError(rpcError):
                 prettyPrint(["rpcError": "\(rpcError)"], label: "Error Details")
-            case .decodingError(let decodingError):
+            case let .decodingError(decodingError):
                 prettyPrint(["error": "Decoding error: \(decodingError)"], label: "Error Details")
             case .invalidResponse:
                 prettyPrint(["error": "Invalid response from server"], label: "Error Details")

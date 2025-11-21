@@ -108,7 +108,7 @@ public enum NearJsonRpcError: Error, LocalizedError {
     case invalidURL(String)
     case invalidResponse
     case httpError(Int)
-    case rpcError(RpcError)
+    case rpcError(RpcErrorDetails)
     case decodingError(Error)
 
     public var errorDescription: String? {
@@ -119,8 +119,8 @@ public enum NearJsonRpcError: Error, LocalizedError {
             "Invalid response from server"
         case let .httpError(code):
             "HTTP error: \(code)"
-        case let .rpcError(error):
-            "RPC error: \(error)"
+        case let .rpcError(details):
+            "RPC error: \(details)"
         case let .decodingError(error):
             "Decoding error: \(error.localizedDescription)"
         }

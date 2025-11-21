@@ -1548,14 +1548,38 @@ import Foundation
 import NearJsonRpcTypes
 
 // MARK: - Auto-generated RPC Methods
-extension NearJsonRpcClient {
+public extension NearJsonRpcClient {
 """
     method_blocks = []
     for method in methods:
         doc_comment = format_doc_comment(method["doc"], method["rpc_method"])
+        
+        # Extract error type response schema
+        response_type = method['response_type']
+        error_wrapper_case = None
+        
+        # Extract error type
+        for schema_name, schema in components.items():
+            swift_schema_name = to_swift_type_name(schema_name)
+            if swift_schema_name == response_type:
+                one_of = schema.get("oneOf", [])
+                for variant in one_of:
+                    variant_props = variant.get("properties", {})
+                    if "error" in variant_props:
+                        error_schema = variant_props["error"]
+                        if "$ref" in error_schema:
+                            ref = error_schema["$ref"]
+                            error_type_name = ref.split("/")[-1]
+                            error_wrapper_case = to_swift_property_name(error_type_name)
+                            break
+                break
+        
+        if not error_wrapper_case:
+            raise ValueError(f"Could not find error type for response: {response_type}")
+        
         method_block = f"""
 {doc_comment}
-    public func {method['swift_method']}(_ request: {method['request_type']}) async throws(NearJsonRpcError) -> {method['result_type']} {{
+    func {method['swift_method']}(_ request: {method['request_type']}) async throws(NearJsonRpcError) -> {method['result_type']} {{
         let response: {method['response_type']} = try await performRequest(
             method: "{method['rpc_method']}",
             params: request,
@@ -1566,7 +1590,7 @@ extension NearJsonRpcClient {
         case .result(let result):
             return result
         case .error(let error):
-            throw NearJsonRpcError.rpcError(error)
+            throw NearJsonRpcError.rpcError(.{error_wrapper_case}(error))
         }}
     }}
 """
@@ -1651,6 +1675,89 @@ def generate_discriminator_enums(discriminators: Dict[str, Set[str]]) -> str:
     
     return code
 
+def extract_error_types_from_responses(openapi: Dict[str, Any], components: Dict[str, Any]) -> Set[str]:
+    """Extract all error types used in JSON-RPC response schemas"""
+    error_types = set()
+    
+    # Scan all response schemas to find error types
+    for schema_name, schema in components.items():
+        # Look for JsonRpcResponse schemas with error variants
+        if not schema_name.startswith("JsonRpcResponse"):
+            continue
+        
+        one_of = schema.get("oneOf", [])
+        for variant in one_of:
+            # Check if this is an error variant
+            variant_props = variant.get("properties", {})
+            if "error" in variant_props:
+                error_schema = variant_props["error"]
+                if "$ref" in error_schema:
+                    # Extract the error type name from the reference
+                    ref = error_schema["$ref"]
+                    error_type = ref.split("/")[-1]
+                    error_types.add(error_type)
+    
+    return error_types
+
+def generate_rpc_error_enum(openapi: Dict[str, Any], components: Dict[str, Any]) -> str:
+    """Generate an enum that wraps all RPC error types"""
+    error_types = extract_error_types_from_responses(openapi, components)
+    
+    if not error_types:
+        # Return empty implementation if no error types found
+        return ""
+    
+    error_types_sorted = sorted(error_types)
+    error_types_sorted = sorted(error_types)
+    
+    code = "// MARK: - RPC Errors\n\n"
+    code += "/// Enum wrapping all possible RPC error types\n"
+    code += "public enum RpcErrorDetails: Codable, Sendable {\n"
+    
+    # Generate cases for error types
+    for error_type in error_types_sorted:
+        case_name = to_swift_property_name(error_type)
+        swift_type = to_swift_type_name(error_type)
+        code += f"    case {case_name}({swift_type})\n"
+    
+    code += "\n"
+    code += "    public init(from decoder: Decoder) throws {\n"
+    code += "        // Try to decode as each error type\n"
+    
+    for i, error_type in enumerate(error_types_sorted):
+        case_name = to_swift_property_name(error_type)
+        swift_type = to_swift_type_name(error_type)
+        if i == 0:
+            code += f"        if let error = try? {swift_type}(from: decoder) {{\n"
+        else:
+            code += f"        else if let error = try? {swift_type}(from: decoder) {{\n"
+        code += f"            self = .{case_name}(error)\n"
+        code += "        }\n"
+    
+    code += "        else {\n"
+    code += "            throw DecodingError.dataCorrupted(\n"
+    code += "                DecodingError.Context(\n"
+    code += "                    codingPath: decoder.codingPath,\n"
+    code += '                    debugDescription: "Could not decode RpcErrorDetails - no matching error type found"\n'
+    code += "                )\n"
+    code += "            )\n"
+    code += "        }\n"
+    code += "    }\n"
+    code += "\n"
+    code += "    public func encode(to encoder: Encoder) throws {\n"
+    code += "        switch self {\n"
+    
+    for error_type in error_types_sorted:
+        case_name = to_swift_property_name(error_type)
+        code += f"        case .{case_name}(let error):\n"
+        code += "            try error.encode(to: encoder)\n"
+    
+    code += "        }\n"
+    code += "    }\n"
+    code += "}\n\n"
+    
+    return code
+
 def main():
     """Main function to generate Swift types from OpenAPI spec"""
     print(f"Loading OpenAPI specification from {OPENAPI_PATH}...")
@@ -1725,6 +1832,9 @@ def main():
         swift_code += "// MARK: - Generated Inline Types\n\n"
         for type_name, struct_code in get_swift_primitive_type._inline_structs.items():
             swift_code += struct_code + "\n"
+    
+    # Generate RPC error enum
+    swift_code += generate_rpc_error_enum(openapi, components_schemas)
     
     # Write to file
     print(f"Writing Swift types to {OUTPUT_PATH}...")

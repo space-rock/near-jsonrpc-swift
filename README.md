@@ -146,7 +146,7 @@ python3 generate_tests.py     # Generate test files
 
 ```bash
 # Download the latest OpenAPI spec
-curl -L -o Scripts/openapi.json https://raw.githubusercontent.com/near/near-jsonrpc-client-rs/master/openapi.json
+curl -L -o Scripts/openapi.json https://raw.githubusercontent.com/near/nearcore/refs/heads/master/chain/jsonrpc/openapi/openapi.json
 
 # Regenerate all code
 cd Scripts
