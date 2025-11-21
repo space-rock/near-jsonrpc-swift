@@ -97,7 +97,8 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock success response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError_Success.json")
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcStateChangesError_Success.json")
         await setupMockSuccessResponse(with: responseData)
 
         // Execute
@@ -125,7 +126,8 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock error response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError_Error.json")
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcStateChangesError_Error.json")
         await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
@@ -196,7 +198,9 @@ struct ClientMethodTests {
 
         // Load mock success response data
         let responseData =
-            try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError_Success.json")
+            try loadMockJSON(
+                "JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcStateChangesError_Success.json",
+            )
         await setupMockSuccessResponse(with: responseData)
 
         // Execute
@@ -225,7 +229,7 @@ struct ClientMethodTests {
 
         // Load mock error response data
         let responseData =
-            try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError_Error.json")
+            try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcStateChangesError_Error.json")
         await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
@@ -295,7 +299,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock success response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcCongestionLevelResponseAndRpcError_Success.json")
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcCongestionLevelResponseAndRpcChunkError_Success.json")
         await setupMockSuccessResponse(with: responseData)
 
         // Execute
@@ -323,7 +327,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock error response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcCongestionLevelResponseAndRpcError_Error.json")
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcCongestionLevelResponseAndRpcChunkError_Error.json")
         await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
@@ -393,7 +397,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock success response data
-        let responseData = try loadMockJSON("JsonRpcResponseForGenesisConfigAndRpcError_Success.json")
+        let responseData = try loadMockJSON("JsonRpcResponseForGenesisConfigAndGenesisConfigError_Success.json")
         await setupMockSuccessResponse(with: responseData)
 
         // Execute
@@ -421,7 +425,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock error response data
-        let responseData = try loadMockJSON("JsonRpcResponseForGenesisConfigAndRpcError_Error.json")
+        let responseData = try loadMockJSON("JsonRpcResponseForGenesisConfigAndGenesisConfigError_Error.json")
         await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
@@ -495,7 +499,9 @@ struct ClientMethodTests {
 
         // Load mock success response data
         let responseData =
-            try loadMockJSON("JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError_Success.json")
+            try loadMockJSON(
+                "JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcLightClientProofError_Success.json",
+            )
         await setupMockSuccessResponse(with: responseData)
 
         // Execute
@@ -526,7 +532,8 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock error response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcError_Error.json")
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcLightClientBlockProofResponseAndRpcLightClientProofError_Error.json")
         await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
@@ -600,7 +607,9 @@ struct ClientMethodTests {
 
         // Load mock success response data
         let responseData =
-            try loadMockJSON("JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError_Success.json")
+            try loadMockJSON(
+                "JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcLightClientProofError_Success.json",
+            )
         await setupMockSuccessResponse(with: responseData)
 
         // Execute
@@ -629,7 +638,9 @@ struct ClientMethodTests {
 
         // Load mock error response data
         let responseData =
-            try loadMockJSON("JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError_Error.json")
+            try loadMockJSON(
+                "JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcLightClientProofError_Error.json",
+            )
         await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
@@ -699,7 +710,8 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock success response data
-        let responseData = try loadMockJSON("JsonRpcResponseForArrayOfRangeOfUint64AndRpcError_Success.json")
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForArrayOfRangeOfUint64AndRpcMaintenanceWindowsError_Success.json")
         await setupMockSuccessResponse(with: responseData)
 
         // Execute
@@ -727,7 +739,8 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock error response data
-        let responseData = try loadMockJSON("JsonRpcResponseForArrayOfRangeOfUint64AndRpcError_Error.json")
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForArrayOfRangeOfUint64AndRpcMaintenanceWindowsError_Error.json")
         await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
@@ -797,7 +810,8 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock success response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcProtocolConfigResponseAndRpcError_Success.json")
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcProtocolConfigResponseAndRpcProtocolConfigError_Success.json")
         await setupMockSuccessResponse(with: responseData)
 
         // Execute
@@ -825,7 +839,8 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock error response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcProtocolConfigResponseAndRpcError_Error.json")
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcProtocolConfigResponseAndRpcProtocolConfigError_Error.json")
         await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
@@ -895,7 +910,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock success response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcReceiptResponseAndRpcError_Success.json")
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcReceiptResponseAndRpcReceiptError_Success.json")
         await setupMockSuccessResponse(with: responseData)
 
         // Execute
@@ -923,7 +938,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock error response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcReceiptResponseAndRpcError_Error.json")
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcReceiptResponseAndRpcReceiptError_Error.json")
         await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
@@ -993,7 +1008,8 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock success response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError_Success.json")
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcSplitStorageInfoError_Success.json")
         await setupMockSuccessResponse(with: responseData)
 
         // Execute
@@ -1021,7 +1037,8 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock error response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcError_Error.json")
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcSplitStorageInfoResponseAndRpcSplitStorageInfoError_Error.json")
         await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
@@ -1091,7 +1108,8 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock success response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcError_Success.json")
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError_Success.json")
         await setupMockSuccessResponse(with: responseData)
 
         // Execute
@@ -1119,7 +1137,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock error response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcError_Error.json")
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError_Error.json")
         await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
@@ -1189,7 +1207,8 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock success response data
-        let responseData = try loadMockJSON("JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError_Success.json")
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForArrayOfValidatorStakeViewAndRpcValidatorError_Success.json")
         await setupMockSuccessResponse(with: responseData)
 
         // Execute
@@ -1217,7 +1236,8 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock error response data
-        let responseData = try loadMockJSON("JsonRpcResponseForArrayOfValidatorStakeViewAndRpcError_Error.json")
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForArrayOfValidatorStakeViewAndRpcValidatorError_Error.json")
         await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
@@ -1287,7 +1307,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock success response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcBlockResponseAndRpcError_Success.json")
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcBlockResponseAndRpcBlockError_Success.json")
         await setupMockSuccessResponse(with: responseData)
 
         // Execute
@@ -1315,7 +1335,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock error response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcBlockResponseAndRpcError_Error.json")
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcBlockResponseAndRpcBlockError_Error.json")
         await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
@@ -1386,7 +1406,9 @@ struct ClientMethodTests {
 
         // Load mock success response data
         let responseData =
-            try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError_Success.json")
+            try loadMockJSON(
+                "JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcStateChangesError_Success.json",
+            )
         await setupMockSuccessResponse(with: responseData)
 
         // Execute
@@ -1415,7 +1437,7 @@ struct ClientMethodTests {
 
         // Load mock error response data
         let responseData =
-            try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcError_Error.json")
+            try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockByTypeResponseAndRpcStateChangesError_Error.json")
         await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
@@ -1485,7 +1507,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock success response data
-        let responseData = try loadMockJSON("JsonRpcResponseForCryptoHashAndRpcError_Success.json")
+        let responseData = try loadMockJSON("JsonRpcResponseForCryptoHashAndRpcTransactionError_Success.json")
         await setupMockSuccessResponse(with: responseData)
 
         // Execute
@@ -1513,7 +1535,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock error response data
-        let responseData = try loadMockJSON("JsonRpcResponseForCryptoHashAndRpcError_Error.json")
+        let responseData = try loadMockJSON("JsonRpcResponseForCryptoHashAndRpcTransactionError_Error.json")
         await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
@@ -1583,7 +1605,8 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock success response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcError_Success.json")
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError_Success.json")
         await setupMockSuccessResponse(with: responseData)
 
         // Execute
@@ -1611,7 +1634,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock error response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcError_Error.json")
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError_Error.json")
         await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
@@ -1681,7 +1704,8 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock success response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError_Success.json")
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcStateChangesError_Success.json")
         await setupMockSuccessResponse(with: responseData)
 
         // Execute
@@ -1709,7 +1733,8 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock error response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcError_Error.json")
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcStateChangesInBlockResponseAndRpcStateChangesError_Error.json")
         await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
@@ -1779,7 +1804,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock success response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcChunkResponseAndRpcError_Success.json")
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcChunkResponseAndRpcChunkError_Success.json")
         await setupMockSuccessResponse(with: responseData)
 
         // Execute
@@ -1807,7 +1832,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock error response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcChunkResponseAndRpcError_Error.json")
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcChunkResponseAndRpcChunkError_Error.json")
         await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
@@ -1877,7 +1902,8 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock success response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcClientConfigResponseAndRpcError_Success.json")
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcClientConfigResponseAndRpcClientConfigError_Success.json")
         await setupMockSuccessResponse(with: responseData)
 
         // Execute
@@ -1905,7 +1931,8 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock error response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcClientConfigResponseAndRpcError_Error.json")
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcClientConfigResponseAndRpcClientConfigError_Error.json")
         await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
@@ -1975,7 +2002,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock success response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcGasPriceResponseAndRpcError_Success.json")
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcGasPriceResponseAndRpcGasPriceError_Success.json")
         await setupMockSuccessResponse(with: responseData)
 
         // Execute
@@ -2003,7 +2030,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock error response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcGasPriceResponseAndRpcError_Error.json")
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcGasPriceResponseAndRpcGasPriceError_Error.json")
         await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
@@ -2073,7 +2100,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock success response data
-        let responseData = try loadMockJSON("JsonRpcResponseForGenesisConfigAndRpcError_Success.json")
+        let responseData = try loadMockJSON("JsonRpcResponseForGenesisConfigAndGenesisConfigError_Success.json")
         await setupMockSuccessResponse(with: responseData)
 
         // Execute
@@ -2101,7 +2128,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock error response data
-        let responseData = try loadMockJSON("JsonRpcResponseForGenesisConfigAndRpcError_Error.json")
+        let responseData = try loadMockJSON("JsonRpcResponseForGenesisConfigAndGenesisConfigError_Error.json")
         await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
@@ -2171,7 +2198,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock success response data
-        let responseData = try loadMockJSON("JsonRpcResponseForNullableRpcHealthResponseAndRpcError_Success.json")
+        let responseData = try loadMockJSON("JsonRpcResponseForNullableRpcHealthResponseAndRpcStatusError_Success.json")
         await setupMockSuccessResponse(with: responseData)
 
         // Execute
@@ -2199,7 +2226,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock error response data
-        let responseData = try loadMockJSON("JsonRpcResponseForNullableRpcHealthResponseAndRpcError_Error.json")
+        let responseData = try loadMockJSON("JsonRpcResponseForNullableRpcHealthResponseAndRpcStatusError_Error.json")
         await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
@@ -2270,7 +2297,9 @@ struct ClientMethodTests {
 
         // Load mock success response data
         let responseData =
-            try loadMockJSON("JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError_Success.json")
+            try loadMockJSON(
+                "JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcLightClientProofError_Success.json",
+            )
         await setupMockSuccessResponse(with: responseData)
 
         // Execute
@@ -2299,7 +2328,9 @@ struct ClientMethodTests {
 
         // Load mock error response data
         let responseData =
-            try loadMockJSON("JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcError_Error.json")
+            try loadMockJSON(
+                "JsonRpcResponseForRpcLightClientExecutionProofResponseAndRpcLightClientProofError_Error.json",
+            )
         await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
@@ -2369,7 +2400,8 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock success response data
-        let responseData = try loadMockJSON("JsonRpcResponseForArrayOfRangeOfUint64AndRpcError_Success.json")
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForArrayOfRangeOfUint64AndRpcMaintenanceWindowsError_Success.json")
         await setupMockSuccessResponse(with: responseData)
 
         // Execute
@@ -2397,7 +2429,8 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock error response data
-        let responseData = try loadMockJSON("JsonRpcResponseForArrayOfRangeOfUint64AndRpcError_Error.json")
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForArrayOfRangeOfUint64AndRpcMaintenanceWindowsError_Error.json")
         await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
@@ -2467,7 +2500,8 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock success response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcNetworkInfoResponseAndRpcError_Success.json")
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcNetworkInfoResponseAndRpcNetworkInfoError_Success.json")
         await setupMockSuccessResponse(with: responseData)
 
         // Execute
@@ -2495,7 +2529,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock error response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcNetworkInfoResponseAndRpcError_Error.json")
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcNetworkInfoResponseAndRpcNetworkInfoError_Error.json")
         await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
@@ -2565,7 +2599,10 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock success response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError_Success.json")
+        let responseData =
+            try loadMockJSON(
+                "JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcLightClientNextBlockError_Success.json",
+            )
         await setupMockSuccessResponse(with: responseData)
 
         // Execute
@@ -2593,7 +2630,10 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock error response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcError_Error.json")
+        let responseData =
+            try loadMockJSON(
+                "JsonRpcResponseForRpcLightClientNextBlockResponseAndRpcLightClientNextBlockError_Error.json",
+            )
         await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
@@ -2663,7 +2703,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock success response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcQueryResponseAndRpcError_Success.json")
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcQueryResponseAndRpcQueryError_Success.json")
         await setupMockSuccessResponse(with: responseData)
 
         // Execute
@@ -2691,7 +2731,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock error response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcQueryResponseAndRpcError_Error.json")
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcQueryResponseAndRpcQueryError_Error.json")
         await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
@@ -2761,7 +2801,8 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock success response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcError_Success.json")
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError_Success.json")
         await setupMockSuccessResponse(with: responseData)
 
         // Execute
@@ -2789,7 +2830,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock error response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcError_Error.json")
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError_Error.json")
         await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
@@ -2859,7 +2900,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock success response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcStatusResponseAndRpcError_Success.json")
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcStatusResponseAndRpcStatusError_Success.json")
         await setupMockSuccessResponse(with: responseData)
 
         // Execute
@@ -2887,7 +2928,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock error response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcStatusResponseAndRpcError_Error.json")
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcStatusResponseAndRpcStatusError_Error.json")
         await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
@@ -2957,7 +2998,8 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock success response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcError_Success.json")
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError_Success.json")
         await setupMockSuccessResponse(with: responseData)
 
         // Execute
@@ -2985,7 +3027,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock error response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcError_Error.json")
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcTransactionResponseAndRpcTransactionError_Error.json")
         await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
@@ -3055,7 +3097,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock success response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcValidatorResponseAndRpcError_Success.json")
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcValidatorResponseAndRpcValidatorError_Success.json")
         await setupMockSuccessResponse(with: responseData)
 
         // Execute
@@ -3083,7 +3125,7 @@ struct ClientMethodTests {
         let request = requestWrapper.params
 
         // Load mock error response data
-        let responseData = try loadMockJSON("JsonRpcResponseForRpcValidatorResponseAndRpcError_Error.json")
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcValidatorResponseAndRpcValidatorError_Error.json")
         await setupMockErrorResponse(with: responseData)
 
         // Execute & Verify
