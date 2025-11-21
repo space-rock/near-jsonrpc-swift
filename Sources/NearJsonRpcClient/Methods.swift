@@ -19,7 +19,7 @@ public extension NearJsonRpcClient {
         case let .result(result):
             return result
         case let .error(error):
-            throw NearJsonRpcError.rpcError(error)
+            throw NearJsonRpcError.rpcError(.rpcError(error))
         }
     }
 
@@ -38,7 +38,7 @@ public extension NearJsonRpcClient {
         case let .result(result):
             return result
         case let .error(error):
-            throw NearJsonRpcError.rpcError(error)
+            throw NearJsonRpcError.rpcError(.rpcError(error))
         }
     }
 
@@ -55,7 +55,7 @@ public extension NearJsonRpcClient {
         case let .result(result):
             return result
         case let .error(error):
-            throw NearJsonRpcError.rpcError(error)
+            throw NearJsonRpcError.rpcError(.rpcError(error))
         }
     }
 
@@ -71,7 +71,7 @@ public extension NearJsonRpcClient {
         case let .result(result):
             return result
         case let .error(error):
-            throw NearJsonRpcError.rpcError(error)
+            throw NearJsonRpcError.rpcError(.rpcError(error))
         }
     }
 
@@ -88,7 +88,7 @@ public extension NearJsonRpcClient {
         case let .result(result):
             return result
         case let .error(error):
-            throw NearJsonRpcError.rpcError(error)
+            throw NearJsonRpcError.rpcError(.rpcError(error))
         }
     }
 
@@ -105,7 +105,7 @@ public extension NearJsonRpcClient {
         case let .result(result):
             return result
         case let .error(error):
-            throw NearJsonRpcError.rpcError(error)
+            throw NearJsonRpcError.rpcError(.rpcError(error))
         }
     }
 
@@ -124,7 +124,7 @@ public extension NearJsonRpcClient {
         case let .result(result):
             return result
         case let .error(error):
-            throw NearJsonRpcError.rpcError(error)
+            throw NearJsonRpcError.rpcError(.rpcError(error))
         }
     }
 
@@ -142,7 +142,7 @@ public extension NearJsonRpcClient {
         case let .result(result):
             return result
         case let .error(error):
-            throw NearJsonRpcError.rpcError(error)
+            throw NearJsonRpcError.rpcError(.rpcError(error))
         }
     }
 
@@ -158,7 +158,7 @@ public extension NearJsonRpcClient {
         case let .result(result):
             return result
         case let .error(error):
-            throw NearJsonRpcError.rpcError(error)
+            throw NearJsonRpcError.rpcError(.rpcError(error))
         }
     }
 
@@ -176,7 +176,7 @@ public extension NearJsonRpcClient {
         case let .result(result):
             return result
         case let .error(error):
-            throw NearJsonRpcError.rpcError(error)
+            throw NearJsonRpcError.rpcError(.rpcError(error))
         }
     }
 
@@ -193,7 +193,7 @@ public extension NearJsonRpcClient {
         case let .result(result):
             return result
         case let .error(error):
-            throw NearJsonRpcError.rpcError(error)
+            throw NearJsonRpcError.rpcError(.rpcError(error))
         }
     }
 
@@ -211,7 +211,7 @@ public extension NearJsonRpcClient {
         case let .result(result):
             return result
         case let .error(error):
-            throw NearJsonRpcError.rpcError(error)
+            throw NearJsonRpcError.rpcError(.rpcError(error))
         }
     }
 
@@ -227,7 +227,7 @@ public extension NearJsonRpcClient {
         case let .result(result):
             return result
         case let .error(error):
-            throw NearJsonRpcError.rpcError(error)
+            throw NearJsonRpcError.rpcError(.rpcError(error))
         }
     }
 
@@ -245,7 +245,7 @@ public extension NearJsonRpcClient {
         case let .result(result):
             return result
         case let .error(error):
-            throw NearJsonRpcError.rpcError(error)
+            throw NearJsonRpcError.rpcError(.rpcError(error))
         }
     }
 
@@ -261,7 +261,7 @@ public extension NearJsonRpcClient {
         case let .result(result):
             return result
         case let .error(error):
-            throw NearJsonRpcError.rpcError(error)
+            throw NearJsonRpcError.rpcError(.rpcError(error))
         }
     }
 
@@ -279,7 +279,7 @@ public extension NearJsonRpcClient {
         case let .result(result):
             return result
         case let .error(error):
-            throw NearJsonRpcError.rpcError(error)
+            throw NearJsonRpcError.rpcError(.rpcError(error))
         }
     }
 
@@ -296,7 +296,7 @@ public extension NearJsonRpcClient {
         case let .result(result):
             return result
         case let .error(error):
-            throw NearJsonRpcError.rpcError(error)
+            throw NearJsonRpcError.rpcError(.rpcError(error))
         }
     }
 
@@ -312,7 +312,7 @@ public extension NearJsonRpcClient {
         case let .result(result):
             return result
         case let .error(error):
-            throw NearJsonRpcError.rpcError(error)
+            throw NearJsonRpcError.rpcError(.rpcError(error))
         }
     }
 
@@ -328,7 +328,7 @@ public extension NearJsonRpcClient {
         case let .result(result):
             return result
         case let .error(error):
-            throw NearJsonRpcError.rpcError(error)
+            throw NearJsonRpcError.rpcError(.rpcError(error))
         }
     }
 
@@ -345,7 +345,7 @@ public extension NearJsonRpcClient {
         case let .result(result):
             return result
         case let .error(error):
-            throw NearJsonRpcError.rpcError(error)
+            throw NearJsonRpcError.rpcError(.rpcError(error))
         }
     }
 
@@ -361,7 +361,7 @@ public extension NearJsonRpcClient {
         case let .result(result):
             return result
         case let .error(error):
-            throw NearJsonRpcError.rpcError(error)
+            throw NearJsonRpcError.rpcError(.rpcError(error))
         }
     }
 
@@ -377,7 +377,7 @@ public extension NearJsonRpcClient {
         case let .result(result):
             return result
         case let .error(error):
-            throw NearJsonRpcError.rpcError(error)
+            throw NearJsonRpcError.rpcError(.rpcError(error))
         }
     }
 
@@ -394,7 +394,7 @@ public extension NearJsonRpcClient {
         case let .result(result):
             return result
         case let .error(error):
-            throw NearJsonRpcError.rpcError(error)
+            throw NearJsonRpcError.rpcError(.rpcError(error))
         }
     }
 
@@ -411,7 +411,7 @@ public extension NearJsonRpcClient {
         case let .result(result):
             return result
         case let .error(error):
-            throw NearJsonRpcError.rpcError(error)
+            throw NearJsonRpcError.rpcError(.rpcError(error))
         }
     }
 
@@ -428,7 +428,7 @@ public extension NearJsonRpcClient {
         case let .result(result):
             return result
         case let .error(error):
-            throw NearJsonRpcError.rpcError(error)
+            throw NearJsonRpcError.rpcError(.rpcError(error))
         }
     }
 
@@ -445,7 +445,7 @@ public extension NearJsonRpcClient {
         case let .result(result):
             return result
         case let .error(error):
-            throw NearJsonRpcError.rpcError(error)
+            throw NearJsonRpcError.rpcError(.rpcError(error))
         }
     }
 
@@ -472,7 +472,7 @@ public extension NearJsonRpcClient {
         case let .result(result):
             return result
         case let .error(error):
-            throw NearJsonRpcError.rpcError(error)
+            throw NearJsonRpcError.rpcError(.rpcError(error))
         }
     }
 
@@ -489,7 +489,7 @@ public extension NearJsonRpcClient {
         case let .result(result):
             return result
         case let .error(error):
-            throw NearJsonRpcError.rpcError(error)
+            throw NearJsonRpcError.rpcError(.rpcError(error))
         }
     }
 
@@ -506,7 +506,7 @@ public extension NearJsonRpcClient {
         case let .result(result):
             return result
         case let .error(error):
-            throw NearJsonRpcError.rpcError(error)
+            throw NearJsonRpcError.rpcError(.rpcError(error))
         }
     }
 
@@ -522,7 +522,7 @@ public extension NearJsonRpcClient {
         case let .result(result):
             return result
         case let .error(error):
-            throw NearJsonRpcError.rpcError(error)
+            throw NearJsonRpcError.rpcError(.rpcError(error))
         }
     }
 
@@ -538,7 +538,7 @@ public extension NearJsonRpcClient {
         case let .result(result):
             return result
         case let .error(error):
-            throw NearJsonRpcError.rpcError(error)
+            throw NearJsonRpcError.rpcError(.rpcError(error))
         }
     }
 }

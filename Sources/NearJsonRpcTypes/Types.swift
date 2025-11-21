@@ -14760,3 +14760,31 @@ public struct InlineObject: Codable, Sendable {
         self.accountId = accountId
     }
 }
+
+// MARK: - RPC Errors
+
+/// Enum wrapping all possible RPC error types
+public enum RpcErrorDetails: Codable, Sendable {
+    case rpcError(RpcError)
+
+    public init(from decoder: Decoder) throws {
+        // Try to decode as each error type
+        if let error = try? RpcError(from: decoder) {
+            self = .rpcError(error)
+        } else {
+            throw DecodingError.dataCorrupted(
+                DecodingError.Context(
+                    codingPath: decoder.codingPath,
+                    debugDescription: "Could not decode RpcErrorDetails - no matching error type found",
+                ),
+            )
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .rpcError(error):
+            try error.encode(to: encoder)
+        }
+    }
+}
