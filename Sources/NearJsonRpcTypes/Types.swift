@@ -8730,6 +8730,7 @@ public struct ReceiptEnumViewOneOfActionInline: Codable, Sendable {
     public let inputDataIds: [CryptoHash]
     public let isPromiseYield: Bool?
     public let outputDataReceivers: [DataReceiverView]
+    public let refundTo: AccountId?
     public let signerId: AccountId
     public let signerPublicKey: PublicKey
 
@@ -8739,6 +8740,7 @@ public struct ReceiptEnumViewOneOfActionInline: Codable, Sendable {
         inputDataIds: [CryptoHash],
         isPromiseYield: Bool?,
         outputDataReceivers: [DataReceiverView],
+        refundTo: AccountId?,
         signerId: AccountId,
         signerPublicKey: PublicKey,
     ) {
@@ -8747,6 +8749,7 @@ public struct ReceiptEnumViewOneOfActionInline: Codable, Sendable {
         self.inputDataIds = inputDataIds
         self.isPromiseYield = isPromiseYield
         self.outputDataReceivers = outputDataReceivers
+        self.refundTo = refundTo
         self.signerId = signerId
         self.signerPublicKey = signerPublicKey
     }
@@ -17704,6 +17707,7 @@ public struct RpcClientConfigResponse: Codable, Sendable {
     public let chunkRequestRetryPeriod: [UInt64]?
     public let chunkValidationThreads: Int?
     public let chunkWaitMult: [Int32]?
+    public let chunksCacheHeightHorizon: UInt64?
     public let clientBackgroundMigrationThreads: Int?
     public let cloudArchivalWriter: CloudArchivalWriterConfig?
     public let disableTxRouting: Bool?
@@ -17775,6 +17779,7 @@ public struct RpcClientConfigResponse: Codable, Sendable {
         chunkRequestRetryPeriod: [UInt64]?,
         chunkValidationThreads: Int?,
         chunkWaitMult: [Int32]?,
+        chunksCacheHeightHorizon: UInt64?,
         clientBackgroundMigrationThreads: Int?,
         cloudArchivalWriter: CloudArchivalWriterConfig?,
         disableTxRouting: Bool?,
@@ -17845,6 +17850,7 @@ public struct RpcClientConfigResponse: Codable, Sendable {
         self.chunkRequestRetryPeriod = chunkRequestRetryPeriod
         self.chunkValidationThreads = chunkValidationThreads
         self.chunkWaitMult = chunkWaitMult
+        self.chunksCacheHeightHorizon = chunksCacheHeightHorizon
         self.clientBackgroundMigrationThreads = clientBackgroundMigrationThreads
         self.cloudArchivalWriter = cloudArchivalWriter
         self.disableTxRouting = disableTxRouting
