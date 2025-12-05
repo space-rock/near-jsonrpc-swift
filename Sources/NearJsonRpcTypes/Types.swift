@@ -8730,6 +8730,7 @@ public struct ReceiptEnumViewOneOfActionInline: Codable, Sendable {
     public let inputDataIds: [CryptoHash]
     public let isPromiseYield: Bool?
     public let outputDataReceivers: [DataReceiverView]
+    public let refundTo: AccountId?
     public let signerId: AccountId
     public let signerPublicKey: PublicKey
 
@@ -8739,6 +8740,7 @@ public struct ReceiptEnumViewOneOfActionInline: Codable, Sendable {
         inputDataIds: [CryptoHash],
         isPromiseYield: Bool?,
         outputDataReceivers: [DataReceiverView],
+        refundTo: AccountId?,
         signerId: AccountId,
         signerPublicKey: PublicKey,
     ) {
@@ -8747,6 +8749,7 @@ public struct ReceiptEnumViewOneOfActionInline: Codable, Sendable {
         self.inputDataIds = inputDataIds
         self.isPromiseYield = isPromiseYield
         self.outputDataReceivers = outputDataReceivers
+        self.refundTo = refundTo
         self.signerId = signerId
         self.signerPublicKey = signerPublicKey
     }
@@ -13352,6 +13355,7 @@ public enum ShardLayout: Codable, Sendable {
     case v0(ShardLayoutV0)
     case v1(ShardLayoutV1)
     case v2(ShardLayoutV2)
+    case v3(ShardLayoutV3)
 
     public init(from decoder: Decoder) throws {
         var decodingErrors: [String] = []
@@ -13392,6 +13396,18 @@ public enum ShardLayout: Codable, Sendable {
         } catch {
             decodingErrors.append(".v2: \(describeDecodingError(error))")
         }
+        do {
+            if let container = anyKeyContainer {
+                if let matchingKey = container.allKeys
+                    .first(where: { key in key.stringValue.caseInsensitiveCompare("V3") == .orderedSame }) {
+                    let value = try container.decode(ShardLayoutV3.self, forKey: matchingKey)
+                    self = .v3(value)
+                    return
+                }
+            }
+        } catch {
+            decodingErrors.append(".v3: \(describeDecodingError(error))")
+        }
         let contextDescription: String
         if decodingErrors.isEmpty {
             let availableKeys: String
@@ -13413,6 +13429,7 @@ public enum ShardLayout: Codable, Sendable {
         case v0 = "V0"
         case v1 = "V1"
         case v2 = "V2"
+        case v3 = "V3"
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -13426,6 +13443,9 @@ public enum ShardLayout: Codable, Sendable {
         case let .v2(value):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(value, forKey: .v2)
+        case let .v3(value):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(value, forKey: .v3)
         }
     }
 }
@@ -17704,6 +17724,7 @@ public struct RpcClientConfigResponse: Codable, Sendable {
     public let chunkRequestRetryPeriod: [UInt64]?
     public let chunkValidationThreads: Int?
     public let chunkWaitMult: [Int32]?
+    public let chunksCacheHeightHorizon: UInt64?
     public let clientBackgroundMigrationThreads: Int?
     public let cloudArchivalWriter: CloudArchivalWriterConfig?
     public let disableTxRouting: Bool?
@@ -17775,6 +17796,7 @@ public struct RpcClientConfigResponse: Codable, Sendable {
         chunkRequestRetryPeriod: [UInt64]?,
         chunkValidationThreads: Int?,
         chunkWaitMult: [Int32]?,
+        chunksCacheHeightHorizon: UInt64?,
         clientBackgroundMigrationThreads: Int?,
         cloudArchivalWriter: CloudArchivalWriterConfig?,
         disableTxRouting: Bool?,
@@ -17845,6 +17867,7 @@ public struct RpcClientConfigResponse: Codable, Sendable {
         self.chunkRequestRetryPeriod = chunkRequestRetryPeriod
         self.chunkValidationThreads = chunkValidationThreads
         self.chunkWaitMult = chunkWaitMult
+        self.chunksCacheHeightHorizon = chunksCacheHeightHorizon
         self.clientBackgroundMigrationThreads = clientBackgroundMigrationThreads
         self.cloudArchivalWriter = cloudArchivalWriter
         self.disableTxRouting = disableTxRouting
@@ -18537,6 +18560,30 @@ public struct ShardLayoutV2: Codable, Sendable {
         self.shardsParentMap = shardsParentMap
         self.shardsSplitMap = shardsSplitMap
         self.version = version
+    }
+}
+
+// MARK: - ShardLayoutV3
+
+public struct ShardLayoutV3: Codable, Sendable {
+    public let boundaryAccounts: [AccountId]
+    public let idToIndexMap: [String: Int]
+    public let lastSplit: ShardId
+    public let shardIds: [ShardId]
+    public let shardsSplitMap: [String: [ShardId]]
+
+    public init(
+        boundaryAccounts: [AccountId],
+        idToIndexMap: [String: Int],
+        lastSplit: ShardId,
+        shardIds: [ShardId],
+        shardsSplitMap: [String: [ShardId]],
+    ) {
+        self.boundaryAccounts = boundaryAccounts
+        self.idToIndexMap = idToIndexMap
+        self.lastSplit = lastSplit
+        self.shardIds = shardIds
+        self.shardsSplitMap = shardsSplitMap
     }
 }
 
