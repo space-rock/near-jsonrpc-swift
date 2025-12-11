@@ -1834,6 +1834,21 @@ struct StandaloneTypesTests {
         _ = try decoder.decode(DurationAsStdSchemaProvider.self, from: encoded)
     }
 
+    @Test("DynamicReshardingConfigView can be decoded from mock and re-encoded")
+    func dynamicReshardingConfigViewDecodingAndEncoding() throws {
+        let data = try loadMockJSON("DynamicReshardingConfigView.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(DynamicReshardingConfigView.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(DynamicReshardingConfigView.self, from: encoded)
+    }
+
     @Test("EpochId can be decoded from mock and re-encoded")
     func epochIdDecodingAndEncoding() throws {
         let data = try loadMockJSON("EpochId.json")
@@ -6799,6 +6814,21 @@ struct StandaloneTypesTests {
         _ = try decoder.decode(ShardLayout.self, from: encoded)
     }
 
+    @Test("ShardLayout variant 3 can be decoded and re-encoded")
+    func shardLayoutVariant3DecodingAndEncoding() throws {
+        let data = try loadMockJSON("ShardLayout_Variant3.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(ShardLayout.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(ShardLayout.self, from: encoded)
+    }
+
     @Test("ShardLayoutV0 can be decoded from mock and re-encoded")
     func shardLayoutV0DecodingAndEncoding() throws {
         let data = try loadMockJSON("ShardLayoutV0.json")
@@ -6842,6 +6872,21 @@ struct StandaloneTypesTests {
 
         // Test round-trip
         _ = try decoder.decode(ShardLayoutV2.self, from: encoded)
+    }
+
+    @Test("ShardLayoutV3 can be decoded from mock and re-encoded")
+    func shardLayoutV3DecodingAndEncoding() throws {
+        let data = try loadMockJSON("ShardLayoutV3.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(ShardLayoutV3.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(ShardLayoutV3.self, from: encoded)
     }
 
     @Test("ShardUId can be decoded from mock and re-encoded")
