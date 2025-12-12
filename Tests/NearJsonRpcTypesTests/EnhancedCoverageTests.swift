@@ -1744,6 +1744,21 @@ struct EnhancedCoverageTests {
         #expect(!reencoded.isEmpty)
     }
 
+    @Test("DynamicReshardingConfigView decoded instance is valid")
+    func dynamicReshardingConfigViewValidity() throws {
+        let data = try loadMockJSON("DynamicReshardingConfigView.json")
+        let decoded = try decoder.decode(DynamicReshardingConfigView.self, from: data)
+
+        // Verify the decoded instance is valid by re-encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Verify round-trip
+        let redecoded = try decoder.decode(DynamicReshardingConfigView.self, from: encoded)
+        let reencoded = try encoder.encode(redecoded)
+        #expect(!reencoded.isEmpty)
+    }
+
     @Test("EpochSyncConfig decoded instance is valid")
     func epochSyncConfigValidity() throws {
         let data = try loadMockJSON("EpochSyncConfig.json")
@@ -6235,6 +6250,20 @@ struct EnhancedCoverageTests {
         #expect(!encoded2.isEmpty)
     }
 
+    @Test("ShardLayout variant 3 encoding stability")
+    func shardLayoutVariant3EncodingStability() throws {
+        let data = try loadMockJSON("ShardLayout_Variant3.json")
+        let decoded = try decoder.decode(ShardLayout.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(ShardLayout.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
     @Test("ShardLayoutV0 decoded instance is valid")
     func shardLayoutV0Validity() throws {
         let data = try loadMockJSON("ShardLayoutV0.json")
@@ -6276,6 +6305,21 @@ struct EnhancedCoverageTests {
 
         // Verify round-trip
         let redecoded = try decoder.decode(ShardLayoutV2.self, from: encoded)
+        let reencoded = try encoder.encode(redecoded)
+        #expect(!reencoded.isEmpty)
+    }
+
+    @Test("ShardLayoutV3 decoded instance is valid")
+    func shardLayoutV3Validity() throws {
+        let data = try loadMockJSON("ShardLayoutV3.json")
+        let decoded = try decoder.decode(ShardLayoutV3.self, from: data)
+
+        // Verify the decoded instance is valid by re-encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Verify round-trip
+        let redecoded = try decoder.decode(ShardLayoutV3.self, from: encoded)
         let reencoded = try encoder.encode(redecoded)
         #expect(!reencoded.isEmpty)
     }
