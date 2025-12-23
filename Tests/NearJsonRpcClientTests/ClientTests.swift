@@ -33,6 +33,36 @@ struct ClientTests {
         return try Data(contentsOf: url)
     }
 
+    @Test("EXPERIMENTAL_call_function request and success response types are valid")
+    func eXPERIMENTALCallFunctionRequestAndSuccessResponse() throws {
+        // Test request type decoding
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALCallFunction.json")
+        _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALCallFunction.self, from: requestData)
+
+        // Test success response type decoding
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcCallFunctionResponseAndRpcCallFunctionError_Success.json")
+        _ = try decoder.decode(
+            JsonRpcResponseForRpcCallFunctionResponseAndRpcCallFunctionError.self,
+            from: responseData,
+        )
+    }
+
+    @Test("EXPERIMENTAL_call_function request and error response types are valid")
+    func eXPERIMENTALCallFunctionRequestAndErrorResponse() throws {
+        // Test request type decoding
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALCallFunction.json")
+        _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALCallFunction.self, from: requestData)
+
+        // Test error response type decoding
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcCallFunctionResponseAndRpcCallFunctionError_Error.json")
+        _ = try decoder.decode(
+            JsonRpcResponseForRpcCallFunctionResponseAndRpcCallFunctionError.self,
+            from: responseData,
+        )
+    }
+
     @Test("EXPERIMENTAL_changes request and success response types are valid")
     func eXPERIMENTALChangesRequestAndSuccessResponse() throws {
         // Test request type decoding
@@ -362,6 +392,185 @@ struct ClientTests {
         let responseData =
             try loadMockJSON("JsonRpcResponseForArrayOfValidatorStakeViewAndRpcValidatorError_Error.json")
         _ = try decoder.decode(JsonRpcResponseForArrayOfValidatorStakeViewAndRpcValidatorError.self, from: responseData)
+    }
+
+    @Test("EXPERIMENTAL_view_access_key request and success response types are valid")
+    func eXPERIMENTALViewAccessKeyRequestAndSuccessResponse() throws {
+        // Test request type decoding
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewAccessKey.json")
+        _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewAccessKey.self, from: requestData)
+
+        // Test success response type decoding
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcViewAccessKeyResponseAndRpcViewAccessKeyError_Success.json")
+        _ = try decoder.decode(
+            JsonRpcResponseForRpcViewAccessKeyResponseAndRpcViewAccessKeyError.self,
+            from: responseData,
+        )
+    }
+
+    @Test("EXPERIMENTAL_view_access_key request and error response types are valid")
+    func eXPERIMENTALViewAccessKeyRequestAndErrorResponse() throws {
+        // Test request type decoding
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewAccessKey.json")
+        _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewAccessKey.self, from: requestData)
+
+        // Test error response type decoding
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcViewAccessKeyResponseAndRpcViewAccessKeyError_Error.json")
+        _ = try decoder.decode(
+            JsonRpcResponseForRpcViewAccessKeyResponseAndRpcViewAccessKeyError.self,
+            from: responseData,
+        )
+    }
+
+    @Test("EXPERIMENTAL_view_access_key_list request and success response types are valid")
+    func eXPERIMENTALViewAccessKeyListRequestAndSuccessResponse() throws {
+        // Test request type decoding
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewAccessKeyList.json")
+        _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewAccessKeyList.self, from: requestData)
+
+        // Test success response type decoding
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcViewAccessKeyListResponseAndRpcViewAccessKeyListError_Success.json")
+        _ = try decoder.decode(
+            JsonRpcResponseForRpcViewAccessKeyListResponseAndRpcViewAccessKeyListError.self,
+            from: responseData,
+        )
+    }
+
+    @Test("EXPERIMENTAL_view_access_key_list request and error response types are valid")
+    func eXPERIMENTALViewAccessKeyListRequestAndErrorResponse() throws {
+        // Test request type decoding
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewAccessKeyList.json")
+        _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewAccessKeyList.self, from: requestData)
+
+        // Test error response type decoding
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcViewAccessKeyListResponseAndRpcViewAccessKeyListError_Error.json")
+        _ = try decoder.decode(
+            JsonRpcResponseForRpcViewAccessKeyListResponseAndRpcViewAccessKeyListError.self,
+            from: responseData,
+        )
+    }
+
+    @Test("EXPERIMENTAL_view_account request and success response types are valid")
+    func eXPERIMENTALViewAccountRequestAndSuccessResponse() throws {
+        // Test request type decoding
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewAccount.json")
+        _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewAccount.self, from: requestData)
+
+        // Test success response type decoding
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcViewAccountResponseAndRpcViewAccountError_Success.json")
+        _ = try decoder.decode(JsonRpcResponseForRpcViewAccountResponseAndRpcViewAccountError.self, from: responseData)
+    }
+
+    @Test("EXPERIMENTAL_view_account request and error response types are valid")
+    func eXPERIMENTALViewAccountRequestAndErrorResponse() throws {
+        // Test request type decoding
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewAccount.json")
+        _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewAccount.self, from: requestData)
+
+        // Test error response type decoding
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcViewAccountResponseAndRpcViewAccountError_Error.json")
+        _ = try decoder.decode(JsonRpcResponseForRpcViewAccountResponseAndRpcViewAccountError.self, from: responseData)
+    }
+
+    @Test("EXPERIMENTAL_view_code request and success response types are valid")
+    func eXPERIMENTALViewCodeRequestAndSuccessResponse() throws {
+        // Test request type decoding
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewCode.json")
+        _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewCode.self, from: requestData)
+
+        // Test success response type decoding
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcViewCodeResponseAndRpcViewCodeError_Success.json")
+        _ = try decoder.decode(JsonRpcResponseForRpcViewCodeResponseAndRpcViewCodeError.self, from: responseData)
+    }
+
+    @Test("EXPERIMENTAL_view_code request and error response types are valid")
+    func eXPERIMENTALViewCodeRequestAndErrorResponse() throws {
+        // Test request type decoding
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewCode.json")
+        _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewCode.self, from: requestData)
+
+        // Test error response type decoding
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcViewCodeResponseAndRpcViewCodeError_Error.json")
+        _ = try decoder.decode(JsonRpcResponseForRpcViewCodeResponseAndRpcViewCodeError.self, from: responseData)
+    }
+
+    @Test("EXPERIMENTAL_view_gas_key request and success response types are valid")
+    func eXPERIMENTALViewGasKeyRequestAndSuccessResponse() throws {
+        // Test request type decoding
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewGasKey.json")
+        _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewGasKey.self, from: requestData)
+
+        // Test success response type decoding
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcViewGasKeyResponseAndRpcViewGasKeyError_Success.json")
+        _ = try decoder.decode(JsonRpcResponseForRpcViewGasKeyResponseAndRpcViewGasKeyError.self, from: responseData)
+    }
+
+    @Test("EXPERIMENTAL_view_gas_key request and error response types are valid")
+    func eXPERIMENTALViewGasKeyRequestAndErrorResponse() throws {
+        // Test request type decoding
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewGasKey.json")
+        _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewGasKey.self, from: requestData)
+
+        // Test error response type decoding
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcViewGasKeyResponseAndRpcViewGasKeyError_Error.json")
+        _ = try decoder.decode(JsonRpcResponseForRpcViewGasKeyResponseAndRpcViewGasKeyError.self, from: responseData)
+    }
+
+    @Test("EXPERIMENTAL_view_gas_key_list request and success response types are valid")
+    func eXPERIMENTALViewGasKeyListRequestAndSuccessResponse() throws {
+        // Test request type decoding
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewGasKeyList.json")
+        _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewGasKeyList.self, from: requestData)
+
+        // Test success response type decoding
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcViewGasKeyListResponseAndRpcViewGasKeyListError_Success.json")
+        _ = try decoder.decode(
+            JsonRpcResponseForRpcViewGasKeyListResponseAndRpcViewGasKeyListError.self,
+            from: responseData,
+        )
+    }
+
+    @Test("EXPERIMENTAL_view_gas_key_list request and error response types are valid")
+    func eXPERIMENTALViewGasKeyListRequestAndErrorResponse() throws {
+        // Test request type decoding
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewGasKeyList.json")
+        _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewGasKeyList.self, from: requestData)
+
+        // Test error response type decoding
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcViewGasKeyListResponseAndRpcViewGasKeyListError_Error.json")
+        _ = try decoder.decode(
+            JsonRpcResponseForRpcViewGasKeyListResponseAndRpcViewGasKeyListError.self,
+            from: responseData,
+        )
+    }
+
+    @Test("EXPERIMENTAL_view_state request and success response types are valid")
+    func eXPERIMENTALViewStateRequestAndSuccessResponse() throws {
+        // Test request type decoding
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewState.json")
+        _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewState.self, from: requestData)
+
+        // Test success response type decoding
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcViewStateResponseAndRpcViewStateError_Success.json")
+        _ = try decoder.decode(JsonRpcResponseForRpcViewStateResponseAndRpcViewStateError.self, from: responseData)
+    }
+
+    @Test("EXPERIMENTAL_view_state request and error response types are valid")
+    func eXPERIMENTALViewStateRequestAndErrorResponse() throws {
+        // Test request type decoding
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewState.json")
+        _ = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewState.self, from: requestData)
+
+        // Test error response type decoding
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcViewStateResponseAndRpcViewStateError_Error.json")
+        _ = try decoder.decode(JsonRpcResponseForRpcViewStateResponseAndRpcViewStateError.self, from: responseData)
     }
 
     @Test("block request and success response types are valid")

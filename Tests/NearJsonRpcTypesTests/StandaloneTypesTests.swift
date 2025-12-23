@@ -1834,6 +1834,21 @@ struct StandaloneTypesTests {
         _ = try decoder.decode(DurationAsStdSchemaProvider.self, from: encoded)
     }
 
+    @Test("DynamicReshardingConfigView can be decoded from mock and re-encoded")
+    func dynamicReshardingConfigViewDecodingAndEncoding() throws {
+        let data = try loadMockJSON("DynamicReshardingConfigView.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(DynamicReshardingConfigView.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(DynamicReshardingConfigView.self, from: encoded)
+    }
+
     @Test("EpochId can be decoded from mock and re-encoded")
     func epochIdDecodingAndEncoding() throws {
         let data = try loadMockJSON("EpochId.json")
@@ -4309,6 +4324,156 @@ struct StandaloneTypesTests {
         _ = try decoder.decode(RpcBlockResponse.self, from: encoded)
     }
 
+    @Test("RpcCallFunctionError variant 0 can be decoded and re-encoded")
+    func rpcCallFunctionErrorVariant0DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcCallFunctionError_Variant0.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcCallFunctionError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcCallFunctionError.self, from: encoded)
+    }
+
+    @Test("RpcCallFunctionError variant 1 can be decoded and re-encoded")
+    func rpcCallFunctionErrorVariant1DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcCallFunctionError_Variant1.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcCallFunctionError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcCallFunctionError.self, from: encoded)
+    }
+
+    @Test("RpcCallFunctionError variant 2 can be decoded and re-encoded")
+    func rpcCallFunctionErrorVariant2DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcCallFunctionError_Variant2.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcCallFunctionError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcCallFunctionError.self, from: encoded)
+    }
+
+    @Test("RpcCallFunctionError variant 3 can be decoded and re-encoded")
+    func rpcCallFunctionErrorVariant3DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcCallFunctionError_Variant3.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcCallFunctionError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcCallFunctionError.self, from: encoded)
+    }
+
+    @Test("RpcCallFunctionError variant 4 can be decoded and re-encoded")
+    func rpcCallFunctionErrorVariant4DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcCallFunctionError_Variant4.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcCallFunctionError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcCallFunctionError.self, from: encoded)
+    }
+
+    @Test("RpcCallFunctionError variant 5 can be decoded and re-encoded")
+    func rpcCallFunctionErrorVariant5DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcCallFunctionError_Variant5.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcCallFunctionError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcCallFunctionError.self, from: encoded)
+    }
+
+    @Test("RpcCallFunctionRequest variant 0 can be decoded and re-encoded")
+    func rpcCallFunctionRequestVariant0DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcCallFunctionRequest_Variant0.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcCallFunctionRequest.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcCallFunctionRequest.self, from: encoded)
+    }
+
+    @Test("RpcCallFunctionRequest variant 1 can be decoded and re-encoded")
+    func rpcCallFunctionRequestVariant1DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcCallFunctionRequest_Variant1.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcCallFunctionRequest.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcCallFunctionRequest.self, from: encoded)
+    }
+
+    @Test("RpcCallFunctionRequest variant 2 can be decoded and re-encoded")
+    func rpcCallFunctionRequestVariant2DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcCallFunctionRequest_Variant2.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcCallFunctionRequest.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcCallFunctionRequest.self, from: encoded)
+    }
+
+    @Test("RpcCallFunctionResponse can be decoded from mock and re-encoded")
+    func rpcCallFunctionResponseDecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcCallFunctionResponse.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcCallFunctionResponse.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcCallFunctionResponse.self, from: encoded)
+    }
+
     @Test("RpcChunkError variant 0 can be decoded and re-encoded")
     func rpcChunkErrorVariant0DecodingAndEncoding() throws {
         let data = try loadMockJSON("RpcChunkError_Variant0.json")
@@ -6724,6 +6889,906 @@ struct StandaloneTypesTests {
         _ = try decoder.decode(RpcValidatorsOrderedRequest.self, from: encoded)
     }
 
+    @Test("RpcViewAccessKeyError variant 0 can be decoded and re-encoded")
+    func rpcViewAccessKeyErrorVariant0DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewAccessKeyError_Variant0.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewAccessKeyError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewAccessKeyError.self, from: encoded)
+    }
+
+    @Test("RpcViewAccessKeyError variant 1 can be decoded and re-encoded")
+    func rpcViewAccessKeyErrorVariant1DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewAccessKeyError_Variant1.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewAccessKeyError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewAccessKeyError.self, from: encoded)
+    }
+
+    @Test("RpcViewAccessKeyError variant 2 can be decoded and re-encoded")
+    func rpcViewAccessKeyErrorVariant2DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewAccessKeyError_Variant2.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewAccessKeyError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewAccessKeyError.self, from: encoded)
+    }
+
+    @Test("RpcViewAccessKeyError variant 3 can be decoded and re-encoded")
+    func rpcViewAccessKeyErrorVariant3DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewAccessKeyError_Variant3.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewAccessKeyError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewAccessKeyError.self, from: encoded)
+    }
+
+    @Test("RpcViewAccessKeyError variant 4 can be decoded and re-encoded")
+    func rpcViewAccessKeyErrorVariant4DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewAccessKeyError_Variant4.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewAccessKeyError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewAccessKeyError.self, from: encoded)
+    }
+
+    @Test("RpcViewAccessKeyListError variant 0 can be decoded and re-encoded")
+    func rpcViewAccessKeyListErrorVariant0DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewAccessKeyListError_Variant0.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewAccessKeyListError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewAccessKeyListError.self, from: encoded)
+    }
+
+    @Test("RpcViewAccessKeyListError variant 1 can be decoded and re-encoded")
+    func rpcViewAccessKeyListErrorVariant1DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewAccessKeyListError_Variant1.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewAccessKeyListError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewAccessKeyListError.self, from: encoded)
+    }
+
+    @Test("RpcViewAccessKeyListError variant 2 can be decoded and re-encoded")
+    func rpcViewAccessKeyListErrorVariant2DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewAccessKeyListError_Variant2.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewAccessKeyListError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewAccessKeyListError.self, from: encoded)
+    }
+
+    @Test("RpcViewAccessKeyListError variant 3 can be decoded and re-encoded")
+    func rpcViewAccessKeyListErrorVariant3DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewAccessKeyListError_Variant3.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewAccessKeyListError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewAccessKeyListError.self, from: encoded)
+    }
+
+    @Test("RpcViewAccessKeyListRequest variant 0 can be decoded and re-encoded")
+    func rpcViewAccessKeyListRequestVariant0DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewAccessKeyListRequest_Variant0.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewAccessKeyListRequest.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewAccessKeyListRequest.self, from: encoded)
+    }
+
+    @Test("RpcViewAccessKeyListRequest variant 1 can be decoded and re-encoded")
+    func rpcViewAccessKeyListRequestVariant1DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewAccessKeyListRequest_Variant1.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewAccessKeyListRequest.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewAccessKeyListRequest.self, from: encoded)
+    }
+
+    @Test("RpcViewAccessKeyListRequest variant 2 can be decoded and re-encoded")
+    func rpcViewAccessKeyListRequestVariant2DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewAccessKeyListRequest_Variant2.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewAccessKeyListRequest.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewAccessKeyListRequest.self, from: encoded)
+    }
+
+    @Test("RpcViewAccessKeyListResponse can be decoded from mock and re-encoded")
+    func rpcViewAccessKeyListResponseDecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewAccessKeyListResponse.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewAccessKeyListResponse.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewAccessKeyListResponse.self, from: encoded)
+    }
+
+    @Test("RpcViewAccessKeyRequest variant 0 can be decoded and re-encoded")
+    func rpcViewAccessKeyRequestVariant0DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewAccessKeyRequest_Variant0.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewAccessKeyRequest.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewAccessKeyRequest.self, from: encoded)
+    }
+
+    @Test("RpcViewAccessKeyRequest variant 1 can be decoded and re-encoded")
+    func rpcViewAccessKeyRequestVariant1DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewAccessKeyRequest_Variant1.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewAccessKeyRequest.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewAccessKeyRequest.self, from: encoded)
+    }
+
+    @Test("RpcViewAccessKeyRequest variant 2 can be decoded and re-encoded")
+    func rpcViewAccessKeyRequestVariant2DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewAccessKeyRequest_Variant2.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewAccessKeyRequest.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewAccessKeyRequest.self, from: encoded)
+    }
+
+    @Test("RpcViewAccessKeyResponse can be decoded from mock and re-encoded")
+    func rpcViewAccessKeyResponseDecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewAccessKeyResponse.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewAccessKeyResponse.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewAccessKeyResponse.self, from: encoded)
+    }
+
+    @Test("RpcViewAccountError variant 0 can be decoded and re-encoded")
+    func rpcViewAccountErrorVariant0DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewAccountError_Variant0.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewAccountError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewAccountError.self, from: encoded)
+    }
+
+    @Test("RpcViewAccountError variant 1 can be decoded and re-encoded")
+    func rpcViewAccountErrorVariant1DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewAccountError_Variant1.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewAccountError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewAccountError.self, from: encoded)
+    }
+
+    @Test("RpcViewAccountError variant 2 can be decoded and re-encoded")
+    func rpcViewAccountErrorVariant2DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewAccountError_Variant2.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewAccountError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewAccountError.self, from: encoded)
+    }
+
+    @Test("RpcViewAccountError variant 3 can be decoded and re-encoded")
+    func rpcViewAccountErrorVariant3DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewAccountError_Variant3.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewAccountError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewAccountError.self, from: encoded)
+    }
+
+    @Test("RpcViewAccountRequest variant 0 can be decoded and re-encoded")
+    func rpcViewAccountRequestVariant0DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewAccountRequest_Variant0.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewAccountRequest.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewAccountRequest.self, from: encoded)
+    }
+
+    @Test("RpcViewAccountRequest variant 1 can be decoded and re-encoded")
+    func rpcViewAccountRequestVariant1DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewAccountRequest_Variant1.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewAccountRequest.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewAccountRequest.self, from: encoded)
+    }
+
+    @Test("RpcViewAccountRequest variant 2 can be decoded and re-encoded")
+    func rpcViewAccountRequestVariant2DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewAccountRequest_Variant2.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewAccountRequest.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewAccountRequest.self, from: encoded)
+    }
+
+    @Test("RpcViewAccountResponse can be decoded from mock and re-encoded")
+    func rpcViewAccountResponseDecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewAccountResponse.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewAccountResponse.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewAccountResponse.self, from: encoded)
+    }
+
+    @Test("RpcViewCodeError variant 0 can be decoded and re-encoded")
+    func rpcViewCodeErrorVariant0DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewCodeError_Variant0.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewCodeError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewCodeError.self, from: encoded)
+    }
+
+    @Test("RpcViewCodeError variant 1 can be decoded and re-encoded")
+    func rpcViewCodeErrorVariant1DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewCodeError_Variant1.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewCodeError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewCodeError.self, from: encoded)
+    }
+
+    @Test("RpcViewCodeError variant 2 can be decoded and re-encoded")
+    func rpcViewCodeErrorVariant2DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewCodeError_Variant2.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewCodeError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewCodeError.self, from: encoded)
+    }
+
+    @Test("RpcViewCodeError variant 3 can be decoded and re-encoded")
+    func rpcViewCodeErrorVariant3DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewCodeError_Variant3.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewCodeError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewCodeError.self, from: encoded)
+    }
+
+    @Test("RpcViewCodeError variant 4 can be decoded and re-encoded")
+    func rpcViewCodeErrorVariant4DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewCodeError_Variant4.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewCodeError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewCodeError.self, from: encoded)
+    }
+
+    @Test("RpcViewCodeRequest variant 0 can be decoded and re-encoded")
+    func rpcViewCodeRequestVariant0DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewCodeRequest_Variant0.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewCodeRequest.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewCodeRequest.self, from: encoded)
+    }
+
+    @Test("RpcViewCodeRequest variant 1 can be decoded and re-encoded")
+    func rpcViewCodeRequestVariant1DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewCodeRequest_Variant1.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewCodeRequest.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewCodeRequest.self, from: encoded)
+    }
+
+    @Test("RpcViewCodeRequest variant 2 can be decoded and re-encoded")
+    func rpcViewCodeRequestVariant2DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewCodeRequest_Variant2.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewCodeRequest.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewCodeRequest.self, from: encoded)
+    }
+
+    @Test("RpcViewCodeResponse can be decoded from mock and re-encoded")
+    func rpcViewCodeResponseDecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewCodeResponse.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewCodeResponse.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewCodeResponse.self, from: encoded)
+    }
+
+    @Test("RpcViewGasKeyError variant 0 can be decoded and re-encoded")
+    func rpcViewGasKeyErrorVariant0DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewGasKeyError_Variant0.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewGasKeyError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewGasKeyError.self, from: encoded)
+    }
+
+    @Test("RpcViewGasKeyError variant 1 can be decoded and re-encoded")
+    func rpcViewGasKeyErrorVariant1DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewGasKeyError_Variant1.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewGasKeyError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewGasKeyError.self, from: encoded)
+    }
+
+    @Test("RpcViewGasKeyError variant 2 can be decoded and re-encoded")
+    func rpcViewGasKeyErrorVariant2DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewGasKeyError_Variant2.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewGasKeyError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewGasKeyError.self, from: encoded)
+    }
+
+    @Test("RpcViewGasKeyError variant 3 can be decoded and re-encoded")
+    func rpcViewGasKeyErrorVariant3DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewGasKeyError_Variant3.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewGasKeyError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewGasKeyError.self, from: encoded)
+    }
+
+    @Test("RpcViewGasKeyError variant 4 can be decoded and re-encoded")
+    func rpcViewGasKeyErrorVariant4DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewGasKeyError_Variant4.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewGasKeyError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewGasKeyError.self, from: encoded)
+    }
+
+    @Test("RpcViewGasKeyListError variant 0 can be decoded and re-encoded")
+    func rpcViewGasKeyListErrorVariant0DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewGasKeyListError_Variant0.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewGasKeyListError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewGasKeyListError.self, from: encoded)
+    }
+
+    @Test("RpcViewGasKeyListError variant 1 can be decoded and re-encoded")
+    func rpcViewGasKeyListErrorVariant1DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewGasKeyListError_Variant1.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewGasKeyListError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewGasKeyListError.self, from: encoded)
+    }
+
+    @Test("RpcViewGasKeyListError variant 2 can be decoded and re-encoded")
+    func rpcViewGasKeyListErrorVariant2DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewGasKeyListError_Variant2.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewGasKeyListError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewGasKeyListError.self, from: encoded)
+    }
+
+    @Test("RpcViewGasKeyListError variant 3 can be decoded and re-encoded")
+    func rpcViewGasKeyListErrorVariant3DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewGasKeyListError_Variant3.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewGasKeyListError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewGasKeyListError.self, from: encoded)
+    }
+
+    @Test("RpcViewGasKeyListRequest variant 0 can be decoded and re-encoded")
+    func rpcViewGasKeyListRequestVariant0DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewGasKeyListRequest_Variant0.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewGasKeyListRequest.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewGasKeyListRequest.self, from: encoded)
+    }
+
+    @Test("RpcViewGasKeyListRequest variant 1 can be decoded and re-encoded")
+    func rpcViewGasKeyListRequestVariant1DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewGasKeyListRequest_Variant1.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewGasKeyListRequest.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewGasKeyListRequest.self, from: encoded)
+    }
+
+    @Test("RpcViewGasKeyListRequest variant 2 can be decoded and re-encoded")
+    func rpcViewGasKeyListRequestVariant2DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewGasKeyListRequest_Variant2.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewGasKeyListRequest.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewGasKeyListRequest.self, from: encoded)
+    }
+
+    @Test("RpcViewGasKeyListResponse can be decoded from mock and re-encoded")
+    func rpcViewGasKeyListResponseDecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewGasKeyListResponse.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewGasKeyListResponse.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewGasKeyListResponse.self, from: encoded)
+    }
+
+    @Test("RpcViewGasKeyRequest variant 0 can be decoded and re-encoded")
+    func rpcViewGasKeyRequestVariant0DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewGasKeyRequest_Variant0.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewGasKeyRequest.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewGasKeyRequest.self, from: encoded)
+    }
+
+    @Test("RpcViewGasKeyRequest variant 1 can be decoded and re-encoded")
+    func rpcViewGasKeyRequestVariant1DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewGasKeyRequest_Variant1.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewGasKeyRequest.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewGasKeyRequest.self, from: encoded)
+    }
+
+    @Test("RpcViewGasKeyRequest variant 2 can be decoded and re-encoded")
+    func rpcViewGasKeyRequestVariant2DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewGasKeyRequest_Variant2.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewGasKeyRequest.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewGasKeyRequest.self, from: encoded)
+    }
+
+    @Test("RpcViewGasKeyResponse can be decoded from mock and re-encoded")
+    func rpcViewGasKeyResponseDecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewGasKeyResponse.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewGasKeyResponse.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewGasKeyResponse.self, from: encoded)
+    }
+
+    @Test("RpcViewStateError variant 0 can be decoded and re-encoded")
+    func rpcViewStateErrorVariant0DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewStateError_Variant0.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewStateError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewStateError.self, from: encoded)
+    }
+
+    @Test("RpcViewStateError variant 1 can be decoded and re-encoded")
+    func rpcViewStateErrorVariant1DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewStateError_Variant1.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewStateError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewStateError.self, from: encoded)
+    }
+
+    @Test("RpcViewStateError variant 2 can be decoded and re-encoded")
+    func rpcViewStateErrorVariant2DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewStateError_Variant2.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewStateError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewStateError.self, from: encoded)
+    }
+
+    @Test("RpcViewStateError variant 3 can be decoded and re-encoded")
+    func rpcViewStateErrorVariant3DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewStateError_Variant3.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewStateError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewStateError.self, from: encoded)
+    }
+
+    @Test("RpcViewStateError variant 4 can be decoded and re-encoded")
+    func rpcViewStateErrorVariant4DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewStateError_Variant4.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewStateError.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewStateError.self, from: encoded)
+    }
+
+    @Test("RpcViewStateRequest variant 0 can be decoded and re-encoded")
+    func rpcViewStateRequestVariant0DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewStateRequest_Variant0.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewStateRequest.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewStateRequest.self, from: encoded)
+    }
+
+    @Test("RpcViewStateRequest variant 1 can be decoded and re-encoded")
+    func rpcViewStateRequestVariant1DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewStateRequest_Variant1.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewStateRequest.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewStateRequest.self, from: encoded)
+    }
+
+    @Test("RpcViewStateRequest variant 2 can be decoded and re-encoded")
+    func rpcViewStateRequestVariant2DecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewStateRequest_Variant2.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewStateRequest.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewStateRequest.self, from: encoded)
+    }
+
+    @Test("RpcViewStateResponse can be decoded from mock and re-encoded")
+    func rpcViewStateResponseDecodingAndEncoding() throws {
+        let data = try loadMockJSON("RpcViewStateResponse.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(RpcViewStateResponse.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(RpcViewStateResponse.self, from: encoded)
+    }
+
     @Test("RuntimeConfigView can be decoded from mock and re-encoded")
     func runtimeConfigViewDecodingAndEncoding() throws {
         let data = try loadMockJSON("RuntimeConfigView.json")
@@ -6799,6 +7864,21 @@ struct StandaloneTypesTests {
         _ = try decoder.decode(ShardLayout.self, from: encoded)
     }
 
+    @Test("ShardLayout variant 3 can be decoded and re-encoded")
+    func shardLayoutVariant3DecodingAndEncoding() throws {
+        let data = try loadMockJSON("ShardLayout_Variant3.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(ShardLayout.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(ShardLayout.self, from: encoded)
+    }
+
     @Test("ShardLayoutV0 can be decoded from mock and re-encoded")
     func shardLayoutV0DecodingAndEncoding() throws {
         let data = try loadMockJSON("ShardLayoutV0.json")
@@ -6842,6 +7922,21 @@ struct StandaloneTypesTests {
 
         // Test round-trip
         _ = try decoder.decode(ShardLayoutV2.self, from: encoded)
+    }
+
+    @Test("ShardLayoutV3 can be decoded from mock and re-encoded")
+    func shardLayoutV3DecodingAndEncoding() throws {
+        let data = try loadMockJSON("ShardLayoutV3.json")
+
+        // Test decoding
+        let decoded = try decoder.decode(ShardLayoutV3.self, from: data)
+
+        // Test encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Test round-trip
+        _ = try decoder.decode(ShardLayoutV3.self, from: encoded)
     }
 
     @Test("ShardUId can be decoded from mock and re-encoded")

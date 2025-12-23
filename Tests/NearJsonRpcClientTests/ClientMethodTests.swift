@@ -80,6 +80,106 @@ struct ClientMethodTests {
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
     }
 
+    @Test("EXPERIMENTAL_call_function method executes successfully with mock response")
+    func experimentalcallfunctionSuccess() async throws {
+        // Setup
+        let mockSession = createMockSession()
+        let client = NearJsonRpcClient(
+            baseURL: URL(string: "https://rpc.testnet.near.org")!,
+            session: mockSession,
+        )
+
+        // Load mock request data and extract params
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALCallFunction.json")
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let requestWrapper = try decoder.decode(JsonRpcRequestForEXPERIMENTALCallFunction.self, from: requestData)
+        let request = requestWrapper.params
+
+        // Load mock success response data
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcCallFunctionResponseAndRpcCallFunctionError_Success.json")
+        await setupMockSuccessResponse(with: responseData)
+
+        // Execute
+        let result = try await client.experimentalCallFunction(request)
+
+        // Verify
+        await verifyRequest(expectedMethod: "EXPERIMENTAL_call_function")
+        #expect(result != nil)
+    }
+
+    @Test("EXPERIMENTAL_call_function method handles error response correctly")
+    func experimentalcallfunctionError() async throws {
+        // Setup
+        let mockSession = createMockSession()
+        let client = NearJsonRpcClient(
+            baseURL: URL(string: "https://rpc.testnet.near.org")!,
+            session: mockSession,
+        )
+
+        // Load mock request data and extract params
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALCallFunction.json")
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let requestWrapper = try decoder.decode(JsonRpcRequestForEXPERIMENTALCallFunction.self, from: requestData)
+        let request = requestWrapper.params
+
+        // Load mock error response data
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcCallFunctionResponseAndRpcCallFunctionError_Error.json")
+        await setupMockErrorResponse(with: responseData)
+
+        // Execute & Verify
+        do {
+            _ = try await client.experimentalCallFunction(request)
+            Issue.record("Expected method to throw RPC error but it succeeded")
+        } catch is NearJsonRpcError {
+            // Expected to catch NearJsonRpcError (including rpcError case)
+            #expect(true)
+        } catch {
+            Issue.record("Expected NearJsonRpcError but got: \(error)")
+        }
+    }
+
+    @Test("EXPERIMENTAL_call_function method handles HTTP error correctly")
+    func experimentalcallfunctionHTTPError() async throws {
+        // Setup
+        let mockSession = createMockSession()
+        let client = NearJsonRpcClient(
+            baseURL: URL(string: "https://rpc.testnet.near.org")!,
+            session: mockSession,
+        )
+
+        // Load mock request data and extract params
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALCallFunction.json")
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let requestWrapper = try decoder.decode(JsonRpcRequestForEXPERIMENTALCallFunction.self, from: requestData)
+        let request = requestWrapper.params
+
+        // Setup HTTP error response
+        await setupMockHTTPError(statusCode: 500)
+
+        // Execute & Verify
+        do {
+            _ = try await client.experimentalCallFunction(request)
+            Issue.record("Expected method to throw HTTP error but it succeeded")
+        } catch let error as NearJsonRpcError {
+            switch error {
+            case let .httpError(statusCode):
+                #expect(statusCode == 500)
+            case .invalidResponse:
+                // Some methods might throw invalidResponse instead
+                #expect(true)
+            default:
+                Issue.record("Expected httpError but got: \(error)")
+            }
+        } catch {
+            Issue.record("Expected NearJsonRpcError but got: \(error)")
+        }
+    }
+
     @Test("EXPERIMENTAL_changes method executes successfully with mock response")
     func experimentalchangesSuccess() async throws {
         // Setup
@@ -1274,6 +1374,699 @@ struct ClientMethodTests {
         // Execute & Verify
         do {
             _ = try await client.experimentalValidatorsOrdered(request)
+            Issue.record("Expected method to throw HTTP error but it succeeded")
+        } catch let error as NearJsonRpcError {
+            switch error {
+            case let .httpError(statusCode):
+                #expect(statusCode == 500)
+            case .invalidResponse:
+                // Some methods might throw invalidResponse instead
+                #expect(true)
+            default:
+                Issue.record("Expected httpError but got: \(error)")
+            }
+        } catch {
+            Issue.record("Expected NearJsonRpcError but got: \(error)")
+        }
+    }
+
+    @Test("EXPERIMENTAL_view_access_key method executes successfully with mock response")
+    func experimentalviewaccesskeySuccess() async throws {
+        // Setup
+        let mockSession = createMockSession()
+        let client = NearJsonRpcClient(
+            baseURL: URL(string: "https://rpc.testnet.near.org")!,
+            session: mockSession,
+        )
+
+        // Load mock request data and extract params
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewAccessKey.json")
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let requestWrapper = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewAccessKey.self, from: requestData)
+        let request = requestWrapper.params
+
+        // Load mock success response data
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcViewAccessKeyResponseAndRpcViewAccessKeyError_Success.json")
+        await setupMockSuccessResponse(with: responseData)
+
+        // Execute
+        let result = try await client.experimentalViewAccessKey(request)
+
+        // Verify
+        await verifyRequest(expectedMethod: "EXPERIMENTAL_view_access_key")
+        #expect(result != nil)
+    }
+
+    @Test("EXPERIMENTAL_view_access_key method handles error response correctly")
+    func experimentalviewaccesskeyError() async throws {
+        // Setup
+        let mockSession = createMockSession()
+        let client = NearJsonRpcClient(
+            baseURL: URL(string: "https://rpc.testnet.near.org")!,
+            session: mockSession,
+        )
+
+        // Load mock request data and extract params
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewAccessKey.json")
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let requestWrapper = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewAccessKey.self, from: requestData)
+        let request = requestWrapper.params
+
+        // Load mock error response data
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcViewAccessKeyResponseAndRpcViewAccessKeyError_Error.json")
+        await setupMockErrorResponse(with: responseData)
+
+        // Execute & Verify
+        do {
+            _ = try await client.experimentalViewAccessKey(request)
+            Issue.record("Expected method to throw RPC error but it succeeded")
+        } catch is NearJsonRpcError {
+            // Expected to catch NearJsonRpcError (including rpcError case)
+            #expect(true)
+        } catch {
+            Issue.record("Expected NearJsonRpcError but got: \(error)")
+        }
+    }
+
+    @Test("EXPERIMENTAL_view_access_key method handles HTTP error correctly")
+    func experimentalviewaccesskeyHTTPError() async throws {
+        // Setup
+        let mockSession = createMockSession()
+        let client = NearJsonRpcClient(
+            baseURL: URL(string: "https://rpc.testnet.near.org")!,
+            session: mockSession,
+        )
+
+        // Load mock request data and extract params
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewAccessKey.json")
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let requestWrapper = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewAccessKey.self, from: requestData)
+        let request = requestWrapper.params
+
+        // Setup HTTP error response
+        await setupMockHTTPError(statusCode: 500)
+
+        // Execute & Verify
+        do {
+            _ = try await client.experimentalViewAccessKey(request)
+            Issue.record("Expected method to throw HTTP error but it succeeded")
+        } catch let error as NearJsonRpcError {
+            switch error {
+            case let .httpError(statusCode):
+                #expect(statusCode == 500)
+            case .invalidResponse:
+                // Some methods might throw invalidResponse instead
+                #expect(true)
+            default:
+                Issue.record("Expected httpError but got: \(error)")
+            }
+        } catch {
+            Issue.record("Expected NearJsonRpcError but got: \(error)")
+        }
+    }
+
+    @Test("EXPERIMENTAL_view_access_key_list method executes successfully with mock response")
+    func experimentalviewaccesskeylistSuccess() async throws {
+        // Setup
+        let mockSession = createMockSession()
+        let client = NearJsonRpcClient(
+            baseURL: URL(string: "https://rpc.testnet.near.org")!,
+            session: mockSession,
+        )
+
+        // Load mock request data and extract params
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewAccessKeyList.json")
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let requestWrapper = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewAccessKeyList.self, from: requestData)
+        let request = requestWrapper.params
+
+        // Load mock success response data
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcViewAccessKeyListResponseAndRpcViewAccessKeyListError_Success.json")
+        await setupMockSuccessResponse(with: responseData)
+
+        // Execute
+        let result = try await client.experimentalViewAccessKeyList(request)
+
+        // Verify
+        await verifyRequest(expectedMethod: "EXPERIMENTAL_view_access_key_list")
+        #expect(result != nil)
+    }
+
+    @Test("EXPERIMENTAL_view_access_key_list method handles error response correctly")
+    func experimentalviewaccesskeylistError() async throws {
+        // Setup
+        let mockSession = createMockSession()
+        let client = NearJsonRpcClient(
+            baseURL: URL(string: "https://rpc.testnet.near.org")!,
+            session: mockSession,
+        )
+
+        // Load mock request data and extract params
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewAccessKeyList.json")
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let requestWrapper = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewAccessKeyList.self, from: requestData)
+        let request = requestWrapper.params
+
+        // Load mock error response data
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcViewAccessKeyListResponseAndRpcViewAccessKeyListError_Error.json")
+        await setupMockErrorResponse(with: responseData)
+
+        // Execute & Verify
+        do {
+            _ = try await client.experimentalViewAccessKeyList(request)
+            Issue.record("Expected method to throw RPC error but it succeeded")
+        } catch is NearJsonRpcError {
+            // Expected to catch NearJsonRpcError (including rpcError case)
+            #expect(true)
+        } catch {
+            Issue.record("Expected NearJsonRpcError but got: \(error)")
+        }
+    }
+
+    @Test("EXPERIMENTAL_view_access_key_list method handles HTTP error correctly")
+    func experimentalviewaccesskeylistHTTPError() async throws {
+        // Setup
+        let mockSession = createMockSession()
+        let client = NearJsonRpcClient(
+            baseURL: URL(string: "https://rpc.testnet.near.org")!,
+            session: mockSession,
+        )
+
+        // Load mock request data and extract params
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewAccessKeyList.json")
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let requestWrapper = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewAccessKeyList.self, from: requestData)
+        let request = requestWrapper.params
+
+        // Setup HTTP error response
+        await setupMockHTTPError(statusCode: 500)
+
+        // Execute & Verify
+        do {
+            _ = try await client.experimentalViewAccessKeyList(request)
+            Issue.record("Expected method to throw HTTP error but it succeeded")
+        } catch let error as NearJsonRpcError {
+            switch error {
+            case let .httpError(statusCode):
+                #expect(statusCode == 500)
+            case .invalidResponse:
+                // Some methods might throw invalidResponse instead
+                #expect(true)
+            default:
+                Issue.record("Expected httpError but got: \(error)")
+            }
+        } catch {
+            Issue.record("Expected NearJsonRpcError but got: \(error)")
+        }
+    }
+
+    @Test("EXPERIMENTAL_view_account method executes successfully with mock response")
+    func experimentalviewaccountSuccess() async throws {
+        // Setup
+        let mockSession = createMockSession()
+        let client = NearJsonRpcClient(
+            baseURL: URL(string: "https://rpc.testnet.near.org")!,
+            session: mockSession,
+        )
+
+        // Load mock request data and extract params
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewAccount.json")
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let requestWrapper = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewAccount.self, from: requestData)
+        let request = requestWrapper.params
+
+        // Load mock success response data
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcViewAccountResponseAndRpcViewAccountError_Success.json")
+        await setupMockSuccessResponse(with: responseData)
+
+        // Execute
+        let result = try await client.experimentalViewAccount(request)
+
+        // Verify
+        await verifyRequest(expectedMethod: "EXPERIMENTAL_view_account")
+        #expect(result != nil)
+    }
+
+    @Test("EXPERIMENTAL_view_account method handles error response correctly")
+    func experimentalviewaccountError() async throws {
+        // Setup
+        let mockSession = createMockSession()
+        let client = NearJsonRpcClient(
+            baseURL: URL(string: "https://rpc.testnet.near.org")!,
+            session: mockSession,
+        )
+
+        // Load mock request data and extract params
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewAccount.json")
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let requestWrapper = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewAccount.self, from: requestData)
+        let request = requestWrapper.params
+
+        // Load mock error response data
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcViewAccountResponseAndRpcViewAccountError_Error.json")
+        await setupMockErrorResponse(with: responseData)
+
+        // Execute & Verify
+        do {
+            _ = try await client.experimentalViewAccount(request)
+            Issue.record("Expected method to throw RPC error but it succeeded")
+        } catch is NearJsonRpcError {
+            // Expected to catch NearJsonRpcError (including rpcError case)
+            #expect(true)
+        } catch {
+            Issue.record("Expected NearJsonRpcError but got: \(error)")
+        }
+    }
+
+    @Test("EXPERIMENTAL_view_account method handles HTTP error correctly")
+    func experimentalviewaccountHTTPError() async throws {
+        // Setup
+        let mockSession = createMockSession()
+        let client = NearJsonRpcClient(
+            baseURL: URL(string: "https://rpc.testnet.near.org")!,
+            session: mockSession,
+        )
+
+        // Load mock request data and extract params
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewAccount.json")
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let requestWrapper = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewAccount.self, from: requestData)
+        let request = requestWrapper.params
+
+        // Setup HTTP error response
+        await setupMockHTTPError(statusCode: 500)
+
+        // Execute & Verify
+        do {
+            _ = try await client.experimentalViewAccount(request)
+            Issue.record("Expected method to throw HTTP error but it succeeded")
+        } catch let error as NearJsonRpcError {
+            switch error {
+            case let .httpError(statusCode):
+                #expect(statusCode == 500)
+            case .invalidResponse:
+                // Some methods might throw invalidResponse instead
+                #expect(true)
+            default:
+                Issue.record("Expected httpError but got: \(error)")
+            }
+        } catch {
+            Issue.record("Expected NearJsonRpcError but got: \(error)")
+        }
+    }
+
+    @Test("EXPERIMENTAL_view_code method executes successfully with mock response")
+    func experimentalviewcodeSuccess() async throws {
+        // Setup
+        let mockSession = createMockSession()
+        let client = NearJsonRpcClient(
+            baseURL: URL(string: "https://rpc.testnet.near.org")!,
+            session: mockSession,
+        )
+
+        // Load mock request data and extract params
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewCode.json")
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let requestWrapper = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewCode.self, from: requestData)
+        let request = requestWrapper.params
+
+        // Load mock success response data
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcViewCodeResponseAndRpcViewCodeError_Success.json")
+        await setupMockSuccessResponse(with: responseData)
+
+        // Execute
+        let result = try await client.experimentalViewCode(request)
+
+        // Verify
+        await verifyRequest(expectedMethod: "EXPERIMENTAL_view_code")
+        #expect(result != nil)
+    }
+
+    @Test("EXPERIMENTAL_view_code method handles error response correctly")
+    func experimentalviewcodeError() async throws {
+        // Setup
+        let mockSession = createMockSession()
+        let client = NearJsonRpcClient(
+            baseURL: URL(string: "https://rpc.testnet.near.org")!,
+            session: mockSession,
+        )
+
+        // Load mock request data and extract params
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewCode.json")
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let requestWrapper = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewCode.self, from: requestData)
+        let request = requestWrapper.params
+
+        // Load mock error response data
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcViewCodeResponseAndRpcViewCodeError_Error.json")
+        await setupMockErrorResponse(with: responseData)
+
+        // Execute & Verify
+        do {
+            _ = try await client.experimentalViewCode(request)
+            Issue.record("Expected method to throw RPC error but it succeeded")
+        } catch is NearJsonRpcError {
+            // Expected to catch NearJsonRpcError (including rpcError case)
+            #expect(true)
+        } catch {
+            Issue.record("Expected NearJsonRpcError but got: \(error)")
+        }
+    }
+
+    @Test("EXPERIMENTAL_view_code method handles HTTP error correctly")
+    func experimentalviewcodeHTTPError() async throws {
+        // Setup
+        let mockSession = createMockSession()
+        let client = NearJsonRpcClient(
+            baseURL: URL(string: "https://rpc.testnet.near.org")!,
+            session: mockSession,
+        )
+
+        // Load mock request data and extract params
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewCode.json")
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let requestWrapper = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewCode.self, from: requestData)
+        let request = requestWrapper.params
+
+        // Setup HTTP error response
+        await setupMockHTTPError(statusCode: 500)
+
+        // Execute & Verify
+        do {
+            _ = try await client.experimentalViewCode(request)
+            Issue.record("Expected method to throw HTTP error but it succeeded")
+        } catch let error as NearJsonRpcError {
+            switch error {
+            case let .httpError(statusCode):
+                #expect(statusCode == 500)
+            case .invalidResponse:
+                // Some methods might throw invalidResponse instead
+                #expect(true)
+            default:
+                Issue.record("Expected httpError but got: \(error)")
+            }
+        } catch {
+            Issue.record("Expected NearJsonRpcError but got: \(error)")
+        }
+    }
+
+    @Test("EXPERIMENTAL_view_gas_key method executes successfully with mock response")
+    func experimentalviewgaskeySuccess() async throws {
+        // Setup
+        let mockSession = createMockSession()
+        let client = NearJsonRpcClient(
+            baseURL: URL(string: "https://rpc.testnet.near.org")!,
+            session: mockSession,
+        )
+
+        // Load mock request data and extract params
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewGasKey.json")
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let requestWrapper = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewGasKey.self, from: requestData)
+        let request = requestWrapper.params
+
+        // Load mock success response data
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcViewGasKeyResponseAndRpcViewGasKeyError_Success.json")
+        await setupMockSuccessResponse(with: responseData)
+
+        // Execute
+        let result = try await client.experimentalViewGasKey(request)
+
+        // Verify
+        await verifyRequest(expectedMethod: "EXPERIMENTAL_view_gas_key")
+        #expect(result != nil)
+    }
+
+    @Test("EXPERIMENTAL_view_gas_key method handles error response correctly")
+    func experimentalviewgaskeyError() async throws {
+        // Setup
+        let mockSession = createMockSession()
+        let client = NearJsonRpcClient(
+            baseURL: URL(string: "https://rpc.testnet.near.org")!,
+            session: mockSession,
+        )
+
+        // Load mock request data and extract params
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewGasKey.json")
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let requestWrapper = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewGasKey.self, from: requestData)
+        let request = requestWrapper.params
+
+        // Load mock error response data
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcViewGasKeyResponseAndRpcViewGasKeyError_Error.json")
+        await setupMockErrorResponse(with: responseData)
+
+        // Execute & Verify
+        do {
+            _ = try await client.experimentalViewGasKey(request)
+            Issue.record("Expected method to throw RPC error but it succeeded")
+        } catch is NearJsonRpcError {
+            // Expected to catch NearJsonRpcError (including rpcError case)
+            #expect(true)
+        } catch {
+            Issue.record("Expected NearJsonRpcError but got: \(error)")
+        }
+    }
+
+    @Test("EXPERIMENTAL_view_gas_key method handles HTTP error correctly")
+    func experimentalviewgaskeyHTTPError() async throws {
+        // Setup
+        let mockSession = createMockSession()
+        let client = NearJsonRpcClient(
+            baseURL: URL(string: "https://rpc.testnet.near.org")!,
+            session: mockSession,
+        )
+
+        // Load mock request data and extract params
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewGasKey.json")
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let requestWrapper = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewGasKey.self, from: requestData)
+        let request = requestWrapper.params
+
+        // Setup HTTP error response
+        await setupMockHTTPError(statusCode: 500)
+
+        // Execute & Verify
+        do {
+            _ = try await client.experimentalViewGasKey(request)
+            Issue.record("Expected method to throw HTTP error but it succeeded")
+        } catch let error as NearJsonRpcError {
+            switch error {
+            case let .httpError(statusCode):
+                #expect(statusCode == 500)
+            case .invalidResponse:
+                // Some methods might throw invalidResponse instead
+                #expect(true)
+            default:
+                Issue.record("Expected httpError but got: \(error)")
+            }
+        } catch {
+            Issue.record("Expected NearJsonRpcError but got: \(error)")
+        }
+    }
+
+    @Test("EXPERIMENTAL_view_gas_key_list method executes successfully with mock response")
+    func experimentalviewgaskeylistSuccess() async throws {
+        // Setup
+        let mockSession = createMockSession()
+        let client = NearJsonRpcClient(
+            baseURL: URL(string: "https://rpc.testnet.near.org")!,
+            session: mockSession,
+        )
+
+        // Load mock request data and extract params
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewGasKeyList.json")
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let requestWrapper = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewGasKeyList.self, from: requestData)
+        let request = requestWrapper.params
+
+        // Load mock success response data
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcViewGasKeyListResponseAndRpcViewGasKeyListError_Success.json")
+        await setupMockSuccessResponse(with: responseData)
+
+        // Execute
+        let result = try await client.experimentalViewGasKeyList(request)
+
+        // Verify
+        await verifyRequest(expectedMethod: "EXPERIMENTAL_view_gas_key_list")
+        #expect(result != nil)
+    }
+
+    @Test("EXPERIMENTAL_view_gas_key_list method handles error response correctly")
+    func experimentalviewgaskeylistError() async throws {
+        // Setup
+        let mockSession = createMockSession()
+        let client = NearJsonRpcClient(
+            baseURL: URL(string: "https://rpc.testnet.near.org")!,
+            session: mockSession,
+        )
+
+        // Load mock request data and extract params
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewGasKeyList.json")
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let requestWrapper = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewGasKeyList.self, from: requestData)
+        let request = requestWrapper.params
+
+        // Load mock error response data
+        let responseData =
+            try loadMockJSON("JsonRpcResponseForRpcViewGasKeyListResponseAndRpcViewGasKeyListError_Error.json")
+        await setupMockErrorResponse(with: responseData)
+
+        // Execute & Verify
+        do {
+            _ = try await client.experimentalViewGasKeyList(request)
+            Issue.record("Expected method to throw RPC error but it succeeded")
+        } catch is NearJsonRpcError {
+            // Expected to catch NearJsonRpcError (including rpcError case)
+            #expect(true)
+        } catch {
+            Issue.record("Expected NearJsonRpcError but got: \(error)")
+        }
+    }
+
+    @Test("EXPERIMENTAL_view_gas_key_list method handles HTTP error correctly")
+    func experimentalviewgaskeylistHTTPError() async throws {
+        // Setup
+        let mockSession = createMockSession()
+        let client = NearJsonRpcClient(
+            baseURL: URL(string: "https://rpc.testnet.near.org")!,
+            session: mockSession,
+        )
+
+        // Load mock request data and extract params
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewGasKeyList.json")
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let requestWrapper = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewGasKeyList.self, from: requestData)
+        let request = requestWrapper.params
+
+        // Setup HTTP error response
+        await setupMockHTTPError(statusCode: 500)
+
+        // Execute & Verify
+        do {
+            _ = try await client.experimentalViewGasKeyList(request)
+            Issue.record("Expected method to throw HTTP error but it succeeded")
+        } catch let error as NearJsonRpcError {
+            switch error {
+            case let .httpError(statusCode):
+                #expect(statusCode == 500)
+            case .invalidResponse:
+                // Some methods might throw invalidResponse instead
+                #expect(true)
+            default:
+                Issue.record("Expected httpError but got: \(error)")
+            }
+        } catch {
+            Issue.record("Expected NearJsonRpcError but got: \(error)")
+        }
+    }
+
+    @Test("EXPERIMENTAL_view_state method executes successfully with mock response")
+    func experimentalviewstateSuccess() async throws {
+        // Setup
+        let mockSession = createMockSession()
+        let client = NearJsonRpcClient(
+            baseURL: URL(string: "https://rpc.testnet.near.org")!,
+            session: mockSession,
+        )
+
+        // Load mock request data and extract params
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewState.json")
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let requestWrapper = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewState.self, from: requestData)
+        let request = requestWrapper.params
+
+        // Load mock success response data
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcViewStateResponseAndRpcViewStateError_Success.json")
+        await setupMockSuccessResponse(with: responseData)
+
+        // Execute
+        let result = try await client.experimentalViewState(request)
+
+        // Verify
+        await verifyRequest(expectedMethod: "EXPERIMENTAL_view_state")
+        #expect(result != nil)
+    }
+
+    @Test("EXPERIMENTAL_view_state method handles error response correctly")
+    func experimentalviewstateError() async throws {
+        // Setup
+        let mockSession = createMockSession()
+        let client = NearJsonRpcClient(
+            baseURL: URL(string: "https://rpc.testnet.near.org")!,
+            session: mockSession,
+        )
+
+        // Load mock request data and extract params
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewState.json")
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let requestWrapper = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewState.self, from: requestData)
+        let request = requestWrapper.params
+
+        // Load mock error response data
+        let responseData = try loadMockJSON("JsonRpcResponseForRpcViewStateResponseAndRpcViewStateError_Error.json")
+        await setupMockErrorResponse(with: responseData)
+
+        // Execute & Verify
+        do {
+            _ = try await client.experimentalViewState(request)
+            Issue.record("Expected method to throw RPC error but it succeeded")
+        } catch is NearJsonRpcError {
+            // Expected to catch NearJsonRpcError (including rpcError case)
+            #expect(true)
+        } catch {
+            Issue.record("Expected NearJsonRpcError but got: \(error)")
+        }
+    }
+
+    @Test("EXPERIMENTAL_view_state method handles HTTP error correctly")
+    func experimentalviewstateHTTPError() async throws {
+        // Setup
+        let mockSession = createMockSession()
+        let client = NearJsonRpcClient(
+            baseURL: URL(string: "https://rpc.testnet.near.org")!,
+            session: mockSession,
+        )
+
+        // Load mock request data and extract params
+        let requestData = try loadMockJSON("JsonRpcRequestForEXPERIMENTALViewState.json")
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let requestWrapper = try decoder.decode(JsonRpcRequestForEXPERIMENTALViewState.self, from: requestData)
+        let request = requestWrapper.params
+
+        // Setup HTTP error response
+        await setupMockHTTPError(statusCode: 500)
+
+        // Execute & Verify
+        do {
+            _ = try await client.experimentalViewState(request)
             Issue.record("Expected method to throw HTTP error but it succeeded")
         } catch let error as NearJsonRpcError {
             switch error {
