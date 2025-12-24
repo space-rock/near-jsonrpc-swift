@@ -1744,6 +1744,21 @@ struct EnhancedCoverageTests {
         #expect(!reencoded.isEmpty)
     }
 
+    @Test("DynamicReshardingConfigView decoded instance is valid")
+    func dynamicReshardingConfigViewValidity() throws {
+        let data = try loadMockJSON("DynamicReshardingConfigView.json")
+        let decoded = try decoder.decode(DynamicReshardingConfigView.self, from: data)
+
+        // Verify the decoded instance is valid by re-encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Verify round-trip
+        let redecoded = try decoder.decode(DynamicReshardingConfigView.self, from: encoded)
+        let reencoded = try encoder.encode(redecoded)
+        #expect(!reencoded.isEmpty)
+    }
+
     @Test("EpochSyncConfig decoded instance is valid")
     func epochSyncConfigValidity() throws {
         let data = try loadMockJSON("EpochSyncConfig.json")
@@ -3970,6 +3985,147 @@ struct EnhancedCoverageTests {
         #expect(!reencoded.isEmpty)
     }
 
+    @Test("RpcCallFunctionError variant 0 encoding stability")
+    func rpcCallFunctionErrorVariant0EncodingStability() throws {
+        let data = try loadMockJSON("RpcCallFunctionError_Variant0.json")
+        let decoded = try decoder.decode(RpcCallFunctionError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcCallFunctionError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcCallFunctionError variant 1 encoding stability")
+    func rpcCallFunctionErrorVariant1EncodingStability() throws {
+        let data = try loadMockJSON("RpcCallFunctionError_Variant1.json")
+        let decoded = try decoder.decode(RpcCallFunctionError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcCallFunctionError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcCallFunctionError variant 2 encoding stability")
+    func rpcCallFunctionErrorVariant2EncodingStability() throws {
+        let data = try loadMockJSON("RpcCallFunctionError_Variant2.json")
+        let decoded = try decoder.decode(RpcCallFunctionError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcCallFunctionError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcCallFunctionError variant 3 encoding stability")
+    func rpcCallFunctionErrorVariant3EncodingStability() throws {
+        let data = try loadMockJSON("RpcCallFunctionError_Variant3.json")
+        let decoded = try decoder.decode(RpcCallFunctionError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcCallFunctionError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcCallFunctionError variant 4 encoding stability")
+    func rpcCallFunctionErrorVariant4EncodingStability() throws {
+        let data = try loadMockJSON("RpcCallFunctionError_Variant4.json")
+        let decoded = try decoder.decode(RpcCallFunctionError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcCallFunctionError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcCallFunctionError variant 5 encoding stability")
+    func rpcCallFunctionErrorVariant5EncodingStability() throws {
+        let data = try loadMockJSON("RpcCallFunctionError_Variant5.json")
+        let decoded = try decoder.decode(RpcCallFunctionError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcCallFunctionError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcCallFunctionRequest variant 0 encoding stability")
+    func rpcCallFunctionRequestVariant0EncodingStability() throws {
+        let data = try loadMockJSON("RpcCallFunctionRequest_Variant0.json")
+        let decoded = try decoder.decode(RpcCallFunctionRequest.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcCallFunctionRequest.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcCallFunctionRequest variant 1 encoding stability")
+    func rpcCallFunctionRequestVariant1EncodingStability() throws {
+        let data = try loadMockJSON("RpcCallFunctionRequest_Variant1.json")
+        let decoded = try decoder.decode(RpcCallFunctionRequest.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcCallFunctionRequest.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcCallFunctionRequest variant 2 encoding stability")
+    func rpcCallFunctionRequestVariant2EncodingStability() throws {
+        let data = try loadMockJSON("RpcCallFunctionRequest_Variant2.json")
+        let decoded = try decoder.decode(RpcCallFunctionRequest.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcCallFunctionRequest.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcCallFunctionResponse decoded instance is valid")
+    func rpcCallFunctionResponseValidity() throws {
+        let data = try loadMockJSON("RpcCallFunctionResponse.json")
+        let decoded = try decoder.decode(RpcCallFunctionResponse.self, from: data)
+
+        // Verify the decoded instance is valid by re-encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Verify round-trip
+        let redecoded = try decoder.decode(RpcCallFunctionResponse.self, from: encoded)
+        let reencoded = try encoder.encode(redecoded)
+        #expect(!reencoded.isEmpty)
+    }
+
     @Test("RpcChunkError variant 0 encoding stability")
     func rpcChunkErrorVariant0EncodingStability() throws {
         let data = try loadMockJSON("RpcChunkError_Variant0.json")
@@ -6163,6 +6319,853 @@ struct EnhancedCoverageTests {
         #expect(!reencoded.isEmpty)
     }
 
+    @Test("RpcViewAccessKeyError variant 0 encoding stability")
+    func rpcViewAccessKeyErrorVariant0EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewAccessKeyError_Variant0.json")
+        let decoded = try decoder.decode(RpcViewAccessKeyError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewAccessKeyError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewAccessKeyError variant 1 encoding stability")
+    func rpcViewAccessKeyErrorVariant1EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewAccessKeyError_Variant1.json")
+        let decoded = try decoder.decode(RpcViewAccessKeyError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewAccessKeyError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewAccessKeyError variant 2 encoding stability")
+    func rpcViewAccessKeyErrorVariant2EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewAccessKeyError_Variant2.json")
+        let decoded = try decoder.decode(RpcViewAccessKeyError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewAccessKeyError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewAccessKeyError variant 3 encoding stability")
+    func rpcViewAccessKeyErrorVariant3EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewAccessKeyError_Variant3.json")
+        let decoded = try decoder.decode(RpcViewAccessKeyError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewAccessKeyError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewAccessKeyError variant 4 encoding stability")
+    func rpcViewAccessKeyErrorVariant4EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewAccessKeyError_Variant4.json")
+        let decoded = try decoder.decode(RpcViewAccessKeyError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewAccessKeyError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewAccessKeyListError variant 0 encoding stability")
+    func rpcViewAccessKeyListErrorVariant0EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewAccessKeyListError_Variant0.json")
+        let decoded = try decoder.decode(RpcViewAccessKeyListError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewAccessKeyListError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewAccessKeyListError variant 1 encoding stability")
+    func rpcViewAccessKeyListErrorVariant1EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewAccessKeyListError_Variant1.json")
+        let decoded = try decoder.decode(RpcViewAccessKeyListError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewAccessKeyListError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewAccessKeyListError variant 2 encoding stability")
+    func rpcViewAccessKeyListErrorVariant2EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewAccessKeyListError_Variant2.json")
+        let decoded = try decoder.decode(RpcViewAccessKeyListError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewAccessKeyListError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewAccessKeyListError variant 3 encoding stability")
+    func rpcViewAccessKeyListErrorVariant3EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewAccessKeyListError_Variant3.json")
+        let decoded = try decoder.decode(RpcViewAccessKeyListError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewAccessKeyListError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewAccessKeyListRequest variant 0 encoding stability")
+    func rpcViewAccessKeyListRequestVariant0EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewAccessKeyListRequest_Variant0.json")
+        let decoded = try decoder.decode(RpcViewAccessKeyListRequest.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewAccessKeyListRequest.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewAccessKeyListRequest variant 1 encoding stability")
+    func rpcViewAccessKeyListRequestVariant1EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewAccessKeyListRequest_Variant1.json")
+        let decoded = try decoder.decode(RpcViewAccessKeyListRequest.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewAccessKeyListRequest.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewAccessKeyListRequest variant 2 encoding stability")
+    func rpcViewAccessKeyListRequestVariant2EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewAccessKeyListRequest_Variant2.json")
+        let decoded = try decoder.decode(RpcViewAccessKeyListRequest.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewAccessKeyListRequest.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewAccessKeyListResponse decoded instance is valid")
+    func rpcViewAccessKeyListResponseValidity() throws {
+        let data = try loadMockJSON("RpcViewAccessKeyListResponse.json")
+        let decoded = try decoder.decode(RpcViewAccessKeyListResponse.self, from: data)
+
+        // Verify the decoded instance is valid by re-encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Verify round-trip
+        let redecoded = try decoder.decode(RpcViewAccessKeyListResponse.self, from: encoded)
+        let reencoded = try encoder.encode(redecoded)
+        #expect(!reencoded.isEmpty)
+    }
+
+    @Test("RpcViewAccessKeyRequest variant 0 encoding stability")
+    func rpcViewAccessKeyRequestVariant0EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewAccessKeyRequest_Variant0.json")
+        let decoded = try decoder.decode(RpcViewAccessKeyRequest.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewAccessKeyRequest.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewAccessKeyRequest variant 1 encoding stability")
+    func rpcViewAccessKeyRequestVariant1EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewAccessKeyRequest_Variant1.json")
+        let decoded = try decoder.decode(RpcViewAccessKeyRequest.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewAccessKeyRequest.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewAccessKeyRequest variant 2 encoding stability")
+    func rpcViewAccessKeyRequestVariant2EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewAccessKeyRequest_Variant2.json")
+        let decoded = try decoder.decode(RpcViewAccessKeyRequest.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewAccessKeyRequest.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewAccessKeyResponse decoded instance is valid")
+    func rpcViewAccessKeyResponseValidity() throws {
+        let data = try loadMockJSON("RpcViewAccessKeyResponse.json")
+        let decoded = try decoder.decode(RpcViewAccessKeyResponse.self, from: data)
+
+        // Verify the decoded instance is valid by re-encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Verify round-trip
+        let redecoded = try decoder.decode(RpcViewAccessKeyResponse.self, from: encoded)
+        let reencoded = try encoder.encode(redecoded)
+        #expect(!reencoded.isEmpty)
+    }
+
+    @Test("RpcViewAccountError variant 0 encoding stability")
+    func rpcViewAccountErrorVariant0EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewAccountError_Variant0.json")
+        let decoded = try decoder.decode(RpcViewAccountError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewAccountError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewAccountError variant 1 encoding stability")
+    func rpcViewAccountErrorVariant1EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewAccountError_Variant1.json")
+        let decoded = try decoder.decode(RpcViewAccountError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewAccountError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewAccountError variant 2 encoding stability")
+    func rpcViewAccountErrorVariant2EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewAccountError_Variant2.json")
+        let decoded = try decoder.decode(RpcViewAccountError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewAccountError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewAccountError variant 3 encoding stability")
+    func rpcViewAccountErrorVariant3EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewAccountError_Variant3.json")
+        let decoded = try decoder.decode(RpcViewAccountError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewAccountError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewAccountRequest variant 0 encoding stability")
+    func rpcViewAccountRequestVariant0EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewAccountRequest_Variant0.json")
+        let decoded = try decoder.decode(RpcViewAccountRequest.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewAccountRequest.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewAccountRequest variant 1 encoding stability")
+    func rpcViewAccountRequestVariant1EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewAccountRequest_Variant1.json")
+        let decoded = try decoder.decode(RpcViewAccountRequest.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewAccountRequest.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewAccountRequest variant 2 encoding stability")
+    func rpcViewAccountRequestVariant2EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewAccountRequest_Variant2.json")
+        let decoded = try decoder.decode(RpcViewAccountRequest.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewAccountRequest.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewAccountResponse decoded instance is valid")
+    func rpcViewAccountResponseValidity() throws {
+        let data = try loadMockJSON("RpcViewAccountResponse.json")
+        let decoded = try decoder.decode(RpcViewAccountResponse.self, from: data)
+
+        // Verify the decoded instance is valid by re-encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Verify round-trip
+        let redecoded = try decoder.decode(RpcViewAccountResponse.self, from: encoded)
+        let reencoded = try encoder.encode(redecoded)
+        #expect(!reencoded.isEmpty)
+    }
+
+    @Test("RpcViewCodeError variant 0 encoding stability")
+    func rpcViewCodeErrorVariant0EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewCodeError_Variant0.json")
+        let decoded = try decoder.decode(RpcViewCodeError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewCodeError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewCodeError variant 1 encoding stability")
+    func rpcViewCodeErrorVariant1EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewCodeError_Variant1.json")
+        let decoded = try decoder.decode(RpcViewCodeError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewCodeError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewCodeError variant 2 encoding stability")
+    func rpcViewCodeErrorVariant2EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewCodeError_Variant2.json")
+        let decoded = try decoder.decode(RpcViewCodeError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewCodeError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewCodeError variant 3 encoding stability")
+    func rpcViewCodeErrorVariant3EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewCodeError_Variant3.json")
+        let decoded = try decoder.decode(RpcViewCodeError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewCodeError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewCodeError variant 4 encoding stability")
+    func rpcViewCodeErrorVariant4EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewCodeError_Variant4.json")
+        let decoded = try decoder.decode(RpcViewCodeError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewCodeError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewCodeRequest variant 0 encoding stability")
+    func rpcViewCodeRequestVariant0EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewCodeRequest_Variant0.json")
+        let decoded = try decoder.decode(RpcViewCodeRequest.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewCodeRequest.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewCodeRequest variant 1 encoding stability")
+    func rpcViewCodeRequestVariant1EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewCodeRequest_Variant1.json")
+        let decoded = try decoder.decode(RpcViewCodeRequest.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewCodeRequest.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewCodeRequest variant 2 encoding stability")
+    func rpcViewCodeRequestVariant2EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewCodeRequest_Variant2.json")
+        let decoded = try decoder.decode(RpcViewCodeRequest.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewCodeRequest.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewCodeResponse decoded instance is valid")
+    func rpcViewCodeResponseValidity() throws {
+        let data = try loadMockJSON("RpcViewCodeResponse.json")
+        let decoded = try decoder.decode(RpcViewCodeResponse.self, from: data)
+
+        // Verify the decoded instance is valid by re-encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Verify round-trip
+        let redecoded = try decoder.decode(RpcViewCodeResponse.self, from: encoded)
+        let reencoded = try encoder.encode(redecoded)
+        #expect(!reencoded.isEmpty)
+    }
+
+    @Test("RpcViewGasKeyError variant 0 encoding stability")
+    func rpcViewGasKeyErrorVariant0EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewGasKeyError_Variant0.json")
+        let decoded = try decoder.decode(RpcViewGasKeyError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewGasKeyError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewGasKeyError variant 1 encoding stability")
+    func rpcViewGasKeyErrorVariant1EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewGasKeyError_Variant1.json")
+        let decoded = try decoder.decode(RpcViewGasKeyError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewGasKeyError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewGasKeyError variant 2 encoding stability")
+    func rpcViewGasKeyErrorVariant2EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewGasKeyError_Variant2.json")
+        let decoded = try decoder.decode(RpcViewGasKeyError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewGasKeyError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewGasKeyError variant 3 encoding stability")
+    func rpcViewGasKeyErrorVariant3EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewGasKeyError_Variant3.json")
+        let decoded = try decoder.decode(RpcViewGasKeyError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewGasKeyError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewGasKeyError variant 4 encoding stability")
+    func rpcViewGasKeyErrorVariant4EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewGasKeyError_Variant4.json")
+        let decoded = try decoder.decode(RpcViewGasKeyError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewGasKeyError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewGasKeyListError variant 0 encoding stability")
+    func rpcViewGasKeyListErrorVariant0EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewGasKeyListError_Variant0.json")
+        let decoded = try decoder.decode(RpcViewGasKeyListError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewGasKeyListError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewGasKeyListError variant 1 encoding stability")
+    func rpcViewGasKeyListErrorVariant1EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewGasKeyListError_Variant1.json")
+        let decoded = try decoder.decode(RpcViewGasKeyListError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewGasKeyListError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewGasKeyListError variant 2 encoding stability")
+    func rpcViewGasKeyListErrorVariant2EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewGasKeyListError_Variant2.json")
+        let decoded = try decoder.decode(RpcViewGasKeyListError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewGasKeyListError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewGasKeyListError variant 3 encoding stability")
+    func rpcViewGasKeyListErrorVariant3EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewGasKeyListError_Variant3.json")
+        let decoded = try decoder.decode(RpcViewGasKeyListError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewGasKeyListError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewGasKeyListRequest variant 0 encoding stability")
+    func rpcViewGasKeyListRequestVariant0EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewGasKeyListRequest_Variant0.json")
+        let decoded = try decoder.decode(RpcViewGasKeyListRequest.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewGasKeyListRequest.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewGasKeyListRequest variant 1 encoding stability")
+    func rpcViewGasKeyListRequestVariant1EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewGasKeyListRequest_Variant1.json")
+        let decoded = try decoder.decode(RpcViewGasKeyListRequest.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewGasKeyListRequest.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewGasKeyListRequest variant 2 encoding stability")
+    func rpcViewGasKeyListRequestVariant2EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewGasKeyListRequest_Variant2.json")
+        let decoded = try decoder.decode(RpcViewGasKeyListRequest.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewGasKeyListRequest.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewGasKeyListResponse decoded instance is valid")
+    func rpcViewGasKeyListResponseValidity() throws {
+        let data = try loadMockJSON("RpcViewGasKeyListResponse.json")
+        let decoded = try decoder.decode(RpcViewGasKeyListResponse.self, from: data)
+
+        // Verify the decoded instance is valid by re-encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Verify round-trip
+        let redecoded = try decoder.decode(RpcViewGasKeyListResponse.self, from: encoded)
+        let reencoded = try encoder.encode(redecoded)
+        #expect(!reencoded.isEmpty)
+    }
+
+    @Test("RpcViewGasKeyRequest variant 0 encoding stability")
+    func rpcViewGasKeyRequestVariant0EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewGasKeyRequest_Variant0.json")
+        let decoded = try decoder.decode(RpcViewGasKeyRequest.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewGasKeyRequest.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewGasKeyRequest variant 1 encoding stability")
+    func rpcViewGasKeyRequestVariant1EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewGasKeyRequest_Variant1.json")
+        let decoded = try decoder.decode(RpcViewGasKeyRequest.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewGasKeyRequest.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewGasKeyRequest variant 2 encoding stability")
+    func rpcViewGasKeyRequestVariant2EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewGasKeyRequest_Variant2.json")
+        let decoded = try decoder.decode(RpcViewGasKeyRequest.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewGasKeyRequest.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewGasKeyResponse decoded instance is valid")
+    func rpcViewGasKeyResponseValidity() throws {
+        let data = try loadMockJSON("RpcViewGasKeyResponse.json")
+        let decoded = try decoder.decode(RpcViewGasKeyResponse.self, from: data)
+
+        // Verify the decoded instance is valid by re-encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Verify round-trip
+        let redecoded = try decoder.decode(RpcViewGasKeyResponse.self, from: encoded)
+        let reencoded = try encoder.encode(redecoded)
+        #expect(!reencoded.isEmpty)
+    }
+
+    @Test("RpcViewStateError variant 0 encoding stability")
+    func rpcViewStateErrorVariant0EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewStateError_Variant0.json")
+        let decoded = try decoder.decode(RpcViewStateError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewStateError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewStateError variant 1 encoding stability")
+    func rpcViewStateErrorVariant1EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewStateError_Variant1.json")
+        let decoded = try decoder.decode(RpcViewStateError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewStateError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewStateError variant 2 encoding stability")
+    func rpcViewStateErrorVariant2EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewStateError_Variant2.json")
+        let decoded = try decoder.decode(RpcViewStateError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewStateError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewStateError variant 3 encoding stability")
+    func rpcViewStateErrorVariant3EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewStateError_Variant3.json")
+        let decoded = try decoder.decode(RpcViewStateError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewStateError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewStateError variant 4 encoding stability")
+    func rpcViewStateErrorVariant4EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewStateError_Variant4.json")
+        let decoded = try decoder.decode(RpcViewStateError.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewStateError.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewStateRequest variant 0 encoding stability")
+    func rpcViewStateRequestVariant0EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewStateRequest_Variant0.json")
+        let decoded = try decoder.decode(RpcViewStateRequest.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewStateRequest.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewStateRequest variant 1 encoding stability")
+    func rpcViewStateRequestVariant1EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewStateRequest_Variant1.json")
+        let decoded = try decoder.decode(RpcViewStateRequest.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewStateRequest.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewStateRequest variant 2 encoding stability")
+    func rpcViewStateRequestVariant2EncodingStability() throws {
+        let data = try loadMockJSON("RpcViewStateRequest_Variant2.json")
+        let decoded = try decoder.decode(RpcViewStateRequest.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(RpcViewStateRequest.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
+    @Test("RpcViewStateResponse decoded instance is valid")
+    func rpcViewStateResponseValidity() throws {
+        let data = try loadMockJSON("RpcViewStateResponse.json")
+        let decoded = try decoder.decode(RpcViewStateResponse.self, from: data)
+
+        // Verify the decoded instance is valid by re-encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Verify round-trip
+        let redecoded = try decoder.decode(RpcViewStateResponse.self, from: encoded)
+        let reencoded = try encoder.encode(redecoded)
+        #expect(!reencoded.isEmpty)
+    }
+
     @Test("RuntimeConfigView decoded instance is valid")
     func runtimeConfigViewValidity() throws {
         let data = try loadMockJSON("RuntimeConfigView.json")
@@ -6235,6 +7238,20 @@ struct EnhancedCoverageTests {
         #expect(!encoded2.isEmpty)
     }
 
+    @Test("ShardLayout variant 3 encoding stability")
+    func shardLayoutVariant3EncodingStability() throws {
+        let data = try loadMockJSON("ShardLayout_Variant3.json")
+        let decoded = try decoder.decode(ShardLayout.self, from: data)
+
+        // Multiple encoding cycles should produce consistent results
+        let encoded1 = try encoder.encode(decoded)
+        let decoded2 = try decoder.decode(ShardLayout.self, from: encoded1)
+        let encoded2 = try encoder.encode(decoded2)
+
+        #expect(!encoded1.isEmpty)
+        #expect(!encoded2.isEmpty)
+    }
+
     @Test("ShardLayoutV0 decoded instance is valid")
     func shardLayoutV0Validity() throws {
         let data = try loadMockJSON("ShardLayoutV0.json")
@@ -6276,6 +7293,21 @@ struct EnhancedCoverageTests {
 
         // Verify round-trip
         let redecoded = try decoder.decode(ShardLayoutV2.self, from: encoded)
+        let reencoded = try encoder.encode(redecoded)
+        #expect(!reencoded.isEmpty)
+    }
+
+    @Test("ShardLayoutV3 decoded instance is valid")
+    func shardLayoutV3Validity() throws {
+        let data = try loadMockJSON("ShardLayoutV3.json")
+        let decoded = try decoder.decode(ShardLayoutV3.self, from: data)
+
+        // Verify the decoded instance is valid by re-encoding
+        let encoded = try encoder.encode(decoded)
+        #expect(!encoded.isEmpty)
+
+        // Verify round-trip
+        let redecoded = try decoder.decode(ShardLayoutV3.self, from: encoded)
         let reencoded = try encoder.encode(redecoded)
         #expect(!reencoded.isEmpty)
     }

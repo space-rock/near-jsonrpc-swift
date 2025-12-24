@@ -5,6 +5,23 @@ import NearJsonRpcTypes
 // MARK: - Auto-generated RPC Methods
 
 public extension NearJsonRpcClient {
+    /// Calls a view function on a contract and returns the result.
+    func experimentalCallFunction(_ request: RpcCallFunctionRequest) async throws(NearJsonRpcError)
+        -> RpcCallFunctionResponse {
+        let response: JsonRpcResponseForRpcCallFunctionResponseAndRpcCallFunctionError = try await performRequest(
+            method: "EXPERIMENTAL_call_function",
+            params: request,
+            responseType: JsonRpcResponseForRpcCallFunctionResponseAndRpcCallFunctionError.self,
+        )
+
+        switch response {
+        case let .result(result):
+            return result
+        case let .error(error):
+            throw NearJsonRpcError.rpcError(.errorwrapperForRpcCallFunctionError(error))
+        }
+    }
+
     /// [Deprecated] Returns changes for a given account, contract or contract code for given block height or hash.
     /// Consider using changes instead.
     func experimentalChanges(_ request: RpcStateChangesInBlockByTypeRequest) async throws(NearJsonRpcError)
@@ -217,6 +234,124 @@ public extension NearJsonRpcClient {
             return result
         case let .error(error):
             throw NearJsonRpcError.rpcError(.errorwrapperForRpcValidatorError(error))
+        }
+    }
+
+    /// Returns information about a single access key for given account.
+    func experimentalViewAccessKey(_ request: RpcViewAccessKeyRequest) async throws(NearJsonRpcError)
+        -> RpcViewAccessKeyResponse {
+        let response: JsonRpcResponseForRpcViewAccessKeyResponseAndRpcViewAccessKeyError = try await performRequest(
+            method: "EXPERIMENTAL_view_access_key",
+            params: request,
+            responseType: JsonRpcResponseForRpcViewAccessKeyResponseAndRpcViewAccessKeyError.self,
+        )
+
+        switch response {
+        case let .result(result):
+            return result
+        case let .error(error):
+            throw NearJsonRpcError.rpcError(.errorwrapperForRpcViewAccessKeyError(error))
+        }
+    }
+
+    /// Returns all access keys for a given account.
+    func experimentalViewAccessKeyList(_ request: RpcViewAccessKeyListRequest) async throws(NearJsonRpcError)
+        -> RpcViewAccessKeyListResponse {
+        let response: JsonRpcResponseForRpcViewAccessKeyListResponseAndRpcViewAccessKeyListError =
+            try await performRequest(
+                method: "EXPERIMENTAL_view_access_key_list",
+                params: request,
+                responseType: JsonRpcResponseForRpcViewAccessKeyListResponseAndRpcViewAccessKeyListError.self,
+            )
+
+        switch response {
+        case let .result(result):
+            return result
+        case let .error(error):
+            throw NearJsonRpcError.rpcError(.errorwrapperForRpcViewAccessKeyListError(error))
+        }
+    }
+
+    /// Returns information about an account for given account_id.
+    func experimentalViewAccount(_ request: RpcViewAccountRequest) async throws(NearJsonRpcError)
+        -> RpcViewAccountResponse {
+        let response: JsonRpcResponseForRpcViewAccountResponseAndRpcViewAccountError = try await performRequest(
+            method: "EXPERIMENTAL_view_account",
+            params: request,
+            responseType: JsonRpcResponseForRpcViewAccountResponseAndRpcViewAccountError.self,
+        )
+
+        switch response {
+        case let .result(result):
+            return result
+        case let .error(error):
+            throw NearJsonRpcError.rpcError(.errorwrapperForRpcViewAccountError(error))
+        }
+    }
+
+    /// Returns the contract code (Wasm binary) deployed to the account.
+    func experimentalViewCode(_ request: RpcViewCodeRequest) async throws(NearJsonRpcError) -> RpcViewCodeResponse {
+        let response: JsonRpcResponseForRpcViewCodeResponseAndRpcViewCodeError = try await performRequest(
+            method: "EXPERIMENTAL_view_code",
+            params: request,
+            responseType: JsonRpcResponseForRpcViewCodeResponseAndRpcViewCodeError.self,
+        )
+
+        switch response {
+        case let .result(result):
+            return result
+        case let .error(error):
+            throw NearJsonRpcError.rpcError(.errorwrapperForRpcViewCodeError(error))
+        }
+    }
+
+    /// Returns information about a single gas key for given account.
+    func experimentalViewGasKey(_ request: RpcViewGasKeyRequest) async throws(NearJsonRpcError)
+        -> RpcViewGasKeyResponse {
+        let response: JsonRpcResponseForRpcViewGasKeyResponseAndRpcViewGasKeyError = try await performRequest(
+            method: "EXPERIMENTAL_view_gas_key",
+            params: request,
+            responseType: JsonRpcResponseForRpcViewGasKeyResponseAndRpcViewGasKeyError.self,
+        )
+
+        switch response {
+        case let .result(result):
+            return result
+        case let .error(error):
+            throw NearJsonRpcError.rpcError(.errorwrapperForRpcViewGasKeyError(error))
+        }
+    }
+
+    /// Returns all gas keys for a given account.
+    func experimentalViewGasKeyList(_ request: RpcViewGasKeyListRequest) async throws(NearJsonRpcError)
+        -> RpcViewGasKeyListResponse {
+        let response: JsonRpcResponseForRpcViewGasKeyListResponseAndRpcViewGasKeyListError = try await performRequest(
+            method: "EXPERIMENTAL_view_gas_key_list",
+            params: request,
+            responseType: JsonRpcResponseForRpcViewGasKeyListResponseAndRpcViewGasKeyListError.self,
+        )
+
+        switch response {
+        case let .result(result):
+            return result
+        case let .error(error):
+            throw NearJsonRpcError.rpcError(.errorwrapperForRpcViewGasKeyListError(error))
+        }
+    }
+
+    /// Returns the state (key-value pairs) of a contract based on the key prefix.
+    func experimentalViewState(_ request: RpcViewStateRequest) async throws(NearJsonRpcError) -> RpcViewStateResponse {
+        let response: JsonRpcResponseForRpcViewStateResponseAndRpcViewStateError = try await performRequest(
+            method: "EXPERIMENTAL_view_state",
+            params: request,
+            responseType: JsonRpcResponseForRpcViewStateResponseAndRpcViewStateError.self,
+        )
+
+        switch response {
+        case let .result(result):
+            return result
+        case let .error(error):
+            throw NearJsonRpcError.rpcError(.errorwrapperForRpcViewStateError(error))
         }
     }
 
